@@ -1,29 +1,49 @@
-# README #
+# LISEZMOI #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+### Qu'est-ce que BiomAid ? ###
 
-### What is this repository for? ###
+BiomAid est une plateforme de portail intranet modulaire destinée essentiellement
+aux établissements de santé français. Il a conçu par des développeurs 
+qui travaillent au service Biomédical du CHU Amiens-Picardie. Les modules de gestion
+des demandes de matériel médical et de suivi du plan d'acquisition ont été jugés 
+suffisamment matures en septembre 2022 pour envisager la diffusion du code source 
+en vue du déploiement dans d'autres établissements.
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+### Comment installer BiomAid ? ###
 
-### How do I get set up? ###
+* Dépendances :
+  * Un serveur, physique ou virtuel, Linux Ubuntu 22.04 de préférence
+  * PostgreSQL 14
+  * nginx
+  * Python 3.10
+  * Python Poetry
+  * Un accès internet
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+* Principales étapes du déploiement : 
+  * Configurer PostgreSQL et créer la base de données
+  * Configurer nginx
+  * Télécharger le code source
+  * Installer les dépendances python
+  * Configurer le logiciel
+  * Initialiser la base de données
+  * Configurer les tâches périodiques
+  * Lancer le serveur
 
-### Contribution guidelines ###
+* Installer un environnement de développement :
+  * A venir...
 
-* Writing tests
-* Code review
-* Other guidelines
+### Comment contribuer ? ###
 
-### Who do I talk to? ###
+* En signalant les bugs via l'interface de gestion des problème de ce dépôt
+* En écrivant de la documentation : Il n'est pas nécessaire de savoir coder. Le source de la
+  documentation est disponible dans l'arbre source principal, dans les dossiers 'docs'
+* En écrivant des tests (plus de détails sur ce sujet sont à venir).
+* En contribuant au code (plus de détails sur ce sujet sont à venir).
 
-* Repo owner or admin
-* Other community or team contact
+### Qui sommes-nous ? ###
+
+* Brice NORD
+* Romuald KLIGLICH
+* Alexandre JABORSKA
+
+Nous sommes des développeurs convaincus des apports du logiciel libre dans le monde professionnel.
