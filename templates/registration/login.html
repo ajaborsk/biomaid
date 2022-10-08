@@ -1,0 +1,32 @@
+{% extends "common/base.html" %}
+{% load url_kwargs %}
+{% block contents %}
+<form method="POST">
+    {% csrf_token %}
+    <table class="login">
+        <tr>
+            <th class="login1">Authentification</th>
+        </tr>
+        <tr>
+            <td class="login2">
+                <label class="login2texte" for="username">Identifiant</label>
+                <br>
+                <input type="text" size="40" id="username" name="username" required="">
+                <br>
+                <br>
+                <label class="login2texte" for="password">Mot de passe</label>
+                <br>
+                <input type="password" size="40" id="password" name="password" required="">
+                <br>
+                <p class="mdp"><a href="{% url_kwargs 'password_reset' %}"> changer de mot de passe / mot de passe oublié ?</a></p>
+            </td>
+        </tr>
+        <tr>
+            <td class="login3">
+                <input type="hidden" name="next" value="{{ next }}">
+                <button class="button" type="submit">Connexion</button>
+            </td>
+        </tr>
+    </table>
+</form>
+{% endblock contents %}

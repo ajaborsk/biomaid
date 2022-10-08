@@ -1,0 +1,45 @@
+{% if filters %}
+<form id="{{ prefix }}-smart-view-filter">{% for filter in filters %}
+{% if filter.type == 'select' %}{% else %}<!-- Filter: {{ filter }} -->{% endif %}
+{% endfor %}</form>
+{% endif %}<div id="{{ prefix }}-smart-view-table"></div>
+<div id="{{ prefix }}-smart-view-form" style="display:none"></div>
+<script>
+var {{ prefix }}_smart_view = new Tabulator("#{{ prefix }}-smart-view-table", {
+    // JSON response processing
+    ajaxResponse:function(url, params, response){
+      //return the data property of a response json object (some JSON servers cannot send list as root object)
+      return response.data; },
+    // Common settings
+    layout:'fitColumns',
+    responsiveLayout: 'hide', // hide rows that no longer fit
+    cellVertAlign: 'middle',  //vertically center cell contents
+    // Columns descriptions
+    columns: [
+      {% for column in columns %}{
+        field:'{{ column.field }}',
+        title:'{{ column.title }}',{% if column.hidden %}
+        visible:false,{% endif %}{% if column.header_sort is not None %}
+        headerSort: {{ column.header_sort|yesno:"true,false,null" }},{% endif %}{% if column.hoz_align %}
+        hozAlign: '{{ column.hoz_align }}',{% endif %}{% if column.min_width %}
+        minWidth: '{{ column.min_width }}',{% endif %}{% if column.width_grow %}
+        widthGrow: '{{ column.width_grow }}',{% endif %}{% if column.show_priority %}
+        responsive: '{{ column.show_priority }}',{% endif %}{% if column.formatter %}
+        formatter: '{{ column.formatter }}',{% endif %}{% if column.formatter_params %}
+        formatterParams: {{ column.formatter_params|safe }},{% endif %}
+      },
+    {% endfor %} ]
+});
+
+
+var {{ prefix }}_filters = document.querySelectorAll("form#{{ prefix }}-smart-view-filter input, form#{{ prefix }}-smart-view-filter select");
+
+function {{ prefix }}_filters_apply()
+ {
+  var query = '{{query_base|safe}}';
+  {{ prefix }}_smart_view.setData(query);
+ }
+
+// Get the data at least once (on page load)
+{{ prefix }}_filters_apply();
+</script>

@@ -1,0 +1,18 @@
+{% load l10n %}
+<!--élements complémentaire pour fichierconfig toml -->
+
+{% if status == "ajouter" %}
+    <label name="LIEN">Connexion à une base de données ou un fichier :</label>
+    <select name="lien-select" id="lien-select">
+        <option value="OFF">NON</option>
+        <option value="ON">BDD</option>
+        <option value="FILE">FICHIER</option>
+    </select> <em style="color:red;">(Attention, si "ON" ou "FICHIER", vous devez produire le code d'import dans le module "ImportationData")</em>
+    <br>
+    <label name="fichier">Si connexion à fichier, nom complet du fichier importé :</label>
+    <input name="fichier" id="fichier"> <em style="color:red;">(Veiller à ce que le fichier à importer soit bien dans le repertoire "Fixture" de GEQIP</em>
+    <br>
+
+{% elif status == "modifier" %}
+
+{% endif %}

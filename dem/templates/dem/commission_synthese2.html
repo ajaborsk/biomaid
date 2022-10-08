@@ -1,0 +1,14 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% block more_header %}
+    <link rel="stylesheet" type="text/css" href="{% static '/dem/tableau-tcd.css' %}" />
+<script src="{% static '/dem/jquery-3.5.1.min.js' %}"></script>
+{% endblock more_header %}
+{% block tab_contents %}
+<h1>{{title}}</h1>
+<h2>TDC expert avec filtres : {{ liste_filtre }}</h2>
+<h2>Récapitulatif de l'arbitrage</h2>
+{{ tbfinal| safe }}
+
+{{ tb2 | safe }}
+{% endblock tab_contents %}

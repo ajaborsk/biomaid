@@ -1,0 +1,25 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load render_table from django_tables2 %}
+{% block tab_contents %}
+<h1>Suivi pluriannuel du Hors marché</h1>
+<div><center>
+    <form method="GET">
+        {% for name, part in form_parts.items %}
+        <fieldset>
+            <legend>{{ part.label }}</legend>
+            {% for cb in part.values %}
+            <label>{{ cb.label }}</label>&nbsp;<input type="checkbox" name="{{ name }}" value="{{ cb.value }}" {% if cb.set %}checked="checked"{% endif %}>&nbsp;&nbsp;
+            {% endfor %}
+        </fieldset>
+        {% endfor %}
+        <button>Mise à jour</button>&nbsp;<button name="_export" value="xlsx">Export Excel</button>
+    </form>
+    <h3>Par fournisseur et par année : En euros (liquidés) et en nombre de lignes de commande</h3>
+    {% if hm_table %}
+    {% render_table hm_table %}
+    {% else %}
+    <h4>Aucune donnée à afficher...</h4>
+    {% endif %}
+</center></div>
+{% endblock tab_contents %}

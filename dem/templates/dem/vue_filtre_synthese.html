@@ -1,0 +1,45 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% block tab_contents %}
+<div class="">
+<h1>SELECTIONNER LES FILTRES A APPLIQUER</h1>
+  <label name="programme">PROGRAMME :</label>
+  <select id="programme" name="programme">
+    <option value="Tous">Tous</option>
+    {% for prog in programmes %}
+      <option value="{{prog.code}}"{% if programme_code == prog.code %}selected="1"{% endif %}>{{prog.code}} - {{prog.nom}}</option>
+    {% endfor %}
+    <option value="&programme_id=null">NA</option>
+  </select>
+  <br>
+    <label name="validation_cp">VALIDATION CHEF DE POLE :</label>
+  <select id="validation_cp" name="validation_cp">
+    <option value="">Tous</option>
+    <option value="1" selected="1">Oui</option>
+    <option value="0">Non</option>
+    <option value="None">Pas remplie</option>
+  </select>
+<br>
+<br>
+<span>GENERER LE TABLEAU CROISE DYNAMIQUE :</span>
+  <button id="btn">GO !</button>
+<br>
+  <p id="text1">selectedIndex: 0</p>
+
+    <script type="text/javascript">
+    var selectElem = document.getElementById('programme');
+    var pElem = document.getElementById('text1');
+    var btn = document.querySelector('#btn');
+
+          btn.addEventListener('click', function() {
+            var index = selectElem.selectedIndex.value;
+            // Rapporter cette donnée au <p text1>
+            code_programme = document.getElementById('programme').value;
+            code_validation_CP = document.getElementById('validation_cp').value
+            pElem.innerHTML = window.location.href='{{ url_base }}'+ code_programme + '/' + code_validation_CP;
+
+})
+    </script>
+
+</div>
+{% endblock tab_contents %}

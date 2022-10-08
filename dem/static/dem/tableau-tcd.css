@@ -1,0 +1,55 @@
+
+/*Style général du tableau*/
+table.dataframe {
+  border: 1px solid #1C6EA4;
+  background-color: white;
+  width: 100%;
+  text-align: right;
+  border-collapse: collapse;
+}
+
+/*Style pour le corps du tableau*/
+table.dataframe td, table.dataframe th {
+  border: 1px solid #AAAAAA;
+  padding: 3px 2px;
+} 
+table.dataframe tbody td {
+  font-size: 13px;
+}
+table.dataframe tbody tr:nth-child(even) {
+  background: #D0E4F5;
+}
+table.dataframe tbody th{
+    text-align: left;
+    font-size: 15px;
+    font-weight: bold;
+    color: black;
+    background: transparent;
+    }
+/*Style pour l'entête*/
+table.dataframe thead th{
+  background: #1C6EA4;
+  background: -moz-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+  background: -webkit-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+  background: linear-gradient(to bottom, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
+  border-bottom: 2px solid #444444;
+}
+table.dataframe thead th {
+  font-size: 15px;
+  font-weight: bold;
+  color: #FFFFFF;
+  border-left: 2px solid #D0E4F5;
+}
+table.dataframe thead th:first-child {
+  border-left: none;
+}
+
+/*Style pieds de tableau en ligne et colonne*/
+table.dataframe tr:last-child {
+  font-weight: bold;
+  border-top: 3px solid black;
+}
+table.dataframe td:last-child {
+  font-weight: bold;
+  border-left: 3px solid black;
+}

@@ -1,0 +1,177 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block more_header %}
+{{ block.super }}
+<script src="{% static '/dem/jquery.flexdatalist.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static '/dem/jquery.flexdatalist.min.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static '/common/css/form.css' %}" />
+<script src="{% static '/dem/helper-rules.js' %}"></script>
+<script src="{% static '/dem/form-helper.js' %}"></script>
+{% endblock more_header %}
+
+{% block contents %}
+
+<div class="contents">
+  <div class="hideable">
+    <h1>J'ai mes identifiants : Je me connecte</h1>
+    <form class="sign-form" id="form-signin" method="post">
+      <div id="main-help-sign" class="form-help main-form-help">
+        <p>Pour vous connecter, vous pouvez utiliser :</p>
+        <ul>
+          <li>Vos identifiants GEQIP/KOS créés précedemment (généralement votre 6+2),</li>
+          <li>Ou vos identifiants Windows (généralement le 6+2+2).</li>
+        </ul>
+        <p style="font-weight:bold">Si vous avez utilisé au moins une fois vos identifiants Windows, ils deviennent prioritaires
+        (et vous ne pouvez plus vous connecter avec vos identifiants GEQIP/KOS).</p>
+        <p>Si vous n'avez pas d'identifiants GEQIP/KOS ni Windows (ou que vous ne pouvez/voulez pas utiliser ces derniers),
+        vous pouvez vous créer un compte GEQIP/KOS en choisissant l'option "Je crée un nouveau compte"
+          plus bas sur cette page.</p>
+        <br>{{message|safe}}</div>
+      <div style="height:10px"></div>
+      <div class="form-section">
+        <h2 class="form-section-title ie-row-1">Informations de connexion</h2>
+        {% csrf_token %}
+        <span id="id_username-label" class="form-label-center">
+        <div class="form-icon help tooltip"><div id="username-help" class="tooltiptext">{{ signup_form.username.help_text }}</div></div>
+        {{ signup_form.username.label_tag }}</span>
+        <span class="form-input-center">{{ signin_form.username }}</span>
+        <span id="id_password-label" class="ie-row-2 form-label-center">
+        <div class="form-icon help tooltip"><div id="password-help" class="tooltiptext">{{ signup_form.password.help_text }}</div></div>
+        Mot de passe :</span>
+        <span class="form-input-center">{{ signin_form.password }}</span>
+        <input type="hidden" name="form" value="sign-in">
+      </div>
+        <br>
+        <center>
+        <button type="submit" name="submit">Se connecter</button>
+          </center>
+    </form>
+  </div>
+  <div class="hideable hidden">
+    <h1>Je veux réinitialiser mon mot de passe</h1>
+    <form class="sign-form" id="recovery" method="POST">
+      <div id="main-help-recovery" class="form-help main-form-help"><p>En saississant ci-dessous votre adresse email,
+        vous recevrez<b>, si vous avez un compte GEQIP/KOS,</b> un message qui vous permettra de le réinitialiser.</p>
+        <p><b>Attention, cela ne fonctionne pas avec un compte Windows ! Si vous avez perdu votre mot de passe Windows,
+          adressez-vous au service informatique de votre établissement (ou au 14000 pour le CHU Amiens).</b></p><br>{{message|safe}}</div>
+      <div style="height:30px"></div>
+      <div class="form-section">
+        {% csrf_token %}
+        {{ password_reset_form.as_ul }}
+      </div>
+        <input type="hidden" name="form" value="password-reset">
+        <center ><button type="submit" name="submit">Réinitialiser mon mot de passe</button></center>
+        </form>
+  </div>
+  <div class="hideable hidden">
+    <h1>Je crée un nouveau compte</h1>
+    <form class="sign-form" id="form-signup" method="post">
+      <div id="main-help" class="form-help"><p>Si vous n'avez pas d'identifiants GEQIP/KOS ni Windows (ou que vous ne pouvez/voulez pas utiliser ces derniers),
+        vous pouvez vous créer un compte GEQIP/KOS en remplissant les champs ci-dessous et en validant le formulaire.</p>
+      <p><b>Si vous avez des identifiants Windows, cette étape n'est pas nécessaire ; vous pouvez utiliser directement ces
+      identifiants pour vous connecter.</b></p>
+        <br>{{ message|safe }}</div>
+      <div style="height:30px"></div>
+      {% csrf_token %}
+      <div class="form-section">
+        <h2 class="form-section-title ie-row-1">Informations personnelles</h2>
+        <!-- Prénom -->
+        <span id="id_first_name-label" class="ie-row-2 form-label-c1">
+        <div class="form-icon help tooltip"><div id="first_name-help" class="tooltiptext">{{ signup_form.first_name.help_text }}</div></div>
+        {{ signup_form.first_name.label_tag }}</span>
+         <span class="ie-row-2 form-input-c1">{{signup_form.first_name}}</span>
+
+         <!-- Nom -->
+        <span id="id_last_name-label" class="ie-row-2 form-label-c2">
+        <div class="form-icon help tooltip"><div id="last_name-help" class="tooltiptext">{{ signup_form.last_name.help_text }}</div></div>
+        {{ signup_form.last_name.label_tag }}</span>
+         <span class="ie-row-2 form-input-c2">{{signup_form.last_name}}</span>
+
+        <!-- Initiales --><!--
+        <span id="id_first_name-label" class="ie-row-2 form-label-c1">
+        <div class="form-icon help tooltip"><div id="first_name-help" class="tooltiptext">{{ signup_form.first_name.help_text }}</div></div>
+        {{ signup_form.first_name.label_tag }}</span>
+         <span class="ie-row-2 form-input-c1">{{signup_form.first_name}}</span> -->
+
+         <!-- Tél DECT -->
+        <span id="id_tel_dect-label" class="ie-row-3 form-label-c2">
+        <div class="form-icon help tooltip"><div id="tel_dect-help" class="tooltiptext">{{ signup_form.tel_dect.help_text }}</div></div>
+        {{ signup_form.tel_dect.label_tag }}</span>
+         <span class="ie-row-3 form-input-c2">{{signup_form.tel_dect}}</span>
+
+        <!-- Tél fixe -->
+        <span id="id_tel_fixe-label" class="ie-row-4 form-label-c1">
+        <div class="form-icon help tooltip"><div id="tel_fixe-help" class="tooltiptext">{{ signup_form.tel_fixe.help_text }}</div></div>
+        {{ signup_form.tel_fixe.label_tag }}</span>
+         <span class="ie-row-4 form-input-c1">{{signup_form.tel_fixe}}</span>
+
+         <!-- Nom -->
+        <span id="id_tel_mobile-label" class="ie-row-4 form-label-c2">
+        <div class="form-icon help tooltip"><div id="tel_mobile-help" class="tooltiptext">{{ signup_form.tel_mobile.help_text }}</div></div>
+        {{ signup_form.tel_mobile.label_tag }}</span>
+         <span class="ie-row-4 form-input-c2">{{signup_form.tel_mobile}}</span>
+
+      </div>
+      <div class="form-section">
+        <h2 class="form-section-title ie-row-2">Données du compte</h2>
+         <!-- Login -->
+        <span id="id_username-label" class="ie-row-2 form-label-c1">
+        <div class="form-icon help tooltip"><div id="username-help" class="tooltiptext">{{ signup_form.username.help_text }}</div></div>
+        {{ signup_form.username.label_tag }}</span>
+         <span class="ie-row-2 form-input-c1">{{signup_form.username}}</span>
+
+         <!-- Email -->
+        <span id="id_email-label" class="ie-row-2 form-label-c2">
+        <div class="form-icon help tooltip"><div id="email-help" class="tooltiptext">{{ signup_form.email.help_text }}</div></div>
+        {{ signup_form.email.label_tag }}</span>
+         <span class="ie-row-2 form-input-c2">{{signup_form.email}}</span>
+
+         <!-- Mot de passe -->
+        <span id="id_password1-label" class="ie-row-3 form-label-c1">
+        <div class="form-icon help tooltip"><div id="password1-help" class="tooltiptext">{{ signup_form.password1.help_text }}</div></div>
+        {{ signup_form.password1.label_tag }}</span>
+         <span class="ie-row-3 form-input-c1">{{signup_form.password1}}</span>
+
+         <!-- Mot de passe (vérification) -->
+        <span id="id_password2-label" class="ie-row-3 form-label-c2">
+        <div class="form-icon help tooltip"><div id="password2-help" class="tooltiptext">{{ signup_form.password2.help_text }}</div></div>
+        {{ signup_form.password2.label_tag }}</span>
+         <span class="ie-row-3 form-input-c2">{{signup_form.password2}}</span>
+    </div>
+    <br/>
+      <input type="hidden" name="form" value="sign-up">
+     <center><button type="submit" name="submit">S'inscrire</button>
+     <input type="button" OnClick="window.location.href = '/common/sign/';" value="Réinitialiser le formulaire">
+     </center>
+     <br/>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block javascript %}
+{{ block.super }}
+<script>
+    var rules = common_rules;
+    rules = Object.assign(rules, signup_rules);
+    var demande_helper = new FormHelper("#form-signup", rules, {});
+
+    function unhide(event) {
+      console.log("unhide", event);
+      event.currentTarget.classList.remove('hidden');
+      let hideables = document.getElementsByClassName('hideable');
+      for (var i=0;i<hideables.length;i++) {
+        let hideable = hideables[i];
+        if (hideable != event.currentTarget) {
+          hideable.classList.add('hidden');
+        }
+      }
+    }
+
+    let hideables = document.getElementsByClassName('hideable');
+    for (var i=0;i<hideables.length;i++) {
+      let hideable = hideables[i];
+      hideable.addEventListener('click', unhide);
+    }
+</script>
+{% endblock javascript %}

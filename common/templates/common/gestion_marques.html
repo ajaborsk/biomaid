@@ -1,0 +1,137 @@
+{% extends "dem/base_avec_form.html" %}
+{% load static %}
+
+{% comment "docstring" %}
+<!--
+Template utilisé (uniquement) pour la saisie d'une nouvelle demande
+
+Variables python utilisées :
+
+- message : Message à diffuser à l'utilisateur, qui sera affiché
+            dans une boite de dialogue à l'ouverture de la page
+            et dans un bandeau en haut du formulaire
+- ...
+-->
+{% endcomment %}
+
+{% block tab_contents %}
+
+<h1>{{ title }}</h1>
+
+<div class="view">
+{% if status == "ajouter" %}
+    <form id="addmarque-Button" action="/common/gestion_marques/" method="POST">
+        {% csrf_token %}
+        <ul>Nom de la marque : {{ form.nom }}</ul>
+        <input type="hidden" name="status" value={{status}}>
+        <button name="AddMarque" type="submit">Enregistrer</button>
+    </form>
+
+{% elif status == "modifier" %}
+    <form id="modifiermarque-Button" action="/common/gestion_marques/" method="POST">
+        {% csrf_token %}
+        <ul>Nom de la marque : {{ form.nom }}</ul>
+        {{instance.id}}
+        <input type="hidden" name="status" value={{status}}>
+        <button name="modifierid" type="submit" value={{instance.id}}>Enregistrer la modification</button>
+    </form>
+
+{% elif status == "supprimer" %}
+    <form id="supp-Button" action="/common/gestion_marques/" method="POST">
+        {% csrf_token %}
+        <ul>Nom de la marque : {{ instance.nom }}</ul>
+        {{ instance.id }}
+        <input type="hidden" name="status" value={{status}}>
+        <button name="supprimerid" type="submit" value={{instance.id}}>Supprimer</button>
+    </form>
+
+{% elif status == "Main" %}
+<!-- AFFICHAGE DES TABLEAUX -->
+    {% if lien == 'OFF' %} <!-- les bouton Ajout, modifier et supprimer son visibles car mode piloté par GMAO est désactivé -->
+    <p style="color:#FF0000">Ajouter un champs de recherche et de filtre du tableau ci-dessous</p>
+    <br>
+    <table align="center">
+        <thead>
+            <tr>
+                <th>Select.</th>
+                <th>nom</th>
+                <th colspan="2">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in list %}
+            <tr>
+                <td>
+                    <form id="selectmarque-Button" action="/common/gestion_marques/" method="POST">
+                        {% csrf_token %}
+                        <button name="select" type="submit" value="{{ item.id }}">V</button>
+                    </form></td>
+                <td>{{ item.nom }}</td>
+                <td>
+                    <form id="Modifmarque-Button" action="/common/gestion_marques/" method="GET">
+                        <button name="modifier" type="submit" value="{{ item.id }}">Modifier</button>
+                    </form>
+                </td>
+                <td>
+                    <form id="Suppmarque-Button" action="/common/gestion_marques/" method="GET">
+                        <button name="supprimer" type="submit" value="{{ item.id }}">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4">
+                    <form id="AjoutMarqueButton" action="/common/gestion_marques/" method="GET">
+                        <button name="ajouter" type="submit" value="Add">Ajouter une marque</button>
+                    </form>
+
+                </td>
+        </tfoot>
+    {% elif lien == 'ON' %}<!-- les bouton Ajout, modifier et supprimer son caché car mode piloté par GMAO est activé -->
+    <p style="color:#FF0000">Ajouter un champs de recherche et de filtre du tableau ci-dessous</p>
+    <br>
+    <table align="center">
+        <thead>
+            <tr>
+                <th>Select.</th>
+                <th>nom</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in list %}
+            <tr>
+                <td>
+                    <form id="selectmarque-Button2" action="/common/gestion_marques/" method="POST">
+                        {% csrf_token %}
+                        <button name="select" type="submit" value="{{ item.id }}">--></button>
+                    </form></td>
+                <td>{{ item.nom }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2">
+                    <i><span style="text-decoration:underline">Remarque</span> : outil en mode automatique, piloté par la GMAO, mise à jour quotidienne</i>
+                    <form id="miseajour" action="/acompleter/common/gestion_marques/" method="POST">
+                        {% csrf_token %}
+                        <button name="miseajour" type="submit" value="miseajour">Mise à jour manuelle</button>
+                    </form>
+                </td>
+        </tfoot>
+    {% else %}
+        Erreur
+    {% endif %}
+</table>
+{% else %}
+      Erreur
+{% endif %}
+    <br>
+</div>
+{% endblock tab_contents %}
+
+
+{% block javascript %}
+{% endblock javascript %}

@@ -1,0 +1,87 @@
+{%extends "common/base.html" %}
+{% load static %}
+{% block more_header %}
+    <link rel="stylesheet" type="text/css" href="{% static '/geprete/StyleForm.css' %}" />
+{% endblock more_header %}
+{% block tab_contents %}
+
+
+
+<div>
+    <img src="{% static '/geprete/muffinlogo.png' %}" alt="My image">
+    <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete/accueilgep'"> Retour à l'accueil </button>
+    <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete/listepretgess/'"> Retour à la liste des prêts </button>
+    <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete/documentsgess/'"> Ajouter un document </button>
+</div>
+
+{% spaceless %}
+<div>
+
+    {%if supprimerid is not None%}
+
+        <h2>Suppression du formulaire de prêt</h2>
+
+            <p> {{form}} </p>
+
+            <form id="Supp-Button" action="/geprete/formgess/" method="POST">
+                {% csrf_token %}
+                <button name="retirer" type="submit" value="{{ form.id }}">Supprimer</button>
+            </form>
+
+        {%elif modifierid is not None%}
+
+            <h2>Modification du formulaire de prêt</h2>
+
+            <form id="Reg-Button" action="/geprete/formgess/" method="POST">
+                {% csrf_token %}
+                <p>code : {{ form_instance.id }}</p>
+                <p>Numéro de série : {{ form.numero_de_serie }}</p>
+                <p>Quantité : {{ form.quantite }}</p>
+                <p>Type : {{ form.type }}</p>
+                <p>Marque : {{ form.marque }}</p>
+                <p>Accessoires : {{ form.accessoires }}</p>
+                <p>Descriptif : {{ form.descriptif }}</p>
+                <p>Début du prêt : {{ form.debut }}</p>
+                <p>Fin du prêt : {{ form.fin }}</p>
+                <p>Date de reprise : {{ form.reprise }}</p>
+                <p>Durée du prêt : {{ form.duree }} en {{form.unite_duree}}</p>
+                <p>Ingénieur responsable : {{ form.ingenieur_responsable }}</p>
+                <p>Unité fonctionnelle : {{ form.unite_fonctionnelle }}</p>
+                <p>Nom de l'emprunteur  : {{ form.nom_emprunteur }}</p>
+                <p>Fournisseur : {{ form.fournisseur }}</p>
+                <p>Commentaire : {{ form.commentaire }}</p>
+
+
+                <button name="sauvegarder" type="submit" value="{{ form_instance.id }}">Sauvegarder la modification</button>
+            </form>
+
+        {%else%}
+
+            <h2>Formulaire de prêt</h2>
+
+            <form id="Registrer-Button" action="/geprete/formgess/" method="POST">
+                {% csrf_token %}
+                <p>code : {{ form.id }}</p>
+                <p>Numéro de série : {{ form.numero_de_serie }}</p>
+                <p>Quantité : {{ form.quantite }}</p>
+                <p>Type : {{ form.type }}</p>
+                <p>Marque : {{ form.marque }}</p>
+                <p>Accessoires : {{ form.accessoires }}</p>
+                <p>Descriptif : {{ form.descriptif }}</p>
+                <p>Début du prêt : {{ form.debut }}</p>
+                <p>Fin du prêt : {{ form.fin }}</p>
+                <p>Date de reprise : {{ form.reprise }}</p>
+                <p>Durée du prêt : {{ form.duree }} en {{form.unite_duree}}</p>
+                <p>Ingénieur responsable : {{ form.ingenieur_responsable }}</p>
+                <p>Unité fonctionnelle : {{ form.unite_fonctionnelle }}</p>
+                <p>Nom de l'emprunteur  : {{ form.nom_emprunteur }}</p>
+                <p>Fournisseur : {{ form.fournisseur }}</p>
+                <p>Commentaire : {{ form.commentaire }}</p>
+
+                <button name="status" type="submit" value="enregistrer">Enregistrer le prêt</button>
+            </form>
+
+        {%endif%}
+</div>
+{% endspaceless %}
+{% endblock tab_contents %}

@@ -1,0 +1,22 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load url_kwargs %}
+{% load crispy_forms_tags %}
+{% comment %}
+<!--
+  Mes préférences :
+    On retrouve ici les données de mon compte personnel
+    qui influencent le fonctionnement de l'application
+    uniquement pour mon compte.
+    On retrouvera ici typiquement la configuration de
+    ma page d'accueil personnalisée ou la configuration
+    de mes alertes mail
+-->
+{% endcomment %}
+
+{% block tab_contents %}
+<div class="contents">
+  <h1>{{title}}</h1>
+  {% crispy form form.helper %}
+</div>
+{% endblock tab_contents %}

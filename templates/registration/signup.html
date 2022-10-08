@@ -1,0 +1,93 @@
+{% extends "dem/base_avec_form.html" %}
+
+{% block contents %}
+
+<div class="contents">
+  <h1>Création d'un compte</h1>
+  <div id="main-help" class="form-help">{{ message|safe }}</div>
+  <form id="form" method="post">
+    {% csrf_token %}
+    <div class="form-section">
+        <h2 class="form-section-title ie-row-1">Informations personnelles</h2>
+
+        <!-- Prénom -->
+        <span id="id_first_name-label" class="ie-row-2 form-label-c1">
+        <div class="form-icon help tooltip"><div id="first_name-help" class="tooltiptext">{{ form.first_name.help_text }}</div></div>
+        {{ form.first_name.label_tag }}</span>
+         <span class="ie-row-2 form-input-c1">{{form.first_name}}</span>
+
+         <!-- Nom -->
+        <span id="id_last_name-label" class="ie-row-2 form-label-c2">
+        <div class="form-icon help tooltip"><div id="last_name-help" class="tooltiptext">{{ form.last_name.help_text }}</div></div>
+        {{ form.last_name.label_tag }}</span>
+         <span class="ie-row-2 form-input-c2">{{form.last_name}}</span>
+
+        <!-- Initiales --><!--
+        <span id="id_first_name-label" class="ie-row-2 form-label-c1">
+        <div class="form-icon help tooltip"><div id="first_name-help" class="tooltiptext">{{ form.first_name.help_text }}</div></div>
+        {{ form.first_name.label_tag }}</span>
+         <span class="ie-row-2 form-input-c1">{{form.first_name}}</span> -->
+
+         <!-- Tél DECT -->
+        <span id="id_tel_dect-label" class="ie-row-3 form-label-c2">
+        <div class="form-icon help tooltip"><div id="tel_dect-help" class="tooltiptext">{{ form.tel_dect.help_text }}</div></div>
+        {{ form.tel_dect.label_tag }}</span>
+         <span class="ie-row-3 form-input-c2">{{form.tel_dect}}</span>
+
+        <!-- Tél fixe -->
+        <span id="id_tel_fixe-label" class="ie-row-4 form-label-c1">
+        <div class="form-icon help tooltip"><div id="tel_fixe-help" class="tooltiptext">{{ form.tel_fixe.help_text }}</div></div>
+        {{ form.tel_fixe.label_tag }}</span>
+         <span class="ie-row-4 form-input-c1">{{form.tel_fixe}}</span>
+
+         <!-- Nom -->
+        <span id="id_tel_mobile-label" class="ie-row-4 form-label-c2">
+        <div class="form-icon help tooltip"><div id="tel_mobile-help" class="tooltiptext">{{ form.tel_mobile.help_text }}</div></div>
+        {{ form.tel_mobile.label_tag }}</span>
+         <span class="ie-row-4 form-input-c2">{{form.tel_mobile}}</span>
+
+      </div>
+      <div class="form-section">
+        <h2 class="form-section-title ie-row-2">Données du compte</h2>
+         <!-- Login -->
+        <span id="id_username-label" class="ie-row-2 form-label-c1">
+        <div class="form-icon help tooltip"><div id="username-help" class="tooltiptext">{{ form.username.help_text }}</div></div>
+        {{ form.username.label_tag }}</span>
+         <span class="ie-row-2 form-input-c1">{{form.username}}</span>
+
+         <!-- Email -->
+        <span id="id_email-label" class="ie-row-2 form-label-c2">
+        <div class="form-icon help tooltip"><div id="email-help" class="tooltiptext">{{ form.email.help_text }}</div></div>
+        {{ form.email.label_tag }}</span>
+         <span class="ie-row-2 form-input-c2">{{form.email}}</span>
+
+         <!-- Mot de passe -->
+        <span id="id_password1-label" class="ie-row-3 form-label-c1">
+        <div class="form-icon help tooltip"><div id="password1-help" class="tooltiptext">{{ form.password1.help_text }}</div></div>
+        {{ form.password1.label_tag }}</span>
+         <span class="ie-row-3 form-input-c1">{{form.password1}}</span>
+
+         <!-- Mot de passe (vérification) -->
+        <span id="id_password2-label" class="ie-row-3 form-label-c2">
+        <div class="form-icon help tooltip"><div id="password2-help" class="tooltiptext">{{ form.password2.help_text }}</div></div>
+        {{ form.password2.label_tag }}</span>
+         <span class="ie-row-3 form-input-c2">{{form.password2}}</span>
+    </div>
+    <br/>
+     <center ><button type="submit" name="submit">S'inscrire</button>
+     <input type="button" OnClick="window.location.href = '/signup/';" value="Réinitialiser le formulaire">
+     </center>
+     <br/>
+  </form>
+  </div>
+{% endblock %}
+{% block javascript %}
+{{ block.super }}
+<script>
+    var rules = common_rules;
+
+    rules = Object.assign(rules, signup_rules);
+
+    var demande_helper = new FormHelper("#form", rules, {});
+</script>
+{% endblock javascript %}

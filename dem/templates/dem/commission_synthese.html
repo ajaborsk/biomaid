@@ -1,0 +1,12 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% block more_header %}
+    <link rel="stylesheet" type="text/css" href="{% static '/dem/tableau-tcd.css' %}" />
+{% endblock more_header %}
+{% block tab_contents %}
+<div>
+<h1>{{title}}</h1>
+<h2>Récapitulatif de l'arbitrage pour le programme : {{ filtre_programme }}</h2>
+{{ tbfinal| safe }}
+</div>
+{% endblock tab_contents %}

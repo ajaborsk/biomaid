@@ -1,0 +1,210 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load l10n %}
+{% load getattribute %}
+{% block more_header %}
+{{ block.super }}
+<script src="{% static '/dem/jquery.flexdatalist.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static '/dem/jquery.flexdatalist.min.css' %}" />
+<script src="{% static '/dem/helper-rules.js' %}"></script>
+<script src="{% static '/dem/form-helper.js' %}"></script>
+{% endblock more_header %}
+
+{% block tab_contents %}
+
+<h1>{{ title }}</h1>
+<h3>{{ titre2 }}</h3>
+
+<div >
+{% if status == "ajouter" %}
+    <form id="add-Button" action={{url}} method="POST">
+        {% csrf_token %}
+        {% for f in form %}
+            <ul>{{ f.label }} : {{ f }}</ul>
+        {% endfor %}
+            <ul>{% include template_additional %}</ul>
+        <input type="hidden" name="status" value={{status}}>
+        <button name="Add" type="submit">Enregistrer</button>
+        <button type="button">
+            <a href="{{url}}">Retour</a>
+        </button>
+
+    </form>
+
+{% elif status == "modifier" %}
+    <form id="modifier-Button" action={{url}} method="POST">
+        {% csrf_token %}
+        <ul> ID de l'élément : {{ instance.id }}</ul>
+        {% for f in form %}
+            <ul>{{ f.label }} : {{ f }}</ul>
+        {% endfor %}
+        <input type="hidden" name="status" value={{status}}>
+        <button name="modifierid" type="submit" value={{instance.id|unlocalize}}>Enregistrer la modification</button>
+        <button type="button">
+            <a href="{{url}}">Retour</a>
+        </button>
+    </form>
+
+{% elif status == "supprimer" %}
+    <form id="del-Button" action={{url}} method="POST">
+        {% csrf_token %}
+        <ul> ID de l'élément : {{ instance.id }}</ul>
+        {% for f in form %}
+            <ul>{{ f.label }} : {{ f.value }}</ul>
+        {% endfor %}
+
+        <input type="hidden" name="status" value={{status}}>
+        <button name="supprimerid" type="submit" value={{instance.id|unlocalize}}>Supprimer</button>
+        <button type="button">
+            <a href="{{url}}">Retour</a>
+        </button>
+    </form>
+
+</div>
+{% elif status == "Main" %}
+<!-- AFFICHAGE DES TABLEAUX -->
+    {% if lien == 'OFF' %} <!-- les bouton Ajout, modifier et supprimer son visibles car mode piloté par Souce externe est désactivé -->
+    <p style="color:#FF0000">Ajouter un champs de recherche et de filtre du tableau ci-dessous</p>
+    <br>
+    <table align="center">
+        <thead>
+            <tr>
+                <th>Select.</th>
+                {% for col in template_col_title %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+                <th colspan="2">ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in list %}
+            <tr>
+                <td>
+                    <form id="select-Button" action={{url}} method="POST">
+                        {% csrf_token %}
+                        <button name="select" type="submit" value="{{ item.id|unlocalize }}">=></button>
+                    </form></td>
+                <!--<code>{{ template_lig_var|safe }}</code>-->
+                {% for var in template_lig_var %}
+                    <td> {{item|getattribute:var }}</td>
+                {% endfor %}
+                <!--<td>{{ item.id }}</td>
+                <td>{{ item.nom }}</td>-->
+                <td>
+                    <form id="Modif-Button" action={{url}} method="GET">
+                        <button name="modifier" type="submit" value="{{ item.id|unlocalize }}">Modifier</button>
+                    </form>
+                </td>
+                <td>
+                    <form id="Supp-Button" action={{url}} method="GET">
+                        <button name="supprimer" type="submit" value="{{ item.id|unlocalize }}">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan={{nbcol|add:2}}>
+                    <form id="AjoutButton" action={{url}} method="GET">
+                        <button name="ajouter" type="submit" value="Add">Ajouter</button>
+                    </form>
+
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {% elif lien == 'ON' %}<!-- les bouton Ajout, modifier et supprimer son caché car mode piloté par Source externe est activé -->
+    <p style="color:#FF0000">Ajouter un champs de recherche et de filtre du tableau ci-dessous</p>
+        <p>{{message}}</p>
+    <br>
+    <table align="center">
+        <thead>
+            <tr>
+                <th>Select.</th>
+                {% for col in template_col_title %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in list %}
+            <tr>
+                <td>
+                    <form id="select-Button2" action={{url}} method="POST">
+                        {% csrf_token %}
+                        <button id="select" name="select" value="{{ item.id|unlocalize }}">--></button>
+                    </form></td>
+                {% for var in template_lig_var %}
+                    <td> {{item|getattribute:var }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan={{nbcol|add:1}}>
+                    <i><span style="text-decoration:underline">Remarque</span> : outil en mode automatique, piloté par la GMAO, mise à jour quotidienne</i>
+                    <form id="miseajour" action="{{url}}" method="POST">
+                        {% csrf_token %}
+                        <button name="miseajour" type="submit" value="miseajour">Mise à jour manuelle</button>
+                    </form>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {% elif lien == 'FILE' %}<!-- les bouton Ajout, modifier et supprimer son caché car mode piloté par source externe est activé -->
+    <p style="color:#FF0000">Ajouter un champs de recherche et de filtre du tableau ci-dessous</p>
+        <p>{{message}}</p>
+    <br>
+    <table align="center">
+        <thead>
+            <tr>
+                <th>Select.</th>
+                {% for col in template_col_title %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in list %}
+            <tr>
+                <td>
+                    <form id="select-Button2" action={{url}} method="POST">
+                        {% csrf_token %}
+                        <button id="select" name="select" value="{{ item.id|unlocalize }}">--></button>
+                    </form></td>
+                {% for var in template_lig_var %}
+                        <td> {{item|getattribute:var}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan={{nbcol|add:1}}>
+                    <i><span style="text-decoration:underline">Remarque</span> : outil en mode automatique (Bdd ou fichier), mise à jour quotidienne</i>
+                    <form id="miseajour" action={{url}} method="POST">
+                        {% csrf_token %}
+                        <button name="miseajour" type="submit" value="miseajour">Mise à jour manuelle</button>
+                    </form>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    {% else %}
+        Erreur
+    {% endif %}
+{% else %}
+      Erreur
+{% endif %}
+    <br>
+</div>
+{% endblock tab_contents %}
+
+
+{% block javascript %}
+{% endblock javascript %}

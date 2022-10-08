@@ -1,0 +1,24 @@
+{% extends base_template %}
+{% block more_header %}
+{{ block.super }}
+{{ smart_view.media }}
+{% endblock %}
+{% load url_kwargs %}
+{% load static %}
+{% block tab_contents %}
+<h1>{{ title }}</h1>
+{% if smart_view_form %}
+
+<form action="{% if code %}{% url_kwargs url_name code %}{% else %}{% url_kwargs url_name %}{% endif %}" method="POST"
+      enctype="multipart/form-data">
+    <div>
+        <input type="hidden" name="smart_view_prefix" value="{{ smart_view.prefix }}">
+        <input type="hidden" name="smart_view_action" value="{{ action }}">
+        {% csrf_token %}
+        {{ smart_view_form | safe }}
+    </div>
+</form>
+{% else %}
+{{ smart_view | safe }}
+{% endif %}
+{% endblock tab_contents %}

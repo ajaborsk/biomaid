@@ -1,0 +1,116 @@
+{% extends "dem/base_avec_form.html" %}
+{% load static %}
+
+{% comment "docstring" %}
+<!--
+Template utilisé (uniquement) pour la saisie d'une nouvelle demande
+
+Variables python utilisées :
+
+- message : Message à diffuser à l'utilisateur, qui sera affiché
+            dans une boite de dialogue à l'ouverture de la page
+            et dans un bandeau en haut du formulaire
+- ...
+-->
+{% endcomment %}
+
+{% block tab_contents %}
+
+<h1>{{ title }}</h1>
+
+{% if status == "gestion" %}
+    <p style="color:#FF0000">Ajouter un champs de recherche et de filtre du tableau ci-dessous</p>
+    <br>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Etablissement</th>
+            <th>CODE</th>
+            <th>NOM</th>
+            <th>PRENOM</th>
+            <th>TELEPHONE</th>
+            <th colspan="2">ACTIONS</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in list_contact_liv %}
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.etablissement }}</td>
+            <td>{{ item.code }}</td>
+            <td>{{ item.nom }}</td>
+            <td>{{ item.prenom }}</td>
+            <td>{{ item.coordonnees }}</td>
+            <td><form id="Modif-Button" action="/{{ url_prefix }}/drachar/gestion_contact_liv/" method="POST">
+                {% csrf_token %}
+                <button name="modifier" type="submit" value="{{ item.id }}">Modifier</button>
+            </form>
+            </td>
+            <td><form id="Supp-Button" action="/{{ url_prefix }}/drachar/gestion_contact_liv/" method="POST">
+                {% csrf_token %}
+                <button name="supprimer" type="submit" value="{{ item.id }}">Supprimer</button>
+            </form>
+            </td>    </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <form id="Ajout-Button" action="/{{ url_prefix }}/drachar/gestion_contact_liv/" method="POST">
+        {% csrf_token %}
+        <button name="status" type="submit" value="ajout">Ajouter un contact de livraison</button>
+    </form>
+
+{% elif status == "modifier" %}
+    <h2>Faites les modifications souhaitées sur le contact N°{{ modifierid }}</h2>
+    <form id="update-Button" action="/{{ url_prefix }}/drachar/gestion_contact_liv/" method="POST">
+        {% csrf_token %}
+        <p hidden>Code : {{ Contactliv_form.code }}</p>
+        <p>Nom : {{ Contactliv_form.nom }}</p>
+        <p>Prenom : {{ Contactliv_form.prenom }}</p>
+        <p>Telephone : {{ Contactliv_form.coordonnees }}</p>
+        <p>Etablissement : {{ Contactliv_form.etablissement }}</p>
+        <input name="modifierid" value="{{ modifierid }}" hidden>
+        <button name="status" type="submit" value="update">Save</button>
+    </form>
+    <form id="Annulerupdate-Button" action="/{{ url_prefix }}/drachar/gestion_contact_liv/" method="GET">
+        <button name="status" type="submit" value="gestion">Annuler</button>
+    </form>
+
+{% elif status == "supprimer" %}
+    <h2>Etes-vous sûr de vouloir supprimer le contacte N°{{ supprimerid }}</h2>
+        <p>Id : {{ Contactliv_instance.id }}</p>
+        <p>Code : {{ Contactliv_instance.code }}</p>
+        <p>Nom : {{ Contactliv_instance.nom }}</p>
+        <p>Prenom : {{ Contactliv_instance.prenom }}</p>
+        <p>Telephone : {{ Contactliv_instance.coordonnees }}</p>
+        <p>Etablissement : {{ Contactliv_instance.etablissement }}</p>
+    <form id="Supprimer-Button" action="/{{ url_prefix }}/drachar/gestion_contact_liv/" method="POST">
+        {% csrf_token %}
+            <input name="supprimerid" value="{{ supprimerid }}" hidden>
+        <button name="status" type="submit" value="delete">Supprimer le contact</button>
+    </form>
+    <form id="Annulersuppression-Button" action="/{{ url_prefix }}/drachar/gestion_contact_liv/" method="GET">
+        <button name="status" type="submit" value="gestion">Annuler</button>
+    </form>
+
+{% elif status == "ajout" %}
+    <h2>Veuillez renseigner les informations suivantes :</h2>
+    <form id="Enregistrer-Button" action="/{{ url_prefix }}/drachar/gestion_contact_liv/" method="POST">
+        {% csrf_token %}
+        <p hidden>code : {{ Contactform.code }}</p>
+        <p>nom : {{ Contactform.nom }}</p>
+        <p>prenom : {{ Contactform.prenom }}</p>
+        <p>Telephone : {{ Contactform.coordonnees }}</p>
+        <p>Etablissement : {{ Contactform.etablissement }}</p>
+        <button name="status" type="submit" value="enregistrer">Ajouter un contact de livraison</button>
+    </form>
+    <form id="Annulerajout-Button" action="/{{ url_prefix }}/drachar/gestion_contact_liv/" method="GET">
+        <button name="status" type="submit" value="gestion">Annuler</button>
+    </form>
+{% endif %}
+
+{% endblock tab_contents %}
+
+{% block javascript %}
+{% endblock javascript %}

@@ -1,0 +1,62 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load url_kwargs %}
+{% block tab_contents %}
+<h1>Gestion des Equipements</h1>
+<div>
+<h2>Administration de GÉQIP - Configuration système</h2>
+<ul>
+    <form id="save" action={{url}} method="POST">
+    {% csrf_token %}
+    <h3>Gestion de la structure</h3>
+    <li>Choix du mode de connexion
+        <br>
+        {% for key, value in linkstruc_bibl.items %}
+        {{key}} :
+        <select name="linkstruc_bibl-{{key}}" id="linkstruc_biblselect">
+            <option hidden value={{value}}>{{value}}</option>
+            <option value="OFF">OFF</option>
+            <option value="ON">ON</option>
+            <option value="FILE">FILE</option>
+        </select>
+        <br>
+        {% endfor %}
+    </li>
+    <br>
+    <li>Chemin et nom des fichiers si mode de connexion = FILE
+        <br>
+        {% for key, value in linkstrucfile_bibl.items %}
+            {{key}} : <input name ="linkstrucfile_bibl-{{key}}" value={{value}}> <br>
+        {% endfor %}
+    <br>
+    </li>
+    <li>Mise a jour quotidienne active :
+        <br>
+        {% for key, value in dailyupdate_bibl.items %}
+            {{key}} :
+        <select name="dailyupdate_bibl-{{key}}" id="dailyupdate_biblselect">
+            <option hidden value={{value}}>{{value}}</option>
+            <option value="OUI">OUI</option>
+            <option value="NON">NON</option>
+        </select>
+        <br>
+        {% endfor %}
+    <br>
+    </li>
+<h3>Information sur les Bases de données connectées</h3>
+    <p>Nom des fichiers si mode de connexion = FILE </p>
+    {% for key1, value in bdd.items %}
+        <li>{{key1}} :<br>
+        {% for k, v in value.items %}
+            <ul>{{k}} : <input value={{v}}></ul>
+        {% endfor %}
+        </li>
+    {% endfor %}
+    <br>
+        <p>gmao actuellement disponible : "assetplus"</p>
+        <p>gef actuellement disponible : "magh2"</p>
+    <br>
+    <button name="save" type="submit">Enregistrer</button>
+    </form>
+
+{% endblock tab_contents %}

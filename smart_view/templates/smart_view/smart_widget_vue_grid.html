@@ -1,0 +1,225 @@
+{% load json_tags %}
+<div id="{{ html_id }}"></div>
+<script>
+    let grid_params ={{ grid_params|to_json }};
+    var app = new Vue({
+        el: '#{{ html_id }}',
+        data() {
+            var base_layout = Array();
+            let index = 0;
+            for (var i = 0; i < grid_params.init_layout.length; i++) {
+                let item = grid_params.init_layout[i];
+                if (item.i >= index) {
+                    index = item.i + 1;
+                }
+                base_layout.push(item);
+            }
+            return {
+                layout: base_layout,
+                editable: false,
+                menu_open: false,
+                grid_item_form_open: false,
+                entries: grid_params['available_widgets'],
+                layout_html_id:'{{ html_id }}',
+                index: index,
+            }
+        },
+        updated: function () {
+            this.$nextTick(function () {
+                // Code that will run only after the
+                // entire view has been re-rendered
+                // console.log('Updated deep', this.layout);
+                if (this.timeoutId !== null) {
+                    clearTimeout(this.timeoutId);
+                    this.timeoutId = null;
+                }
+                this.timeoutId = setTimeout(()=>{
+                    this.timeoutId = null;
+                    //console.log("TimeOut fired !", this.layout);
+                    for (var i=0;i<this.layout.length;i++) {
+                        if (this.layout[i].hasOwnProperty('altair')) {
+                            //console.log("Update", this.layout[i].i);
+                            vegaEmbed("#{{ html_id }}-"+this.layout[i].i, this.layout[i].altair.spec, this.layout[i].altair.options).then(function(result){
+                                result.view.addEventListener("click", function (event, item) {
+                                    console.log("Click", item.datum); // for future use (link on click)
+                                    event.stopPropagation();
+                                });
+                            });
+                        }
+                    }
+                }, 200);
+
+            })
+        },
+        methods: {
+            layoutUpdatedEvent: function (newLayout) {
+                const params = new URLSearchParams();
+                let record = [];
+                for (var i = 0; i < newLayout.length; i++) {
+                    var widget = newLayout[i];
+                    record.push({
+                        x: widget.x,
+                        y: widget.y,
+                        w: widget.w,
+                        h: widget.h,
+                        i: widget.i,
+                        show_title: widget.show_title,
+                        title: widget.title,
+                        'w_class': widget.w_class,
+                        'w_params': widget.w_params
+                    });
+                }
+                params.append('settings', JSON.stringify({'common.my-cockpit.grid-layout': record}));
+                axios.post(grid_params.settings_url,
+                    params,
+                    {headers: {'X-CSRFToken': csrftoken}}).then(function (response) {
+                });
+            },
+            layoutReadyEvent: function (newLayout) {
+                let self = this;
+                let layout = [];
+                for (var i = 0; i < newLayout.length; i++) {
+                    var widget = newLayout[i];
+                    layout.push({
+                        i: widget.i,
+                        title: widget.title,
+                        'w_class': widget.w_class,
+                        'w_params': widget.w_params
+                    });
+                }
+                axios.get('?id={{ html_id }}&layout=' + encodeURIComponent(JSON.stringify(layout))).then(function (response) {
+                    for (var i = 0; i < app.layout.length; i++) {
+                        if (response.data.layout.hasOwnProperty(app.layout[i].i)) {
+                            self.layout[i].content = response.data.layout[app.layout[i].i].html;
+                            if ('altair' in  response.data.layout[app.layout[i].i]) {
+                                self.layout[i].altair = response.data.layout[app.layout[i].i].altair;
+                            }
+                        } else {
+                            self.layout[i].content = "WIDGET NOT FOUND !";
+                        }
+                    }
+                    self.$forceUpdate();
+                });
+            },
+            layoutClick(event) {
+                const isClosest = event.target.closest(".grid-menu-entry");
+                if (!isClosest & this.menu_open) {
+                    this.menu_open = false;
+                }
+            },
+            openMenu: function () {
+                this.menu_open = true;
+            },
+            addItem: function (w_class) {
+                this.layout.push({
+                    'i': this.index,
+                    'title': "",
+                    'w_class': w_class,
+                    'w_params': '{}',
+                    'w': 2,
+                    'h': 2,
+                    'x': 0,
+                    'y': 0
+                });
+                this.index++;
+                this.menu_open = false;
+                this.layoutReadyEvent(this.layout);
+            },
+            itemEditOk: function (val) {
+                const index = this.layout.map(item => item.i).indexOf(val);
+                this.layout[index].title = this.edit_widget_title;
+                let params = {};
+                for (var attr in this.form){
+                    params[attr] = this.form[attr].value;
+                }
+                this.layout[index].w_params=JSON.stringify(params);
+                this.grid_item_form_open = false;
+                this.layoutUpdatedEvent(this.layout);
+                this.layoutReadyEvent(this.layout);
+            },
+            itemEditCancel: function (val) {
+                this.grid_item_form_open = false;
+            },
+            editItem: function (val) {
+                const index = this.layout.map(item => item.i).indexOf(val);
+                this.edit_item = val;
+                this.edit_widget_title = this.layout[index].title;
+                this.form = grid_params.widget_defs[this.layout[index].w_class].m_params;
+                params = JSON.parse(this.layout[index].w_params);
+                for (var attr in this.form){
+                    this.form[attr].value = params[attr];
+                }
+                this.grid_item_form_open = true;
+            },
+            removeItem: function (val) {
+                const index = this.layout.map(item => item.i).indexOf(val);
+                this.layout.splice(index, 1);
+            },
+            toggleLock: function () {
+                this.editable = !(this.editable);
+            },
+        },
+        template: `{% verbatim %}<div @click="layoutClick">
+            <grid-layout
+            :layout.sync="layout"
+            :col-num="16"
+            :row-height="32"
+            :is-draggable="editable"
+            :is-resizable="editable"
+            :is-mirrored="false"
+            :vertical-compact="true"
+            :margin="[12, 12]"
+            :use-css-transforms="true"
+            @layout-updated="layoutUpdatedEvent"
+            @layout-ready="layoutReadyEvent"
+            >
+    <grid-item v-for="item in layout"
+               :x="item.x"
+               :y="item.y"
+               :w="item.w"
+               :h="item.h"
+               :i="item.i"
+               :w_class="item.w_class"
+               :w_params="item.w_params"
+               :drag-allow-from="'.title'"
+               :key="item.i"
+               :class="{'add-border':item.title}"
+    >
+        <div class="frame" :class="{'with-title':item.title.length, 'editable':editable}">
+            <div class="content" :class="{'with-title':item.title.length}"  v-if="!item.title.length" v-html="item.content"></div>
+            <div class="frame-overlay" :class="{'without-title':!item.title.length}">
+                <div class="title" v-if="item.title.length|editable">{{ item.title }}</div>
+                <div class="remove" v-if="editable"><i class="fa-regular fa-edit" @click="editItem(item.i)"></i> <i class="fa-regular fa-trash-can" @click="removeItem(item.i)"></i></div>
+                <div class="window"  v-if="item.title.length" v-html="item.content"></div>
+            </div>
+        </div>
+
+    </grid-item>
+    <div class="lock">
+       <i v-if="editable" class="fa-solid fa-lock-open" @click="toggleLock"></i>
+       <i v-if="!editable" style="color:#ccc" class="fa-solid fa-lock" @click="toggleLock"></i>
+       <i v-if="editable" class="fa-solid fa-plus grid-menu-entry" @click="openMenu"></i>
+       <div v-if="menu_open" class="grid-menu"><span>Type de widget</span><ul class="grid-menu"><li class="grid-menu-entry" v-for="entry in entries" @click="addItem(entry.w_class)">{{ entry.label }}</li></ul></div>
+    </div>
+    </grid-layout>
+    <div v-if="grid_item_form_open" class="dialog-background">
+        <div class="dialog">
+            <div class="dialog-title"></div>
+            <form class="dialog-form"><fieldset>
+                <legend>Modification du Widget :</legend>
+                <label>Titre</label><input v-model="edit_widget_title">
+                <template v-for="entry in form">
+                    <label>{{ entry.label }}</label>
+                    <input v-if="entry.type=='int'" v-model.lazy="entry.value" type="number">
+                    <input v-else-if="entry.type=='boolean'" v-model.lazy="entry.value" type="checkbox">
+                    <input v-else-if="entry.type=='color'" v-model.lazy="entry.value" type="color">
+                    <select v-else-if="entry.type=='choice'" v-model.lazy="entry.value"><option v-for="choice in entry.choices" :value="choice[0]">{{ choice[1] }}</option></select>
+                    <input v-else="" v-model.lazy="entry.value">
+                </template>
+            </fieldset></form>
+            <div class="form-buttons-box"><button class="dialog-button" @click="itemEditOk(edit_item)">Ok</button> <button class="dialog-button" @click="itemEditCancel(edit_item)">Annuler</button></div>
+        </div>
+    </div>
+    </div>{% endverbatim %}`,
+    });
+</script>

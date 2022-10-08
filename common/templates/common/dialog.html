@@ -1,0 +1,33 @@
+{% load url_kwargs %}
+{% load getattribute %}
+<!-- Boîte de dialogue -->
+<div {% if not message and not messages %}style="display:none" {% endif %}id="main-dialog" class="dialog-background">
+ <div class="dialog">
+ <div class="dialog-message">
+{% for message in messages %}
+  {{ message|safe }}
+{% endfor %}
+{{ message|safe }}
+  {% if errors %} :
+    <ul>
+    {% for err, errval in errors.items %}
+     <li>
+      {{ form_dmd.fields|getattribute:err|getattribute:"label" }} :
+        <ul>
+        {% for errv in errval %}
+          <li>{{errv.message}}</li>
+        {% endfor %}
+        </ul>
+        </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+   </div>
+   <button id="main-dialog-ok" class="dialog-button">
+     C'est noté
+   </button>
+ </div>
+</div>
+<script>
+  $("#main-dialog-ok").focus().click(function (){$("#main-dialog").hide(); {% if redirect_after_message %}window.location.href="{% url_kwargs redirect_after_message redirect_after_params %}{% if redirect_after_url_params %}?{{ redirect_after_url_params }}{% endif %}";{% endif %}} );
+</script>

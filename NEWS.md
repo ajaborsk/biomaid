@@ -1,0 +1,57 @@
+# Nouveautés
+
+## Version 0.11.3 (12 août 2022) :
+
+### Corrections bugs :
+
+- [X] Correction bug liens dans les alertes entraînait une erreur 500
+- [X] Correction désélections/sélections intempestives lignes dans suivi drachar
+- [X] Les campagnes inutilisées ne sont plus montrées dans le cockpit
+- [X] Les utilisateurs inactifs ne peuvent plus être choisis
+- [X] Bloqué pour l'instant à Django 4.0 => retour lien Asset+ (oracle 11.2 non supporté par Django 4.1) 
+
+## Version 0.11.2 (1er août 2022) :
+
+### Corrections bugs :
+
+- [X] Correction problème chemin des pièces jointes
+
+## Version 0.11.1 (unpublished) :
+
+### Corrections bugs :
+
+- [X] Ajout des droits pour permettre de faire de demandes informatiques
+- [X] Correction des scripts pour les jobs périodiques (alertes, transferts de demandes entre programmes, 
+      validations auto...) 
+
+## Version 0.11 (29 juillet 2022) :
+
+### Pour tout le monde :
+
+- [X] Nouvelle page de connexion, avec trois parties (connexion, mot de passe oublié et nouveau compte)
+- [X] Connexion grâce au compte Windows (LDAP/AD)
+- [X] La colonne 'actions' est verrouillée à droite dans les tableaux 
+- [X] Gestion complète des demandes d'intéressement
+- [X] Correction du bug de tri des valeurs numériques (montants)
+
+### Services demandeurs :
+
+- [X] Correction du bug empêchant la copie d'une demande
+- [X] Nouveau workflow pour les demandes de travaux (demandes par les cadres avec validation par l'encadrement du pôle)
+- [X] Mise à jour du lien vers l'annuaire du CHU
+
+### Experts :
+
+- [X] Champ UF dans le prévisionnel maintenant dédié et modifiable par l'arbitre du programme
+- [X] L'enveloppe du prévisionnel peut être modifiée par l'arbitre du programme
+- [X] Portail dédié au backoffice pour les travaux (KOS)
+- [X] Possibilité de donner un avis directement à la saisie d'une nouvelle demande
+
+### Sous le capot :
+
+- [X] Renommage de tous les 'Drav2' vers 'BiomAid'
+- [X] Mise à jour vers Tabulator 5.3
+- [X] Toutes les données de l'utilisateur sont dans le modèle User (suppression modèle ExtensionUser)
+- [X] L'argumentaire étendu est dans le modèle Demande pour tous les types de demande (suppression modèle ArgumentaireDetaille)
+- [X] Toutes les vues sont maintenant des classes (plus de vues "fonctions")
+- [X] Tous les formulaires de l'appli `dem` sont générés et gérés automatiquement

@@ -1,0 +1,50 @@
+﻿
+Icones : https://icon-icons.com/pack/Responsive-Office-Icons/624
+
+installer des applications intéressantes:
+
+pip install django-debug-toolbar
+
+puis rajouter dans \votre _projet\setting.py
+
+INSTALLED_APPS = [
+    ....
+    'django_toolbar',
+]
+
+MIDDLEWARE = [
+    # ...
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # ...
+]
+
+INTERNAL_IPS = [
+    # ...
+    '127.0.0.1',
+    # ...
+]
+
+puis rajouter dans \votre _projet\urls.py
+
+from django.conf import settings
+from django.conf.urls import include, url  # For django versions before 2.0
+from django.urls import include, path  # For django versions from 2.0 and up
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
+
+
+pip install django-extensions
+pip install Werkzeug
+pip install ipython
+
+rajouter dans settings.py et dans INSTALLED_APPS : 'django_extensions'
+pour avoir python manage.py shell_plus --ipython   (par exemple)
+
+
+pour windows, installer < Cmder >  terminal digne de ce nom !
+(dans une fen. de commande, aller dans le repertoire où est installé cmder
+et tapez ".\cmder.exe /REGISTER ALL"  --> donne acces au click droit ouvrir avec   ;-) )

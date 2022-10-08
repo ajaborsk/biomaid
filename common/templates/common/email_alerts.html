@@ -1,0 +1,16 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Message de GÉQIP</title>
+</head>
+<body>
+<p>Bonjour {{ ext_user.user.first_name }} {{ ext_user.user.last_name }},</p>
+<p>GÉQIP a déclenché les alertes suivantes, qui vous concernent :</p>{% for category_id, category in categories.items %}
+<h4>{{ category.category.label }}</h4>
+<ul>{% for alert in category.alerts %}
+  <li>{{ alert.intitule | safe }}</li>{% endfor %}
+</ul>{% endfor %}
+<p>Ce message a été émis depuis une boîte mail qui ne peut pas recevoir de réponse. En cas de problème, merci de vous adresser à l'équipe des développeurs (voir en bas de page sur le site)</p>
+</body>
+</html>

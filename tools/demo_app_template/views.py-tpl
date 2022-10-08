@@ -1,0 +1,21 @@
+# Create your views here. Only class views are supported for BiomAid
+
+# All view must inherit from BiomAidViewMixin
+from common.base_views import BiomAidViewMixin
+from django.views.generic import TemplateView
+
+
+# Home view is a very simple view using a template
+class {{ camel_case_app_name }}HomeView(BiomAidViewMixin, TemplateView):
+    permissions = ('ADM', 'CAD', 'EXP')
+    template_name = '{{ app_name}}/home.html'
+
+
+class {{ camel_case_app_name }}CategoryView(BiomAidViewMixin, TemplateView):
+    permissions = ('ADM', 'CAD', 'EXP')
+    template_name = '{{ app_name}}/home.html'
+
+
+class {{ camel_case_app_name }}ArticleView(BiomAidViewMixin, TemplateView):
+    permissions = ('ADM', 'CAD', 'EXP')
+    template_name = '{{ app_name}}/home.html'

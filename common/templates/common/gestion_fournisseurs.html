@@ -1,0 +1,274 @@
+{% extends "dem/base_avec_form.html" %}
+{% load static %}
+
+{% comment "docstring" %}
+<!--
+Template utilisé (uniquement) pour la saisie d'une nouvelle demande
+
+Variables python utilisées :
+
+- message : Message à diffuser à l'utilisateur, qui sera affiché
+            dans une boite de dialogue à l'ouverture de la page
+            et dans un bandeau en haut du formulaire
+- ...
+-->
+{% endcomment %}
+
+{% block tab_contents %}
+
+<h1>{{ title }}</h1>
+
+<!-- AFFICHAGE DES TABLEAUX -->
+{% if status == "gestion" %}
+    <p style="color:#FF0000">Ajouter un champs de recherche et de filtre du tableau ci-dessous</p>
+    <br>
+<table align="center">
+    <thead>
+        <tr>
+            <td></td>
+            <td><h2>Fournisseurs (générique)</h2></td>
+            <td></td>
+            <td><h2>Contacts du fournisseur</h2></td>
+            <td></td>
+            <td><h2>Fournisseurs GEF associé</h2></td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>vide</td>
+    <td>
+    <table> <!-- Tableau des Fournisseurs génériques -->
+        <thead>
+        <tr>
+            <th>Select.</th>
+            <th>code_four</th>
+            <th>NOM</th>
+            <th colspan="2">ACTIONS</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in list_fournisseurs %}
+        <tr>
+            <td>
+                <form id="selectfournisseur-Button" action="/common/gestion_fournisseurs/" method="POST">
+                        {% csrf_token %}
+                        <button name="selectfournisseur" type="submit" value="{{ item.id }}">V</button>
+                </form></td>
+            <td>{{ item.code_four }}</td>
+            <td>{{ item.nom }}</td>
+            <td><form id="Modiffour-Button" action="/common/gestion_fournisseurs/" method="POST">
+                {% csrf_token %}
+                <button name="modifierfour" type="submit" value="{{ item.id }}">Modifier</button>
+            </form>
+            </td>
+            <td><form id="Suppfour-Button" action="/common/gestion_fournisseurs/" method="POST">
+                {% csrf_token %}
+                <button name="supprimerfour" type="submit" value="{{ item.id }}">Supprimer</button>
+            </form>
+            </td>    </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </td>
+    <td>vide</td>
+    <td>
+        <table> <!-- Tableau des Contacts -->
+            <thead>
+                <tr>
+                    <th>NOM</th>
+                    <th>DIVISION</th>
+                    <th>TELEPHONE</th>
+                    <th>MAIL</th>
+                    <th colspan="2">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in list_contact_fournisseur %}
+                <tr>
+                    <td>{{ item.nom }} {{ item.prenom }} </td>
+                    <td>{{ item.division }}</td>
+                    <td>{{ item.telephone1 }}</td>
+                    <td>{{ item.mail }}</td>
+                    <td><form id="Modifcont-Button" action="/common/gestion_fournisseurs/" method="POST">
+                        {% csrf_token %}
+                        <button name="modifiercontfour" type="submit" value="{{ item.id }}">Modifier</button>
+                    </form>
+                    </td>
+                    <td><form id="Suppcont-Button" action="/common/gestion_fournisseurs/" method="POST">
+                        {% csrf_token %}
+                        <button name="supprimercontfour" type="submit" value="{{ item.id }}">Supprimer</button>
+                    </form>
+                    </td>    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </td>
+    <td>vide</td>
+    <td>
+        <table> <!-- Tableau des DataFournisseurGEF -->
+            <thead>
+                <tr>
+                    <th>code_gef</th>
+                    <th>Intitulé Fournisseur</th>
+                    <th>Adresse</th>
+                    <th>SIRET</th>
+                    <th>ETABLISSEMENT</th>
+                    <th colspan="2">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in list_contact_fournisseur %}
+                <tr>
+                    <td>{{ item.code_gef }}</td>
+                    <td>{{ item.intitule_fournisseur }}</td>
+                    <td>{{ item.adresse_1_fournisseur }}, {{ item.cp_fournisseur }} {{ item.ville_fournisseur }}</td>
+                    <td>{{ item.nu_siret }}</td>
+                    <td>{{ item.etablissement }}</td>
+                    <td><form id="Modifcont-Button" action="/common/gestion_fournisseurs/" method="POST">
+                        {% csrf_token %}
+                        <button name="modifiercontfour" type="submit" value="{{ item.id }}">Modifier</button>
+                    </form>
+                    </td>
+                    <td><form id="Suppcont-Button" action="/common/gestion_fournisseurs/" method="POST">
+                        {% csrf_token %}
+                        <button name="supprimercontfour" type="submit" value="{{ item.id }}">Supprimer</button>
+                    </form>
+                    </td>    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </td>
+    <td>vide</td>
+    </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td></td>
+            <td>
+                <form id="AjoutFourButton" action="/common/gestion_fournisseurs/" method="POST">
+                    {% csrf_token %}
+                    <button name="status" type="submit" value="ajoutfournisseur">Ajouter un Fournisseur</button>
+                </form>
+            </td>
+            <td></td>
+            <td>
+                <form id="AjoutContactButton" action="/common/gestion_fournisseurs/" method="POST">
+                    {% csrf_token %}
+                    <button name="status" type="submit" value="ajoutcontactfour">Ajouter un contact fournisseur</button>
+                </form>
+            </td>
+            <td></td>
+                        <td>
+                <form id="ImportGEF" action="/common/gestion_fournisseurs/" method="POST">
+                    {% csrf_token %}
+                    <button name="status" type="submit" value="importgef">Import/Update fournisseurs GEFs</button>
+                </form>
+            </td>
+            <td></td>
+        </tr>
+    </tfoot>
+</table>
+
+    <br>
+<!--Actions pour Ajout/Modification/Suppression d'un fournisseur-->
+<!--
+{% elif status == "modifier" %}
+    <h2>Faites les modifications souhaitées sur le contact N°{{ modifierid }}</h2>
+    <form id="update-Button" action="/drachar/gestion_contact_liv/" method="POST">
+        {% csrf_token %}
+        <p hidden>Code : {{ Contactliv_form.code }}</p>
+        <p>Nom : {{ Contactliv_form.nom }}</p>
+        <p>Prenom : {{ Contactliv_form.prenom }}</p>
+        <p>Telephone : {{ Contactliv_form.coordonnees }}</p>
+        <p>Etablissement : {{ Contactliv_form.etablissement }}</p>
+        <input name="modifierid" value="{{ modifierid }}" hidden>
+        <button name="status" type="submit" value="update">Save</button>
+    </form>
+    <form id="Annulerupdate-Button" action="/drachar/gestion_contact_liv/" method="GET">
+        <button name="status" type="submit" value="gestion">Annuler</button>
+    </form>
+
+{% elif status == "supprimer" %}
+    <h2>Etes-vous sûr de vouloir supprimer le contacte N°{{ supprimerid }}</h2>
+        <p>Id : {{ Contactliv_instance.id }}</p>
+        <p>Code : {{ Contactliv_instance.code }}</p>
+        <p>Nom : {{ Contactliv_instance.nom }}</p>
+        <p>Prenom : {{ Contactliv_instance.prenom }}</p>
+        <p>Telephone : {{ Contactliv_instance.coordonnees }}</p>
+        <p>Etablissement : {{ Contactliv_instance.etablissement }}</p>
+    <form id="Supprimer-Button" action="/drachar/gestion_contact_liv/" method="POST">
+        {% csrf_token %}
+            <input name="supprimerid" value="{{ supprimerid }}" hidden>
+        <button name="status" type="submit" value="delete">Supprimer le contact</button>
+    </form>
+    <form id="Annulersuppression-Button" action="/drachar/gestion_contact_liv/" method="GET">
+        <button name="status" type="submit" value="gestion">Annuler</button>
+    </form>
+-->
+<!-- AJOUT D'UN FOURNISSEUR GEF -->
+{% elif status == "ajoutfournisseurgef" %}
+    <h2>Veuillez renseigner les informations suivantes :</h2>
+    <form id="Enregistrerfourgef-Button" action="/common/gestion_fournisseurs/" method="POST">
+        {% csrf_token %}
+        <p>code : {{ fournisseurform.code_four }}</p>
+        <p>Etablissement : {{fournisseurform.etablissement}}</p>
+        <p>code_recon : {{ fournisseurform.code_recon }}</p>
+        <p>nom : a rajouter ?</p>
+        <button name="status" type="submit" value="enregistrerfournisseur">Ajouter un fournisseur</button>
+    </form>
+    <form id="Annulerajoutfourgef-Button" action="/common/gestion_fournisseurs/" method="GET">
+        <button name="status" type="submit" value="gestion">Annuler</button>
+    </form>
+
+<!-- AJOUT D'UN FOURNISSEUR -->
+{% elif status == "ajoutfournisseur" %}
+    <h2>Veuillez renseigner les informations suivantes :</h2>
+    <form id="Enregistrerfour-Button" action="/common/gestion_fournisseurs/" method="POST">
+        {% csrf_token %}
+        <p hidden>CODE : {{ fournisseurform.code_four }}</p>
+        <p>NOM : {{fournisseurform.nom}}</p>
+        <button name="status" type="submit" value="enregistrerfournisseur">Ajouter un fournisseur</button>
+    </form>
+    <form id="Annulerajoutfour-Button" action="/common/gestion_fournisseurs/" method="GET">
+        <button name="status" type="submit" value="gestion">Annuler</button>
+    </form>
+
+<!-- MODIFICATION D'UN FOURNISSEUR -->
+{% elif status == "modifierfour" %}
+    <h2>Veuillez modifier les informations suivantes :</h2>
+    <form id="modifierfour-Button" action="/common/gestion_fournisseurs/" method="POST">
+        {% csrf_token %}
+        <p hidden>CODE : {{ fournisseurform.code_four }}</p>
+        <p>NOM : {{fournisseurform.nom}}</p>
+        <button name="status" type="submit" value="modifierfour">Enregistrer la modification</button>
+        <input name="modifierfourid" value="{{ modifierfourid }}" hidden>
+    </form>
+    <form id="Annulermodiffour-Button" action="/common/gestion_fournisseurs/" method="GET">
+        <button name="status" type="submit" value="gestion">Annuler</button>
+    </form>
+
+<!-- SUPPRESSION D'UN FOURNISSEUR -->
+{% elif status == "supprimerfour" %}
+    <h2>Etes-vous sûr de vouloir supprimer le fournisseur N°{{ supprimerid }}</h2>
+        <p>Code : {{ fourgenerique_instance.code_four }}</p>
+        <p>Nom : {{ fourgenerique_instance.nom }}</p>
+    <form id="Supprimerfour-Button" action="/common/gestion_fournisseurs/" method="POST">
+        {% csrf_token %}
+            <input name="supprimerfourid" value="{{ supprimerfourid }}" hidden>
+        <button name="status" type="submit" value="supprimerfour">Supprimer le contact</button>
+    </form>
+    <form id="Annulersuppressionfour-Button" action="/common/gestion_fournisseurs/" method="GET">
+        <button name="status" type="submit" value="gestion">Annuler</button>
+    </form>
+
+<!--Actions pour Ajout/Modification/Suppression un Contact fournisseur-->
+
+{% elif status == "importgef" %}
+    <!-- créer page d'import/update et sa vue-->
+{% endif %}
+
+{% endblock tab_contents %}
+
+{% block javascript %}
+{% endblock javascript %}

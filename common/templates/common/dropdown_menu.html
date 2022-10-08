@@ -1,0 +1,42 @@
+{% spaceless %}
+{% comment 'usage' %}
+  Template utilisé pour intégrer un menu déroulant (dropdown menu) dans un autre template.
+  Il s'utilise de la façon suivante {% include common/dropdown_menu.html with id='menu_id' menu=mon_menu %}
+  Où mon_menu est le nom de la variable dans laquelle la structure du menu est stockée et 'menu_id' l'identifiant
+    (unique dans la page) du menu considéré.
+  Une variable de menu est une liste (ou un tuple) d'entrées de menu, qui est un dict avec les clés suivantes :
+  'icon': Nom de l'icône (à choisir dans la liste de FontAwesome 4), facultatif,
+  'label': Texte de l'entrée de menu,
+  'help_text': Texte d'aide (bulle)
+  'url': URL du lien vers lequel rediriger l'utilisateur en cas de clic,
+  'url_name': nom d'URL (au sens de Django) vers lequel rediriger l'utilisateur en cas de clic, prioritaire sur 'url'
+  'classes': **Liste** de classes à ajouter à l'objet HTML qui contient l'entrée du menu (attention ce doit être une liste !)
+  'badge': Nombre à faire apparaître en badge rouge (si != 0)
+  'new_page': Booléen qui indique s'il faut ouvrir le lien dans une nouvelle page ou un nouvel onglet (faux par défaut)
+  'entries': Sous-menu (liste d'entries), avec la même structure (fonctionnement récursif, mais attention, le CSS et le code JS ne gèrent que 2 niveaux pour l'instant),
+  'right': Indique si le sous-menu sera aligné à droite (utile pour les menu à droite de l'écran)
+
+{% endcomment %}
+{% load static %}
+{% load url_kwargs %}
+<ul {% if id %}id="{{ id }}" {% endif %}class="dropdown{% if right %} right{% endif %}{% if add_class %} {{ add_class }}{% endif %}">
+    {% for entry in menu %}
+        <li class="dropdown-entry{% if entry.classes %} {{ entry.classes|join:' ' }}{% endif %}"
+            title="{{ entry.help_text }}">{% if entry.url or entry.url_name %}<a href="{% if entry.url_name %}{% url_kwargs entry.url_name entry.url_kwargs %}{% else %}{{ entry.url }}{% endif %}{{ entry.url_parameters_string }}"
+                {% if entry.new_page %} onclick="window.open(this.href); return false;"{% endif %}>{% else %}
+            <div>{% endif %}
+            {% if entry.icon %}
+                <i class="dropdown-icon {{ entry.icon }} fa-fw{% if entry.badge %} has-badge{% endif %}"
+                   data-count="{{ entry.badge }}"></i>{% if entry.label %}&nbsp;&nbsp;{% endif %}{% endif %}
+            {% if entry.img %}<img src="{% static entry.img %}">{% endif %}
+            {% if entry.label %}<span class="dropdown-label">{{ entry.label }}
+                {% if entry.entries %}&nbsp;&nbsp;
+                    <i class="fa-solid fa-caret-down"></i>{% endif %}</span>{% endif %}
+            {% if entry.url or entry.url_name %}</a>
+                {% else %}</div>{% endif %}
+            {% if entry.entries %}
+                {% include 'common/dropdown_menu.html' with id='' menu=entry.entries right=entry.right url_prefix=url_prefix only %}{% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endspaceless %}

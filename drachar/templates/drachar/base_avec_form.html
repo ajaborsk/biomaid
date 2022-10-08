@@ -1,0 +1,65 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block more_header %}
+{{ block.super }}
+<script src="{% static '/dem/jquery.flexdatalist.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static '/dem/jquery.flexdatalist.min.css' %}" />
+<script src="{% static '/dem/helper-rules.js' %}"></script>
+<script src="{% static '/dem/form-helper.js' %}"></script>
+{% endblock more_header %}
+
+{% block javascript %}
+{{ block.super }}
+<script>
+
+// Polyfill for IE9+
+(function () {
+
+  if ( typeof window.CustomEvent === "function" ) return false;
+
+  function CustomEvent ( event, params ) {
+    params = params || { bubbles: false, cancelable: false, detail: null };
+    var evt = document.createEvent( 'CustomEvent' );
+    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+    return evt;
+   }
+
+  window.CustomEvent = CustomEvent;
+})();
+// Polyfill end
+
+  $('.flexdatalist').flexdatalist({
+      minLength: 0,
+      searchContain:true,
+      valueProperty:'value',
+      noResultsText:"Pas de résultat trouvé pour '{keyword}'"
+    }).on('change:flexdatalist', function(event, set, options) {
+      // Simule le "onChange" sur le champ original
+      var event = new CustomEvent('change');
+      this.dispatchEvent(event);
+    });
+
+  //help_on("#form", {'debug':false});
+
+  $('.delete').on('click', function (event) {
+//      console.log("delete ev", event);
+    var docform = $(this.parentNode.parentNode);
+    docform.addClass('deleted');
+    docform.addClass('crossed');
+    docform.find('.undelete').show();
+    docform.find('.todelete').val(true);
+    $(this).hide();
+  });
+
+  $('.undelete').on('click', function (event) {
+//      console.log("delete ev", event);
+    var docform = $(this.parentNode.parentNode);
+    docform.removeClass('deleted');
+    docform.removeClass('crossed');
+    docform.find('.delete').show();
+    docform.find('.todelete').val(null);
+    $(this).hide();
+  });
+</script>
+{% endblock javascript %}

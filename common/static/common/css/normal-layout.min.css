@@ -1,0 +1,1 @@
+#footer-status,.table-topbar .button,.table-topbar .filters-box,.topbar-compact{display:none}.topbar{display:grid;grid-auto-flow:column;grid-auto-columns:50px max-content minmax(0,1fr) max-content 50px max-content;width:100%;height:50px;top:0}footer{background:var(--main-color-theme-2a);padding:5px;color:#fff}

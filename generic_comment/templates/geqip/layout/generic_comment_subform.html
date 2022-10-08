@@ -1,0 +1,17 @@
+{% if form.instance.pk %}
+<!-- {{form_rindex}} {{form.instance.user}} {{user}} -->
+{% if form_rindex == 1 and form.instance.user == user %}
+<input type="hidden" id="{{form.id.id_for_label}}" name="{{form.id.html_name}}" value="{{form.id.value}}">
+<input type="hidden" id="{{form.user.id_for_label}}" name="{{form.user.html_name}}" value="{{form.user.value}}">
+<span><b>Modifier votre commentaire</b> du <b>{{form.instance.modification_timestamp}}</b> :</span><textarea style="grid-column:2/last-column" id="{{form.comment_text.id_for_label}}" name="{{form.comment_text.html_name}}">{{form.comment_text.value}}</textarea>
+{% else %}
+<input type="hidden" id="{{form.id.id_for_label}}" name="{{form.id.html_name}}" value="{{form.id.value}}">
+<input type="hidden" id="{{form.user.id_for_label}}" name="{{form.user.html_name}}" value="{{form.user.value}}">
+<input type="hidden" id="{{form.comment_text.id_for_label}}" name="{{form.comment_text.html_name}}" value="{{form.comment_text.value}}">
+<span><b>{{form.instance.user.first_name}} {{form.instance.user.last_name}}</b> le <b>{{form.instance.modification_timestamp}}</b> :</span><span style="grid-column:2/last-column">{{form.comment_text.value}}</span>
+{% endif %}
+{% else %}
+<input type="hidden" id="{{form.user.auto_id}}" name="{{form.user.html_name}}" value="{{form.user.value}}">
+<label for="{{form.comment_text.id_for_label}}"><b>Ajouter un commentaire</b> :</label>
+<textarea style="grid-column:2/last-column" id="{{form.comment_text.id_for_label}}" name="{{form.comment_text.html_name}}">{{form.comment_text.value|default:''}}</textarea>
+{% endif %}

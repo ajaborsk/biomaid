@@ -1,0 +1,28 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load url_kwargs %}
+{% block tab_contents %}
+    <h1>Gestion des Equipements</h1>
+    <div>
+        <h2>Manager GÉQIP</h2>
+        <ul>
+            <li><a href="{% url_kwargs 'common:role' %}">Gestion des rôles</a></li>
+            <li><a href="{% url_kwargs 'common:programme' %}">Gestion des programmes/enveloppes</a></li>
+            <li><a href="{% url_kwargs 'common:calendrier' %}">Gestion des calendriers/campagnes</a></li>
+        </ul>
+
+        <h2>Manager DRACHAR</h2>
+        <ul>
+            <li><a href="{% url_kwargs 'common:gestion_marques' %}">Liste des Marques</a></li>
+            <li><a href="{% url_kwargs 'common:gestion_types' %}">Liste des Types</a></li>
+            {% comment %}<li><a href="{% url_kwargs 'common:gestion_fournisseurs' %}">Liste des Fournisseurs</a></li> {% endcomment %}
+            <li><a href="">Liste des des Contacts de livraison des établissements</a><em style="color:red;">(problème de
+                lien reverse drachar à corriger)</em></li>
+            <li><a href="{% url_kwargs 'common:gestion_comptes' %}">Liste des des Comptes financiers</a></li>
+        </ul>
+
+        <h2>Manager MARCHE</h2>
+        <ul>
+        </ul>
+    </div>
+{% endblock tab_contents %}

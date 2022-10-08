@@ -1,0 +1,86 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load url_kwargs %}
+{% block tab_contents %}
+<h1>Gestion des Equipements</h1>
+<div>
+<h2>Administration de GÉQIP</h2>
+<ul>
+<li><a href="{% url 'admin:index' %}">Administration Django</a></li>
+<li><a href="{% url_kwargs 'common:programme' %}">Gestion des programmes/enveloppes</a></li>
+<li><a href="{% url_kwargs 'common:calendrier' %}">Gestion des calendriers/campagnes</a></li>
+<!--<p>OLD</p>
+{% if link_structure == True %}
+    <li>Structure :
+    <ul>
+        {% for etablissement in etablissements %}
+            <li><a href="/drachar-chuap/common/gestion_structure/{{etablissement.code}}">{{etablissement.code}} - {{ etablissement.nom }}</a></li>
+        {% endfor %}
+            <li><a href="{% url_kwargs 'common:gestion_etablissement' %}">(+) Ajouter un établissement</a></li>
+    </ul>
+    </li>
+{% elif link_structure == False %}
+    <li>Structure :
+    <ul>
+    {% for etablissement in etablissements %}
+        <li>{{ etablissement.nom }}</li>
+           <ul>
+            <li><a href="/drachar-chuap/common/gestion_structure/{{etablissement.code}}">Arborescence Structure Complète</a></li>
+            <li><a href="{% url_kwargs 'common:gestion_pole' %}">Liste des Pôles</a></li>
+            <li><a href="{% url_kwargs 'common:gestion_centreresponsabilite' %}">Liste des Centres de Responsabilité</a></li>
+            <li><a href="{% url_kwargs 'common:gestion_service' %}">Listes des Services</a></li>
+            <li><a href="{% url_kwargs 'common:gestion_uf' %}">Liste des UFs</a></li>
+           </ul>
+      <li><a href="{% url_kwargs 'common:gestion_etablissement' %}">(+) Gérer les établissements un établissement</a></li>
+    {% endfor %}
+    </ul>
+    </li>
+{% endif %}-->
+<li>Structure :
+        <ul>{% for etablissement in etablissements %}
+            {{link}}
+            {%for key, value in link_structure.items  %}
+                {% if key == etablissement.prefix%}
+
+                    {% if value == 'FILE' %}
+                        <li>{{ etablissement.nom }}</li>
+                        <ul>
+                            <li><a href="/drachar-chuap/common/gestion_structure/{{etablissement.id}}">Structure Complète</a></li>
+                        </ul>
+                    {% elif value == 'ON' %}
+                        <li>{{ etablissement.nom }}</li>
+                        <ul>
+                            <li><a href="/drachar-chuap/common/gestion_structure/{{etablissement.id}}">Structure Complète</a></li>
+                        </ul>
+                    {% elif value == 'OFF' %}
+                    <li>{{ etablissement.nom }}</li>
+                        <ul>
+                            <li><a href="/drachar-chuap/common/gestion_structure/{{etablissement.id}}">Arborescence Structure Complète</a></li>
+                            <li><a href="/drachar-chuap/common/gestion_site/{{etablissement.id}}">Liste des Sites</a></li>
+                            <li><a href="/drachar-chuap/common/gestion_pole/{{etablissement.id}}">Liste des Pôles</a></li>
+                            <li><a href="/drachar-chuap/common/gestion_centreresponsabilite/{{etablissement.id}}">Liste des Centres de Responsabilité</a></li>
+                            <li><a href="/drachar-chuap/common/gestion_service/{{etablissement.id}}">Listes des Services</a></li>
+                            <li><a href="/drachar-chuap/common/gestion_uf/{{etablissement.id}}">Liste des UFs</a></li>
+                        </ul>
+
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+        </ul>
+        <ul>
+            <li><a href="{% url_kwargs 'common:gestion_etablissement' %}">(+) Ajouter un établissement</a></li>
+        </ul>
+
+<!--<li>Tables de données de DRACHAR :
+    <ul>
+        <li><a href="{% url_kwargs 'common:gestion_marques' %}">Liste des Marques</a></li>
+        <li><a href="{% url_kwargs 'common:gestion_types' %}">Liste des Types</a></li>
+        {% comment %} <li><a href="{% url_kwargs 'common:gestion_fournisseurs' %}">Liste des Fournisseurs</a></li> {% endcomment %}
+        <li><a href="">Liste des des Contacts de livraison des établissements</a><em style="color:red;">(problème de lien reverse drachar à corriger)</em></li>
+        <li><a href="{% url_kwargs 'common:gestion_comptes' %}">Liste des des Comptes financiers</a></li>
+    </ul>-->
+    <li><a href="{% url_kwargs 'common:admin-config' %}">Configuration Système</a><em style="color:red;"></li>
+</ul>
+</div>
+{% endblock tab_contents %}

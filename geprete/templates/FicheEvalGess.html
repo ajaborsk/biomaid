@@ -1,0 +1,28 @@
+{%extends "common/base.html" %}
+{% load static %}
+
+{% block tab_contents %}
+
+{% spaceless %}
+
+    <div>
+        <img src="{% static '/geprete/muffinlogo.png' %}" alt="My image">
+
+        <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete-chuap/geprete/home/'"> Retour à l'accueil </button>
+        <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete-chuap/geprete/listegeprete/'"> Retour à la liste des prêts </button>
+    </div>
+
+Pour remplir la fiche de prêt de matériel, il faut l'imprimer, la compléter et la déposer
+dans <a href = http://127.0.0.1:8000/geprete-chuap/geprete/documentsgess/> Ajouter un document</a>
+
+<!--Changer l'url pour les documents-->
+
+avec en titre "FI_date_nomduDM".
+
+Fiche à imprimer :
+
+<a href="{% static '/geprete/FI_nomduDM.doc' %}"  onclick="window.open(this.href); return false;"> Fiche d'évaluation</a>
+
+{% endspaceless %}
+
+{% endblock tab_contents %}

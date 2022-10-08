@@ -1,0 +1,189 @@
+header {
+        position: relative;
+        left: 0px;
+        margin-left: -8px;
+        margin-right: -8px;
+        }
+
+.conteneur {
+        justify-content: center;
+        border-collapse: collapse;
+        width: 100%;
+        border: none;
+        }
+
+.barreverte1 {
+        background-color: #94BE31;
+        background-opacity: 0.5;
+        padding: 10px;
+        width: 1%;
+        border: none;
+        }
+
+.barrebleu1 {
+        background-color: #0084A5;
+        background-opacity: 0.5;
+        width: 1%;
+        border: none;
+        }
+
+.logo {
+        background-color: white;
+        width: auto;
+        }
+
+.barreverte {
+        background-color: #94BE31;
+        background-opacity: 0.5;
+        padding: 0px;
+        border: none;
+        width: 70%;
+        }
+
+.barrebleu {
+        background-color: #0084A5;
+        background-opacity: 0.5;
+        padding: 0px;
+        text-align: right;
+        width: 70%;
+        height: 95px;
+        border: none;
+        }
+.lien {
+        color: white;
+        }
+.titre0 {
+         margin-top: 20px;
+         margin-bottom: 20px;
+         margin-left: auto;
+         margin-right: auto;
+         width: auto;
+         text-align: center;
+         padding: 0px;
+         border-collapse: collapse;
+         border: none;
+         }
+
+.titre1 {
+        color: Blue;
+        font-family: "Arial", times, sans-serif;
+        font-size: 400%;
+        font-weight: bold;
+        text-shadow: 3px 3px 7px #999;
+        text-align: center;
+        line-height: 0.8em;
+        padding: 0px 0px 0px 0px;
+        margin: 0px;
+        border: none;
+        }
+
+.titre2 {
+        color: Blue;
+        font-family: "Arial", times, sans-serif;
+        font-size: 150%;
+        text-align: right;
+        padding: 0px;
+        margin-top: -5px;
+        margin-bottom: 5px;
+        border: none;
+        }
+
+.login {
+         margin: auto;
+         width: 30%;
+         text-align: center;
+         padding: 0px;
+         border-collapse: collapse;
+         box-shadow: 3px 3px 7px #999;
+         border-radius: 12px 0 12px 0;
+         border: none;
+        }
+
+.login1 {
+         font-family: "Arial", times, sans-serif;
+         font-size: 100%;
+         font-weight: bold;
+         color: black;
+         padding-top: 10px;
+         padding-bottom: 10px;
+         background-color: #0084A5;
+         border-radius: 12px 0 0px 0;
+        }
+
+.login2 {
+        border-right: 1px transparent;
+        border-left: 1px transparent;
+        border-bottom: 1px transparent;
+        padding-top: 20px;
+        padding-bottom: 10px;
+        background-color: white;
+        }
+
+input {
+        width: 90%;
+        }
+
+.login2texte {
+        font-family: "Arial", times, sans-serif;
+        font-size: 100%;
+        font-weight: bold;
+        }
+
+.mdp {
+        text-align: right;
+	    padding-right: 10%;
+        }
+
+.login3 {
+        border-right: 1px transparent;
+        border-left: 1px transparent;
+        border-bottom: 1px transparent;
+        text-align: right;
+        padding-right: 10%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        }
+
+.button {
+        border-radius: 12px 0 12px 0;
+        color: black;
+        background: orange;
+        border: none;
+        font: bold 12px Verdana;
+        box-shadow: 1px 1px 3px #999;
+        padding: 6px 15px 6px 15px;
+        }
+
+.alerte {
+        background-color: red;
+		color: white;
+		text-align: center;
+		font: normal 12px/150% Arial, Helvetica, sans-serif;
+		font-weight: bold;
+        }
+
+table, td {
+        border: 1px solid #999 ;
+	    font-family: : "Times new roman", times, serif;
+	    }
+
+thead,
+tfoot {
+    	background-color: #C0C0C0;
+		color: #000000;
+	   	border-top: 2px;
+	   	border-width: medium ;
+	    border-color: black;
+	    text-align: center;
+        font-family: "Arial", times, serif;
+	    font-variant-caps: all-small-caps;
+	    font-weight: bold;
+	    }
+
+.footer {
+        margin-top: 30px;
+        width:100%;
+        border-collapse: collapse;
+        border: transparent;
+        background: orange;
+        }

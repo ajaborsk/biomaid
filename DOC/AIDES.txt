@@ -1,0 +1,3 @@
+HTML :
+
+pour cacher des élements en HTML sur simple clique : https://developer.mozilla.org/fr/docs/Web/CSS/:checked

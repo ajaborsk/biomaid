@@ -1,0 +1,6 @@
+<h2>{{application.verbose_name}} :</h2>
+{% for alert_name, alert in application.alerts.items %}
+{% include 'common/alert-documentation.html' with alert_name=alert_name alert=alert application_id=application_id only %}
+{% empty %}
+<em>Pas d'alerte pour cette application</em>
+{% endfor %}

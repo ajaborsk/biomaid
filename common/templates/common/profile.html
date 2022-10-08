@@ -1,0 +1,102 @@
+{% extends "dem/base_avec_form.html" %}
+{% load static %}
+{% load url_kwargs %}
+{% comment %}
+<!--
+  Mes informations personnelles :
+    On retrouve ici toutes les informations personnelles qui n'ont
+    pas d'impact sur le fonctionnement de l'application. Ce sont typiquement
+    des informations à destination des autres utilisateurs :
+    nom, prénom, fonction (intitulé), numéros de téléphone...
+-->
+{% endcomment %}
+
+{% block tab_contents %}
+  <center><h1>{{title}}</h1>
+  <!-- <img width="200" style="width:25% text-align:center" src="{% static 'dem/roadsign.png' %}">
+  <p>Cette page n'est malheureusement pas encore disponible.</p> -->
+
+  <form id="form" method="POST">
+   {% csrf_token %}
+
+  <div id="main-help" class="form-help">{{ message|safe }}</div>
+
+  <div class="form-section">
+    <h2 class="ie-row-1 form-section-title">Informations personnelles</h2>
+
+    <span class="ie-row-2 form-label-c1" id="id_titre-label">
+      <div class="form-icon {% if extension_user_profile_form.titre.help_text %}help{% endif %} tooltip">
+        <div id="titre-help" class="tooltiptext">{{ extension_user_profile_form.titre.help_text }}</div>
+      </div>
+      {{ extension_user_profile_form.titre.label_tag }}</span>
+    <span class="ie-row-2 form-input-c1">{{ extension_user_profile_form.titre }}</span>
+
+    <span class="ie-row-2 form-label-c2" id="id_initiales-label">
+      <div class="form-icon {% if extension_user_profile_form.initiales.help_text %}help{% endif %} tooltip">
+        <div id="initiales-help" class="tooltiptext">{{ extension_user_profile_form.initiales.help_text }}</div>
+      </div>
+      {{ extension_user_profile_form.initiales.label_tag }}</span>
+    <span class="ie-row-2 form-input-c2">{{ extension_user_profile_form.initiales }}</span>
+
+    <span class="ie-row-3 form-label-c1" id="id_first_name-label">
+      <div class="form-icon {% if user_profile_form.first_name.help_text %}help{% endif %} tooltip">
+        <div id="first_name-help" class="tooltiptext">{{ user_profile_form.first_name.help_text }}</div>
+      </div>
+      {{ user_profile_form.first_name.label_tag }}</span>
+    <span class="ie-row-3 form-input-c1">{{ user_profile_form.first_name }}</span>
+
+    <span class="ie-row-3 form-label-c2" id="id_last_name-label">
+      <div class="form-icon {% if user_profile_form.last_name.help_text %}help{% endif %} tooltip">
+        <div id="last_name-help" class="tooltiptext">{{ user_profile_form.last_name.help_text }}</div>
+      </div>
+      {{ user_profile_form.last_name.label_tag }}</span>
+    <span class="ie-row-3 form-input-c2">{{ user_profile_form.last_name }}</span>
+
+    <span class="ie-row-4 form-label-c1" id="id_intitule_fonction-label">
+      <div class="form-icon {% if extension_user_profile_form.intitule_fonction.help_text %}help{% endif %} tooltip">
+        <div id="intitule_fonction-help" class="tooltiptext">{{ extension_user_profile_form.intitule_fonction.help_text }}</div>
+      </div>
+      {{ extension_user_profile_form.intitule_fonction.label_tag }}</span>
+    <span class="ie-row-4 form-input-c12">{{ extension_user_profile_form.intitule_fonction }}</span>
+  </div>
+  <div class="form-section">
+        <h2 class="ie-row-1 form-section-title">Coordonnées</h2>
+    <span class="ie-row-2 form-label-c1" id="id_tel_dect-label">
+      <div class="form-icon {% if extension_user_profile_form.tel_dect.help_text %}help{% endif %} tooltip">
+        <div id="tel_dect-help" class="tooltiptext">{{ extension_user_profile_form.tel_dect.help_text }}</div>
+      </div>
+      {{ extension_user_profile_form.tel_dect.label_tag }}</span>
+    <span class="ie-row-2 form-input-c1">{{ extension_user_profile_form.tel_dect }}</span>
+
+    <span class="ie-row-2 form-label-c2" id="id_email-label">
+      <div class="form-icon {% if user_profile_form.email.help_text %}help{% endif %} tooltip">
+        <div id="email-help" class="tooltiptext">{{ user_profile_form.email.help_text }}</div>
+      </div>
+      {{ user_profile_form.email.label_tag }}</span>
+    <span class="ie-row-2 form-input-c2">{{ user_profile_form.email }}</span>
+
+    <span class="ie-row-3 form-label-c1" id="id_tel_mobile-label">
+      <div class="form-icon {% if extension_user_profile_form.tel_mobile.help_text %}help{% endif %} tooltip">
+        <div id="tel_mobile-help" class="tooltiptext">{{ extension_user_profile_form.tel_mobile.help_text }}</div>
+      </div>
+      {{ extension_user_profile_form.tel_mobile.label_tag }}</span>
+    <span class="ie-row-3 form-input-c1">{{ extension_user_profile_form.tel_mobile }}</span>
+
+    <span class="ie-row-3 form-label-c2" id="id_tel_fixe-label">
+      <div class="form-icon {% if extension_user_profile_form.tel_fixe.help_text %}help{% endif %} tooltip">
+        <div id="tel_fixe-help" class="tooltiptext">{{ extension_user_profile_form.tel_fixe.help_text }}</div>
+      </div>
+      {{ extension_user_profile_form.tel_fixe.label_tag }}</span>
+    <span class="ie-row-3 form-input-c2">{{ extension_user_profile_form.tel_fixe }}</span>
+
+   </div>
+
+   <center>
+    <input type="submit" name="submit" value="Enregistrer">
+    <button type="button" OnClick="window.location.href = '';">Réinitialiser le formulaire</button>
+   </center>
+
+  </form>
+  <p><a href="{% url_kwargs 'dem:home' %}">Retour à l'accueil</a></p>
+  </center>
+{% endblock tab_contents %}

@@ -1,0 +1,14 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load url_kwargs %}
+
+{% block title_short %}
+Page introuvable
+{% endblock title_short %}
+
+{% block tab_contents %}
+  <center><h1>Page non trouvée</h1>
+  <p>Cette page n'existe pas.</p>
+  <p><a href="{% url_kwargs 'dem:home' %}">Retour à l'accueil</a></p>
+  </center>
+{% endblock tab_contents %}

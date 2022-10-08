@@ -1,0 +1,8 @@
+{% autoescape off %}Bonjour {{ ext_user.user.first_name }} {{ ext_user.user.last_name }},
+
+GÉQIP a déclenché les alertes suivantes, qui vous concernent :
+{% for category_id, category in categories.items %}
+{{ category.category.label }} :{% for alert in category.alerts %}
+- {{ alert.intitule_txt }}{% endfor %}
+{% endfor %}
+Ce message a été émis depuis une boîte mail qui ne peut pas recevoir de réponse. En cas de problème, merci de vous adresser à l'équipe des développeurs (voir en bas de page sur le site){% endautoescape %}

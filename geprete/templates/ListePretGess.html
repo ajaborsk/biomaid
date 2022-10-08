@@ -1,0 +1,167 @@
+{%extends "common/base.html" %}
+{% load static %}
+{% block more_header %}
+   <link rel="stylesheet" type="text/css" href="{% static '/geprete/StyleListPret.css' %}" />
+{% endblock more_header %}
+{% block tab_contents %}
+
+<div>
+    <img src="{% static '/geprete/muffinlogo.png' %}" alt="My image">
+
+    <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete/accueilgep'"> Retour à l'accueil </button>
+    <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete/formgess'"> Ajouter un prêt </button>
+    <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete/documentsgess'"> Ajouter un document </button>
+    <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete/ficheevalgess'"> Ajouter une fiche d'évaluation </button>
+</div>
+
+{% spaceless %}
+<div>
+        <h2> Liste des prêts : </h2>
+</div>
+
+<div>
+<label name="inge">Ingénieur(e)s responsables :</label>
+  <select id="inge" name="inge">
+      <option value="Tous">Tous</option>
+      {% for inge in ingenieurs %}
+          <option value="{{inge.user}}" {% if ingenieur_responsable_user == inge.user %}selected="1" {% endif %}>{{inge.user}}</option>
+      {% endfor %}
+      <option value="&ingenieur_responsable_id=null">NA</option>
+  </select>
+    <br>
+  <label name="date">Avec ou sans date de fin :</label>
+  <select id="date" name="date">
+        <option value="Les_deux">Les deux</option>
+        <option value="Avec">Avec</option>
+        <option value="Sans">Sans</option>
+  </select>
+</div>
+
+<div>
+
+<span>Appliquer le(s) filtre(s) :</span>
+  <button id="btn">GO !</button>
+<br>
+  <p id="text1">selectedIndex: 0</p>
+    #le selectIndex: 0 permet de récupérer "text1"
+</div>
+
+    <script type="text/javascript">
+    var selectElem = document.getElementById('inge');
+    var pElem = document.getElementById('text1');
+    var btn = document.querySelector('#btn');
+
+          btn.addEventListener('click', function()
+          {
+            var index = selectElem.selectedIndex.value;
+            // Rapporter cette donnée au <p text1>
+            ingenieur = document.getElementById('inge').value;
+            date = document.getElementById('date').value;
+            pElem.innerHTML = window.location.href='/geprete/listepretgess/'+ ingenieur + '/' date ;
+
+          }
+          return ingenieur ;
+          )
+
+    </script>
+
+<div>
+    <table>
+            <tr> <!-- tr pour création ligne--> <!--uniquement entête-->
+                <th> Numéro </th>
+                <th> Numéro de série </th>
+                <th> Quantité </th>
+                <th> Type </th>
+                <th> Marque </th>
+                <th> Accessoires </th>
+                <th> Descriptif </th>
+                <th> Date de début </th>
+                <th> Date de fin </th>
+                <th> Date de reprise </th>
+                <th> Durée du prêt </th>
+                <th> Ingénieur responsable </th>
+                <th> Unité fonctionnelle </th>
+                <th> Nom de l'emprunteur </th>
+                <th> Fournisseur </th>
+                <th> Commentaire </th>
+                <th colspan="3"> Fichier(s) et commentaire(s) </th>
+                <th>  Action </th>
+
+        <!--th pour la ligne d'entête sinon td pour les différentes lignes à remplir-->
+            </tr>
+        {% for Pret in listepret %} <!--boucle for pour appeler tous les prêts enregistrés-->
+
+            <tr>
+                <td>{{Pret.id}}</td>
+                <td>{{Pret.numero_de_serie}}</td>
+                <td>{{Pret.quantite}}</td>
+                <td>{{Pret.type}}</td>
+                <td>{{Pret.marque}}</td>
+                <td>{{Pret.accessoires}}</td>
+                <td>{{Pret.descriptif}}</td>
+                <td>{{Pret.debut}}</td>
+                <td>{{Pret.fin}}</td>
+                <td>{{Pret.reprise}}</td>
+                <td>{{Pret.duree}} {{Pret.unite_duree}}</td>
+                <td>{{Pret.ingenieur_responsable}}</td>
+                <td>{{Pret.unite_fonctionnelle}}</td>
+                <td>{{Pret.nom_emprunteur}}</td>
+                <td>{{Pret.fournisseur}}</td>
+                <td>{{Pret.commentaire}}</td>
+                <!--attention, il va falloir changer ça pour que seuls les documents
+                de ce pret en particulier soient pris en compte
+                Presque reussi mais en fait pb car DocumentPret.num_pret et
+                Pret.id ne renvoient rien
+                alors qu'il existe bel et bien donc faut comprendre pq maintenant-->
+                    <td>
+                        {% for DocumentPret in documentpret %} <!--boucle for pour appeler tous les prêts enregistrés-->
+                        <br><br>
+                            {% if DocumentPret.num_pret == Pret %}
+                                <div><a href="/media/{{ DocumentPret.fichier }}"  onclick="window.open(this.href); return false;">{{ DocumentPret.fichier }}</a></div>
+                                <br><br><br>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <br><br>
+                        {% for DocumentPret in documentpret %} <!--boucle for pour appeler tous les prêts enregistrés-->
+                            {% if DocumentPret.num_pret == Pret %}
+                                {{DocumentPret.commentaire}}
+                                <br><br><br><br><br>
+                            {% endif %}
+                        {%endfor%}
+                    </td>
+                    <td>
+                        {% for DocumentPret in documentpret %} <!--boucle for pour appeler tous les prêts enregistrés-->
+                            {% if DocumentPret.num_pret == Pret %}
+                            <form id="Modifi-Button" action="/geprete/documentsgess/" method="POST">
+                                {% csrf_token %}
+                                <button name="modifierdoc" type="submit" value="{{ DocumentPret.id }}">Modifier document</button>
+                            </form>
+
+                            <form id="Sup-Button" action="/geprete/documentsgess/" method="POST">
+                                {% csrf_token %}
+                                <button name="supprimerdoc" type="submit" value="{{ DocumentPret.id }}">Supprimer document</button>
+                            </form>
+                            {% endif %}
+                        {%endfor%}
+                    </td>
+
+                    <td>
+                        <form id="Modif-Button" action="/geprete/formgess/" method="POST">
+                            {% csrf_token %}
+                            <button name="modifier" type="submit" value="{{ Pret.id }}">Modifier informations</button>
+                        </form>
+
+                        <form id="Supp-Button" action="/geprete/formgess/" method="POST">
+                            {% csrf_token %}
+                            <button name="supprimer" type="submit" value="{{ Pret.id }}">Supprimer prêt</button>
+                        </form>
+                    </td>
+                </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endspaceless %}
+
+{% endblock tab_contents %}

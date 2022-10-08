@@ -1,0 +1,20 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% comment %}
+<!--
+  Etat des rôles :
+
+   Page (cachée pour l'instant : pas de lien qui y mène) pour afficher
+   l'état de tous les rôles / fonction pour une liste d'Uf.
+
+-->
+{% endcomment %}
+
+{% block tab_contents %}
+  <h1>{{title}}</h1>
+
+  {{ contents|safe }}
+
+  <p><a href="{% url 'dem:home' %}">Retour à l'accueil</a></p>
+{% endblock tab_contents %}

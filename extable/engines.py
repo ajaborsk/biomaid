@@ -1,0 +1,568 @@
+#
+# This file is part of the BIOM_AID distribution (https://bitbucket.org/kig13/dem/).
+# Copyright (c) 2020-2021 Brice Nord, Romuald Kliglich, Alexandre Jaborska, Philomène Mazand.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+from __future__ import annotations
+
+import copy
+import datetime
+import os
+import types
+import unicodedata
+from abc import ABC
+from glob import glob
+from io import StringIO
+from logging import warning
+from typing import Type, Union
+
+import numpy as np
+import pandas as pd
+from django.apps import apps
+from django.db import models
+from django.db.models import (
+    ForeignKey,
+    TextField,
+    IntegerField,
+    FloatField,
+    DecimalField,
+    Index,
+    Manager,
+    JSONField,
+)
+from django.db.models.fields import DateTimeField
+from django.utils.translation import gettext as _
+from numpy import dtype
+from pandas import read_csv, DataFrame, read_excel, Int64Dtype, StringDtype, Series
+from pandas.core.arrays.floating import Float64Dtype
+from pytz import utc
+
+from common import config
+from smart_view.smart_expression import SmartExpression
+
+
+class ExtableManager(Manager):
+    def __init__(self, fields_list):
+        super().__init__()
+        self.fields_list = fields_list
+
+    def get_by_natural_key(self, *args):
+        return super().get(**dict(zip(self.fields_list, args)))
+
+
+class ExtableEngine(ABC):
+    """A abstract class for engines that handle external table data"""
+
+    TYPES: dict = {
+        'string': (TextField, [], {}),
+        'json': (JSONField, [], {}),
+        'integer': (IntegerField, [], {}),
+        'datetime': (DateTimeField, [], {}),
+        'float': (FloatField, [], {}),
+        'money': (DecimalField, [], {'max_digits': 14, 'decimal_places': 2}),
+        'foreign_key': (ForeignKey, lambda prefix, col_def: [col_def['foreign_table']], {'on_delete': models.PROTECT}),
+    }
+
+    @staticmethod
+    def create_model_class(schema: dict, prefix: str = '', module=None) -> Type[models.Model]:
+        """Create a (Django) model from a descriptive Schema and put it in the extable (Django) application"""
+
+        # Used as a template for model class
+        class Meta:
+            managed = False
+
+        # Future model class attributes (will be in __dict__)
+        attrs = {}
+
+        # Add fields
+        for fname, column_sch in schema['columns'].items():
+
+            field_class = ExtableEngine.TYPES[column_sch['type']][0]
+            args = ExtableEngine.TYPES[column_sch['type']][1]
+            if callable(args):
+                args = args(prefix, column_sch)
+            kwargs = ExtableEngine.TYPES[column_sch['type']][2]
+            if callable(kwargs):
+                kwargs = kwargs(prefix, column_sch)
+            kwargs = dict(
+                {
+                    'verbose_name': column_sch.get('src_column'),
+                    'null': True,
+                    'blank': True,
+                },
+                **kwargs,
+            )
+            attrs[fname] = field_class(
+                *args,
+                **kwargs,
+            )
+
+        # Add miscellaneous stuff
+        attrs.update(
+            {
+                '__module__': module.__name__ if module else None,
+                'Meta': Meta,
+            }
+        )
+
+        def natural_key_def(self):
+            return tuple(getattr(self, f) for f in list(schema.get('key')))
+
+        # Add key columns as index, contraints and natural key
+        if schema.get('key'):
+            attrs['Meta'].indexes = [Index(fields=schema.get('key'))]
+            attrs['Meta'].unique_together = [list(schema.get('key'))]
+            attrs['natural_key'] = natural_key_def
+            attrs['objects'] = ExtableManager(list(schema.get('key')))
+
+        # Do create the model class
+        model_class: Type[models.Model] = type(prefix + schema['name'], (models.Model,), attrs)
+
+        # Add this model class to module
+        if isinstance(module, types.ModuleType):
+            setattr(module, prefix + schema['name'], model_class)
+
+        return model_class
+
+    @staticmethod
+    def fieldname_build(title: str, field_names: list = None) -> str:
+        """
+        Build a valid unique (lowcase) identifier (less than 64 characters long) from a string (for instance a column title/header)
+        It works by removing all special characters and replace them by best lowcase ASCII approximation
+
+        :param title: String used to build the fieldname
+        :param field_names: list of previously defined identifiers (default is a empty list)
+        :return: a valid, unique identifier, less than 64 characters long
+        """
+        field_names = field_names or []
+
+        # Create a simple valid identifier
+        fname = ''
+        for c in (char for char in unicodedata.normalize('NFD', title) if unicodedata.combining(char) == 0):
+            if c.isalnum():
+                fname += c.lower()
+            elif not fname.endswith('_'):
+                fname += '_'
+        fname = fname[:60].strip('_')
+
+        # Ensure uniqueness
+        if fname in field_names:
+            idx = 0
+            while fname + str(idx) in field_names:
+                idx += 1
+            fname = fname + str(idx)
+
+        return fname
+
+    @staticmethod
+    def columns_autodetect(filename: str, cfg: dict | None) -> dict:  # NOQA
+        raise NotImplementedError("Static method columns_autodetect() must be overloaded.")
+
+    @classmethod
+    def schema_build(cls, cfg: dict = None, filename: str = None) -> dict:
+        """
+        Build a schema description from source (autodetected) and configuration.
+
+        A Schema description is a dict with the following structure :
+        - 'columns' :
+            - 'type' : a valid type name (as a string)
+            - 'data' : a valid expression (as a string)
+        """
+        cfg = cfg or {}
+
+        schema = {'name': cfg['name'], 'columns': {}}
+
+        # Add manually defined columns
+        columns_cfg: dict = cfg.get('column', {})
+        for column_name, column_def in columns_cfg.items():
+            # Ensure configuration is valid
+            ...
+
+            # Verify 'data' expression (syntax & used columns names)
+            data = column_def.get('data')
+            if data:
+                if isinstance(data, str):
+                    expression = SmartExpression(data)
+                    if not expression.syntax_is_valid(list(schema['columns'].keys())):
+                        warning(_("Expression '{}' is invalid.").format(data))
+                else:
+                    warning(
+                        _("data value for columns '{}' in table '{}' is not valid: {}").format(column_name, cfg['name'], repr(data))
+                    )
+
+            schema['columns'][column_name] = {'type': column_def.get('type', 'string')}
+            if schema['columns'][column_name]['type'] == 'foreign_key':
+                schema['columns'][column_name]['foreign_table'] = column_def.get('foreign_table', '__unknown__')
+                schema['columns'][column_name]['foreign_column'] = column_def.get('foreign_column', 'pk')
+            src_column = column_def.get('src_column')
+            if src_column:
+                schema['columns'][column_name]['src_column'] = src_column
+            column_data = column_def.get('data')
+            if column_data:
+                schema['columns'][column_name]['data'] = column_data
+
+        # Add key column(s)
+        schema['key'] = cfg.get('key')
+
+        return schema
+
+    def __init__(self, schema: dict):
+        self.schema = copy.deepcopy(schema)
+        for colname, coldef in self.schema['columns'].items():
+            expression_str = coldef.get('data')
+            if expression_str:
+                if isinstance(expression_str, str):
+                    coldef['expr'] = SmartExpression(expression_str)
+
+        # Check and set (primary) key
+        ...
+        self.key = schema['parser_opts'].get('key')
+        self.preprocess = schema['parser_opts'].get('preprocess')
+
+    def read_into_model(self, filename: str, model: Type[models.Model], stdout=None) -> int:
+        raise NotImplementedError("Method read_into_model() must be overloaded.")
+
+    def update(self, msg_callback=None, options={}):
+        raise NotImplementedError("Method update() must be overloaded.")
+
+
+class FileExtableEngine(ExtableEngine, ABC):
+    @staticmethod
+    def filename_match(filename: str) -> bool:  # NOQA: U101
+        raise NotImplementedError("Static method filename_match() must be overloaded.")
+
+    def update(self, msg_callback=None, options={}):
+        from extable.models import Table  # noqa
+
+        # pprint(self.schema)
+        # print('~' * 132)
+        model = self.schema['model']
+        table = Table.objects.get(table_name=model._meta.db_table)
+        # print(table, table.update_ts)
+        filename: str = self.schema['parser_opts'].get('filename')
+        if (
+            'path' in self.schema['parser_opts']
+            and config.get('paths')
+            and config.get('paths').get(self.schema['parser_opts']['path'])
+        ):
+            root = config.get('paths').get(self.schema['parser_opts']['path'], '')
+        else:
+            root = ''
+        if filename.startswith('last:'):
+            filenames = sorted(
+                [(fn, datetime.datetime.fromtimestamp(os.stat(fn).st_mtime, tz=utc)) for fn in glob(root + filename[5:])],
+                key=lambda a: a[1],
+            )[-1:]
+        elif filename.startswith('all:'):
+            filenames = sorted(
+                [(fn, datetime.datetime.fromtimestamp(os.stat(fn).st_mtime, tz=utc)) for fn in glob(root + filename[4:])],
+                key=lambda a: a[1],
+            )
+        else:
+            if os.path.exists(root + filename):
+                filenames = [
+                    (
+                        root + filename,
+                        datetime.datetime.fromtimestamp(os.stat(root + filename).st_mtime, tz=utc),
+                    )
+                ]
+            else:
+                if msg_callback is not None:
+                    msg_callback(_("File '{}' does not exists. Skipping update.").format(root + filename))
+                filenames = []
+        # print(filenames)
+        for filename in filenames:
+            # print('=>', filename)
+            if not table.update_ts or table.update_ts < filename[1] or options['force']:
+                # print('====>', filename)
+                if self.key is None or options['clear']:
+                    # Empty the model/table
+                    if msg_callback is not None:
+                        msg_callback(_("  Emptying table..."))
+                    model.objects.all().delete()
+                else:
+                    if msg_callback is not None:
+                        msg_callback(_("  Keeping table records and updating using key {}...").format(repr(self.key)))
+                if msg_callback is not None:
+                    msg_callback(_("  Reading file: '{}'...").format(filename[0]))
+                n_records = self.read_into_model(filename[0], model, msg_callback)
+                table.update_ts = filename[1]
+                table.save()
+                if msg_callback is not None:
+                    msg_callback(_("  {} records read and stored.").format(n_records))
+            else:
+                if msg_callback is not None:
+                    msg_callback(_("File '{}' is older the extable data. Skipping.").format(filename[0]))
+
+        # raise NotImplementedError("Method update() must be overloaded.")
+
+
+class DataFrameExtableEngine(FileExtableEngine, ABC):
+    @staticmethod
+    def schema_from_dataframe(df: Union[DataFrame, Series], cfg: dict = None) -> dict:
+        cfg = cfg or {}
+        schema: dict = {}
+        for src_column in df.columns:
+            column = ExtableEngine.fieldname_build(str(src_column), list(schema.keys()))
+            if df[src_column].dtype == object:
+                types = set()
+                for val in df[src_column]:
+                    types.add(type(val))
+                if str in types:
+                    guessed_type = 'string'
+                else:
+                    raise RuntimeError(
+                        "Table {:s}, column '{:s}': Dont know which field type to use with {:s}".format(
+                            cfg['name'], src_column, repr(types)
+                        )
+                    )
+            elif df[src_column].dtype in {Int64Dtype(), dtype('int64')}:
+                guessed_type = 'integer'
+            elif df[src_column].dtype in {Float64Dtype(), dtype('float64')}:
+                guessed_type = 'float'
+            elif df[src_column].dtype in {
+                dtype('datetime64[ns]'),
+            }:
+                guessed_type = 'datetime'
+            elif df[src_column].dtype in {
+                StringDtype(),
+            }:
+                guessed_type = 'string'
+            else:
+                raise RuntimeError(
+                    "Table {:s}, column '{:s}': Dont know which field type to use with {:s}".format(
+                        cfg['name'], src_column, repr(df[src_column].dtype)
+                    )
+                )
+            schema[column] = {'type': guessed_type, 'src_column': src_column}
+        return schema
+
+    def dataframe_to_model(self, df: DataFrame, model: Type[models.Model], msg_callback=None, **kwargs) -> int:
+        n_records = 0
+
+        df = DataFrame(df.convert_dtypes())
+        for column in df.columns:
+            if df[column].dtype == dtype('datetime64[ns]'):
+                df[column] = df[column].dt.tz_localize(config.settings.TIME_ZONE)
+        df = df.fillna(np.nan).replace([np.nan], [None]).replace([pd.NA], [None])
+
+        foreign_tables = {}
+        for column, col_def in self.schema['columns'].items():
+            if col_def['type'] == 'foreign_key':
+                if col_def['foreign_table'] not in foreign_tables:
+                    foreign_model = apps.get_model(col_def['foreign_table'])
+                    field_type = int if isinstance(foreign_model._meta.get_field(col_def['foreign_column']), IntegerField) else str
+                    foreign_tables[col_def['foreign_table']] = {'model': foreign_model, 'field_type': field_type}
+
+        for src_index, src_record in df.iterrows():
+            # Columns from file
+            record_dict = {
+                column: src_record[col_def['src_column']] if not src_record[col_def['src_column']] is pd.NA else None
+                for column, col_def in self.schema['columns'].items()
+                if 'src_column' in col_def and col_def['src_column'] in df.columns
+            }
+
+            computed = {
+                column: col_def['expr'].python_eval(expr_vars=record_dict)
+                for column, col_def in self.schema['columns'].items()
+                if 'expr' in col_def
+            }
+            record_dict.update(computed)
+
+            for column, col_def in self.schema['columns'].items():
+                if col_def['type'] == 'foreign_key':
+                    foreign_object_qs = foreign_tables[col_def['foreign_table']]['model'].objects.filter(
+                        **{col_def['foreign_column']: foreign_tables[col_def['foreign_table']]['field_type'](record_dict[column])}
+                    )
+                    if foreign_object_qs.count() == 1:
+                        foreign_object = foreign_object_qs[0]
+                    else:
+                        msg_callback(
+                            "Key not found for column {}: {} (type {}, count:{})".format(
+                                column, repr(record_dict[column]), type(record_dict[column]), foreign_object_qs.count()
+                            )
+                        )
+                        foreign_object = None
+                    record_dict[column] = foreign_object
+
+            if self.key:
+                records = model.objects.filter(**{k: record_dict[k] for k in self.key})
+                # stdout.write("  key: {}".format(repr({k:record_dict[k] for k in self.key})))
+                if records.count() == 1:
+                    # Get record from database
+                    record = records.get()
+                    # stdout.write("  record found: {}".format(record))
+                    for k, v in record_dict.items():
+                        setattr(record, k, v)
+                else:
+                    # Create record from scratch
+                    record = model(**record_dict)
+            else:
+                # Create record from scratch
+                record = model(**record_dict)
+            # Save record to the database
+            record.save()
+            n_records += 1
+            if n_records % 100 == 0 and msg_callback is not None:
+                msg_callback("  records written: {}".format(n_records), ending='\r')
+
+        return n_records
+
+
+class CsvEngine(DataFrameExtableEngine):
+    @staticmethod
+    def filename_match(filename: str) -> bool:
+        return filename.endswith('.csv')
+
+    @staticmethod
+    def columns_autodetect(filename: str, cfg: dict = None) -> dict:
+        cfg = cfg or {}
+        if os.path.exists(filename):
+            if filename.endswith('.csv'):
+
+                # read the file (1000 first rows)
+                separator = cfg.get('separator', ',')
+                df = read_csv(filename, engine='python', sep=separator, decimal=',', nrows=1000)
+
+                # read again the file but try to parse dates for columns of type 'Object'
+                df = read_csv(
+                    filename,
+                    quoting=1,
+                    sep=separator,
+                    engine='python',
+                    nrows=1000,
+                    parse_dates=list(filter(lambda i: df.dtypes[i] == dtype('O'), range(len(df.columns)))),
+                    dayfirst=True,
+                    decimal=',',
+                    on_bad_lines='skip',
+                )
+                df_ct = df.convert_dtypes()
+                return DataFrameExtableEngine.schema_from_dataframe(df_ct)
+
+        # Nothing can be guessed...
+        else:
+            warning(_("File not found: '{}'. No schema guessing.").format(filename))
+        return {}
+
+    def read_into_model(self, filename: str, model: Type[models.Model], msg_callback=None, **kwargs) -> int:
+        separator = self.schema['parser_opts'].get('separator', ',')
+
+        # A dict that associate src_columns (= CSV columns headers) to columns id
+        rev_colnames = {value['src_column']: col_id for col_id, value in self.schema['columns'].items() if 'src_column' in value}
+
+        if self.preprocess is None:
+            file = open(filename, encoding='utf8')
+        elif self.preprocess == 'fix_nb_columns':
+            n_columns = None
+            with open(filename, encoding='utf8') as src:
+                file = StringIO()
+                for line in src.readlines():
+                    line = line[:-1].replace('"', "'")  # remove trailing "\n" & remove '"'
+                    # print(line)
+                    if n_columns is None:
+                        columns = line.split(separator)
+                        n_columns = len(columns)
+                        # print(f"n_columns: {n_columns}")
+                    else:
+                        columns = line.split(separator, maxsplit=n_columns - 1)
+                    # print(f"  columns:{len(columns)} / {n_columns}")
+                    line = '"' + ('"' + separator + '"').join(columns) + '"'
+                    # print(line)
+                    file.write(line + '\n')
+                file.seek(0)
+        else:
+            warning(_("Unknown preprocess mode :'{}' ; Ignoring it.").format(self.preprocess))
+            file = open(filename, encoding='utf8')
+
+        # Get only columns names
+        colnames = list(
+            read_csv(
+                file,
+                sep=separator,
+                quoting=1,
+                quotechar='"',
+                engine='python',
+                nrows=10,
+            ).columns
+        )
+
+        # Read the file
+        file.seek(0)
+        df = read_csv(
+            file,
+            sep=separator,
+            quoting=1,
+            quotechar='"',
+            engine='python',
+            parse_dates=[
+                idx
+                for idx, key in enumerate(colnames)
+                if key in rev_colnames
+                and 'src_column' in self.schema['columns'][rev_colnames[key]]
+                and 'datetime' == self.schema['columns'][rev_colnames[key]]['type']
+            ],
+            dayfirst=True,
+            decimal=',',
+            on_bad_lines='warn',
+        )
+        df.fillna(value=pd.NA, inplace=True)
+        df.replace(pd.NA, None, inplace=True)
+        # print(df)
+        n_records = self.dataframe_to_model(df, model, msg_callback, **kwargs)
+        return n_records
+
+
+class ExcelEngine(DataFrameExtableEngine):
+    @staticmethod
+    def filename_match(filename: str) -> bool:
+        return filename.endswith('.xlsx')
+
+    @staticmethod
+    def columns_autodetect(filename: str, cfg: dict = None) -> dict:
+        cfg = cfg or {}
+        if os.path.exists(filename):
+            if filename.endswith('.xlsx'):
+                # read the file (1000 first rows)
+                header_row = cfg.get('header_row', 1) - 1
+                df = read_excel(filename, header=header_row, nrows=2000)
+                df_ct = df.convert_dtypes()
+                return DataFrameExtableEngine.schema_from_dataframe(df_ct)
+        # Nothing can be guessed...
+        else:
+            warning(_("File not found: '{}'. No schema guessing.").format(filename))
+        return {}
+
+    def read_into_model(self, filename: str, model: Type[models.Model], stdout=None) -> int:
+        header_row = self.schema['parser_opts'].get('header_row', 1) - 1
+        df = read_excel(filename, header=header_row)
+        return self.dataframe_to_model(df, model, stdout)
+
+
+class DatabaseEngine(ExtableEngine):
+    @staticmethod
+    def filename_match(filename: str) -> bool:
+        if filename.endswith('__DATABASE__'):
+            return True
+        return False
+
+    def update(self, msg_callback=None, options={}):
+        if msg_callback is not None:
+            msg_callback(_("Database engine not yet implemented. Ignoring this extable."))
+
+
+repository: dict[str, Type[ExtableEngine]] = {
+    'csv': CsvEngine,
+    'excel': ExcelEngine,
+    'database': DatabaseEngine,
+}

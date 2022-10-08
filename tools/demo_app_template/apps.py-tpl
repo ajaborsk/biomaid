@@ -1,0 +1,67 @@
+from django.apps import AppConfig
+
+# You should use _("User string") instead of "User String"
+# so application translation in other langages will be much easier
+# See 'gettext' documentation
+from django.utils.translation import gettext_lazy as _
+
+class {{ camel_case_app_name }}Config(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = '{{ app_name }}'
+    verbose_name = _("Demo application")
+
+    # This is a BiomAid application with a portal
+    biom_aid = {
+        'portal': {
+            # Only users with one of these roles can access the portal
+            'permissions': (
+                'ADM',
+                'EXP',
+                'CAD'
+            ),
+            # Label of the portal
+            'main-name': _("Demo Portal"),
+            'label': _("Demonstration"),
+            # Home page, default is 'appname:home' where appname is the application name
+            'home': '{{ app_name }}:home',
+            'global-status-message': _("Hi, there, everybody"),
+            'user-status-message': _("Hi, there, everybody"),
+            'main-menu': (
+                {
+                    'label': _("Home"),
+                    'url_name': '{{ app_name }}:home',
+                },
+                # A simple menu entry
+                {
+                    'label': _("Categories"),
+                    'url_name': '{{ app_name }}:category',
+                    # It is possible to restraint this very entry only to some roles
+                    'permissions': (
+                        'ADM',
+                        'EXP',
+                        'DIS',
+                    ),
+                    # If current user isn't allowed to use this entry, (s)he even don't see it
+                    'show-only-if-allowed': True,
+                },
+                {
+                    'label': _("Articles"),
+                    'entries': [
+                        {
+                            'label': _("Articles"),
+                            'url_name': '{{ app_name }}:article',
+                        },
+                    ],
+                },
+            ),
+        },
+    }
+
+    # These roles are for the whole application (even for view accessed from other portals)
+    # Each view has also its own permissions
+    biom_aid_roles = (
+        'ADM',
+        'ACH',
+        'EXP',
+        'DIS',
+    )

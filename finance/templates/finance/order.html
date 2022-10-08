@@ -1,0 +1,114 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load render_table from django_tables2 %}
+{% block more_header %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static '/finance/css/order_view.css' %}" />
+{% endblock %}
+{% block tab_contents %}
+  <div style="width:80%;margin:0 10%;">
+    {% if order_id %}
+      <h1>Commande {{ order_id }} :</h1>
+      {% if order %}
+        <center>
+          <table class="tables2">
+            <tr>
+              <th>Gestionnaire</th>
+              <td>{{ order.gest_ec }}</td>
+              <th>Numéro</th>
+              <td>{{ order.no_cde_ec }}</td>
+            </tr>
+            <tr>
+              <th>Exercice</th>
+              <td>{{ order.exercice_ec }}</td>
+              <th>Date passation</th>
+              <td>{{ order.date_passation_ec }}</td>
+            </tr>
+            <tr>
+              <th>N° Fournisseur</th>
+              <td>{{ order.no_fournisseur_fr }}</td>
+              <th>Fournisseur</th>
+              <td>{{ order.intitule_fournisseur_fr }}</td>
+            </tr>
+            <tr>
+              <th>N° Opération</th>
+              <td>{{ order.no_operation_op }}</td>
+              <th>Opération</th>
+              <td>{{ order.lib_operation_op }}</td>
+            </tr>
+            <tr>
+              <th>Objet dépense</th>
+              <td colspan="3">{{ order.objet_depense_ec }}</td>
+            </tr>
+            <tr>
+              <th>Bloc-note</th>
+              <td colspan="3">{{ order.bloc_note|safe }}</td>
+            </tr>
+          </table>
+          <br>
+          {% render_table rows_table %}
+        </center>
+        {% if database_message %}
+          <br>
+          <div style="background-color:#ffe0a0;
+                      text-align:center;
+                      padding:20px;
+                      border:solid 1px black;">
+          Problème de connexion à Asset+ : <em>« {{ database_message }} »</em>. Les interventions et équipements liés ne seront pas détectés.
+        </div>
+      {% endif %}
+      {% if invoices_table %}
+        <H2>Facture(s) liée(s)</H2>
+        {% render_table invoices_table %}
+      {% else %}
+        <br>
+        <p>
+          <em>Pas de facture liée.</em>
+        </p>
+      {% endif %}
+      {% if equipements_table %}
+        <H2>Equipement(s) lié(s)</H2>
+        {% render_table equipements_table %}
+      {% else %}
+      {% endif %}
+      {% if interventions_table %}
+        <H2>Intervention(s) liée(s)</H2>
+        {% render_table interventions_table %}
+      {% else %}
+      {% endif %}
+      {% if immos_table %}
+        <H2>
+          Immobilisation(s) liée(s)
+        </H2>
+        {% render_table immos_table %}
+      {% else %}
+      {% endif %}
+      {% if dras_table %}
+        <H2>
+          DRA(s) liée(s)
+        </H2>
+        {% render_table dra_table %}
+      {% else %}
+      {% endif %}
+    {% else %}
+      <center>
+        <br>
+        <br>
+        <p>
+          Pas de commande trouvée avec ce numéro
+        </p>
+      </center>
+    {% endif %}
+  {% else %}
+    <h1>
+      Rechercher une commande :
+    </h1>
+    <form>
+      <center>Numéro de commande :
+        <input name="order_id">
+        <input type="submit" value="Rechercher">
+      </center>
+    </form>
+  {% endif %}
+</div>
+{% endblock tab_contents %}

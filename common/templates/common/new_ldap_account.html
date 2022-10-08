@@ -1,0 +1,22 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block tab_contents %}
+<h1>Compte actif sans droits</h1>
+
+<div>
+<div class="content form-help" style="width:80%;margin-left:10%;">
+    <center><p>{{ message|safe }}</p></center>
+</div>
+    {% if old_user %}
+        <br><br>
+    <div style="margin:auto;padding:20px;width:fit-content;border:1px solid black;"><form style="width:fit-content;" method="POST">
+        {% csrf_token %}
+        <p style="width:fit-content;">Le profil de l'utilisateur :  <b>{{old_user.username}}</b>  ({{old_user.first_name}}  {{old_user.last_name}})</p>
+        <p style="width:fit-content;">Sera copié vers l'utilisateur : <b>{{user.username}}</b>  ({{user.first_name}}  {{user.last_name}})</p>
+        <div style="margin-left:auto;margin-right:auto;width:fit-content;"><button value="OK">Valider</button></div>
+    </form></div>
+    {% endif %}
+</div>
+
+{% endblock tab_contents %}

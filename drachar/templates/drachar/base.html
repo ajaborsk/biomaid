@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+{% load static %}
+{% load l10n %}
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="{% static '/favicon.ico' %}" />
+    <title>{% block title_short %}GÉQIP : {{title}}{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static '/common/css/dropdown-menu.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/drachar/base.css' %}" />
+    <link rel="stylesheet" id="css-layout" type="text/css" href="{% static '/drachar/normal-layout.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/drachar/font-awesome-4.7.0/css/font-awesome.min.css' %}" />
+    <script src="{% static '/drachar/css-vars-ponyfill.min.js' %}"></script>
+    <script src="{% static '/drachar/jquery-3.5.1.min.js' %}"></script>
+    <script src="{% static '/common/js/dropdown-menu.js' %}"></script>
+    {% block more_header %}{% endblock more_header %}
+  </head>
+  <body>
+  {{ js_data|json_script:"jsdata" }}
+  <script>
+   const data = JSON.parse(document.getElementById('jsdata').textContent);
+   cssVars({});
+   //console.debug("JS data :", data);
+  </script>
+    <header>
+    {% if user.id %}
+      {% if datefin %}
+        {% if phase == 'en_cours' %}
+          <div class="alerte">
+            <p class="alerte">Recensement des besoins en cours. Saisie possible jusqu'au {{datefin | date:"l j F Y à H:i"}}</p>
+          </div>
+        {% elif phase == 'bientot_fini' %}
+          <div class="alerte">
+            <p class="alerte">Recensement des besoins en cours - Presque terminé - Saisie possible jusqu'au {{datefin | date:"l j F Y à H:i"}}</p>
+          </div>
+        {% elif phase == 'fini' %}
+          <div class="alerte">
+            <p class="alerte">Recensement des besoins terminé (depuis le {{datefin | date:"l j F Y à H:i"}})</p>
+          </div>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+      <div class="topbar-compact">
+        <div class="css-normal"><i class="fa fa-window-restore"></i></div>
+        <div class="srv-tile-small">GÉQIP</div>
+        <div class="main-title-tile-small">Plans d'équipement</div>
+        <div class="links-tile-small">
+          <a href="https://portail.chu-amiens.fr/" onclick="window.open(this.href); return false;">Portail Institutionnel</a>
+          <a href="http://holbein/meibo/start.html" onclick="window.open(this.href); return false;">Annuaire</a>
+          <a href="http://piment.chu-amiens.local:8080/AssetPlusWeb/loginView.do" onclick="window.open(this.href); return false;">Asset+ WEB (GMAO)</a>
+        </div>
+        <div class="help-tile"><a href="/dem/aide">?</a></div>
+      </div>
+      <div class="topbar">
+        <div class="app-tile"></div>
+        <div class="srv-tile">GÉQIP</div>
+        <div class="main-title-tile">Plans d'équipement</div>
+        <div class="links-tile">
+          <a href="https://portail.chu-amiens.fr/" onclick="window.open(this.href); return false;">Portail Institutionnel</a>
+          <a href="http://holbein/meibo/start.html" onclick="window.open(this.href); return false;">Annuaire</a>
+          <a href="http://piment.chu-amiens.local:8080/AssetPlusWeb/loginView.do" onclick="window.open(this.href); return false;">Asset+ WEB (GMAO)</a>
+        </div>
+        <div class="help-tile"><a href="/dem/aide">?</a></div>
+        <div class="username-tile">
+    {% if user.id %}
+            <ul class="dropdown"><li><span>{% if can_admin %}<i class="fa fa-gears fa-fw"></i>{% else %}<i class="fa fa-user fa-fw"></i>{% endif %}&nbsp;&nbsp;{{ user.first_name }}&nbsp;{{ user.last_name }}&nbsp;<i class="fa fa-caret-down"></i></span>
+              <ul class="right-menu">
+              <li><a href="/common/account/"><span><i class="fa fa-user-circle-o fa-fw"></i>&nbsp; Mon compte</span></a></li>
+              <li><a href="/common/profile/"><span><i class="fa fa-vcard-o fa-fw"></i>&nbsp; Mes informations personnelles</span></a></li>
+              <li class="bottom-separator"><a href="/common/preferences/"><span><i class="fa fa-sliders fa-fw"></i>&nbsp; Mes préférences</span></a></li>
+              {% if can_admin %}
+              <li><a href="/common/admin/"><span><i class="fa fa-gear fa-fw"></i>&nbsp; Administration</span></a></li>
+              {% endif %}
+              <li><a href="/logout/"><span><i class="fa fa-sign-out fa-fw"></i>&nbsp; Me déconnecter</span></a></li>
+              </ul></li>
+            </ul>
+    {% else %}
+            <ul class="dropdown"><li><span>Non connecté <i class="fa fa-caret-down"></i></span>
+              <ul>
+              <li><a href="/signup/"><span><i class="fa fa-user-plus fa-fw"></i>&nbsp; S'inscrire</span></a></li>
+              <li><a href="/login/"><span><i class="fa fa-sign-in fa-fw"></i>&nbsp; Connexion</span></a></li>
+            </ul>
+    {% endif %}
+        </div>
+      </div>
+      <div class="topbar2">
+    {% if user.id %}
+       <span class="topbar-item">
+      <b>{{nb_demandes}}</b> demandes en cours sur l'ensemble de mes UF.
+       </span>
+    {% endif %}
+      </div>
+    </header>
+    <div class="menubar">
+
+    {% block main_menu %}
+     {% if user.id %}
+      {% include "drachar/main_menu.html" with active=title %}
+     {% else %}
+      {% include "drachar/main_menu.html" with active='' main_menu='' %}
+     {% endif %}
+    {% endblock main_menu %}
+    </div>
+      {% block contents %}
+       <div class="active-tab-content">
+        {% block tab_contents %}
+        {% endblock tab_contents %}
+       </div>
+      {% endblock contents %}
+    <footer>
+      {% block footer %}
+      <div id="footer-help">
+        <p> GÉQIP <span class="footer-version">V{{dem_version}} ({{dem_version_date}})</span> est un jeune logiciel en cours de création par le Département Biomédical. Ses développeurs font leur possible pour
+        vous apporter un logiciel fiable et complet. N'hésitez pas à nous contacter si vous observez des problèmes</p>
+        <em><p>En cas de question ou pour toute assistance, les concepteurs se tiennent à votre disposition :</p>
+        <ul>
+          <li>Brice Nord - 88568 - <a href="mailto:nord.brice@chu-amiens.fr">nord.brice@chu-amiens.fr</a> </li>
+          <li>Romuald Kliglich - 88561 - <a href="mailto:kliglich.romuald@chu-amiens.fr">kliglich.romuald@chu-amiens.fr</a></li>
+          <li>Alexandre Jaborska</li>
+        </ul>
+        </em>
+      </div>
+      <div id="footer-status">
+      {% block footer-status %}
+          <div>left status</div>
+          <div>center status</div>
+          <div>right status</div>
+      {% endblock footer-status %}
+      </div>
+      {% endblock footer %}
+    </footer>
+  {% block javascript %}
+  <script>
+
+  var dropdown_menus = new DropdownMenus();
+
+/*
+
+var shown_dropdown = null;
+
+      $("ul.dropdown > li").click(function(e){
+
+        console.debug("click dropdown");
+
+        if (!shown_dropdown)
+         {
+
+        var dropdown = $('ul:first',this);
+
+        dropdown.css('visibility', 'visible');
+        shown_dropdown = dropdown;
+        e.stopPropagation();
+         }
+   // Comme on a pas stoppé la propagation, l'event va "bubbler", la callback sur le 'body' va être appelée et le menu sera caché.
+    });
+    $('body').click(function(e){
+        console.debug("click body");
+        // Ne pas fermer le menu si on clique sur un de ses enfants
+        console.debug("shown_dropdown:", shown_dropdown);
+        if (shown_dropdown && (!shown_dropdown[0].contains(e.target)))
+         {
+          shown_dropdown.css('visibility', 'hidden');
+          shown_dropdown = null;
+         }
+        }); */
+/*    $("ul.dropdown li").hover(function(){
+
+        $(this).addClass("hover");
+        $('ul:first',this).css('visibility', 'visible');
+
+    }, function(){
+
+        $(this).removeClass("hover");
+        $('ul:first',this).css('visibility', 'hidden');
+
+    });
+
+    $("ul.dropdown li ul li:has(ul)").find("a:first").append(" &raquo; "); */
+  </script>
+  {% endblock javascript %}
+  </body>
+</html>

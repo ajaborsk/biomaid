@@ -1,0 +1,81 @@
+{%extends "common/base.html" %}
+{% load static %}
+{% block more_header %}
+    <link rel="stylesheet" type="text/css" href="{% static '/geprete/StyleDocument.css' %}" />
+{% endblock more_header %}
+{% block tab_contents %}
+
+
+    <div>
+        <img src="{% static '/geprete/muffinlogo.png' %}" alt="My image">
+
+        <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete/accueilgep'"> Retour à l'accueil </button>
+        <button onclick = "window.location.href = 'http://127.0.0.1:8000/geprete/listepretgess/'"> Retour à la liste des prêts </button>
+    </div>
+
+{% spaceless %}
+<div>
+    {%if supprimeriddoc is not None%}
+
+        <h2>Suppresion de documents</h2>
+
+        <p> {{form_doc}} </p>
+
+        <form enctype="multipart/form-data" id="Supp-Button" action="/geprete/documentsgess/" method="POST">
+            {% csrf_token %}
+            <button name="retirerdoc" type="submit" value="{{ form_doc.id }}">Supprimer le document</button>
+        </form>
+
+    {%elif modifieriddoc is not None%}
+
+        <h2>Modification de documents</h2>
+
+        <form enctype="multipart/form-data" id="Reg-Button" action="/geprete/documentsgess/" method="POST">
+            {% csrf_token %}
+            <p hidden>code : {{ form_instance.id }}</p>
+            <p>Prêt : {{ form_doc.num_pret }}</p>
+            <p>Nom du fichier : {{ form_doc.nom }}</p>
+            <p>Fichier : {{ form_doc.fichier }}</p>
+            <p>Commentaire : {{ form_doc.commentaire }}</p>
+
+            <button name="sauvegarderdoc" type="submit" value="{{ form_doc_instance.id }}">Sauvegarder la modification </button>
+
+        </form>
+
+        {%else%}
+
+            <h2>Ajout de documents</h2>
+
+            <form enctype="multipart/form-data" id="Enregistrer-Button" action="/geprete/documentsgess/" method="POST">
+                {% csrf_token %}
+                <p hidden>code : {{ form.id }}</p>
+                <p>Prêt : {{ form_doc.num_pret }}</p>
+                <p>Nom du fichier : {{ form_doc.nom }}</p>
+                <p>Fichier : {{form_doc.fichier}}</p>
+                <p>Commentaire : {{ form_doc.commentaire }}</p>
+
+                <button name="status" type="submit" value="enregistrer">Enregistrer le document</button>
+            </form>
+
+</div>
+
+        {%endif%}
+{% endspaceless %}
+{% endblock tab_contents %}
+
+<!--          <form enctype="multipart/form-data"
+          id="Enregistrer-Button"
+          action="/geprete/documentsgess/"
+          method="POST">
+
+
+    {% csrf_token %}
+            <p hidden>code : {{ form.id }}</p>
+            <p>Prêt : {{ form_doc.num_pret }}</p>
+            <p>Nom du fichier : {{ form_doc.nom }}</p>
+            <p>Fichier : {{form_doc.fichier}}</p>
+            <p>Commentaire : {{ form_doc.commentaire }}</p>
+        <button name="status" type="submit" value="enregistrer">Enregistrer le document </button>
+    </form>
+
+-->

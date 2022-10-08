@@ -1,0 +1,44 @@
+{% load static %}
+{% load l10n %}
+{% if form.instance.pk %}
+{% if form.instance.user == request.user %}
+<div class="document-row new-document-row{{form_rindex}}">
+<input type="hidden" id="{{ form.id.id_for_label }}" name="{{ form.id.html_name }}" value="{{ form.instance.pk|unlocalize }}">
+<input type="hidden" id="{{ form.user.id_for_label }}" name="{{ form.user.html_name }}" value="{{ form.instance.user.pk|unlocalize }}">
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_type.id_for_label}}" class="tooltiptext">{{form.document_type.help_text}}</div></div>Type de document :</span><span>{{form.document_type}}</span>
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_file.id_for_label}}" class="tooltiptext">{{form.document_file.help_text}}</div></div>Fichier :</span><span class="ro-field"><a href="{% get_media_prefix %}{{ form.instance.document.physical_path }}" onclick="window.open(this.href); return false;">{{form.instance.document.logical_path}}</a></span>
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_comment.id_for_label}}" class="tooltiptext">{{form.document_comment.help_text}}</div></div>Description :</span><span>{{form.document_comment}}</span>
+<span>&nbsp;</span><span class="label document-delete-button to-delete-index-{{form_rindex}}" data-document-index="{{form_rindex}}"><i class="fa-regular fa-trash-can lg"></i></span><span class="label document-undelete-button to-delete-index-{{form_rindex}} hidden" data-document-index="{{form_rindex}}"><i class="fa-solid fa-rotate-left fa-lg"></i></span>
+<input type="hidden" class="to-delete-index-{{form_rindex}}" id="{{ form.to_delete.id_for_label }}" name="{{form.to_delete.html_name}}" value="">
+<div class="document-row-overlay crossed hidden to-delete-index-{{form_rindex}}"></div>
+</div>
+{% else %}
+<div class="document-row">
+<input type="hidden" id="{{ form.id.id_for_label }}" name="{{ form.id.html_name }}" value="{{ form.instance.pk|unlocalize }}">
+<input type="hidden" id="{{ form.user.id_for_label }}" name="{{ form.user.html_name }}" value="{{ form.instance.user.pk|unlocalize }}">
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_type.id_for_label}}" class="tooltiptext">{{form.document_type.help_text}}</div></div>Type de document :</span><span class="ro-field">{{form.instance.document.get_doc_type_display}}</span>
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_file.id_for_label}}" class="tooltiptext">{{form.document_file.help_text}}</div></div>Fichier :</span><span class="ro-field"><a href="{% get_media_prefix %}{{ form.instance.document.physical_path }}" onclick="window.open(this.href); return false;">{{form.instance.document.logical_path}}</a></span>
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_comment.id_for_label}}" class="tooltiptext">{{form.document_comment.help_text}}</div></div>Description :</span><span class="ro-field">{{form.instance.document.description}}</span>
+<span>&nbsp;</span><span class="label">&nbsp;</span>
+</div>
+{% endif %}
+{% else %}
+{% if form_rindex == 0 %}
+<span class="" style="font-weight:bold; grid-column:1/last-column; padding-top:3px; border-top:solid 1px black;">Ajouter un document :</span>
+<div class="document-row new-document-row{{form_rindex|add:-1}}">
+<input type="hidden" id="{{ form.user.id_for_label }}" name="{{ form.user.html_name }}" value="{{ user.pk|unlocalize }}">
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_type.id_for_label}}" class="tooltiptext">{{form.document_type.help_text}}</div></div>Type de document :</span><span>{{form.document_type}}</span>
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_file.id_for_label}}" class="tooltiptext">{{form.document_file.help_text}}</div></div>Fichier :</span><span class="document-show-row{{form_rindex|add:-2}}">{{form.document_file}}</span>
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_comment.id_for_label}}" class="tooltiptext">{{form.document_comment.help_text}}</div></div>Description :</span><span>{{form.document_comment}}</span>
+<span>&nbsp;</span><span class="label">&nbsp;</span>
+</div>
+{% else %}
+<div class="document-row hidden new-document-row{{form_rindex|add:-1}}">
+<input type="hidden" id="{{ form.user.id_for_label }}" name="{{ form.user.html_name }}" value="{{ user.pk|unlocalize }}">
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_type.id_for_label}}" class="tooltiptext">{{form.document_type.help_text}}</div></div>Type de document :</span><span>{{form.document_type}}</span>
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_file.id_for_label}}" class="tooltiptext">{{form.document_file.help_text}}</div></div>Fichier :</span><span class="document-show-row{{form_rindex|add:-2}}">{{form.document_file}}</span>
+<span class="label"><div class="form-icon help tooltip"><div id="help-{{form.document_comment.id_for_label}}" class="tooltiptext">{{form.document_comment.help_text}}</div></div>Description :</span><span>{{form.document_comment}}</span>
+<span>&nbsp;</span><span class="label">&nbsp;</span>
+</div>
+{% endif %}
+{% endif %}

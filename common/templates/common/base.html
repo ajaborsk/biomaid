@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{% load static %}
+{% load l10n %}
+{% load json_tags %}
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="{% static '/local/favicon.ico' %}" />
+    <title>{% block title_short %}{{ main_name }} : {{title}}{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static '/common/css/dialog.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/common/css/dropdown-menu.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/common/css/tourguide.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/common/css/base.css' %}" />
+    {% block theme-header %}<link rel="stylesheet" id="css-layout" type="text/css" href="{% static '/common/css/normal-layout.css' %}" />{% endblock theme-header %}
+    {% if theme_css %}<link rel="stylesheet" type="text/css" href="{% static theme_css %}" />{% endif %}
+    <link rel="stylesheet" type="text/css" href="{% static '/common/fontawesome/css/all.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static '/local/css/default.css' %}" />
+    <script src="{% static '/common/js/jquery-3.5.1.min.js' %}"></script>
+    <script src="{% static '/common/js/dropdown-menu.js' %}"></script>
+    <script src="{% static '/common/js/tourguide.min.js' %}"></script>
+    {% block more_header %}{% endblock more_header %}
+  </head>
+  <body>
+  {% include "common/dialog.html" %}
+    <header>
+      <div class="topbar">
+        <div class="app-tile">{% include 'common/dropdown_menu.html' with menu=applications_menu url_prefix=url_prefix only %}</div>
+        <div class="srv-tile">{{ main_name }} <small>{{dem_version}}</small></div>
+        <div class="main-title-tile">{{ application_title }}</div>
+        <div class="links-tile">{% include 'common/dropdown_menu.html' with menu=external_menu url_prefix=url_prefix only %}</div>
+        <div class="help-tile">{% include 'common/dropdown_menu.html' with menu=help_menu url_prefix=url_prefix only %}</div>
+        <div class="username-tile">{% include 'common/dropdown_menu.html' with menu=user_menu url_prefix=url_prefix only %}</div>
+      </div>
+
+      <div class="topbar2">
+        <div class="left">{{ global_status_message | safe }}</div>
+        <div class="center">{{ main_status_message | safe }}</div>
+        <div class="right">{{ user_status_message | safe }}</div>
+      </div>
+    </header>
+    <main>
+      <div class="menubar">{% include 'common/dropdown_menu.html' with menu=main_menu url_prefix=url_prefix add_class='main_menu' only %}</div>
+      <div class="active-tab-content">
+      {% block contents %}
+        {% block tab_contents %}
+         <h1>{{ title }}</h1>
+        {% endblock tab_contents %}
+      {% endblock contents %}
+      </div>
+    </main>
+    <footer>
+      {% block footer %}
+      <div id="footer-help">{{ footer_text | safe }}</div>
+      <div id="footer-status">
+      {% block footer-status %}
+          <div>left status</div>
+          <div>center status</div>
+          <div>right status</div>
+      {% endblock footer-status %}
+      </div>
+      {% endblock footer %}
+    </footer>
+  {% block javascript %}
+  <script>
+
+  var dropdown_menus = new DropdownMenus();
+
+  function close_all_menus()
+   {
+    dropdown_menus.hide_all();
+   }
+
+{% if main_tour_steps %}
+  var main_tour = new Tourguide({
+      steps:{{ main_tour_steps|to_json }},
+  });
+
+  $('.main-tour-launch').click(function(e) {
+      main_tour.start();
+  });
+{% endif %}
+  </script>
+  {% endblock javascript %}
+  </body>
+</html>

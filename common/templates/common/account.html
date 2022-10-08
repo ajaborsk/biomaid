@@ -1,0 +1,62 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load url_kwargs %}
+{% comment %}
+<!--
+  Mon compte :
+    Toutes les informations de mon compte qui influencent le
+    fonctionnement de l'application et notamment tout ce qui est lié
+    aux droits/privilèges. Certaines informations ne sont disponibles
+    qu'en lecture seule (sous le contrôle d'un administrateur
+    ou d'un supérieur)
+
+    C'est ici qu'on retrouve le lien pour changer de mot de passe
+-->
+{% endcomment %}
+
+{% block tab_contents %}
+<div class="contents">
+  <h1>{{title}}</h1>
+
+
+  <h2 class="form-section-title">Identification</h2>
+  <br/>
+  {% if first_person %}
+  <p>Mon identifiant : <b>{{ account_user.username }}</b></p>
+  <p>Mon adresse mail : <b>{{ account_user.email }}</b></p>
+  <br/>
+  <center><p><form action="{% url_kwargs 'password_reset' %}"><button typ="submit">Réinitialiser mon mot de passe</button><br/>(nécessite une adresse mail valide)</p></form></center>
+  {% else %}
+  <p>Identifiant : <b>{{ account_user.username }}</b></p>
+  <p>Adresse mail : <b>{{ account_user.email }}</b></p>
+  <br/>
+  {% endif %}
+  <br/>
+  {% if first_person %}
+  <h2 class="form-section-title">Mes responsabilités</h2>
+  {% else %}
+  <h2 class="form-section-title">Responsabilités</h2>
+  {% endif %}
+  <p>Chaque responsabilité peut donner des droits différents dans les différentes sections du portail et sur les différents objets (demandes...)</p>
+  <br/>
+  {% if roles %}
+  <ul>
+  {% for role, liste_uf in roles.items %}
+    <li><b>{{role}}</b> pour les structures :
+     <ul>
+    {% for uf in liste_uf %}
+     <li>{{ uf }}</li>
+    {% endfor %}
+    </ul>
+    </li>
+    <br/>
+  {% endfor %}
+  </ul>
+  {% else %}
+  <br/><p><b>Vous n'avez aucun droit dans GÉQIP.</b><p><br/>
+  {% endif %}
+  <div class="form-subsection-end"></div>
+  <br/>
+  <p><a href="{% url_kwargs 'dem:home' %}">Retour à l'accueil</a></p>
+  </div>
+{% endblock tab_contents %}

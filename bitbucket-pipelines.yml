@@ -1,0 +1,21 @@
+#  Template python-build
+
+#  This template allows you to validate your python code.
+#  The workflow allows running tests and code linting on the default branch.
+
+image: python:3.10
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Lint code
+          script:
+            # Enforce style consistency across Python projects https://flake8.pycqa.org/en/latest/manpage.html
+            - pip install flake8
+            - flake8 . --select F --extend-exclude=dist,build --extend-exclude=*/migrations/ --show-source --statistics
+      - step:
+          name: Dependencies check
+          script:
+            - pip install poetry
+            - poetry install --no-root

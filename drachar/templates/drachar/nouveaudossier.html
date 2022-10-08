@@ -1,0 +1,78 @@
+{% extends "dem/base_avec_form.html" %}
+{% load static %}
+
+{% comment "docstring" %}
+<!--
+Template utilisé (uniquement) pour la saisie d'une nouvelle demande
+
+Variables python utilisées :
+
+- message : Message à diffuser à l'utilisateur, qui sera affiché
+            dans une boite de dialogue à l'ouverture de la page
+            et dans un bandeau en haut du formulaire
+- form_dmd : Formulaire de type NouvelleDemandeForm
+- ...
+-->
+{% endcomment %}
+
+{% block tab_contents %}
+    {% block extrahead %}
+        {{ form_dossier.media }}
+    {% endblock extrahead %}
+<h1>Nouveau dossier</h1>
+
+{% if message %}
+{% endif %}
+
+<form id="form"  enctype="multipart/form-data" action="/drachar/nouveau_dossier/" method="POST">
+    {% csrf_token %}
+    <p><label for="id_nom_dossier">Nom dossier :</label>
+        <textarea name="nom_dossier" cols="40" rows="10" required id="id_nom_dossier">
+        </textarea>
+    </p>
+    <p><label for="id_proprietaire">Proprietaire :</label> <input type="text" name="proprietaire" maxlength="255" id="id_proprietaire"></p>
+    <p><label for="id_document">Document :</label>
+        <select name="document" id="id_document">
+            {% for doc in form_dossier.document %}
+                <option value="{{doc.id}}">{{doc}}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <p><label for="id_participants">Select tags :</label>
+        <select name="participants" id="id_participants" multiple class="selectfilter" data-field-name="participants" data-is-stacked="0">
+            {% for part in form_dossier.participants %}
+                <option value="{{part.id}}">{{part}}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><b><br><br><br><br><br><br><br><br><br><br><br><br>
+    <p><label for="id_proprietaire">Proprietaire :</label>
+       <input type="text" name="proprietaire" maxlength="255" id="id_proprietaire">
+    </p>
+    <p><label for="id_priorite_status">Status de la Priorité :</label> <select name="priorite_status" id="id_priorite_status">
+      <option value="1">Haute</option>
+      <option value="2" selected>Normale</option>
+      <option value="3">Basse</option>
+    </select></p>
+    <p><label for="id_date_deadline">Date Butoire :</label> <input type="date" name="date_deadline" maxlength="255" id="id_date_deadline"></p>
+    <p><label for="id_priorite_classement">Classement Priorité :</label> <input type="number" name="priorite_classement" min="0" id="id_priorite_classement"> <span class="helptext">classement de la priorité</span></p>
+    lier une DRA ou une ligne du prévisionnelle :
+    <a href="">choix DRA</a> <a href="">choix prévisionnel
+    <br>
+    <!--<div style="text-align:center;">-->
+        <input type="submit" name="submit" value="ENREGISTRER et faire une nouvelle demande">
+        <input type="button" OnClick="window.location.href = '/drachar/nouveaudossier/';" value="REINITIALISER le formulaire">
+    <!--</div>-->
+</form>
+
+{% endblock tab_contents %}
+
+{% block javascript %}
+<script>
+$(document).ready(function() {
+        $('#additemsbutton').on('click', function(event) {
+         $('#additems').val("True");
+       });
+});
+</script>
+{% endblock javascript %}

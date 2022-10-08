@@ -1,0 +1,17 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load url_kwargs %}
+{% block tab_contents %}
+<div class="doc-page">
+    <h1>{{title}}</h1>
+
+    <h2>Prévisionnel :</h2>
+    <ul>
+        <li><a href="{% url_kwargs 'drachar:gestion_previsionnel' programme_tous %}">Importation des demandes validée vers le previsionnel</a></li>
+    <!--    <li><a href="{% url_kwargs 'drachar:previsionnel' %}">Suivi du previsionnel</a></li>-->
+    </ul>
+
+
+    <br>
+</div>
+{% endblock tab_contents %}

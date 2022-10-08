@@ -1,0 +1,46 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% block tab_contents %}
+<div class="doc-page">
+  <h1>{{title}}</h1>
+
+  <h2>Prévisionnel :</h2>
+    <p>Année sélectionnée : {{ filtre_annee }}</p>
+    <p><b>Demandes validées sans prévisionnel associé :</b></p>
+  <table><tr>
+      <th>Numéro</th>
+      <th>UF</th>
+      <th>Libellé</th>
+      <th>Programme</th>
+      <th>Expert</th>
+      <th>PU TTC</th>
+      <th>Commentaire définitif</th>
+      <th>Quantité validée</th>
+      <th>Enveloppe</th>
+    </tr>{% for demande in demandesval %}<tr>
+      <td>{{ demande.code }}</td>
+      <td>{{ demande.uf }}</td>
+      <td>{{ demande.libelle }}</td>
+      <td>{{ demande.programme }}</td>
+      <td>{{ demande.expert_metier }}</td>
+      <td>{{ demande.pu }}</td>
+      <td>{{ demande.commentaire_definitif_commission }}</td>
+      <td>{{ demande.qte_validee }}</td>
+      <td>{{ demande.enveloppe }}</td>
+    </tr>{% endfor %}</table>
+
+    <!--<br>
+    <p><b>Prévisionnel actuel :</b></p>
+    <p>{{ previsionnel }}</p>-->
+    <h2 style="color:#FF0000">{{ message_error }}</h2>
+      <form id="form" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="submit" name="importprevisionnel" value="Import du previsionnel depuis Géqip/ MaJ">
+      </form>
+        <!--
+        /*tableau avec % de réalisation des prévisionnelles non encore 100% réalisés, filtré sur la discipline.*/
+        /*possibilité de selectionner un de ces programmes pour en faire le desciptif ligne à ligne avec % réalisé/budget*/
+        -->
+
+
+{% endblock tab_contents %}

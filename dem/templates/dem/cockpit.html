@@ -1,0 +1,127 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load json_tags %}
+{% load url_kwargs %}
+{% block more_header %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static '/dem/css/cockpit.css' %}" />
+{% endblock more_header %}
+{% block tab_contents %}<div>
+  <h1>GÉQIP / DEM : Cockpit gestion demandes de matériel</h1>
+  <b><p><center>Ce cockpit et ce portail permettent de traiter le processus des demandes de matériel, depuis leur saisie ou leur expression, jusqu'à leur validation formelle par un "arbitre". Ils ne concernent PAS le process de mise en oeuvre effective (acquisition, etc.) qui est traité par le portail DRACHAR.</center></p></b>
+  <div class="main-dem-cockpit">
+    <span class="dem-cockpit-title"></span>
+    <span class="dem-cockpit-title">Demandes non approuvées</span>
+    <span class="dem-cockpit-title">Demandes à répartir</span>
+    <span class="dem-cockpit-title">Demandes à expertiser</span>
+    <span class="dem-cockpit-title">Demandes à arbitrer</span>
+    <span class="dem-cockpit-title">Demandes en cours</span>
+
+    <span class="dem-cockpit-title">Campagne de recensement</span>
+    <span class="dem-cockpit-help">Demandes <b>non encore approuvées</b> ou refusées par le <b>chef de pôle</b> (ou le directeur). Elle peuvent commencer à être instruites, mais, sauf exception, pas arbitrées.</span>
+    <span class="dem-cockpit-help">Demandes en cours dont au moins un des éléments suivants n'est pas déterminé : <b>Programme</b>, <b>domaine technique</b> ou <b>expert-métier</b>.</span>
+    <span class="dem-cockpit-help">Demandes affectées à un expert mais qui n'a pas encore de <b>prix</b> ou <b>d'avis de l'expert</b>.</span>
+    <span class="dem-cockpit-help">Demandes ayant un <b>avis du chef de pôle</b> (ou du directeur), un <b>programme</b>, un <b>montant</b> et un <b>avis de l'expert métier</b> et donc techniquement prêtes à être arbitrées.</span>
+    <span class="dem-cockpit-help">Demandes en cours de traitement (quel que soit l'état).</span>
+
+    {% for campagne_row in campagne_rows %}
+        {% if campagne_row.toutes.count %}
+          <span class="dem-cockpit-row-title"><span>{{ campagne_row.campagne.nom }}</span></span>
+          <span class="dem-cockpit-tile">
+            <span class="dem-cockpit-subtile">
+              <span class="dem-cockpit-number">{{ campagne_row.non_soumises.count }}</span>
+              <span class="dem-cockpit-precision">En tout</span>
+            </span>
+            <span class="dem-cockpit-subtile{% if campagne_row.non_soumises_moi.count %} highlight{% endif %}">
+              <span class="dem-cockpit-number">{{ campagne_row.non_soumises_moi.count }}</span>
+              <span class="dem-cockpit-precision">Pour moi</span>
+            </span>
+          </span>
+          <span class="dem-cockpit-tile">
+            <span class="dem-cockpit-subtile">
+              <span class="dem-cockpit-number">{{ campagne_row.repartir.count }}</span>
+              <span class="dem-cockpit-precision">En tout</span>
+            </span>
+            <span class="dem-cockpit-subtile{% if campagne_row.repartir_moi.count %} highlight{% endif %}">
+              <span class="dem-cockpit-number">{{ campagne_row.repartir_moi.count }}</span>
+              <span class="dem-cockpit-precision">Pour moi</span>
+            </span>
+          </span>
+          <span class="dem-cockpit-tile">
+            <span class="dem-cockpit-subtile">
+              <span class="dem-cockpit-number">{{ campagne_row.expertiser.count }}</span>
+              <span class="dem-cockpit-precision">En tout</span>
+            </span>
+            <span class="dem-cockpit-subtile{% if campagne_row.expertiser_moi.count %} highlight{% endif %}">
+              <span class="dem-cockpit-number">{{ campagne_row.expertiser_moi.count }}</span>
+              <span class="dem-cockpit-precision">{% if campagne_row.expertiser_moi.count %}<a href="{% url_kwargs 'dem:expertise' %}?filters={{ campagne_row.expertiser_filters }}">Pour moi</a>{% else %}Pour moi{% endif %}</span>
+            </span>
+          </span>
+          <span class="dem-cockpit-tile">
+            <span class="dem-cockpit-subtile">
+              <span class="dem-cockpit-number">{{ campagne_row.arbitrer.count }}</span>
+              <span class="dem-cockpit-precision">En tout</span>
+            </span>
+            <span class="dem-cockpit-subtile{% if campagne_row.arbitrer_moi.count %} highlight{% endif %}">
+              <span class="dem-cockpit-number">{{ campagne_row.arbitrer_moi.count }}</span>
+              <span class="dem-cockpit-precision">Pour moi</span>
+            </span>
+          </span>
+          <span class="dem-cockpit-tile">
+            <span class="dem-cockpit-subtile">
+              <span class="dem-cockpit-number">{{ campagne_row.toutes.count }}</span>
+              <span class="dem-cockpit-precision">En tout</span>
+            </span>
+          </span>
+        {% endif %}
+    {% endfor %}
+
+      <span class="dem-cockpit-row-title"><span>Toutes les campagnes</span></span>
+      <span class="dem-cockpit-tile">
+        <span class="dem-cockpit-subtile">
+          <span class="dem-cockpit-number">{{ non_soumises_total }}</span>
+          <span class="dem-cockpit-precision">En tout</span>
+        </span>
+        <span class="dem-cockpit-subtile{% if non_soumises_total_moi %} highlight{% endif %}">
+          <span class="dem-cockpit-number">{{ non_soumises_total_moi }}</span>
+          <span class="dem-cockpit-precision">Pour moi</span>
+        </span>
+      </span>
+      <span class="dem-cockpit-tile">
+        <span class="dem-cockpit-subtile">
+          <span class="dem-cockpit-number">{{ repartir_total }}</span>
+          <span class="dem-cockpit-precision">En tout</span>
+        </span>
+        <span class="dem-cockpit-subtile{% if repartir_total_moi %} highlight{% endif %}">
+          <span class="dem-cockpit-number">{{ repartir_total_moi }}</span>
+          <span class="dem-cockpit-precision">Pour moi</span>
+        </span>
+      </span>
+      <span class="dem-cockpit-tile">
+        <span class="dem-cockpit-subtile">
+          <span class="dem-cockpit-number">{{ expertiser_total }}</span>
+          <span class="dem-cockpit-precision">En tout</span>
+        </span>
+        <span class="dem-cockpit-subtile{% if expertiser_total_moi %} highlight{% endif %}">
+          <span class="dem-cockpit-number">{{ expertiser_total_moi }}</span>
+          <span class="dem-cockpit-precision">{% if expertiser_total_moi %}<a href="{% url_kwargs 'dem:expertise' %}?filters={{ expertiser_total_filters }}">Pour moi</a>{% else %}Pour moi{% endif %}</span>
+        </span>
+      </span>
+      <span class="dem-cockpit-tile">
+        <span class="dem-cockpit-subtile">
+          <span class="dem-cockpit-number">{{ arbitrer_total }}</span>
+          <span class="dem-cockpit-precision">En tout</span>
+        </span>
+        <span class="dem-cockpit-subtile{% if arbitrer_total_moi %} highlight{% endif %}">
+          <span class="dem-cockpit-number">{{ arbitrer_total_moi }}</span>
+          <span class="dem-cockpit-precision">Pour moi</span>
+        </span>
+      </span>
+      <span class="dem-cockpit-tile">
+        <span class="dem-cockpit-subtile">
+          <span class="dem-cockpit-number">{{ toutes_total }}</span>
+          <span class="dem-cockpit-precision">En tout</span>
+        </span>
+      </span>
+  </div></div>
+{% endblock tab_contents %}

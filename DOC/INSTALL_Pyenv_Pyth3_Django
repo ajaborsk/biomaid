@@ -1,0 +1,53 @@
+installation sous LINUX d' une version de python et de son environnement virtuel en utilisant PYENV
+
+pré-requis pour ubunutu :
+	sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev
+	libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev
+	xz-utils tk-dev libffi-dev liblzma-dev python-openssl git libedit-dev
+
+
+installer PYENV :
+
+	curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+
+ajouter dans ~/.bashrc:  
+
+	export PATH=${PATH}:/home/kligliro/.pyenv/bin
+	if [ -z ${PROFILE_LOADED}];     # pour lancer l' environnement virtuel
+	then
+    	    export PROFILE_LOADED=true
+    	    eval "$(pyenv virtualenv-init -)"
+    	    eval "$(pyenv init -)"
+	fi
+
+appliquer la modification: 
+ 
+	source ~/.bashrc
+
+	pyenv install --list       # pour voir la liste des interpréteurs Python disponibles
+	pyenv install 3.7.6        # par exemple et que l'on va utiliser
+	pyenv versions             # pour voir les versions de python installées
+	pyenv uninstall n°version  # pour enlever la version précisée
+
+se rendre dans le répertoire du projet:
+
+	cd ~/repos
+	pyenv virtualenv 3.7.6 myenv1   # création de l'environnement virtuel <myenv1> avec Python 3.7.6
+
+on se rend dans le repertoire choisi, par exemple dra:
+
+	mkdir dra 
+	cd dra
+	pyenv local myenv1              # on lie l' environnement au répertoire dans lequel on est
+
+dès que l' on rentrera dans ce répertoire, myenv1 se lancera automatiquement
+dès que l' on sortira dans ce répertoire, myenv1 se fermera
+
+	pip install django                   # Django-3.0.3  à ce jour!
+
+	python -m django --version           # pour verifier si Django  OK
+
+	django-admin startproject dem    # nom du projet
+
+
+

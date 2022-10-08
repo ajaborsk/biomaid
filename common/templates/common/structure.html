@@ -1,0 +1,120 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block more_header %}
+<script src="{% static '/dem/jquery-3.5.1.min.js' %}"></script>
+<script src="{% static '/dem/jquery.flexdatalist.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static '/dem/jquery.flexdatalist.min.css' %}" />
+{% endblock more_header %}
+
+{% comment %}
+<!--
+Affichage d'une structure (pole, etablissement, service, centre de responsabilité, Uf...) -->
+{% endcomment %}
+
+{% block tab_contents %}
+<div class="contents">
+  <h1>{{title}}</h1>
+
+{{ contents|safe }}
+
+<h2>Clôture : {{instance.cloture}}</h2>
+
+{% if responsabilites is not None %}
+  <form action="" method="POST">
+   {% csrf_token %}
+
+   <h2>Responsabilités :</h2>
+   <table>
+    {% for responsabilite in responsabilites %}
+     <tr>
+      <td><a href="/common/account/{{ responsabilite.extension_user.user.username }}/">{{ responsabilite.extension_user }}</a></td><td>{{ responsabilite.role_name }}</td><td><input type="submit" name="{{ responsabilite.role_code }}__{{ responsabilite.extension_user.user.username }}" value="Supprimer"></td>
+     </tr>
+    {% endfor %}
+   <tr>
+    <td>
+     <datalist id="users">
+      {% for user in users %}
+       <option value="{{user.user__username}}">{{user.user__first_name}} {{user.user__last_name}} ({{user.user__username}})</option>
+      {% endfor %}
+     </datalist>
+     <input class="flexdatalist" list="users" name="username" size="25">
+    </td>
+    <td>
+     <select name="role_code">
+      {% for code, name in role_codes.items %}
+       <option value="{{ code }}">{{ name }}</option>
+      {% endfor %}
+     </select>
+    </td>
+    <td>
+     <input type="submit" name="add" value="Ajouter">
+    </td>
+   </tr>
+  </table>
+ </form>
+{% endif %}
+
+  {% if parents %}
+  <h2>Fait partie des structures :</h2>
+  <ul>
+      {% for parent in parents %}
+        <li><a href="/common/structure/{{parent.level}}/{{parent.code}}/">{{parent.class_name|capfirst}} : {{parent.name}} {% if parent.cloture %}Fermé(e) depuis le {{ parent.cloture }}{% endif %}</a></li>
+      {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if children %}
+  <h2>Comporte les structures :</h2>
+  <ul>
+      {% for child in children %}
+        <li><a href="/common/structure/{{child.level}}/{{child.code}}/">{{child.class_name|capfirst}} : {{child.name}} {% if child.cloture %}Fermé(e) depuis le {{ child.cloture }}{% endif %}</a></li>
+      {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if ufs %}
+    <h2>Détail des UF :</h2>
+    <table>
+        <tr><th>UF</th><th>Clôture</th>{% for role_display in roles_display %}<th>{{ role_display }}</th>{% endfor %}</tr>
+    {% for uf in ufs %}
+      <tr><td><a href="/common/structure/uf/{{ uf.code }}/">{{ uf.code }} - {{ uf.nom }}</a></td><td>{% if uf.cloture %}{{ uf.cloture }}{% endif %}</td>{% for role_user in uf.roles_user %}<td>{{ role_user }}</td>{% endfor %}</tr>
+    {% endfor %}
+    </table>
+  {% endif %}
+  <br/>
+  <p><a href="/common/roles_view/">Page vue des rôles</a> <a href="{% url 'dem:home' %}">Retour à l'accueil</a></p>
+</div>
+{% endblock tab_contents %}
+
+{% block javascript %}
+{{ block.super }}
+<script>
+// Polyfill for IE9+
+(function () {
+
+  if ( typeof window.CustomEvent === "function" ) return false;
+
+  function CustomEvent ( event, params ) {
+    params = params || { bubbles: false, cancelable: false, detail: null };
+    var evt = document.createEvent( 'CustomEvent' );
+    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+    return evt;
+   }
+
+  window.CustomEvent = CustomEvent;
+})();
+// Polyfill end
+
+  $('.flexdatalist').flexdatalist({
+      minLength: 0,
+      searchContain:true,
+      valueProperty:'value',
+      noResultsText:"Pas de résultat trouvé pour '{keyword}'"
+    }).on('change:flexdatalist', function(event, set, options) {
+      // Simule le "onChange" sur le champ original
+      var event = new CustomEvent('change');
+      this.dispatchEvent(event);
+    });
+</script>
+{% endblock %}

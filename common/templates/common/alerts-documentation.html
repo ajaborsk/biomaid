@@ -1,0 +1,11 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title_short %}{{title}}{% endblock title_short %}
+
+{% block tab_contents %}
+<h1>{{title}}</h1>
+<div class="content">
+{% for appname, app in applications.items %}{% include 'common/application-alerts-documentation.html' with application=app application_id=appname only %}{% endfor %}
+</div>
+{% endblock tab_contents %}

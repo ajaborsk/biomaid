@@ -1,0 +1,704 @@
+{% extends "drachar/base.html" %}
+{% load static %}
+{% load json_tags %}
+
+{% block more_header %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static '/dem/tabulator.min.css' %}" />
+{% if user_agent_is_ie11 %}
+<script src="{% static '/dem/promise-polyfill.min.js' %}"></script>
+<script src="{% static '/dem/fetch.umd.js' %}"></script>
+{% endif %}
+<script src="{% static '/dem/xlsx.full.min.js' %}"></script>
+<!--
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.0.5/jspdf.plugin.autotable.js"></script>
+-->
+<script src="{% static '/smart_viw/js/moment-with-locales.min.js' %}"></script>
+{% if debug_mode %}
+<script src="{% static '/smart_view/js/tabulator.js' %}"></script>
+{% else %}
+<script src="{% static '/smart_view/js/tabulator.min.js' %}"></script>
+{% endif %}
+{% endblock more_header %}
+
+{% block javascript %}
+{{ block.super }}
+<script>
+
+
+/*
+  On stock dans cette variable le dictionnaire qui donne le code couleur en fonction de l'état de la demande
+  si ce disctionnaire existe (fourni pas la vue Django via le contexte)
+*/
+{% if state_code_color_mapping %}
+var state_code_color_mapping = {{ state_code_color_mapping | to_json }};
+{% else %}
+  var state_code_color_mapping = {};
+{% endif %}
+
+
+function show_column_prepare(local_tabulator)
+ {
+  // console.debug("show_column_prepare...", local_tabulator);
+
+  // Système de sélection des colonnes à afficher dans le tableau
+  var column_selectors = document.querySelectorAll(".columns-selector input");
+  var responsive_base = {};
+  var local_tabulator = this;
+
+  function show_column_update(cb)
+   {
+    //  console.debug("column changed:", cb.name, cb.indeterminate, cb.checked, localStorage.getItem('show-column-'+cb.name));
+
+      if (cb.checked)
+       {
+        //local_tabulator.updateColumnDefinition(cb.name, {responsive:0});
+        local_tabulator.showColumn(cb.name);
+        localStorage.setItem('show-column-'+cb.name, 'true')
+       }
+      else
+       {
+        //console.debug("A");
+        //local_tabulator.updateColumnDefinition(cb.name, {responsive:32});
+        //console.debug("B1");
+        var col = local_tabulator.getColumn(cb.name);
+        //console.debug("B2", col);
+        col.hide();
+        //console.debug("C");
+        localStorage.setItem('show-column-'+cb.name, 'false')
+        //console.debug("D");
+       }
+   }
+
+  for (var i = 0 ; i < column_selectors.length ; i++)
+   {
+    var cb = column_selectors[i];
+    // console.debug("Updating column view:", cb);
+
+    var col = local_tabulator.getColumn(cb.name);
+    if (col)
+     {
+    var definition = col.getDefinition();
+    //responsive_base[cb.name] = definition.responsive;
+
+    if (localStorage.getItem('show-column-'+cb.name) == 'false')
+     {
+      cb.checked=false;
+     }
+    else
+     {
+      cb.checked=true;
+     }
+
+
+   // L'utilisation de .onchange() évite d'enregistrer plusieurs fois la callback
+    cb.onchange = function(event) {
+      var cb=event.target;
+
+      show_column_update(cb);
+
+        local_tabulator.redraw();
+      };
+
+      show_column_update(cb);
+     }
+   }
+  // console.debug("show_column_prepared.");
+ }
+
+    //custom formatter definition
+
+    var checkbox_fmt = function(cell, formatterParams, onRendered){
+        if (cell._cell.value === true)
+          return "<i class=\"fa fa-check\"></i>";
+        else if (cell._cell.value === false)
+          return "<i class=\"fa fa-close\"></i>";
+        else
+          return "<i class=\"fa fa-square-o\"></i>";
+    }
+
+    var modifyIcons = function(cell, formatterParams, onRendered){ //plain text value
+      if ((cell._cell.row.data.decision_validateur) || (cell._cell.row.data.redacteur != '{{user.last_name}} {{user.first_name}}'))
+        return "<img class=\"modify\" width=\"16\" src=\"{% static 'dem/eye.png' %}\">&nbsp;&nbsp;<img class=\"copy\" width=\"16\" src=\"{% static 'dem/reports-stack.png' %}\">&nbsp;&nbsp;<img width=\"16\" class=\"delete\" src=\"{% static 'dem/cross.png' %}\">";
+      else
+        return "<img class=\"modify\" width=\"16\" src=\"{% static 'dem/pencil.png' %}\">&nbsp;&nbsp;<img class=\"copy\" width=\"16\" src=\"{% static 'dem/reports-stack.png' %}\">&nbsp;&nbsp;<img width=\"16\" class=\"delete\" src=\"{% static 'dem/cross.png' %}\">";
+   };
+
+    var modifyIcon = function(cell, formatterParams, onRendered){ //plain text value
+      if ((cell._cell.row.data.decision_validateur) || (cell._cell.row.data.redacteur != '{{user.last_name}} {{user.first_name}}'))
+        return "<i class=\"fa fa-eye fa-lg\"></i>";
+      else
+        return "<i class=\"fa fa-edit fa-lg\"></i>";
+   };
+
+    var copyIcon = function(cell, formatterParams, onRendered){ //plain text value
+      if ((cell._cell.row.data.decision_validateur) || (cell._cell.row.data.redacteur != '{{user.last_name}} {{user.first_name}}'))
+        return "<i class=\"fa fa-clone fa-lg\"></i>";
+      else
+        return "<i class=\"fa fa-clone fa-lg\"></i>";
+   };
+
+    var deleteIcon = function(cell, formatterParams, onRendered){ //plain text value
+      if ((cell._cell.row.data.decision_validateur) || (cell._cell.row.data.redacteur != '{{user.last_name}} {{user.first_name}}'))
+        return "<span></span>";
+      else
+        return "<i class=\"fa fa-trash fa-lg\"></i>";
+   };
+
+     var is_editable = function(cell) {
+        var data = cell.getRow().getData();
+        var edit_roles = cell.getColumn()._column.definition.editorParams.can_edit.split(' ');
+        {% if debug_mode %}
+        console.debug("AJA> ",cell.getColumn().getField(),"is editable by:", data.user_roles, edit_roles);
+        {% endif %}
+        var can_edit = false;
+
+        for (var i = 0 ; i < edit_roles.length ; i++)
+         {
+          var role = edit_roles[i];
+          if (data.user_roles.indexOf(role) >= 0)
+           {
+            can_edit = true;
+           }
+         }
+/*        if ((data.user_roles.indexOf('CHP') >= 0) || (data.user_roles.indexOf('DIR') >= 0) || (data.user_roles.indexOf('EXP') >= 0))
+         {
+          console.debug("edit OK");
+          return true;
+         }
+        else
+         {
+          console.debug("edit KO");
+          return false;
+         } */
+       //console.debug("can_edit:", can_edit);
+       return can_edit;
+     }
+
+      console.debug("Contructing tabulator...");
+      var tabulator = new Tabulator("#datatable", {
+          // les paramètres de la requete AJAX sont calculés et mis en forme d'URL en python dans la vue
+          //ajaxURL:"/dem/demandes.json"+"{{query_params|safe}}",
+          data:[],
+          ajaxResponse:function(url, params, response){
+            //url - the URL of the request
+            //params - the parameters passed with the request
+            //response - the JSON object returned in the body of the response.
+            //for (var i = 0 ; i < response.data.length; i++)
+          //   {
+              // Process received data...
+              //TODO
+             //}
+            dropdown_menus.hide_all();
+            return response.data; //return the data property of a response json object
+          },
+    {% if not user_agent_is_ie11 %}
+    ajaxLoaderLoading: "<div style='display:inline-block; border:4px solid #333; border-radius:10px; background:#fff; font-weight:bold; font-size:16px; color:#000; padding:10px 20px;'>Chargement des données...</div>",
+    {% endif %}
+          tooltipsHeader:true, //enable header tooltips
+          tooltipGenerationMode:"hover", //regenerate tooltip as users mouse enters the cell;
+          tooltips:function(cell){
+            //cell - cell component
+            var data = cell.getRow().getData();
+            var columns = cell.getTable().options.columns;
+            tt = '';
+            for (var i in columns)
+             {
+              if (columns[i].responsive < 9)
+               {
+                if ((columns[i].formatter == null) || (columns[i].formatter == 'plaintext'))
+                 {
+                  tt += '* ' + columns[i].title + ' : ' + data[columns[i].field] + '\n';
+                 }
+                if (columns[i].formatter == 'textarea')
+                 {
+                  var text = data[columns[i].field];
+                  if (!text)
+                   {
+                    tt += '* ' + columns[i].title + ' : <<< vide >>>' + '\n';
+                   }
+                  else if (text.replace)
+                   {
+                    tt += '* ' + columns[i].title + ' :\n    ' + text.replace(/\n/g, '\n    ') + '\n';
+                   }
+                 }
+                else if (columns[i].formatter == 'money')
+                 {
+                  if (data[columns[i].field] !== null)
+                    tt += '* ' + columns[i].title + ' : ' + parseFloat(data[columns[i].field]).toFixed(2) + '€ \n';
+                  else
+                    tt += '* ' + columns[i].title + ' : - €\n';
+                 }
+                else if (columns[i].formatter == 'datetime')
+                 {
+                  tt += '* ' + columns[i].title + ' : ' + moment(data[columns[i].field]).format('MM/DD/YYYY') + '\n';
+                 }
+                else if (columns[i].formatter == 'tickCross')
+                 {
+                  tt += '* ' + columns[i].title + ' : ' + (data[columns[i].field]?'Oui':'Non') + '\n';
+                 }
+                else
+                 {
+//                   tt += columns[i].title + ' : ' + data[columns[i].field] +(columns[i].formatter)+ '\n';
+                 }
+               }
+             }
+             return tt;
+            },
+    layout:'fitColumns',
+    index:'num_dmd',
+    //groupBy: 'code_uf',
+    groupHeader: function(value, count, data, group) {return value + " - " + data[0].nom_uf_court + "<span style='color:#d00; margin-left:10px;'> " + count + " demande(s)</span>"},
+    //responsiveLayout:"hide", // hide rows that no longer fit
+    //renderStarted:show_column_prepare,
+    //renderComplete:show_column_prepare,
+    tableBuilt:show_column_prepare,
+    layoutColumnsOnNewData:true,
+    resizableColumns:true,
+
+    //height:'auto',
+    rowFormatter:function(row) {
+        var data = row.getData();
+
+        if (state_code_color_mapping.hasOwnProperty(data.state_code)) {
+            row.getElement().style.backgroundColor = state_code_color_mapping[data.state_code];
+        }
+        else {
+            row.getElement().style.backgroundColor = '#fff';
+        }
+    },
+    {% if pagination %}
+    pagination: 'local',
+    paginationSize: {{pagination|to_json}},
+    {% endif %}
+    cellVertAlign:'middle',
+    cellClick:function (e, cell) {
+        console.debug('click');
+        // La colonne a son propre gestionnaire de clic, le laisser faire.
+        if (cell._cell.column.cellEvents.cellClick) {
+          cell._cell.column.cellEvents.cellClick(e, cell);
+        }
+        // sinon, si la cellule est 'editable'...
+        else if (cell._cell.column.definition.editor)
+         {
+          console.debug('AJA> Début édition (via click)');
+          if (cell._cell.column.definition.editor == 'checkbox')
+           {
+              console.debug('Editor is checkbox');
+            // L'éditeur est 'checkbox', on agit directement au clic
+            // pour éviter de devoir faire plusieurs clics pour une seule case à cocher...
+
+            // Vérification que l'utilisateur a le droit de modifier cette cellule
+            if (is_editable(cell))
+             {
+              // console.debug('can check OK !');
+              var fieldname = cell._cell.column.definition.field;
+              // console.debug('column name =', fieldname);
+              // console.debug('column value =', cell._cell.row.data[fieldname]);
+              var current_value = cell._cell.row.data[fieldname];
+              var updated_value = 'None';
+              if (current_value === null)
+               {
+                updated_value = true;
+               }
+              else if (current_value === true)
+               {
+                updated_value = false;
+               }
+              // Mise à jour du champs dans la base de données, via AJAX
+              var data = {'demande': cell._cell.row.data.num_dmd}
+              data[fieldname] = updated_value;
+              $.ajax('/dem/demande_update.json', {
+                 context: cell,
+                 data: data}).done(function (data) {
+                 // data est la réponse de la requete AJAX et 'this' est la valeur passée comme 'context', c'est à dire le tabulator.
+                   //console.debug("Updated:", data);
+                   var update = {'num_dmd':data.demande, };
+                   for (fieldname in data.record) {
+                        update[fieldname] = data.record[fieldname];
+                   }
+                   this.getTable().updateData([update]);
+                   this.getRow().reformat();
+                 }).fail(function(err) {
+               this.restoreOldValue();
+               console.warn("ajax error while editing checkbox cell:", cell, err);
+               alert("La cellule ne peut pas être mise à jour.\nErreur renvoyée par le serveur.");
+             });
+
+             }
+           }
+          else
+           {
+            // L'éditeur est différent de 'checkbox', on ne fait rien (on laisse l'éditeur prendre la main)
+           }
+         }
+    },
+    cellEdited:function(cell) {
+        console.debug("AJA> cellule éditée", cell);
+        var my_data = {'demande': cell._cell.row.data.num_dmd};
+        my_data[cell.getField()] = cell.getValue();
+
+        //console.debug("edited cell :", cell);
+
+         $.ajax('/dem/demande_update.json', {
+             context:cell,
+             data:my_data}).done(function (data) {
+                 // data est la réponse de la requete AJAX et 'this' est la valeur passée comme 'context', c'est à dire le tabulator.
+                 // TODO: Mieux gérer la réponse si ce n'est pas OK (retour à la valeur avant modif ? Alerte ?)
+                   var update = {'num_dmd':data.demande, };
+                   for (fieldname in data.record) {
+                        update[fieldname] = data.record[fieldname];
+                   }
+                   this.getTable().updateData([update]);
+                   // Mise à jour du résumé des arbitrages
+                   // TODO: Cette partie ne devrait figurer que dans la page "arbitrage"... Créer une sorte de "hook' ?
+                   $.ajax('/dem/arbitrage_summary_update.json', {
+                       data:{'programme':{{ programmes_codes | to_json }}[this.getData()['programme']]}
+                   }).done(function(data) {
+                       $(".arbitrage-summary-programme").text(data.programme);
+                       $(".arbitrage-summary-enveloppe").text(data.enveloppe.toLocaleString("fr-FR"));
+                       $(".arbitrage-summary-ok").text(data.ok.toLocaleString("fr-FR"));
+                       $(".arbitrage-summary-reste").text(data.reste.toLocaleString("fr-FR"));
+                       $(".arbitrage-summary-reste-percent").text(data.reste_percent.toLocaleString("fr-FR"));
+                       $(".arbitrage-summary-all").text(data.all.toLocaleString("fr-FR"));
+                       console.debug('AJA> MàJ tableau retour modif:', data);
+                   }).fail(function(err){
+                   });
+             }).fail(function(err) {
+               this.restoreOldValue();
+               console.warn("ajax error while editing cell:", this, err);
+               alert("La cellule ne peut pas être mise à jour.\nErreur renvoyée par le serveur.");
+             });
+    },
+    columns:[ //set column definitions for imported table data
+    {% for column in columns %}
+     { field:'{{column.field}}',
+       title:'{{column.title}}',
+       width:{{column.width|default:"null"}},
+       minWidth:{{column.minWidth|default:"50"}},
+       responsive:{{column.responsive}},
+       hozAlign:'{{column.hozAlign}}',
+       sorter:'{{column.sorter}}',
+       formatter:('{{column.formatter}}' == 'checkbox_fmt')?checkbox_fmt:'{{column.formatter}}',
+       formatterParams:{{column.formatterParams|to_json}},
+       variableHeight:{{column.variableHeight|yesno:"true,false,true"}},
+       headerSort:{{column.headerSort|yesno:"true,false,true"}},
+       editable:is_editable,
+       {% if column.bottom_calc %}
+       bottomCalc:'{{column.bottom_calc}}',
+       {% endif %}
+       {% if column.bottom_calc_params %}
+       bottomCalcParams:{{column.bottom_calc_params|to_json}},
+       {% endif %}
+       {% if column.bottom_calc_formatter %}
+       bottomCalcFormatter:'{{column.bottom_calc_formatter}}',
+       {% endif %}
+       {% if column.bottom_calc_formatter_params %}
+       bottomCalcFormatterParams:{{column.bottom_calc_formatter_params|to_json}},
+       {% endif %}
+       {% if column.editor %}
+       editor:'{{column.editor}}',
+       {% endif %}
+       {% if column.editorParams %}
+       editorParams:{{column.editorParams|to_json}},
+       {% else %}
+       editorParams:{'can_edit':''},
+       {% endif %}
+     },
+    {% endfor %}
+    {% if show_row_tools %}
+    {
+     title:'Actions',
+     width:80,
+     columns:[
+       {'width':25,
+       'minWidth':25,
+       field:'open',
+       title:'',
+       hozAlign:"center",
+       headerSort:false,
+       cssClass:"action-icon",
+       formatter:modifyIcon,
+       responsive:0, // never hidden
+       tooltip:"Ouvrir la demande",
+        cellClick:function(e, cell){
+           window.location.href = "/dem/modif_demande/" + cell.getRow().getData().num_dmd;
+        },
+       },
+       {
+       'width':25,
+       'minWidth':25,
+       field:'duplicate',
+       hozAlign:"center",
+       headerSort:false,
+       cssClass:"action-icon",
+       formatter:copyIcon,
+       responsive:0, // never hidden
+       tooltip:"Dupliquer la demande",
+        cellClick:function(e, cell){
+           window.location.href = "../nouvelle-dmd/copy/" + cell.getRow().getData().num_dmd + "/";
+        },
+       },
+       {'width':25,
+        'minWidth':25,
+        field:'delete',
+        hozAlign:"center",
+        headerSort:false,
+        cssClass:"action-icon",
+        formatter:deleteIcon,
+        responsive:0, // never hidden
+        tooltip:"Supprimer la demande",
+        cellClick:function(e, cell){
+           window.location.href = "../supprimer/" + cell.getRow().getData().num_dmd;
+        },
+       }],
+    },
+/*    {
+     title:'Actions',
+     formatter:modifyIcons,
+     width:80,
+     minWidth:80,
+     hozAlign:"center",
+     headerSort:false,
+     cellClick:function(e, cell){
+         if (e.target.className == "modify")
+          {
+           window.location.href = "../modif_demande/" + cell.getRow().getData().num_dmd;
+          }
+         else if (e.target.className == "copy")
+          {
+           window.location.href = "../copie_demande/" + cell.getRow().getData().num_dmd;
+          }
+         else if (e.target.className == "delete")
+          {
+           window.location.href = "../supprimer/" + cell.getRow().getData().num_dmd;
+          }
+         },
+     responsive:0, // never hidden
+     tooltip:function(cell){
+        //cell - cell component
+    /*    var elts = document.querySelectorAll( ":hover" );
+        var elt = elts[elts.length-1];
+
+        console.debug("elt", elt);
+        console.debug("elt.tagName", elt.tagName);
+        console.debug("elt modify", elt.classList.contains("modify"));
+        if ((elt.tagName == "IMG") && (elt.classList.contains("modify")))
+          return "Modifier la demande";
+        else
+        //function should return a string for the tooltip of false to hide the tooltip
+          return  "Modifier, copier ou supprimer la demande (suivant l'icone choisi)"; //return cells "field - value";
+     },
+ //        tooltip:"Modifier, copier ou supprimer la demande (suivant l'icone choisi)",
+    },*/
+    {% endif %}
+    {% if show_row_tools2 %}
+    {
+     title:'Actions',
+     width:80,
+     columns:[
+       {'width':25,
+       'minWidth':25,
+       field:'modify',
+       title:'',
+       hozAlign:"center",
+       headerSort:false,
+       cssClass:"action-icon",
+       formatter:modifyIcon,
+       responsive:0, // never hidden
+       tooltip:"Ouvrir la demande",
+        cellClick:function(e, cell){
+           window.location.href = "/dem/modif_demande/" + cell.getRow().getData().num_dmd + "?from=expert";
+        },
+       },
+       {'width':25,
+       'minWidth':25,
+        hozAlign:"center",
+        headerSort:false,
+        cssClass:"action-icon",
+        formatter:deleteIcon,
+        responsive:0, // never hidden
+        tooltip:"Supprimer la demande",
+        cellClick:function(e, cell){
+           window.location.href = "../supprimer/" + cell.getRow().getData().num_dmd;
+        },
+       }],
+    },
+/*    {
+     title:'Actions',
+     formatter:modifyIcons,
+     width:80,
+     minWidth:80,
+     hozAlign:"center",
+     headerSort:false,
+     cellClick:function(e, cell){
+         if (e.target.className == "modify")
+          {
+           window.location.href = "../modif_demande/" + cell.getRow().getData().num_dmd + "?from=expert";
+          }
+         else if (e.target.className == "delete")
+          {
+           window.location.href = "../supprimer/" + cell.getRow().getData().num_dmd;
+          }
+         },
+     responsive:0, // never hidden
+     tooltip:function(cell){
+        //cell - cell component
+    /*    var elts = document.querySelectorAll( ":hover" );
+        var elt = elts[elts.length-1];
+
+        console.debug("elt", elt);
+        console.debug("elt.tagName", elt.tagName);
+        console.debug("elt modify", elt.classList.contains("modify"));
+        if ((elt.tagName == "IMG") && (elt.classList.contains("modify")))
+          return "Modifier la demande";
+        else
+        //function should return a string for the tooltip of false to hide the tooltip
+          return  "Modifier, copier ou supprimer la demande (suivant l'icone choisi)"; //return cells "field - value";
+     },
+ //        tooltip:"Modifier, copier ou supprimer la demande (suivant l'icone choisi)",
+    },*/
+    {% endif %}
+    ],});
+
+
+// Liste de tous les éléments HTML5 qui sont utilisés comme filtre pour la table
+var filters = $(".table-filter input, .table-filter select");
+
+var main_table_parameters = '';
+
+/*
+  Fonction qui est appelée au chargement de la page et à chaque fois qu'un filtre est modifié par l'utilisateur.
+
+  Cette fonction vérifie la cohérence entre les différents filtres (TODO), met à jour le stockage local pour mémoriser l'état des filtres (TODO)
+  et (re)charge les données dans le tableau.
+*/
+function filters_apply(event, presets)
+ {
+  var query = '{{query_base|safe}}';
+
+  var columns_list = [{% for column in columns %}'{{column.field}}',{% endfor %}];
+
+  main_table_parameter = 'columns='+encodeURIComponent(JSON.stringify(columns_list));
+
+  var filters_kw = {};
+
+  if (event == null)
+   {
+      console.debug("filters_apply presets:", presets);
+   }
+  else
+   {
+    console.debug("filters_apply event:", event, "changed :", event.target.attributes['name'].value, "to", event.target.value);
+
+    // Enregistre la valeur dans le stockage local
+    localStorage.setItem('filter-' + event.target.attributes['name'].value, event.target.value)
+
+    // Met tous les filtres pour ce paramètre sur la même position
+    filters.filter('[name="'+event.target.attributes['name'].value+'"]').val(event.target.value);
+   }
+
+  filters.each(function (filter) {
+    try {
+      var filter_box = $('.filter-box[data-field="'+this.attributes['name'].value+'"]');
+      var filter_value = $(this).val();
+
+      if ($(this).is('select'))
+       {
+        if (filter_value != "{}")
+         {
+          //console.debug(filter_box);
+          console.debug("filter", this.attributes['name'].value, "val:", filter_value, "label:", "text_value");
+
+          filter_box.find('.filter-text').html('<b>' + $('.table-filter label[name="' + this.attributes['name'].value + '"]').html() + '</b> ' + $('.table-filter select[name="' + this.attributes['name'].value + '"] option[value=\''+filter_value+'\']').html());
+          filter_box.show();
+         } else
+         {
+          filter_box.hide();
+         }
+       }
+      else if ($(this).is('input'))
+       {
+        if (filter_value != "")
+         {
+          filter_box.find('.filter-text').html('<b>' + $('.table-filter label[name="' + this.attributes['name'].value + '"]').html() + '</b> "' + filter_value + '"');
+          filter_box.show();
+         }
+        else
+         {
+          filter_box.hide();
+         }
+        filter_value = '{"' + this.attributes['name'].value + '__contains":"' + filter_value + '"}';
+       }
+
+      filter_value = JSON.parse(filter_value);
+      Object.assign(filters_kw, filter_value);
+
+      //console.debug("filters_kw", filters_kw);
+    } catch (ex) {
+      console.warn("Exception :", ex);
+    }
+  });
+
+  var filters_string = JSON.stringify(filters_kw);
+
+  main_table_parameter += '&filters='+encodeURIComponent(filters_string);
+
+  tabulator.setData(query+'&'+main_table_parameter);
+ }
+
+/* Add a event listener to every filter so the table data are
+ * reloaded for each change
+ */
+for (var i = 0 ; i < filters.length ; i++)
+ {
+  var filter = filters[i];
+
+  filter.addEventListener('change', function(event) {
+//      console.debug("changed:", event);
+      filters_apply(event);
+      });
+ }
+
+$(".filter-box i").click(function(event){
+    console.debug("del filter click !!", $(this).parent().attr('data-field'));
+
+    var field_name = $(this).parent().attr('data-field');
+
+    if ($(".table-filter [name=\""+field_name+"\"]").is('select'))
+     {
+      // Enregistre la valeur dans le stockage local
+      localStorage.setItem('filter-' + field_name, "{}")
+
+      // Met tous les filtres pour ce paramètre sur la même position
+      filters.filter('[name="'+field_name+'"]').val("{}");
+     }
+    else
+     {
+      // Enregistre la valeur dans le stockage local
+      localStorage.setItem('filter-' + field_name, "")
+
+      // Met tous les filtres pour ce paramètre sur la même position
+      filters.filter('[name="'+field_name+'"]').val("");
+     }
+
+    filters_apply(null, '');
+    }).css("cursor","pointer");
+
+// Get the data at least once (on page load)
+// fr: initialise les filtres avec un preset fourni par Django (TODO)
+filters_apply(null, {'validation':true});
+
+$('select[name="pagination"]').change(function(){
+    console.debug("Change pagination :", this.value, tabulator);
+    var pageSize = this.value;
+    if (pageSize == "0")
+     {
+      pageSize = true; // Tout
+     }
+    tabulator.setPageSize(pageSize);
+});
+
+</script>
+{% endblock javascript %}

@@ -1,0 +1,24 @@
+{% extends "common/base.html" %}
+{% load url_kwargs %}
+{% block tab_contents %}
+<h1>LOGICIEL DE DEMANDE D'ACHAT</h1>
+<div>
+    <p> Bienvenue dans GÉQIP</p>
+    <p>Ce logiciel vous permettra d'effectuer chaque année vos demandes d'équipements dans le cadre du recensement du plan         d'équipement.
+    Vous serez prévenu par email lorsque le recensement démarrera.
+    Ce site vous permettra également de suivre les demandes validées et non retenues, ainsi que l'application du plan      d'équipement.
+    </p>
+
+    <p>
+    {% if user.is_authenticated %}
+    <p>Your name is - {{user.first_name}} {{user.last_name}}</p>
+    <p>Your email is - {{user.email}}</p>
+    <p> cliquer  <a href="../dem/home/"> <strong>ici</strong>  </a> pour vous connecter </p>
+    <br><br>
+    <a href="{% url_kwargs 'logout' %}"><strong>Logout</strong></a>
+    {% else %}
+    <CENTER><h1 text-align="center";><a href="{% url_kwargs 'common:sign' %}">Se Connecter</a></h1></CENTER>
+    {% endif %}
+    </p>
+    </div>
+{% endblock tab_contents %}

@@ -1,0 +1,51 @@
+{% extends "common/base.html" %}
+{% load url_kwargs %}
+{% load static %}
+{% block more_header %}
+    <link rel="stylesheet" type="text/css" href="{% static '/common/css/cockpit.css' %}" />
+{% endblock %}
+{% block tab_contents %}
+<div>
+<h1>Portail GÉQIP</h1>
+    {% if user.is_authenticated %}
+    <div class="main-cockpit-container">
+        <div class="cockpit-subtitle cockpit-subtitle-w"><span>Equipements & logiciels</span></div>
+          <div class="cockpit-tile" style="grid-row-end:span 2">Faire une demande d'équipement<br>Faire une demande de logiciel</div>
+          <div class="cockpit-arrow" style="grid-row-end:span 2"><i class="fa fa-arrow-circle-right fa-2x"></i></div>
+          <div class="cockpit-tile" style="grid-row-end:span 2">Demandes à approuver par le chef de pôle ou le directeur adjoint</div>
+          <div class="cockpit-arrow" style="grid-row-end:span 2"><i class="fa fa-arrow-circle-right fa-2x"></i></div>
+          <div class="cockpit-tile" style="grid-row-end:span 2">Demandes en cours d'étude et/ou arbitrage</div>
+          <div class="cockpit-arrow"><i class="fa fa-arrow-circle-right fa-2x"></i></div>
+          <div class="cockpit-tile">Demandes acceptées, en cours de traitement.</div>
+          <div class="cockpit-arrow"><i class="fa fa-arrow-circle-right fa-2x"></i></div>
+          <div class="cockpit-tile">Demandes traitées</div>
+          <div class="cockpit-arrow"><i class="fa fa-arrow-circle-right fa-2x"></i></div>
+          <div class="cockpit-arrow">- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</i></div>
+          <div class="cockpit-arrow"><i class="fa fa-arrow-circle-right fa-2x"></i></div>
+          <div class="cockpit-tile">Archive demandes refusées</div>
+        <div class="cockpit-subtitle cockpit-subtitle-w"><span>Travaux (lien vers KOS)</span></div>
+          <div class="cockpit-tile-2h">Faire une demande de travaux</div>
+          <div class="cockpit-arrow"><i class="fa fa-arrow-circle-right fa-2x"></i></div>
+          <div class="cockpit-tile">... étude ...</div>
+          <div class="cockpit-arrow"><i class="fa fa-arrow-circle-right fa-2x"></i></div>
+          <div class="cockpit-tile">... suivi ...</div>
+          <div class="cockpit-arrow"><i class="fa fa-arrow-circle-right fa-2x"></i></div>
+          <div class="cockpit-tile">... archives ...</div>
+        <div class="cockpit-subtitle cockpit-subtitle-2"><span>Guide</span></div><div class="cockpit-arrow"></div>
+        <div class="cockpit-subtitle cockpit-subtitle-2"><span>Prêts</span></div><div class="cockpit-arrow"></div>
+        <div class="cockpit-subtitle cockpit-subtitle-1"><span>Catalogue</span></div>
+          <div class="cockpit-tile-2h">Tile 11</div>
+          <div class="cockpit-arrow"></i></div>
+          <div class="cockpit-tile">Prêts de matériel par les sociétés (essais)</div>
+          <div class="cockpit-arrow"> / </div>
+          <div class="cockpit-tile">Prêts inter-services</div>
+          <div class="cockpit-arrow"> </div>
+          <div class="cockpit-tile">Catalogue des consommables liés aux équipements</div>
+    </div><br>
+    <center><a href="{% url_kwargs 'logout' %}"><strong>Se déconnecter</strong></a></center>
+    {% else %}
+    <center><a href="{% url_kwargs 'login' %}">Se Connecter</a></center>
+    {% endif %}
+    </p>
+</div>
+{% endblock tab_contents %}

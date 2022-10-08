@@ -1,0 +1,35 @@
+.topbar-compact {
+  display:none;
+}
+
+.topbar {
+/*  position:fixed;
+  display:flex;
+  flex-direction:row-reverse; */
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns: 50px max-content minmax(max-content, 1fr) max-content 50px max-content;
+  width:100%;
+  height:50px;
+  top:0;
+}
+
+footer {
+  background:var(--main-color-theme-2a);
+  padding:5px;
+  color:#fff;
+}
+
+#footer-status {
+  display: none;
+}
+
+.table-topbar .button
+ {
+  display:none;
+ }
+
+.table-topbar .filters-box
+ {
+  display:none;
+ }

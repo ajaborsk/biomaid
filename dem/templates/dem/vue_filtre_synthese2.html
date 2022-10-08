@@ -1,0 +1,211 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% block tab_contents %}
+<div class="contents">
+<h1>OUTILS TABLEAU CROISE DYNAMIQUE</h1>
+<h2>SELECTIONNER LES FILTRES A APPLIQUER</h2>
+  <ul>
+  <label name="programme">PROGRAMME :</label>
+  <select id="programme" name="programme">
+    <option value="Tous">Tous</option>
+    {% for prog in programmes %}
+      <option value="{{prog.code}}"{% if programme_code == prog.code %}selected="1"{% endif %}>{{prog.code}} - {{prog.nom}}</option>
+    {% endfor %}
+    <option value="None">NA</option>
+  </select>
+<br>
+  <label name="pole">POLE :</label>
+  <select id="pole" name="code_pole">
+    <option value="Tous">Tous</option>
+    {% for pole in poles %}
+      <option value="{{pole.code}}">{{pole.nom}}</option>
+    {% endfor %}
+  </select>
+  <br>
+  <label name="uf">CODE UF :</label>
+  <select id="uf" name="code_uf">
+    <option value="Toutes">Toutes</option>
+    {% for uf in ufs %}
+      <option value="{{uf.code}}">{{uf.nom}}</option>
+    {% endfor %}
+  </select>
+    <br>
+  <label name="validation_cp">VALIDATION CHEF DE POLE :</label>
+  <select id="validation_cp" name="validation_cp">
+    <option value="Tous">Tous</option>
+    <option value="1" selected="1">Oui</option>
+    <option value="0">Non</option>
+    <option value="None">Pas remplie</option>
+  </select>
+  <br>
+    <label name="domaine">DOMAINE :</label>
+  <select id="domaine" name="domaine">
+    <option value="Tous">Tous</option>
+    {% for domaine in domaines %}
+      <option value="{{domaine.code}}">{{domaine.nom}}</option>
+    {% endfor %}
+  </select>
+  <br>
+    <label name="arbitrage">ARBITRAGE :</label>
+      <select id="arbitrage" name="arbitrage">
+        <option value="Tous">Tous</option>
+        {% for arbitrage in arbitrages %}
+        <option value="{{arbitrage.code}}">{{arbitrage.nom}}</option>
+        {% endfor %}
+  </select>
+    <br>
+      <label name="priorite">PRIORITE DE LA DEMANDE :</label>
+      <select id="priorite" name="priorite">
+        <option value="Tous" selected="1">Tous</option>
+        <option value="1">Haute</option>
+        <option value="2">Moyenne</option>
+        <option value="3">Basse</option>
+  </select>
+  </ul>
+  <p>________________________________________________________________</p>
+  <h2>TABLEAU CROISEE DYNAMIQUE TYPE :</h2>
+  <br>
+    <ul><label name="TCDcommission">TCD Arbitrage de la Commission :</label>
+    <button id="btn2">TCD Commission</button>
+    </ul>
+  <br>
+    <p>________________________________________________________________</p>
+  <br>
+  <br>
+    <h2>TABLEAU CROISEE DYNAMIQUE MANUEL :</h2>
+  <table>
+    <tr>
+    <td><label name="index1">INDEX 1 :</label></td>
+    <td><select id="index1" name="index1">
+        <option value="None" selected="1">A renseigner</option>
+        <option value="domaine">Domaine</option>
+        <option value="programme">Programme</option>
+        <option value="nom_pole_court">Pole</option>
+        <option value="nom_uf_court">Uf</option>
+        <option value="expert_metier">Expert métier</option>
+        <option value="priorite">Priorité</option>
+        <option value="cause">Cause</option>
+      </select></td>
+    </tr>
+  <tr>
+    <td><label name="index2">INDEX 2 :</label></td>
+    <td>   <select id="index2" name="index2">
+      <option value="None" selected="1">A renseigner</option>
+      <option value="domaine">Domaine</option>
+      <option value="programme">Programme</option>
+      <option value="nom_pole_court">Pole</option>
+      <option value="nom_uf_court">Uf</option>
+      <option value="expert_metier">Expert métier</option>
+      <option value="priorite">Priorité</option>
+      <option value="cause">Cause</option>
+      </select></td>
+  </tr>
+    <tr>
+    <td><label name="colonne1">COLONNE 1 :</label></td>
+      <td><select id="colonne1" name="colonne1">
+        <option value="None" selected="1">A renseigner</option>
+        <option value="domaine">Domaine</option>
+        <option value="programme">Programme</option>
+        <option value="arbitrage_commission__code">Arbitrage(code)</option>
+        <option value="nom_pole_court">Pole</option>
+        <option value="nom_uf_court">Uf</option>
+        <option value="expert_metier">Expert métier</option>
+        <option value="montant">Montant (plages)</option>
+        <option value="priorite">Priorité</option>
+      <option value="cause">Cause</option>
+      </select></td>
+  </tr>
+    <tr>
+    <td><label name="colonne2">COLONNE 2 :</label></td>
+    <td><select id="colonne2" name="colonne2">
+          <option value="None" selected="1">NA</option>
+
+    </select></td>
+  </tr>
+  <tr>
+    <td><label name="valeur">VALEURS :</label></td>
+      <td><select id="valeur" name="valeur">
+        <option value="None" selected="1">A renseigner</option>
+        <option value="enveloppe_allouee">Enveloppe validée</option>
+        <option value="quantite_validee">Quantité Validée</option>
+        <option value="montant_total_expert_metier">Montant TTC expert</option>
+        <option value="montant">Montant TTC demandeur</option>
+        <option value="quantite">quantité demandée</option>
+    </select></td>
+  </tr>
+  <tr>
+    <td><label name="agr">TYPE AGREGATION :</label></td>
+        <td><select id="agr" name="agr">
+          <option value="sum" selected="1">Somme</option>
+          <option value="avg">Moyenne</option>
+          <option value="count">Compte</option>
+        </select></td>
+  </tr>
+  <tr>
+    <td><label name="agrl">Calcul totaux en bas :</label></td>
+        <td><select id="agrl" name="agrl">
+          <option value="agrl_True">Oui</option>
+          <option value="agrl_False" selected="1">Non</option>
+        </select></td>
+  </tr>
+  <tr>
+    <td><label name="agrc">Calcul totaux à droite :</label></td>
+        <td><select id="agrc" name="agrl">
+          <option value="agrc_True">Oui</option>
+          <option value="agrc_False" selected="1">Non</option>
+        </select></td>
+  </tr>
+  <tr>
+    <td><span>GENERER LE TABLEAU CROISE DYNAMIQUE :</span></td>
+    <td><button id="btn1">GO !</button></td>
+  </tr>
+  </table>
+  <p id="text1">selectedIndex: 0</p>
+
+    <script type="text/javascript">
+    var selectElem = document.getElementById('programme');
+    var pElem = document.getElementById('text1');
+    var btn1 = document.querySelector('#btn1');
+
+          btn1.addEventListener('click', function() {
+            var index = selectElem.selectedIndex.value;
+            // Rapporter cette donnée au <p text1>
+            programme_code = document.getElementById('programme').value;
+            pole_code = document.getElementById('pole').value;
+            validation_cp = document.getElementById('validation_cp').value;
+            code_uf = document.getElementById('uf').value;
+            domaine = document.getElementById('domaine').value;
+            colonne1 = document.getElementById('colonne1').value;
+            colonne2 = document.getElementById('colonne2').value;
+            index1 = document.getElementById('index1').value;
+            index2 = document.getElementById('index2').value;
+            valeur = document.getElementById('valeur').value;
+            typeag = document.getElementById('agr').value;
+            totl = document.getElementById('agrl').value;
+            totc = document.getElementById('agrc').value;
+            pElem.innerHTML = window.location.href='/dem/commission_synthese2/'+ programme_code + '/' + pole_code + '/' + validation_cp + '/' + code_uf + '/' + domaine + '/' + colonne1 + '/' + colonne2 + '/' + index1 + '/' + index2 + '/' + valeur + '/' + typeag + '/' + totl + '/' + totc;
+
+
+})
+    </script>
+  <p id="text2">selectedIndex: 0</p>
+
+    <script type="text/javascript">
+    var selectElem = document.getElementById('programme');
+    var pElem = document.getElementById('text2');
+    var btn2 = document.querySelector('#btn2');
+
+          btn2.addEventListener('click', function() {
+            var index = selectElem.selectedIndex.value;
+            // Rapporter cette donnée au <p text1>
+            programme_code = document.getElementById('programme').value;
+            pole_code = document.getElementById('pole').value;
+            validation_cp = document.getElementById('validation_cp').value;
+            code_uf = document.getElementById('uf').value;
+            domaine = document.getElementById('domaine').value;
+            pElem.innerHTML = window.location.href='/dem/commission_synthese/'+ programme_code + '/' + validation_cp ;
+
+})
+    </script>
+</div>
+{% endblock tab_contents %}

@@ -1,0 +1,86 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load url_kwargs %}
+{% block tab_contents %}
+<div class="doc-page">
+  <h1>Les plans d'équipement biomédicaux et généraux</h1>
+  <h2>Principe général</h2>
+  Les plans d'équipements sont traités avec une périodicité annuelle. Pour l'année 2020, le calendrier prévu est le suivant :
+  {% spaceless %}
+  <div class="timeline-axis">
+      <div  class="timeline-date" style="left:0; text-indent:0;">24/07/2020</div>
+      <div  class="timeline-date" style="left:45%">18/10/2020</div>
+      <div  class="timeline-date" style="left:55%">20/11/2020</div>
+      <div  class="timeline-date" style="left:70%">01/02/2021</div>
+      <div  class="timeline-date" style="left:100%; text-indent:-100%;">...</div>
+  </div>
+  <div class="timeline">
+      <div  class="timeline-part" style="width:45%;">Recensement</div>
+      <div  class="timeline-part" style="width:10%;">Instruction</div>
+      <div  class="timeline-part" style="width:15%;">Arbitrages<br/>et validation</div>
+      <div  class="timeline-part" style="width:30%;">Exécution</div>
+  </div>
+  {% endspaceless %}
+  <h3>Étape 1 : Saisie des demandes</h3>
+  <p>A la date de début de recensement, vous êtes invités à renseigner autant de formulaires que de demandes de matériel.
+  Ces demandes peuvent être renseignées simplement avec un nombre d’informations minimales pour des équipements de faibles valeurs, ou renseignées de manière plus complexe avec des extensions du formulaire :
+  Aide à l’argumentaire, couts détaillés, documents joints à la demande (devis, études…)…</p>
+  <h3>Étape 2 : Validation par le chef de pôle</h3>
+  <p>Avant la fin du recensement, l’ensemble de vos demandes pour être soumises à la Commission des équipements doivent être validées par le chef de pôle.
+  Cette étape vise à favoriser la cohérence des demandes et des priorités au sein du Pôle.
+  Le chef de pôle devra donc valider ou non chaque demande et dans le cas d’un refus en expliquer la raison.
+  En cas de non acceptation, vous disposez toujours d’un droit de modification de la demande pour quelle puisse être réévaluée.
+  Toute demande validée par le Chef de pôle, ou si la date de clôture est dépassée, ne seront plus modifiables.
+  Dans le premier cas, il sera toujours possible de demander au chef de pôle de "dévalider" la demande pour permettre de la corriger.</p>
+  <h3>Étape 3 : Intruction des demandes</h3>
+  <p>En fonction du type de matériel, la demande sera orientée vers un plan d'équipements (biomédical ou équipements généraux) et un expert technique sera désigné et chargé d'instruire la demande et, en particulier, d'émettre un avis technique sur l'argumentation</p>
+  <h3>Étape 4 : Passage en commission d'arbitrage</h3>
+  <p>La commission des équipements est une sous commission de la CME. Elle est constituée de tous les chefs de pôle et du président de la commission. Les experts métier des différents domaines impactés sont présents au titre de conseillers, il s’agit de : des ingénieurs biomédicaux, de pharmacienne en charge des achats, d’un responsable de la DSN et des travaux. Passer la date de clôture, les services ayant déposés une demande sont invités à présenter et à “défendre” leurs projets à la Commission des équipements. La commission se réunit ensuite pour passer en revue toutes les demandes et établir le plan d'équipement le plus pertinent au vue du budget qui leur est alloué.</p>
+  <a href="https://portail.chu-amiens.fr/hopital/presentation/organisation/cme-commission-equipements/Pages/Accueil.aspx">Commission des Equipements sur l'intranet ECHO</a>
+  <h3>Étape 5 : Validation définitive</h3>
+  <p>Le plan constitué par la commission est ensuite présenté à la CME pour avis, puis au directoire avant d'être transmis à la Direction Générale de l'établissement pour validation finale.</p>
+  <h3>Étape 6 : Exécution du plan d'équipement</h3>
+  <p>Une fois le plan annuel validé, les acheteurs, ingénieurs et/ou experts métiers sont chargés de réaliser les acquisitions tout au long de l'année,
+   en respectant les différentes régles institutionnelles et notamment la réglementation sur la commande publique</p>
+   <p>A terme, ce portail vous permettra de suivre la programmation et l'avancement des acquisitions.</p>
+  <h3>Demandes exceptionnelles</h3>
+  <p>Si un besoin se révèle en dehors de la période de recensement, il est parfois possible de lancer l'opération d'acquisition, en dehors du plan annuel.</p>
+  <p>Dans ce cas, la procédure à suivre est la suivante :</p>
+  <ul>
+  <li>Rédiger une demande au format libre (courriel), en précisant explicitement :</li>
+  <ul>
+  <li>Pourquoi ce besoin n'était pas prévisible et en particulier lors du dernier recensement,</li>
+  <li>En quoi ce besoin est impératif et ne peut pas attendre le prochaine recensement.</li>
+  </ul>
+  <li>Faire valider cette demande par le chef de pôle,</li>
+  <li>trasmettre cette demande au <a href="mailto:jaborska.alexandre@chu-amiens.fr">Directeur de l'Ingénierie Biomédicale et des Equipements Généraux</a>, qui verra s'il est possible de trouver un moyen de financement et de passer par une procédure dérogatoire.</li>
+  </ul>
+  <h2>Utilisation du portail</h2>
+<h3>Principe général</h3>
+<p>Après vous être authentifié sur la première page, vous disposez d’un accès à plusieurs pages (via le menu bleu sombre):</p>
+  <ul>
+    <li><b>Accueil :</b> onglet vous permettant de voir les différentes rubriques auxquelles vous avez accès,</li>
+    <li><b>Nouvelle-demande :</b> rubrique permettant d’ouvrir le formulaire de demande d'équipement,</li>
+    <li><b>Demandes en cours :</b> liste des demandes que vous avez rédigé pour le recensement en cours de réalisation,</li>
+    <li><b>Suivi du plan :</b> rubrique dans laquelle vous pourrez suivre l'état d’avance de vos demandes validées par la commission,</li>
+    <li><b>Liste de toutes les demandes :</b> rubrique qui vous affiche la liste de l’ensemble des demandes qui on été réalisées pour vos UF,</li>
+    <li><b>Aide :</b> rubrique ou vous trouverez les informations du fonctionnement de la commission et de l’usage de cet outil.</li>
+  </ul>
+<h3>1. Nouvelle demande</h3>
+<p>renseigner le maximum d’information permettant à la commission d’apprécier votre demande
+    lorsque l’ensemble des champs sont renseignés, vous pourrez enregistrer votre demande et ajouter des documents liés à cette demande (devis, analyses financières…) ou enregistrer et passer à une nouvelle demande. Pour l’instant, l’outil ne permet pas de créer des demandes incomplètes (formulaire provisoire), mais il vous est possible de la modifier ultérieurement.
+    Les codes UF accessibles sont d’après nos sources ceux pour lesquels vous avez le statu de responsable . Si cette liste est erronée, merci de nous le communiquer pour correction.</p>
+<h3>2. Demandes en cours</h3>
+<p>Vous disposez ici de la liste de l’ensemble des demandes que vous avez faites pour le recensement en cours. Vous disposez d’une vue de l’ensemble de vos demandes avec la possibilité pour chacune d’elles de les modifier (complément du formulaire, ajout/suppression de documents…) voir de supprimer intégralement une demande. En cas de suppression de la demande, l’ensemble des informations concernées (documents compris) seront supprimées.
+    Cette vue vous informe également de l’acceptation de votre chef de pôle de soumettre cette demande à la commission. En cas de refus, les raisons sont possiblement renseignées dans le tableau.</p>
+<h3>3. Suivi du plan</h3>
+<p>Cette rubrique est en cours de construction. Elle vous permettra de suivre l’avancement de l’achat des demandes acceptées par la commission. Les données affichées seront celles fournies par les différents ingénieurs responsable du dossier pendant l’exécution du plan.</p>
+<h3>4. Liste de toutes les demandes</h3>
+    <p>Il s’agit de la liste complète de l’ensemble de vos demandes de matériels, quelles soient acceptées ou non par votre chef de pôle ou par la commission. Cette rubrique vous permettra à terme de faciliter le renouvellement de vos demandes non validées d’une année sur l’autre.</p>
+<h3>5. Aide</h3>
+<p>Cette partie vous servira de guide :
+        tant sur l’usage de ce logiciel (notice, questions fréquentes…)
+        que sur le déroulé de la commission des équipements (étapes, calendrier…)</p>
+  <p><a href="{% url_kwargs 'dem:home' %}">Retour à l'accueil</a></p>
+  </div>
+{% endblock tab_contents %}

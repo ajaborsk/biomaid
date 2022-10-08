@@ -1,0 +1,15 @@
+- name: install-packages
+  packages:
+    - postgresql
+    - nginx
+    - supervisor
+    - libldap-dev
+    - python3-cachecontrol
+#    - python3-poetry
+# - name: add-cmdline-arg
+#   arg: autoinstall
+#   persist: false
+- name: add-autoinstall-config
+  autoinstall_config: autoinstall.yaml
+# - name: shell
+#   command: echo "biomaid" >> /root/deded.txt

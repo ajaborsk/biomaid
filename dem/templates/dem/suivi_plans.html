@@ -1,0 +1,14 @@
+{% extends "common/base.html" %}
+{% load static %}
+
+{% block title_short %}
+Suivi des plans d'équipement
+{% endblock title_short %}
+
+{% block tab_contents %}
+  <center><h1>{{title}}</h1>
+  <img width="200" style="width:25% text-align:center" src="{% static 'dem/roadsign.png' %}">
+  <p>Cette page n'est malheureusement pas encore disponible.</p>
+  <p><a href="{% url 'dem:home' %}">Retour à l'accueil</a></p>
+  </center>
+{% endblock tab_contents %}

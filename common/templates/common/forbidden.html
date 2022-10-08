@@ -1,0 +1,15 @@
+{% extends "common/base.html" %}
+{% load url_kwargs %}
+{% load static %}
+
+{% block title_short %}
+Accès interdit
+{% endblock title_short %}
+
+{% block tab_contents %}
+  <center><h1>Accès interdit</h1>
+  <p>Vos droits actuels ne vous permettent pas d'accéder à cette page.</p>
+      <p id="exception-message">{{ exception_message }}</p>
+  <p><a href="{% url_kwargs 'dem:home' %}">Retour à l'accueil</a></p>
+  </center>
+{% endblock tab_contents %}

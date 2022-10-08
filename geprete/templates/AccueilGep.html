@@ -1,0 +1,55 @@
+{%extends "common/base.html" %}
+{% load static %}
+{% block more_header %}
+    <link rel="stylesheet" type="text/css" href="{% static '/geprete/StyleAccueil.css' %}" />
+{% endblock more_header %}
+{% block tab_contents %}
+
+{% spaceless %}
+    <div class="doc-page">
+
+        <div>
+        <img src="{% static '/geprete/muffin1.png' %}" alt="My image">
+        </div>
+
+
+    <div class="main-block">
+    <div class="main-tile-c13 ie-row-1">
+    <div class="main-tile-title">Bienvenue sur Geprete!</div>
+        <br>
+        <p>Geprete a été conçu pour informatiser la gestion des prêts internes à l'hôpital ainsi que les essais réalisés
+        dans les différents services.</p>
+        <br>
+        <p>Pour se connecter en tant qu'administrateur : <a href = http://127.0.0.1:8000/admin/> Administration de Geprete</a> </p>
+    </div>
+
+   <!--     <div class="main-tile-c13 ie-row-2">
+        <div class="main-tile-title">Prêts externes</div>
+            <p>Créer un nouveau formulaire : <a href = http://127.0.0.1:8000/geprete/formgess/> Ajouter un prêt </a> </p>
+            <br>
+            <p>Remplir une fiche d'évaluation d'un prêt : <a href = http://127.0.0.1:8000/geprete/ficheevalgess/> Fiche d'évaluation </a> </p>
+            <br>
+            <p>Afficher la liste des prêts : <a href = http://127.0.0.1:8000/geprete/listepretgess/> Liste des prêts</a></p>
+            <br>
+            <p>Ajouter des documents : <a href = http://127.0.0.1:8000/geprete/documentsgess/> Ajouter un document</a></p>
+            <br>
+        </div>
+
+
+        <div class="main-tile-c13 ie-row-3">
+        <div class="main-tile-title">Prêts internes</div>
+            <p>Créer un nouveau formulaire : </p>
+            <br>
+            <p>Remplir une fiche d'évaluation d'un prêt :  </p>
+            <br>
+            <p>Afficher la liste des prêts : </p>
+            <br>
+            <p>Ajouter des documents : </p>
+            <br>
+        </div>
+
+-->
+    </div>
+
+{% endspaceless %}
+{% endblock tab_contents %}

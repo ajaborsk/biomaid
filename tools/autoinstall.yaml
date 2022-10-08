@@ -1,0 +1,8 @@
+version: 1
+#locale: fr_FR.UTF-8
+#keyboard:
+#  layout: fr
+identity:
+  username: user_dra
+  password: $6$FhcddHFVZ7ABA4Gi$58/upGpTA2LXfoiXEsvZxKgWbsjoWIg2SE4.Q5p1mUAMe.FosQpUJP6etUYULUYwPUTzSZ9yqrB0DSbk44vxF/
+  hostname: biomaid
