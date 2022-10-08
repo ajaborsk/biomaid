@@ -1,0 +1,41 @@
+digraph  {
+    gel [shape=diamond, label="Définitif\n?"];
+    arb_val [shape=diamond, label="Valeur\narbitrage ?"];
+    prev_not_null [shape=diamond, label="Prévisionnel\nlié ?"];
+    prev_fini_6 [shape=diamond, label="Prévisionnel lié\nterminé +6 mois?"];
+    REFUSE [shape=rect, label="REFUSE\nArchivé refusé"];
+    ANNULE [shape=rect, label="ANNULE\nArchivé annulé"];
+    TRAITE [shape=rect, label="TRAITE\nArchivé validé"];
+    VALIDE [shape=rect, label="VALIDE\nSuivi validé"];
+    A_BASCULER [shape=rect];
+    gel -> arb_val [label="Oui"];
+    arb_val -> REFUSE [label="Pas\nOK"];
+    arb_val -> ANNULE [label="N/A"];
+    arb_val -> prev_not_null [label="OK"];
+    prev_not_null -> prev_fini_6 [label="Oui"];
+    prev_not_null -> A_BASCULER [label = "Non"];
+    prev_fini_6 -> VALIDE [label="Non"]
+    prev_fini_6 -> TRAITE [label="Oui"]
+    AREP_AAP [shape=box, label="AREP_AAP\nA répartir\n& à approuver"]
+    AARB_AAP [shape=box, label="AARB_AAP\nA arbitrer\n& à approuver"]
+    AEXP_AAP [shape=box, label="AEXP_AAP\nA expertiser\n& à approuver"]
+    AREP [shape=box, label="AREP\nA répartir"]
+    AARB [shape=box, label="AARB\nA arbitrer"]
+    AEXP [shape=box, label="AEXP\nA expertiser"]
+    approbation_1 [shape=diamond, label="Approbation\nCP ?"]
+    approbation_2 [shape=diamond, label="Approbation\nCP ?"]
+    approbation_3 [shape=diamond, label="Approbation\nCP ?"]
+    expert [shape=diamond, label="Expert\nnommé ?"];
+    montant_arb_and_avis_defined [shape=diamond, label="Montant\narbitrage\n**ET**\nAvis expert ?"]
+    gel -> montant_arb_and_avis_defined [label="Non"];
+    montant_arb_and_avis_defined -> expert [label="Non"];
+    montant_arb_and_avis_defined -> approbation_1 [label = "Oui"]
+    expert -> approbation_2 [label="Non"];
+    expert -> approbation_3 [label="Oui"];
+    approbation_1 -> AARB [label="Défini"];
+    approbation_1 -> AARB_AAP [label="N/A"];
+    approbation_2 -> AREP [label="Défini"];
+    approbation_2 -> AREP_AAP [label="N/A"];
+    approbation_3 -> AEXP [label="Défini"];
+    approbation_3 -> AEXP_AAP [label="N/A"];
+}
