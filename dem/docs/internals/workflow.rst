@@ -5,6 +5,7 @@
 Le "workflow" des demandes
 ==================================
 
+.. image:: workflow_demandes.*
 
 Campagne de recensement
 ------------------------------------------
