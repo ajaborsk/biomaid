@@ -1,0 +1,25 @@
+@import '../../_static/css/sizzle.css';
+
+table
+ {
+  background:#fff;
+  border:solid 1px #000;
+  border-collapse:collapse;
+ }
+
+th
+{
+ padding: 5px;
+ background:#ddd;
+ border:solid 1px #000;
+}
+
+td
+{
+ padding: 5px;
+ border:solid 1px #000;
+}
+
+td.euros {
+  text-align: right;
+}

@@ -51,6 +51,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc.typehints',
     'sphinx.ext.todo',
+    'sphinx.ext.graphviz',
     # 'sphinx.ext.autodoc',
     'sphinx.ext.inheritance_diagram',
     # 'autoapi.sphinx',
@@ -101,6 +102,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'sizzle'
+html_style = 'css/biomaid_doc.css'
 globaltoc_depth = 3
 
 

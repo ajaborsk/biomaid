@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+import datetime
 import json
 import logging
 import math
@@ -2210,6 +2211,113 @@ class DemandeSmartView(SmartView):
                         return qs[0].message
             return None
 
+    # Calcul de l'état d'une demande suivant le workflow décrit dans la documentation (dem/internals/dem_states.dot)
+    dyn_state = (
+        ComputedSmartField,
+        {
+            'hidden': False,
+            'title': _("Etat dyn."),
+            'help_text': _("Etat calculé dynamiquement à partir des valuers des champs de chaque demande."),
+            'data': lambda view_params: Case(
+                When(
+                    gel=True,
+                    then=Case(
+                        When(
+                            arbitrage_commission__valeur=True,
+                            then=Case(
+                                When(
+                                    previsionnel__isnull=False,
+                                    then=Case(
+                                        When(
+                                            previsionnel__solder_ligne=True,
+                                            previsionnel__date_modification__lt=view_params['now'] - datetime.timedelta(days=90),
+                                            then=Value("TRAITE"),
+                                        ),
+                                        default=Value("VALIDE"),
+                                    ),
+                                ),
+                                default=Value("A_BASCULER"),
+                            ),
+                        ),
+                        When(
+                            arbitrage_commission__valeur=False,
+                            then=Value("REFUSE"),
+                        ),
+                        default=Value("ANNULE"),
+                    ),
+                ),
+                default=Case(
+                    When(
+                        montant_arbitrage__isnull=False,
+                        avis_biomed__isnull=False,
+                        programme__isnull=False,
+                        then=Case(
+                            When(
+                                decision_validateur__isnull=True,
+                                then=Case(
+                                    When(
+                                        expert_metier__isnull=True,
+                                        then=Value("AAP_AREP"),
+                                    ),
+                                    default=Case(
+                                        When(
+                                            programme__arbitre__isnull=True,
+                                            then=Value("AAP"),
+                                        ),
+                                        default=Value("AAP_AARB"),
+                                    ),
+                                ),
+                            ),
+                            default=Case(
+                                When(
+                                    expert_metier__isnull=True,
+                                    then=Value("AREP"),
+                                ),
+                                default=Case(
+                                    When(
+                                        programme__arbitre__isnull=True,
+                                        then=Value("WAIT"),
+                                    ),
+                                    default=Value("AARB"),
+                                ),
+                            ),
+                        ),
+                    ),
+                    default=Case(
+                        When(
+                            expert_metier__isnull=True,
+                            then=Case(
+                                When(
+                                    decision_validateur__isnull=True,
+                                    then=Value("AAP_AREP"),
+                                ),
+                                default=Value("AREP"),
+                            ),
+                        ),
+                        default=Case(
+                            When(
+                                decision_validateur__isnull=True,
+                                then=Case(
+                                    When(programme__isnull=True, then=Value("AAP_AREP_AEXP")),
+                                    default=Value("AAP_AEXP"),
+                                ),
+                            ),
+                            default=Case(
+                                When(programme__isnull=True, then=Value("AREP_AEXP")),
+                                default=Value("AEXP"),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        },
+    )
+
+    # Champs calculé qui détermine les campagnes vers lesquelles une demande peut être copiée
+    # Le calcul se base sur la nature de la demande (il faut que les campagnes destinations soient compatibles)
+    # et les dates de début et fin des campagnes destination (doivent être ouvertes).
+    # La colonne est une chaîne de caractère qui peut être interprétées en JSON comme une liste des pk des campagnes, sous forme de
+    # chaînes de caractères.
     can_copy_to_campagnes = (
         ComputedSmartField,
         {
@@ -2806,6 +2914,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'arbitrage',
             'quantite_validee',
             'enveloppe_allouee',
+            'dyn_state',
             'gel',
             'tools',
         )
@@ -3240,18 +3349,18 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
         )
         columns__remove = (
             'commentaire_biomed',
-            'avis_biomed',
-            'montant_arbitrage',
-            'montant_unitaire_expert_metier',
-            'quantite_validee_conditional',  # hidden
+            # 'avis_biomed',
+            # 'montant_arbitrage',
+            # 'montant_unitaire_expert_metier',
+            # 'quantite_validee_conditional',  # hidden
             'montant_qte_validee',
             'montant_valide_conditional',
             'montant_final',
             'montant_consomme',
-            'arbitrage',
+            # 'arbitrage',
             'quantite_validee',
             'enveloppe_allouee',
-            'gel',
+            # 'gel',
         )
         selectable_columns__remove = (
             'commentaire_biomed',

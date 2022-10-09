@@ -2,7 +2,7 @@ digraph  {
     gel [shape=diamond, label="Définitif\n?"];
     arb_val [shape=diamond, label="Valeur\narbitrage ?"];
     prev_not_null [shape=diamond, label="Prévisionnel\nlié ?"];
-    prev_fini_6 [shape=diamond, label="Prévisionnel lié\nterminé +6 mois?"];
+    prev_fini_3 [shape=diamond, label="Prévisionnel lié\nterminé +3 mois?"];
     REFUSE [shape=rect, label="REFUSE\nArchivé refusé"];
     ANNULE [shape=rect, label="ANNULE\nArchivé annulé"];
     TRAITE [shape=rect, label="TRAITE\nArchivé validé"];
@@ -12,30 +12,52 @@ digraph  {
     arb_val -> REFUSE [label="Pas\nOK"];
     arb_val -> ANNULE [label="N/A"];
     arb_val -> prev_not_null [label="OK"];
-    prev_not_null -> prev_fini_6 [label="Oui"];
+    prev_not_null -> prev_fini_3 [label="Oui"];
     prev_not_null -> A_BASCULER [label = "Non"];
-    prev_fini_6 -> VALIDE [label="Non"]
-    prev_fini_6 -> TRAITE [label="Oui"]
-    AREP_AAP [shape=box, label="AREP_AAP\nA répartir\n& à approuver"]
-    AARB_AAP [shape=box, label="AARB_AAP\nA arbitrer\n& à approuver"]
-    AEXP_AAP [shape=box, label="AEXP_AAP\nA expertiser\n& à approuver"]
+    prev_fini_3 -> VALIDE [label="Non"]
+    prev_fini_3 -> TRAITE [label="Oui"]
+    AAP_AREP [shape=box, label="AAP_AREP\nA répartir\n& à approuver"]
+    AAP_AARB [shape=box, label="AAP_AARB\nA arbitrer\n& à approuver"]
+    AAP_AEXP [shape=box, label="AAP_AEXP\nA expertiser\n& à approuver"]
+    AREP_AEXP [shape=box, label="AREP_AEXP\nA répartir\n& à expertiser"]
+    AAP_AREP_AEXP [shape=box, label="AAP_AREP_AEXP\nA répartir\n& à expertiser\n& à approuver"]
     AREP [shape=box, label="AREP\nA répartir"]
     AARB [shape=box, label="AARB\nA arbitrer"]
     AEXP [shape=box, label="AEXP\nA expertiser"]
-    approbation_1 [shape=diamond, label="Approbation\nCP ?"]
-    approbation_2 [shape=diamond, label="Approbation\nCP ?"]
-    approbation_3 [shape=diamond, label="Approbation\nCP ?"]
-    expert [shape=diamond, label="Expert\nnommé ?"];
-    montant_arb_and_avis_defined [shape=diamond, label="Montant\narbitrage\n**ET**\nAvis expert ?"]
+    WAIT [shape=box, label="WAIT\nEn attente"]
+    AAP [shape=box, label="AAP\nA approuver"]
+    approbation_1 [shape=diamond, label="Approbation\nChef pôle ?"]
+    approbation_2 [shape=diamond, label="Approbation\nChef pôle ?"]
+    approbation_3 [shape=diamond, label="Approbation\nChef pôle ?"]
+    expert_1 [shape=diamond, label="Expert\nnommé ?"];
+    expert_2 [shape=diamond, label="Expert\nnommé ?"];
+    expert_3 [shape=diamond, label="Expert\nnommé ?"];
+    montant_arb_and_avis_defined [shape=diamond, label="Montant arbitrage\n** ET **\nProgramme sélectionné\n** ET **\nAvis expert donné ?"]
     gel -> montant_arb_and_avis_defined [label="Non"];
-    montant_arb_and_avis_defined -> expert [label="Non"];
+    montant_arb_and_avis_defined -> expert_1 [label="Non"];
     montant_arb_and_avis_defined -> approbation_1 [label = "Oui"]
-    expert -> approbation_2 [label="Non"];
-    expert -> approbation_3 [label="Oui"];
-    approbation_1 -> AARB [label="Défini"];
-    approbation_1 -> AARB_AAP [label="N/A"];
+    expert_1 -> approbation_2 [label="Non"];
+    expert_1 -> approbation_3 [label="Oui"];
+    arbitre_1 [shape=diamond, label="Programme\navec arbitre\n?"];
+    arbitre_2 [shape=diamond, label="Programme\navec arbitre\n?"];
+    approbation_1 -> expert_2 [label="Défini"];
+    expert_2 -> arbitre_1 [label="Oui"];
+    arbitre_1 -> AARB [label="Oui"];
+    arbitre_1 -> WAIT [label="Non"];
+    expert_2 -> AREP [label="Non"];
+    approbation_1 -> expert_3 [label="N/A"];
+    expert_3 -> arbitre_2 [label="Oui"];
+    arbitre_2 -> AAP_AARB [label="Oui"];
+    arbitre_2 -> AAP [label="Non"];
+    expert_3 -> AAP_AREP [label="Non"];
     approbation_2 -> AREP [label="Défini"];
-    approbation_2 -> AREP_AAP [label="N/A"];
-    approbation_3 -> AEXP [label="Défini"];
-    approbation_3 -> AEXP_AAP [label="N/A"];
+    approbation_2 -> AAP_AREP [label="N/A"];
+    prgm_set_1 [shape=diamond, label="Programme\ndéfini ?"];
+    prgm_set_2 [shape=diamond, label="Programme\ndéfini ?"];
+    approbation_3 -> prgm_set_1 [label="Défini"];
+    approbation_3 -> prgm_set_2 [label="N/A"];
+    prgm_set_1 -> AEXP [label="Défini"];
+    prgm_set_1 -> AREP_AEXP [label="N/A"];
+    prgm_set_2 -> AAP_AEXP [label="Défini"];
+    prgm_set_2 -> AAP_AREP_AEXP [label="N/A"];
 }
