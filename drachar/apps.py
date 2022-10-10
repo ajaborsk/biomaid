@@ -71,7 +71,7 @@ class DracharConfig(AppConfig):
             'main-menu': (
                 {'label': 'Accueil', 'url_name': 'drachar:home'},
                 {'label': 'Suivi', 'url_name': 'drachar:previsionnel'},
-                {'label': 'Cockpit', 'url_name': 'drachar:cockpit'},
+                # {'label': 'Cockpit', 'url_name': 'drachar:cockpit'},
             ),
         },
         'user-settings-categories': {

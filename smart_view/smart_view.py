@@ -1371,7 +1371,7 @@ class SmartView(metaclass=SmartViewMetaclass):
         load_filters={},
         **kwargs,
     ):
-        self._prefix = prefix
+        self._prefix = prefix or ''
         self._view_params = view_params
 
         # if field_smartviews is None:
@@ -1399,7 +1399,7 @@ class SmartView(metaclass=SmartViewMetaclass):
         self.manager = manager
 
         self.user_settings = (
-            get_user_settings(self.request.user, self._meta['appname'] + '.tabulator-' + self._prefix).get(
+            get_user_settings(self._view_params['user'], self._meta['appname'] + '.tabulator-' + self._prefix).get(
                 self._meta['appname'] + '.tabulator-' + self._prefix, {}
             )
             or {}

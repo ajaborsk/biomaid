@@ -17,8 +17,8 @@
 import datetime
 import json
 import logging
-import math
 from datetime import date
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db.models import (
@@ -2215,7 +2215,7 @@ class DemandeSmartView(SmartView):
     dyn_state = (
         ComputedSmartField,
         {
-            'hidden': False,
+            'hidden': not config.settings.DEBUG,
             'title': _("Etat dyn."),
             'help_text': _("Etat calculé dynamiquement à partir des valuers des champs de chaque demande."),
             'data': lambda view_params: Case(
@@ -2310,6 +2310,15 @@ class DemandeSmartView(SmartView):
                     ),
                 ),
             ),
+            'depends': [
+                'gel',
+                'programme',
+                'decision_validateur',
+                'expert_metier',
+                'avis_biomed',
+                'montant_arbitrage',
+                'arbitrage_commission',
+            ],
         },
     )
 
@@ -2699,51 +2708,52 @@ class DemandeSmartView(SmartView):
             "precision": 0,
             "max_width": 120,
             "footer_data": "sum",
-            'data': ExpressionWrapper(
-                Case(
-                    When(
-                        arbitrage_commission__valeur=True,
-                        then=Case(
-                            When(
-                                enveloppe_allouee__isnull=False,
-                                then=F("enveloppe_allouee"),
-                            ),
-                            When(
-                                montant_unitaire_expert_metier__isnull=False,
-                                then=F("quantite_validee") * F("montant_unitaire_expert_metier"),
-                            ),
-                            When(
-                                prix_unitaire__isnull=False,
-                                then=F("quantite_validee") * F("prix_unitaire"),
-                            ),
-                            default=Value(math.nan),  # Pour indiquer que ce n'est pas un cas 'valide'
-                            output_field=DecimalField(),
-                        ),
-                    ),
-                    # When(
-                    #     montant_total_expert_metier__isnull=False,
-                    #     then=F("montant_total_expert_metier"),
-                    # ),
-                    When(
-                        montant_unitaire_expert_metier__isnull=False,
-                        then=F("quantite") * F("montant_unitaire_expert_metier"),
-                    ),
-                    # When(montant__isnull=False, then=F("montant")),
-                    When(
-                        prix_unitaire__isnull=False,
-                        then=F("quantite") * F("prix_unitaire"),
-                    ),
-                ),
-                output_field=DecimalField(),
-            ),
+            # 'data': ExpressionWrapper(
+            #     Case(
+            #         When(
+            #             arbitrage_commission__valeur=True,
+            #             then=Case(
+            #                 When(
+            #                     enveloppe_allouee__isnull=False,
+            #                     then=F("enveloppe_allouee"),
+            #                 ),
+            #                 When(
+            #                     montant_unitaire_expert_metier__isnull=False,
+            #                     then=F("quantite_validee") * F("montant_unitaire_expert_metier"),
+            #                 ),
+            #                 When(
+            #                     prix_unitaire__isnull=False,
+            #                     then=F("quantite_validee") * F("prix_unitaire"),
+            #                 ),
+            #                 default=Value(math.nan),  # Pour indiquer que ce n'est pas un cas 'valide'
+            #                 output_field=DecimalField(),
+            #             ),
+            #         ),
+            #         # When(
+            #         #     montant_total_expert_metier__isnull=False,
+            #         #     then=F("montant_total_expert_metier"),
+            #         # ),
+            #         When(
+            #             montant_unitaire_expert_metier__isnull=False,
+            #             then=F("quantite") * F("montant_unitaire_expert_metier"),
+            #         ),
+            #         # When(montant__isnull=False, then=F("montant")),
+            #         When(
+            #             prix_unitaire__isnull=False,
+            #             then=F("quantite") * F("prix_unitaire"),
+            #         ),
+            #     ),
+            #     output_field=DecimalField(),
+            # ),
+            'data': Coalesce(F('enveloppe_allouee'), F('montant_qte_validee'), Value(Decimal(0.0))),
             'depends': [
-                'arbitrage_commission',
+                # 'arbitrage_commission',
                 'enveloppe_allouee',
-                'quantite_validee',
-                'montant_unitaire_expert_metier',
-                'prix_unitaire',
+                'montant_qte_validee',
+                # 'montant_unitaire_expert_metier',
+                # 'prix_unitaire',
                 # 'montant_total_expert_metier',
-                'quantite',
+                # 'quantite',
                 # 'montant',
             ],
         },
