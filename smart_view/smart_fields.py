@@ -18,9 +18,11 @@ from __future__ import annotations
 
 import ast
 import copy
+import datetime
 import logging
 from functools import reduce
 from itertools import accumulate
+from typing import Any, Optional
 
 from django.apps import apps
 from django.db.models import Value, F, CharField, ExpressionWrapper
@@ -146,6 +148,18 @@ class BooleanSmartFormat(SmartFormat):
             return CheckboxInput()
 
 
+class SmartDateInput(DateInput):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def format_value(self, value: Any) -> Optional[str]:
+        if isinstance(value, datetime.datetime):
+            return value.isoformat()
+        elif isinstance(value, datetime.date):
+            return value.isoformat()
+        return str(value)
+
+
 class DateSmartFormat(SmartFormat):
     class Media:
         js = (
@@ -183,7 +197,7 @@ class DateSmartFormat(SmartFormat):
         return settings
 
     def get_widget(self, context=None, default=None, **kwargs):
-        return DateInput(attrs={'type': 'date'})
+        return SmartDateInput(attrs={'type': 'date'})
 
 
 class DatetimeSmartFormat(SmartFormat):
