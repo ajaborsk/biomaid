@@ -103,7 +103,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 html_theme = 'sizzle'
 html_style = 'css/biomaid_doc.css'
-globaltoc_depth = 3
+globaltoc_depth = 1
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -117,7 +117,15 @@ latex_documents = [
     (
         'index',
         project + '.tex',
-        "Documentation complète BIOM_AID",
+        "Documentation complète BIOM\\_AID",
+        author.replace(',', ' \\and'),
+        'manual',
+        False,
+    ),
+    (
+        'dev/index',
+        project + '-user.tex',
+        "Documentation Utilisateur BIOM\\_AID",
         author.replace(',', ' \\and'),
         'manual',
         False,

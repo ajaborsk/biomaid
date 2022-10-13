@@ -31,7 +31,8 @@ class Command(BaseCommand):
             if app.path.startswith(config.settings.BASE_DIR):
                 # If it's in BIOM_AID directory (which is probably not the best criteria...)
                 app_path = app.path[len(config.settings.BASE_DIR) + 1 :]  # NOQA
-                if app_path not in ('local',):  # This one has a special treatment...
+                # if app_path not in ('local',):  # This one has a special treatment...
+                if True:
                     for doc_name in (
                         'sysadmin',
                         'admin',

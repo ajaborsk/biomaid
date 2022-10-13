@@ -4,18 +4,17 @@
    contain the root `toctree` directive.
 
 Documentation de BIOM_AID
-======================
+=========================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contenu :
 
+   user/index
    admin/index
-   dem/index
    internals/index
    sysadmin/index
    dev/index
-   autoapi/index
 
 
 Index

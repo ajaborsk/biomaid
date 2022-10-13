@@ -22,6 +22,9 @@ Elle est composée de 5 documents différents :
 
 La documentation principales est rédigée dans le dossier `docs` de la hiérarchie principale du projet.
 
+Documentation des différentes applications de BiomAid
+-----------------------------------------------------
+
 Chaque application peur définir ses propres sections dans chaque document.
 
 Par exemple, dans l'application `dem`, il y a un répertoire `docs` qui contient lui-même un dossier `internals`.
@@ -30,3 +33,25 @@ par la commande `make_docs`.
 
 .. note::
     Il faudrait un exemple plus clair ici !
+
+Documentation locale
+--------------------
+
+Il est possible (et même conseillé) de compléter la documentation des applications par de la documentation
+spécifique au site d'installation.
+
+Ce mécanisme permet de créer des guides spécifiques à la plateforme, là où elle est installée. C'est particulièrement utile pour
+le guide de l'utilisateur ou pour préciser certains détails des autres documentations.
+
+Cela se fait par l'insertion (réalisée automatiquement par la commande
+`python manage.py make_docs`) de blocs spécifiques à l'utilisation locale à n'importe quel point de la documentation générique.
+
+Par exemple, la documentation générique va inclure dans la section "installation via un dépôt" une partie de documentation (si elle existe)
+qui sera dans le fichier local/docs/sysadmin/install.rst entre la balise `.. _repository:` et la balise suivante.
+
+Il existe de nombreux points d'insertion dans la documentation générique et il est évidemment possible d'en ajouter autant
+que nécessaire.
+
+.. warning::
+    Même si cela peut être tentant, il faut absolument éviter d'intégrer dans cette partie de la
+    documentation des mots de passe ou d'autres données confidentielles !

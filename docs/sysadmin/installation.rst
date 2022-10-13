@@ -15,7 +15,7 @@ Toutefois, pour simplifier, la documentation se base sur une configuration typiq
 - Serveur Web ``nginx``
 - SGBD PostgreSQL verstion 12
 
-.. include:: ../../local/docs/sysadmin/installation.rst
+.. include:: doc_local/installation.rst
     :start-after: .. _prerequisites:
     :end-before: .. _
 
@@ -51,4 +51,6 @@ Installation avec des containers
 
 - Todo...
 
-
+.. include:: doc_local/installation.rst
+    :start-after: .. _containers:
+    :end-before: .. _
