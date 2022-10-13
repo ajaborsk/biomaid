@@ -23,7 +23,8 @@ from inspect import ismodule
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
+from django.db.models import F, Q, Value
+from django.db.models.functions import Concat
 from django.http import HttpRequest
 from django.template import Context, Template
 from django.urls import reverse, path
@@ -172,9 +173,17 @@ class BiomAidViewMixin(UserPassesTestMixin, metaclass=BiomAidViewMixinMetaclass)
         if isinstance(request.user, get_user_model()):
             if Programme.objects.filter(arbitre=request.user).exists():
                 roles.append('ARB')
+                roles.append('P-ARB')
             if Campagne.objects.filter(dispatcher=request.user).exists():
                 roles.append('DIS')
+                roles.append('P-DIS')
             roles += list(UserUfRole.active_objects.filter(user=request.user).values_list('role_code', flat=True).distinct())
+            roles += list(
+                UserUfRole.active_objects.filter(user=request.user)
+                .annotate(p_role=Concat(Value('P-'), F('role_code')))
+                .values_list('p_role', flat=True)
+                .distinct()
+            )
 
             # Get last time the use viewed a page on this site (if any)
             if request.user.last_seen:
