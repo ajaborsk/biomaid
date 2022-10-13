@@ -388,6 +388,14 @@ class ExceptionMarcheSmartView(SmartView):
             # Commentaires
                 <comments_sf>
         """
+        menu_left = ({'label': 'Ajouter une autorisation', 'url_name': 'marche:exception_marche-create'},)
+        exports = {
+            'xlsx': {
+                'engine': 'xlsx',
+                'label': 'Microsoft Excel 2003+',
+                'filename': 'Exceptions_marché.xlsx',
+            }
+        }
 
     # Do not use 'comments' since this is a model fieldname
     comments_sf = (
