@@ -33,7 +33,7 @@ from common.base_views import BiomAidViewMixinMetaclass
 def media_property(cls):
     def _media(self):
 
-        # print("Container Media...")
+        # print("Container Media...", cls)
         # print(f"  self.Media: {self.Media} {dir(self.Media)}")
 
         # Get the media property of the superclass, if it exists
@@ -103,34 +103,40 @@ class HtmlMediaDefiningClass(MediaDefiningClass, ABCMeta):
 
     def __new__(mcs, name, bases, attrs):
         params_set = set()
-        template_mapping = dict()
+        _template_mapping = dict()
         if len(bases) == 1:
             for base_dict in list(b.__dict__ for b in reversed(bases[0].__mro__)) + [attrs]:
                 # print(f"base: {base}")
                 if 'PARAMS_ADD' in base_dict:
                     # print(f"  params: {base.__dict__['PARAMS']}")
                     params_set.update(set(base_dict['PARAMS_ADD']))
-                if 'template_mapping' in base_dict:
-                    template_mapping = base_dict['template_mapping'].copy()
-                if 'template_mapping_add' in base_dict:
-                    template_mapping.update(base_dict['template_mapping_add'])
-                if 'template_mapping_del' in base_dict:
-                    for k in base_dict['template_mapping_del']:
-                        del template_mapping[k]
+                if '_template_mapping' in base_dict:
+                    _template_mapping = base_dict['_template_mapping'].copy()
+                if '_template_mapping_add' in base_dict:
+                    _template_mapping.update(base_dict['_template_mapping_add'])
+                if '_template_mapping_del' in base_dict:
+                    for k in base_dict['_template_mapping_del']:
+                        del _template_mapping[k]
 
             # print(f"params_set: {params_set}")
             attrs['PARAMS'] = deepcopy(params_set)
-            # print(f"{name}.template_mapping: {template_mapping}")
-            attrs['template_mapping'] = deepcopy(template_mapping)
+            # print(f"{name}._template_mapping: {_template_mapping}")
+            attrs['_template_mapping'] = deepcopy(_template_mapping)
 
             new_class = super().__new__(mcs, name, bases, attrs)
 
             if "media" not in attrs:
-                attrs['media'] = media_property(new_class)
+                new_class.media = media_property(new_class)
+
+            # Do not check this (but this should be done for some HtmlWidgets... :-( )
+            # if name != 'HtmlWidget' and new_class.template_string is None and new_class.template_name is None:
+            #     raise RuntimeError(
+            #         _("Widget Class {} must have either a template_string or a template_name attribute").format(name)
+            #     )
+
+            return new_class
         else:
             NotImplementedError("Multiple heritance non implemented yet for WidgetPage")
-
-        return new_class
 
 
 class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
@@ -139,7 +145,7 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
     """
 
     @classmethod
-    def factory(cls, **attrs):
+    def _factory(cls, **attrs):
         # print(f"factory {cls}")
         # print(f"  factory {cls.__dict__}")
         # Small hacking name
@@ -153,9 +159,9 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
 
     PARAMS_ADD = ('template_string', 'template_name')
 
-    template_string = None
+    template_string = ""
     template_name = None
-    template_mapping = {
+    _template_mapping = {
         'html_id': lambda self, kwargs: self.html_id,
     }
 
@@ -193,9 +199,9 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
         else:
             self.template = engine.from_string(_("-- Undefined Template --"))
 
-    def get_context_data(self, **kwargs):
+    def _get_context_data(self, **kwargs):
         context = Context()
-        for k, v in self.template_mapping.items():
+        for k, v in self._template_mapping.items():
             if callable(v):
                 context[k] = v(self, kwargs)
             elif isinstance(v, str):
@@ -204,13 +210,13 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
                 context[k] = v
         return context
 
-    def as_html(self, html_only=False):
-        context = self.get_context_data()
+    def _as_html(self, html_only=False):
+        context = self._get_context_data()
         context['html_only'] = html_only
         return self.template.render(context)
 
     def __str__(self):
-        return self.as_html()
+        return self._as_html()
 
 
 class ContainerWidget(HtmlWidget):
@@ -228,8 +234,12 @@ class ContainerWidget(HtmlWidget):
     def __init__(self, html_id=None, params=None):
         super().__init__(html_id=html_id, params=None)
         self._children = [base_child(html_id=self.html_id + '-' + str(c)) for c, base_child in enumerate(self.base_children)]
-        params = params or {}
-        self.setup(**params)
+        if params:
+            self.setup(**params)
+
+    def _add_child(self, child):
+        self._children.append(child)
+        return child
 
     def setup(self, **params):
         super().setup(**params)
@@ -238,8 +248,8 @@ class ContainerWidget(HtmlWidget):
         for child in self.children:
             child.setup(**self.params)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def _get_context_data(self, **kwargs):
+        context = super()._get_context_data(**kwargs)
         context['children'] = self._children
         return context
 
@@ -261,8 +271,8 @@ class GridWidget(ContainerWidget):
             self.base_columns = params['columns']
         super().setup(**params)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def _get_context_data(self, **kwargs):
+        context = super()._get_context_data(**kwargs)
         context['columns_style'] = ' '.join(self.base_columns * [str(100 / self.base_columns) + '%'])
         return context
 
@@ -288,7 +298,7 @@ class SimpleTextWidget(HtmlWidget):
         '"><div style="color:{{ text_color }}">{{ text | safe}}</div></div>'
     )
     PARAMS_ADD = ('text_align', 'font_size', 'text_color')
-    template_mapping_add = {
+    _template_mapping_add = {
         'text': 'text',
         'text_align': 'text_align',
         'text_color': 'text_color',
@@ -316,8 +326,8 @@ class SimpleTextWidget(HtmlWidget):
         self.params['font_size'] = str(self.params.get('font_size', self.default_size))
         self.params['text_color'] = str(self.params.get('text_color', self.default_color))
 
-    # def get_context_data(self, **kwargs):
-    # context = super().get_context_data(**kwargs)
+    # def _get_context_data(self, **kwargs):
+    # context = super()._get_context_data(**kwargs)
     # context['text'] = self.params['text']
     # context['text_align'] = self.params['text_align']
     # context['font_size'] = self.params['font_size']
@@ -355,8 +365,8 @@ class AltairWidget(HtmlWidget):
         self.chart = self.params.get('chart')
         super().setup(**params)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def _get_context_data(self, **kwargs):
+        context = super()._get_context_data(**kwargs)
         context['options'] = json.dumps(self.altair_options)
         if self.chart:
             context['spec'] = self.chart.to_json()
@@ -481,8 +491,8 @@ class SimpleLightWidget(SvgWidget):
         self.light_color = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.9, saturation)))
         self.dark_color = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.4, saturation)))
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def _get_context_data(self, **kwargs):
+        context = super()._get_context_data(**kwargs)
         context['suffix'] = self.suffix
         context['light_color'] = self.light_color
         context['dark_color'] = self.dark_color

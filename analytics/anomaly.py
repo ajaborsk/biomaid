@@ -9,6 +9,8 @@
 #  General Public License for more details.
 #  You should have received a copy of the GNU General Public License
 #  along with this program. If not, see <http://www.gnu.org/licenses/>.
+from django.utils.timezone import now
+
 from analytics.data import put_data
 
 # A anomaly is a simple dict with the following keys :
@@ -52,10 +54,10 @@ class JsonAnomaliesStorage(AnomaliesStorage):
             setattr(
                 self.record,
                 self.column,
-                {'max_level': max_level, 'anomalies': self.anomalies},
+                {'max_level': max_level, 'anomalies': self.anomalies, 'timestamp': now().isoformat()},
             )
         else:
-            setattr(self.record, self.column, {'max_level': 0})
+            setattr(self.record, self.column, {'max_level': 0, 'timestamp': now().isoformat()})
         self.record.save(update_fields=[self.column])
 
 
@@ -142,6 +144,7 @@ class AnomalyChecker:
                 'score': kwargs.get('score', self.base_score),
                 'level': self.level,
                 'message': self.message.format(**kwargs),
+                'data': kwargs.get('data'),
             }
         )
         if self.storage:

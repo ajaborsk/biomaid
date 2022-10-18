@@ -131,7 +131,11 @@ class CmdRowIntervLinkChecker(RecordAnomalyChecker):
     def check(self, verbosity=1):
         order, order_row, interv = self.data
         if interv is not None:
-            self.add(no_intv=interv['nu_int'], strength=100 * interv['match_strength'])
+            self.add(
+                no_intv=interv['nu_int'],
+                strength=100 * interv['match_strength'],
+                data={'intv': interv['nu_int'], 'strength': 100 * interv['match_strength']},
+            )
         return super().check(verbosity)
 
 

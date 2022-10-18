@@ -61,7 +61,7 @@ class DracharView(BiomAidViewMixin, TemplateView):
 
 
 class TestWidget(BarChartWidget):
-    template_mapping_add = {}
+    _template_mapping_add = {}
 
     def params_process(self):
         self.params['qs'] = (

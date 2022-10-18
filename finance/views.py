@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import re
+from datetime import datetime
 from functools import reduce
 
 from altair import Chart, Data, Y
@@ -22,6 +23,7 @@ from django.apps import apps
 from django.db import Error as DbError
 from django.db.models import Value, F, CharField, When, Case, Q, Sum, Count
 from django.db.models.functions import Replace
+from django.http import HttpRequest
 from django.utils.connection import ConnectionDoesNotExist
 from django.utils.timezone import now
 from django.views.generic import TemplateView
@@ -32,6 +34,7 @@ import finance
 from analytics.data import get_last_data
 from smart_view.smart_widget import (
     AltairWidget,
+    ContainerWidget,
     GridWidget,
     HtmlWidget,
     SimpleLightWidget,
@@ -327,8 +330,8 @@ class GestWidget(HtmlWidget):
         score = Column(verbose_name=_("Score"), orderable=False)
         problemes = TemplateColumn(verbose_name=_("Problèmes"), orderable=False, template_code='{{value|safe}}')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def _get_context_data(self, **kwargs):
+        context = super()._get_context_data(**kwargs)
 
         gestionnaire = self.params['request_get'].get('gest')
         indicateur = self.params['request_get'].get('indic')
@@ -422,7 +425,7 @@ class GestTextWidget(SimpleTextWidget):
 
 
 class GestGrid(GridWidget):
-    # template_mapping_add = {'asset_ooo': 'asset_ooo'}
+    # _template_mapping_add = {'asset_ooo': 'asset_ooo'}
 
     gest_list = ('IF', 'II', 'IM')
 
@@ -446,72 +449,72 @@ class GestGrid(GridWidget):
 
     base_children = tuple(
         [
-            SimpleTextWidget.factory(default_text=''),
-            SimpleTextWidget.factory(
+            SimpleTextWidget._factory(default_text=''),
+            SimpleTextWidget._factory(
                 default_text='<center><b>Avec problème(s)</b><br>Commandes avec '
                 'au moins un problème de saisie dans magh2 ou Asset+</center>'
             ),
-            SimpleTextWidget.factory(
+            SimpleTextWidget._factory(
                 default_text='<center><b>A solder</b><br>Commandes pour lesquelles'
                 ' des interventions Asset+ sont terminées</center>'
             ),
-            SimpleTextWidget.factory(
+            SimpleTextWidget._factory(
                 default_text='<center><b>Anciennes</b><br>Commandes de plus de 6 mois, Peut-être à relancer</center>'
             ),
-            SimpleTextWidget.factory(default_text='<center><b>Ok</b><br>Commandes sans problème détecté</center>'),
+            SimpleTextWidget._factory(default_text='<center><b>Ok</b><br>Commandes sans problème détecté</center>'),
         ]
         + reduce(
             lambda a, b: a + b,
             (
                 [
-                    SimpleTextWidget.factory(default_text='Gestionnaire ' + gest),
-                    LightAndTextWidget.factory(
+                    SimpleTextWidget._factory(default_text='Gestionnaire ' + gest),
+                    LightAndTextWidget._factory(
                         base_children=(
-                            GestLightWidget.factory(
+                            GestLightWidget._factory(
                                 data_code='nb-orders-flaws',
                                 data_params={'gest': gest, 'level': 4},
                                 alert_color='red',
                             ),
-                            GestTextWidget.factory(
+                            GestTextWidget._factory(
                                 data_code='nb-orders-flaws',
                                 data_params={'gest': gest, 'level': 4},
                             ),
                         )
                     ),
-                    LightAndTextWidget.factory(
+                    LightAndTextWidget._factory(
                         base_children=(
-                            GestLightWidget.factory(
+                            GestLightWidget._factory(
                                 data_code='nb-orders-flaws',
                                 data_params={'gest': gest, 'level': 3},
                                 alert_color='orange',
                             ),
-                            GestTextWidget.factory(
+                            GestTextWidget._factory(
                                 data_code='nb-orders-flaws',
                                 data_params={'gest': gest, 'level': 3},
                             ),
                         )
                     ),
-                    LightAndTextWidget.factory(
+                    LightAndTextWidget._factory(
                         base_children=(
-                            GestLightWidget.factory(
+                            GestLightWidget._factory(
                                 data_code='nb-orders-flaws',
                                 data_params={'gest': gest, 'level': 2},
                                 alert_color='yellow',
                             ),
-                            GestTextWidget.factory(
+                            GestTextWidget._factory(
                                 data_code='nb-orders-flaws',
                                 data_params={'gest': gest, 'level': 2},
                             ),
                         )
                     ),
-                    LightAndTextWidget.factory(
+                    LightAndTextWidget._factory(
                         base_children=(
-                            GestLightWidget.factory(
+                            GestLightWidget._factory(
                                 data_code='nb-orders-flaws',
                                 data_params={'gest': gest, 'level': 0},
                                 alert_color='green',
                             ),
-                            GestTextWidget.factory(
+                            GestTextWidget._factory(
                                 data_code='nb-orders-flaws',
                                 data_params={'gest': gest, 'level': 0},
                             ),
@@ -590,8 +593,289 @@ class OrdersView(SmartPage):
     }
 
 
-class OrderView(FinanceView):
+class AnomalyWidget(HtmlWidget):
+    """ """
+
+    class Media:
+        css = {'all': ['smart_view/css/analysis.css']}
+
+    template_string = """<div class="widget level-{{ level }} message">{{ message }}</div>"""
+    _template_mapping_add = {
+        'message': 'message',
+        'level': 'level',
+        'code': 'code',
+    }
+
+
+class AnalyseWidget(ContainerWidget):
+    """"""
+
+    template_string = """<div class="widget analysis">{% if ok %}{{ ok|safe }}{% else %}
+    {% for anomaly in anomalies %}{{ anomaly.widget }}{% endfor %}{% endif %}</div>"""
+    _template_mapping_add = {'anomalies': 'anomalies', 'ok': 'ok'}
+
+    def params_process(self):
+        super().params_process()
+        if 'anomalies' in self.params and self.params['anomalies']:
+            self.params['ok'] = None
+            for idx, anomaly in enumerate(self.params['anomalies']):
+                anomaly['widget'] = self._add_child(AnomalyWidget(self.html_id + '-anomaly-' + str(idx), anomaly))
+        else:
+            self.params['ok'] = _("<div class=\"widget level-0 message\">RAS</div>")
+            self.params['anomalies'] = []
+
+
+class OrderIdFormWidget(HtmlWidget):
+    """Very basic widget (a simple form to get a order id)"""
+
+    template_string = """<div class="widget"><form><input name="order_id"><button type="submit">Envoyer</button></form></div>"""
+
+
+class OrderHeaderWidget(ContainerWidget):
+    class Media:
+        css = {
+            'all': [
+                'smart_view/css/simple_table.css',
+            ]
+        }
+
+    template_string = """{% load l10n %}<div class="widget" id="{{ html_id }}">
+    <table class="simple" style="width:80%;margin:0 10%;background-color:#eee;">
+        <tr>
+            <th>N°</th><td>{{ header.commande }}</td>
+            <th>Exercice</th><td>{{ header.exercice_ec|unlocalize }}</td>
+            <th>Date passation</th><td>{{ header.date_passation_ec }}</td>
+            <th>Founisseur</th><td>{{ header.no_fournisseur_fr|unlocalize }}</td><td>{{ header.intitule_fournisseur_fr }}</td>
+            <th>Opération</th><td>{{ header.no_operation_op|unlocalize|default_if_none:"" }}</td>
+                <td>{{ header.lib_operation_op|default_if_none:"" }}</td>
+        </tr>
+        <tr>
+            <th>Objet dépense</th><td colspan="5">{{ header.objet_depense_ec|default_if_none:"" }}</td>
+            <th>Bloc note</th><td colspan="5">{{ header.bloc_note|safe }}</td>
+        </tr>
+        {% if analyse_widget %}
+            <tr><th colspan="2">Analyse ({{ header.analyse_cmd.timestamp }})</th><td colspan="12">{{ analyse_widget }}</td></tr>
+        {% endif %}
+    </table>
+    </div>"""
+    _template_mapping_add = {
+        'header': 'header',
+        'analyse_widget': 'analyse_widget',
+    }
+
+    # def params_process(self):
+    #     super().params_process()
+    #     self.params['header']['analyse_widget'] = self._add_child(
+    #         AnalyseWidget(self.html_id + '-analyse', self.params['header']['analyse_cmd'])
+    #     )
+
+
+class OrderRowWidget(ContainerWidget):
+    class Media:
+        css = {
+            'all': [
+                'smart_view/css/simple_table.css',
+            ]
+        }
+
+    template_string = """<div id="{{ html_id }}"><br>
+    <table class="simple" style="width:80%;margin:0 10%;background-color:#eee;">
+        <tr>
+            <td class="center" rowspan="5" style="width:5%;">{{ row.no_ligne_lc }}</td>
+            <th colspan="2">Unité Fonctionnelle</th>
+            <th style="width:12%;">N° Marché</th>
+            <th style="width:12%;">Nomenclature</th>
+            <th style="width:12%;">N° compte</th>
+            <th style="width:35%;">Libellé</th>
+        </tr>
+        <tr>
+            <td colspan="2" class="center">{{ row.no_uf_uf }} - {{ row.libelle_uf_uf }}</td>
+            <td class="center">{{ row.no_marche_ma }}</td>
+            <td></td>
+            <td class="center">{{ row.no_compte_cp }}</td>
+            <td rowspan="3">{{ row.libelle|safe }}</td>
+        </tr>
+        <tr>
+            <th style="width:12%;">Qté commandée</th>
+            <th style="width:12%;">Qté reçue</th>
+            <th>Mt Engagé</th><th>Mt liquidé</th>
+            <th>Soldé</th>
+        </tr>
+        <tr>
+            <td class="number">{{ row.qte_cdee_lc }}</td>
+            <td class="number">{{ row.qte_recue_lc }}</td>
+            <td class="euros">{{ row.mt_engage_lc }} €</td>
+            <td class="euros">{{ row.mt_liquide_lc|default_if_none:"---,--" }} €</td>
+            <td>{{ row.lg_soldee_lc }}</td>
+        </tr>
+        {% if row.analyse_widget %}
+            <tr>
+                <th>Analyse ({{ row.analyse.timestamp }})</th>
+                <td colspan="5">{{ row.analyse_widget }}</td>
+            </tr>
+        {% endif %}
+    </table>
+    </div>"""
+    _template_mapping_add = {
+        'row': 'row',
+    }
+
+    def params_process(self):
+        super().params_process()
+
+        # Linked intervention
+        ...
+
+        # Linked equipement(s)
+        ...
+
+        # Analyse widget
+        if self.params['row']['analyse']:
+            self.params['row']['analyse_widget'] = self._add_child(
+                AnalyseWidget(self.html_id + '-analyse', self.params['row']['analyse'])
+            )
+            # date conversion (workaround test since it should always be a string :-( )
+            if isinstance(self.params['row']['analyse']['timestamp'], str):
+                self.params['row']['analyse']['timestamp'] = datetime.fromisoformat(self.params['row']['analyse']['timestamp'])
+
+        # HTML-ize
+        self.params['row']['libelle'] = self.params['row']['libelle'].replace('\n', '<br>')
+
+
+class OrderWidget(ContainerWidget):
+
+    template_string = """<div id="{{ html_id }}">
+            {% if order %}
+                {{ order.header.widget }}
+                {% for row in order.rows %}
+                    {{ row.widget }}
+                {% endfor %}
+            {% else %}
+                Pas de commande avec ce n° : {{ order_id }}
+            {% endif %}
+        </div>"""
+    _template_mapping_add = {'order': 'order'}
+
+    def params_process(self):
+        qs = self.params['smart_view'].get_base_queryset(view_attrs=self.params)
+        qs = qs.filter(commande=self.params['order_id']).annotate(
+            libelle_html=Replace(F('libelle'), Value('\n'), Value('<br>'), output_field=CharField())
+        )
+        if qs.count():
+
+            # Order header
+            header = (
+                qs.values(
+                    'gest_ec',
+                    'no_cde_ec',
+                    'exercice_ec',
+                    'no_fournisseur_fr',
+                    'intitule_fournisseur_fr',
+                    'date_passation_ec',
+                    'no_operation_op',
+                    'lib_operation_op',
+                    'commande',
+                    'objet_depense_ec',
+                    'bloc_note',
+                    'analyse_cmd',
+                )
+                .distinct()
+                .order_by('no_ligne_lc')[0]
+            )
+
+            # Add links if orders are cited & transform to a multilines html text
+            header['bloc_note'] = re.sub(
+                r"\b((?:[0-9A-Za-z][0-9A-Za-z])\d\d\d\d\d\d)\b",
+                lambda a: '<a href="./?order_id=' + a.groups()[0] + '">' + a.groups()[0] + '</a>',
+                header['bloc_note'].replace('\n', '<br>'),
+            )
+
+            # Order rows
+            rows = qs.order_by('no_ligne_lc').values()
+            self.params['order'] = {
+                'rows': [
+                    {'widget': self._add_child(OrderRowWidget(self.html_id + '-row-' + str(idx), {'row': row}))}
+                    for idx, row in enumerate(rows)
+                ],
+            }
+            if header['analyse_cmd']:
+                self.params['order']['analyse_widget'] = self._add_child(
+                    AnalyseWidget(self.html_id + '-analyse', header['analyse_cmd'])
+                )
+                # date conversion (workaround test since it should always be a string :-( )
+                if isinstance(header['analyse_cmd']['timestamp'], str):
+                    header['analyse_cmd']['timestamp'] = datetime.fromisoformat(header['analyse_cmd']['timestamp'])
+
+            self.params['order']['header'] = {
+                'widget': self._add_child(
+                    OrderHeaderWidget(
+                        self.html_id + '-header',
+                        {'header': header, 'analyse_widget': self.params['order'].get('analyse_widget')},
+                    )
+                ),
+            }
+
+            # self.params['children'] = [self.params['order']['analyse_widget'], self.params['order']['header']['widget']] + [
+            #     row['widget'] for row in self.params['order']['rows']
+            # ]
+
+            # Is there a associated invoice ?
+            ...
+
+        else:
+            self.params['order'] = None
+
+        super().params_process()
+
+
+class OrderView(BiomAidViewMixin, TemplateView):
     name = 'order'
+    label = _("Commande")
+    title = _("Commande")
+    template_name = 'common/basic.html'
+    permissions = {
+        'EXP',
+        'ACH',
+        'DIS',
+        'ARB',
+        'ADM',
+        'GES',
+    }
+    main_widget_class = OrderWidget
+
+    def setup(self, request: HttpRequest, *args: list, **kwargs: dict):
+        super().setup(request, *args, **kwargs)
+        self.message = None
+        if 'order_id' in request.GET:
+            order_id = request.GET.get('order_id')
+            if order_id:
+                order_id = order_id.strip().upper().replace(' ', '').replace(' ', '')
+                if len(order_id) > 2 and len(order_id) < 8:
+                    order_id = order_id[:2] + (8 - len(order_id)) * '0' + order_id[2:]
+                elif len(order_id) > 8:
+                    self.message = _("Numéro de commande non conforme (trop long) : {}").format(order_id)
+                elif len(order_id) <= 2:
+                    self.message = _("Numéro de commande non conforme (trop court) : {}").format(order_id)
+            OrdersView.smart_view_class._meta['appname'] = 'finance'
+            self.smart_view = OrdersView.smart_view_class(prefix=self.url_prefix, view_params=self.view_params)
+            self.order_id = order_id
+            self.title = _("Commande {}").format(self.order_id)
+            self.main_widget = OrderWidget(None, dict(self.view_params, order_id=self.order_id, smart_view=self.smart_view))
+        else:
+            self.smart_view = None
+            self.order_id = None
+            self.title = _("Commande à rechercher")
+            self.main_widget = OrderIdFormWidget(None, self.view_params)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['main_widget'] = self.main_widget
+        context['message'] = self.message
+        return context
+
+
+class OrderViewBak(FinanceView):
+    name = 'order_bak'
     label = _("Commande")
     title = _("Commande")
     template_name = 'finance/order.html'
@@ -721,9 +1005,6 @@ class OrderView(FinanceView):
         qte_uf_df1 = Column(verbose_name=_("Qté UF"), orderable=False)
         repart_uf_df1 = Column(verbose_name=_("Répart. UF"), orderable=False)
         actif_uf_df2 = Column(verbose_name=_("Actif"), orderable=False)
-
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

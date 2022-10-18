@@ -401,7 +401,7 @@ class SimpleScalarWidget(HtmlWidget):
         '"><div style="color:{{ text_color }}">{{ prefix }}&nbsp;{{ scalar }}&nbsp;{{ suffix }}</div></div>'
     )
     PARAMS_ADD = ('font_size', 'text_color', 'scalar', 'prefix', 'suffix')
-    template_mapping_add = {
+    _template_mapping_add = {
         'text_color': 'text_color',
         'font_size': 'font_size',
         'prefix': 'prefix',
@@ -567,7 +567,7 @@ class VueGridWidget(VueWidget):
                 w = self.available_widgets[widget.get('w_class')](
                     html_id=self.html_id + '-' + str(widget.get('i')), params=dict(self.params, **params)
                 )
-                r_layout[widget['i']] = {'html': w.as_html(html_only=True)}
+                r_layout[widget['i']] = {'html': w._as_html(html_only=True)}
                 if isinstance(w, AltairWidget):
                     # print("Altair widget", widget)
                     r_layout[widget['i']]['altair'] = w.altair_data
@@ -575,8 +575,8 @@ class VueGridWidget(VueWidget):
                 r_layout[widget['i']] = {'html': 'Not found'}
         return JsonResponse({'ok': 'it s me !', 'layout': r_layout})
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def _get_context_data(self, **kwargs):
+        context = super()._get_context_data(**kwargs)
         grid_layout = self.default_grid_layout
         if not self.params['request_get'].get('reset'):
             try:

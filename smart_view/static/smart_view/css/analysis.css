@@ -2,6 +2,10 @@
   padding: 2px;
 }
 
+.analysis div.message {
+  padding: 2px;
+}
+
 .analysis .level-4 {
   background-color: #f99;
 }

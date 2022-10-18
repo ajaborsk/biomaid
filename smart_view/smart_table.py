@@ -38,7 +38,7 @@ class SmartTable(HtmlWidget, metaclass=SmartTableMetaclass):
     selectable_columns = tuple()
     user_filters = tuple()
     PARAMS_ADD = ('options',)
-    template_mapping_add = {
+    _template_mapping_add = {
         'options': lambda self, kwargs: self.params['options'],
     }
 
