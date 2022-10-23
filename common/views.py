@@ -418,8 +418,8 @@ class SimpleScalarWidget(HtmlWidget):
         'suffix': {'label': "Suffixe", 'type': 'string'},
     }
 
-    def params_process(self):
-        super().params_process()
+    def _setup(self, **params):
+        super()._setup(**params)
         self.params['prefix'] = self.params.get('prefix', '')
         self.params['suffix'] = self.params.get('suffix', '')
         self.params['scalar'] = get_data('common.user-active-alerts', all_params=self.params)
@@ -438,8 +438,8 @@ class PrevisionnelParExpertWidget(AltairWidget):
             },
         }
 
-    def setup(self, **params):
-        super().setup(**params)
+    def _setup(self, **params):
+        super()._setup(**params)
 
         qs = get_data('drachar.previsionnel-par-expert', all_params=self.params)
         category = 'nom_expert:N'
@@ -455,9 +455,6 @@ class PrevisionnelParExpertWidget(AltairWidget):
             .configure_view(strokeWidth=0)
         )
 
-    def params_process(self):
-        super().params_process()
-
 
 class MontantPrevisionnelParExpertWidget(AltairWidget):
     label = _("Montant prévisionnel par expert")
@@ -472,8 +469,8 @@ class MontantPrevisionnelParExpertWidget(AltairWidget):
             },
         }
 
-    def setup(self, **params):
-        super().setup(**params)
+    def _setup(self, **params):
+        super()._setup(**params)
 
         qs = get_data('drachar.montant-previsionnel-par-expert', all_params=self.params)
         category = 'nom_expert:N'
@@ -488,9 +485,6 @@ class MontantPrevisionnelParExpertWidget(AltairWidget):
             .properties(width='container', height='container')
             .configure_view(strokeWidth=0)
         )
-
-    def params_process(self):
-        super().params_process()
 
 
 class VueGridWidget(VueWidget):
@@ -558,7 +552,7 @@ class VueGridWidget(VueWidget):
         'montant_previsionnel_par_expert': MontantPrevisionnelParExpertWidget,
     }
 
-    def get(self, request, *args, **kwargs):
+    def _get(self, request, *args, **kwargs):
         layout = json.loads(request.GET['layout'])
         r_layout = {}
         for widget in layout:
@@ -633,7 +627,7 @@ class BiomAidCockpit(BiomAidViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         if 'id' in request.GET and request.GET['id'] in self.widgets:
-            return self.widgets[request.GET['id']].get(request, *args, **kwargs)
+            return self.widgets[request.GET['id']]._get(request, *args, **kwargs)
         else:
             return super().get(request, *args, **kwargs)
 

@@ -20,7 +20,7 @@ from functools import reduce
 
 from altair import Chart, Data, Y
 from django.apps import apps
-from django.db import Error as DbError
+from django.db import DatabaseError, Error as DbError
 from django.db.models import Value, F, CharField, When, Case, Q, Sum, Count
 from django.db.models.functions import Replace
 from django.http import HttpRequest
@@ -32,6 +32,7 @@ from django.utils.translation import gettext as _
 
 import finance
 from analytics.data import get_last_data
+from finance.analytics import get_intv
 from smart_view.smart_widget import (
     AltairWidget,
     ContainerWidget,
@@ -354,7 +355,8 @@ class GestWidget(HtmlWidget):
 
 
 class GestLightWidget(SimpleLightWidget):
-    def params_process(self):
+    def _setup(self, **params):
+        super()._setup(**params)
 
         try:
             data = get_last_data(self.data_code, self.data_params)
@@ -372,7 +374,8 @@ class GestLightWidget(SimpleLightWidget):
 
 
 class GestTextWidget(SimpleTextWidget):
-    def params_process(self):
+    def _setup(self, **params):
+        super()._setup(**params)
 
         info_orders = 0
         try:
@@ -421,7 +424,6 @@ class GestTextWidget(SimpleTextWidget):
                     )
             else:
                 self.params['text'] = _("Aucune")
-        super().params_process()
 
 
 class GestGrid(GridWidget):
@@ -429,7 +431,8 @@ class GestGrid(GridWidget):
 
     gest_list = ('IF', 'II', 'IM')
 
-    def params_process(self):
+    def _setup(self, **params):
+        super()._setup(**params)
         ...
         # try:
         #     self.params['indicators'] = {gest: flawed_orders(gest) for gest in self.gest_list}
@@ -547,14 +550,13 @@ class FinanceHome(FinanceView, metaclass=WidgetPageMetaClass):
         else:
             self.main_widget = self.main_widget_class()
         super().setup(request, *args, **kwargs)
-        self.main_widget.setup(**self.view_params)
+        self.main_widget._setup(**self.view_params)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         # This statement shouldn't be in a WidgetPageMixin ??
         context['main_widget'] = self.main_widget
-
         context['title'] = _("Commandes de maintenance externe - Biomédical")
 
         return context
@@ -609,17 +611,20 @@ class AnomalyWidget(HtmlWidget):
 
 class AnalyseWidget(ContainerWidget):
     """"""
+    class Media:
+        css = {'all': ['smart_view/css/analysis.css']}
 
     template_string = """<div class="widget analysis">{% if ok %}{{ ok|safe }}{% else %}
     {% for anomaly in anomalies %}{{ anomaly.widget }}{% endfor %}{% endif %}</div>"""
     _template_mapping_add = {'anomalies': 'anomalies', 'ok': 'ok'}
 
-    def params_process(self):
-        super().params_process()
+    def _setup(self, **params):
+        super()._setup(**params)
         if 'anomalies' in self.params and self.params['anomalies']:
             self.params['ok'] = None
             for idx, anomaly in enumerate(self.params['anomalies']):
-                anomaly['widget'] = self._add_child(AnomalyWidget(self.html_id + '-anomaly-' + str(idx), anomaly))
+                print('anomaly+', idx)
+                anomaly['widget'] = self._add_child(AnomalyWidget, 'anomaly-' + str(idx), anomaly)
         else:
             self.params['ok'] = _("<div class=\"widget level-0 message\">RAS</div>")
             self.params['anomalies'] = []
@@ -670,6 +675,17 @@ class OrderHeaderWidget(ContainerWidget):
     #     )
 
 
+class IntervWidget(HtmlWidget):
+    class Media:
+        css = {
+            'all': [
+                'smart_view/css/simple_table.css',
+            ]
+        }
+
+    template_string = """Intervention !"""
+
+
 class OrderRowWidget(ContainerWidget):
     class Media:
         css = {
@@ -681,7 +697,7 @@ class OrderRowWidget(ContainerWidget):
     template_string = """<div id="{{ html_id }}"><br>
     <table class="simple" style="width:80%;margin:0 10%;background-color:#eee;">
         <tr>
-            <td class="center" rowspan="5" style="width:5%;">{{ row.no_ligne_lc }}</td>
+            <td class="center" rowspan="8" style="width:5%;">{{ row.no_ligne_lc }}</td>
             <th colspan="2">Unité Fonctionnelle</th>
             <th style="width:12%;">N° Marché</th>
             <th style="width:12%;">Nomenclature</th>
@@ -708,10 +724,16 @@ class OrderRowWidget(ContainerWidget):
             <td class="euros">{{ row.mt_liquide_lc|default_if_none:"---,--" }} €</td>
             <td>{{ row.lg_soldee_lc }}</td>
         </tr>
+        {% if row.intv_widgets %}
+            <tr>
+                <th>Intervention Asset+</th>
+                <td colspan="5">{% for widget in row.intv_widgets %}{{ widget }}{% endfor %}</td>
+            </tr>
+        {% endif %}
         {% if row.analyse_widget %}
             <tr>
                 <th>Analyse ({{ row.analyse.timestamp }})</th>
-                <td colspan="5">{{ row.analyse_widget }}</td>
+                <td colspan="6">{{ row.analyse_widget }}</td>
             </tr>
         {% endif %}
     </table>
@@ -720,23 +742,26 @@ class OrderRowWidget(ContainerWidget):
         'row': 'row',
     }
 
-    def params_process(self):
-        super().params_process()
-
-        # Linked intervention
-        ...
-
-        # Linked equipement(s)
-        ...
+    def _setup(self, **params):
+        super()._setup(**params)
+        print("Row.params_process()...")
 
         # Analyse widget
         if self.params['row']['analyse']:
-            self.params['row']['analyse_widget'] = self._add_child(
-                AnalyseWidget(self.html_id + '-analyse', self.params['row']['analyse'])
-            )
+            self.params['row']['analyse_widget'] = self._add_child(AnalyseWidget, '-analyse', self.params['row']['analyse'])
             # date conversion (workaround test since it should always be a string :-( )
             if isinstance(self.params['row']['analyse']['timestamp'], str):
                 self.params['row']['analyse']['timestamp'] = datetime.fromisoformat(self.params['row']['analyse']['timestamp'])
+            if 'anomalies' in self.params['row']['analyse']:
+                for idx, anomaly in enumerate(self.params['row']['analyse']['anomalies']):
+                    if anomaly['code'] == '1L01':  # match code
+                        try:
+                            self.params['row']['intvs'] = self.params['row'].get('intvs', []) + [get_intv(anomaly['data']['intv'])]
+                        except DatabaseError:
+                            pass
+                        self.params['row']['intv_widgets'] = self.params['row'].get('intv_widgets', []) + [
+                            self._add_child(IntervWidget, '-interv-' + str(idx), self.params['row']['intvs'][-1])
+                        ]
 
         # HTML-ize
         self.params['row']['libelle'] = self.params['row']['libelle'].replace('\n', '<br>')
@@ -756,7 +781,8 @@ class OrderWidget(ContainerWidget):
         </div>"""
     _template_mapping_add = {'order': 'order'}
 
-    def params_process(self):
+    def _setup(self, **params):
+        super()._setup(**params)
         qs = self.params['smart_view'].get_base_queryset(view_attrs=self.params)
         qs = qs.filter(commande=self.params['order_id']).annotate(
             libelle_html=Replace(F('libelle'), Value('\n'), Value('<br>'), output_field=CharField())
@@ -794,30 +820,22 @@ class OrderWidget(ContainerWidget):
             rows = qs.order_by('no_ligne_lc').values()
             self.params['order'] = {
                 'rows': [
-                    {'widget': self._add_child(OrderRowWidget(self.html_id + '-row-' + str(idx), {'row': row}))}
-                    for idx, row in enumerate(rows)
+                    {'widget': self._add_child(OrderRowWidget, '-row-' + str(idx), {'row': row})} for idx, row in enumerate(rows)
                 ],
             }
             if header['analyse_cmd']:
-                self.params['order']['analyse_widget'] = self._add_child(
-                    AnalyseWidget(self.html_id + '-analyse', header['analyse_cmd'])
-                )
+                self.params['order']['analyse_widget'] = self._add_child(AnalyseWidget, '-analyse', header['analyse_cmd'])
                 # date conversion (workaround test since it should always be a string :-( )
                 if isinstance(header['analyse_cmd']['timestamp'], str):
                     header['analyse_cmd']['timestamp'] = datetime.fromisoformat(header['analyse_cmd']['timestamp'])
 
             self.params['order']['header'] = {
                 'widget': self._add_child(
-                    OrderHeaderWidget(
-                        self.html_id + '-header',
-                        {'header': header, 'analyse_widget': self.params['order'].get('analyse_widget')},
-                    )
+                    OrderHeaderWidget,
+                    'header',
+                    {'header': header, 'analyse_widget': self.params['order'].get('analyse_widget')},
                 ),
             }
-
-            # self.params['children'] = [self.params['order']['analyse_widget'], self.params['order']['header']['widget']] + [
-            #     row['widget'] for row in self.params['order']['rows']
-            # ]
 
             # Is there a associated invoice ?
             ...
@@ -825,7 +843,7 @@ class OrderWidget(ContainerWidget):
         else:
             self.params['order'] = None
 
-        super().params_process()
+        # super().params_process()
 
 
 class OrderView(BiomAidViewMixin, TemplateView):

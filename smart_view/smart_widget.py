@@ -165,39 +165,26 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
         'html_id': lambda self, kwargs: self.html_id,
     }
 
-    def __init__(self, html_id=None, params=None):
+    def __init__(self, html_id=None, params=None, parent=None, mode='render'):
+        self._mode = mode
+        self._parent = parent
         self.params = params or {}
         self.html_id = html_id or re.sub(r'(?<!^)(?=[A-Z])', '_', self.__class__.__name__).lower()
         self.template = None
 
-        # print('Widget __init__...')
-
-        # Used only for direct instanciate-then-setup instanciation
+        # Used only for direct instanciate-then-setup instanciation.
         if self.params:
-            self.setup(**self.params)
+            self._setup(**self.params)
 
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({'error': 'Widget get method not overloaded'})
+    def _get(self, request, *args, **kwargs):
+        return JsonResponse({'error': 'Widget _get method not overloaded'})
 
-    def params_process(self):
-        pass
-
-    def setup(self, **params):
+    # def params_process(self):
+    #     pass
+    #
+    def _setup(self, **params):
         self.params.update(params or {})
-
-        self.params_process()
-
-        # print('Widget setup...')
-
-        engine = Engine.get_default()
-        if self.template_string:
-            self.template = engine.from_string(self.template_string)
-            # Small hack to give a name to the template (helps debug)
-            self.template.name = self.__class__.__name__
-        elif self.template_name:
-            self.template = engine.get_template(self.template_name)
-        else:
-            self.template = engine.from_string(_("-- Undefined Template --"))
+        # self.params_process()
 
     def _get_context_data(self, **kwargs):
         context = Context()
@@ -211,8 +198,20 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
         return context
 
     def _as_html(self, html_only=False):
+        """Render the widget as HTML. The media (JS, CSS) of the widget must have been loaded in the HTML page header"""
         context = self._get_context_data()
         context['html_only'] = html_only
+
+        engine = Engine.get_default()
+        if self.template_string:
+            self.template = engine.from_string(self.template_string)
+            # Small hack to give a name to the template (helps debug)
+            self.template.name = self.__class__.__name__
+        elif self.template_name:
+            self.template = engine.get_template(self.template_name)
+        else:
+            self.template = engine.from_string(_("-- Undefined Template --"))
+
         return self.template.render(context)
 
     def __str__(self):
@@ -220,33 +219,35 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
 
 
 class ContainerWidget(HtmlWidget):
-    class Media:
-        js = ['container_w.js']
-
     PARAMS_ADD = ('base_children',)
-
     base_children = tuple()
 
     @property
     def children(self):
         return self._children
 
-    def __init__(self, html_id=None, params=None):
-        super().__init__(html_id=html_id, params=None)
+    def __init__(self, html_id=None, params=None, parent=None):
+        self._children = []
+        super().__init__(html_id, params, parent)
         self._children = [base_child(html_id=self.html_id + '-' + str(c)) for c, base_child in enumerate(self.base_children)]
-        if params:
-            self.setup(**params)
+        if params and not parent:
+            self._setup(**params)
 
-    def _add_child(self, child):
-        self._children.append(child)
-        return child
+    def _add_child(self, child_class, html_id_suffix, params=None):
+        if isinstance(child_class, type):
+            widget = child_class(self.html_id + '-' + html_id_suffix, params=params or {}, parent=self)
+            self._children.append(widget)
+        else:
+            raise RuntimeError
+            # self._children.append(child)
+        return widget
 
-    def setup(self, **params):
-        super().setup(**params)
+    def _setup(self, **params):
+        super()._setup(**params)
         if 'children' in params:
             self._children = params['children']
         for child in self.children:
-            child.setup(**self.params)
+            child._setup(**self.params)
 
     def _get_context_data(self, **kwargs):
         context = super()._get_context_data(**kwargs)
@@ -266,10 +267,10 @@ class GridWidget(ContainerWidget):
     )
     base_columns = 1
 
-    def setup(self, **params):
+    def _setup(self, **params):
         if 'columns' in params:
             self.base_columns = params['columns']
-        super().setup(**params)
+        super()._setup(**params)
 
     def _get_context_data(self, **kwargs):
         context = super()._get_context_data(**kwargs)
@@ -285,9 +286,6 @@ class TableWidget(GridWidget):
     column_titles = []
     row_titles = []
     cells = [[]]
-
-    def setup(self, **params):
-        super().setup(**params)
 
 
 class SimpleTextWidget(HtmlWidget):
@@ -319,8 +317,8 @@ class SimpleTextWidget(HtmlWidget):
     default_align = 'center'
     default_color = '#000'
 
-    def params_process(self):
-        super().params_process()
+    def _setup(self, **params):
+        super()._setup(**params)
         self.params['text'] = self.params.get('text', self.default_text)
         self.params['text_align'] = str(self.params.get('text_align', self.default_align))
         self.params['font_size'] = str(self.params.get('font_size', self.default_size))
@@ -357,13 +355,9 @@ class AltairWidget(HtmlWidget):
             'options': self.altair_options,
         }
 
-    def __init__(self, html_id=None, params=None):
-        self.chart = None
-        super().__init__(html_id=html_id, params=params)
-
-    def setup(self, **params):
+    def _setup(self, **params):
+        super()._setup(**params)
         self.chart = self.params.get('chart')
-        super().setup(**params)
 
     def _get_context_data(self, **kwargs):
         context = super()._get_context_data(**kwargs)
@@ -376,8 +370,8 @@ class AltairWidget(HtmlWidget):
 
 
 class BasicChartWidget(AltairWidget):
-    def setup(self, **params):  # *args, qs=None, category=None, amount=None, **kwargs):
-        super().setup(**params)
+    def _setup(self, **params):  # *args, qs=None, category=None, amount=None, **kwargs):
+        super()._setup(**params)
 
         qs = self.params.get('qs')
         category = self.params.get('category')
@@ -395,8 +389,8 @@ class BasicChartWidget(AltairWidget):
 
 
 class BarChartWidget(AltairWidget):
-    def setup(self, **params):
-        super().setup(**params)
+    def _setup(self, **params):
+        super()._setup(**params)
 
         qs = self.params.get('qs')
         category = self.params.get('category')
@@ -416,19 +410,19 @@ class BarChartWidget(AltairWidget):
 
 
 class TestBarChartWidget(BarChartWidget):
-    def setup(self, **params):
+    def _setup(self, **params):
+        super()._setup(**params)
         self.params['x'] = 'xx:N'
         self.params['y'] = 'yy:N'
         self.params['category'] = 'yy:O'
         self.params['qs'] = [{'xx': 1, 'yy': 2}]
-        super().setup(**params)
 
 
 class DemoPieChartWidget(AltairWidget):
     label = _("Démo Camenbert")
 
-    def setup(self, **params):
-        super().setup(**params)
+    def _setup(self, **params):
+        super()._setup(**params)
 
         qs = [{'category': k, 'value': v} for k, v in {'a': 4, 'b': 6, 'c': 10, 'd': 3, 'e': 7, 'f': 8}.items()]
         category = 'category:N'
@@ -466,10 +460,13 @@ class SimpleLightWidget(SvgWidget):
         self.light_color = '#dfdfdf'
         self.dark_color = '#050505'
         if params:
-            self.setup(**params)
+            self._setup(**params)
 
-    def setup(self, **params):
-        super().setup(**params)
+    def _setup(self, **params):
+        super()._setup(**params)
+
+    def _get_context_data(self, **kwargs):
+        context = super()._get_context_data(**kwargs)
 
         hue = None
         saturation = 1.0
@@ -487,15 +484,9 @@ class SimpleLightWidget(SvgWidget):
                 )
             )
 
-        self.suffix = id(self)  # to avoid svg/html id collisions
-        self.light_color = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.9, saturation)))
-        self.dark_color = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.4, saturation)))
-
-    def _get_context_data(self, **kwargs):
-        context = super()._get_context_data(**kwargs)
-        context['suffix'] = self.suffix
-        context['light_color'] = self.light_color
-        context['dark_color'] = self.dark_color
+        context['suffix'] = id(self)
+        context['light_color'] = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.9, saturation)))
+        context['dark_color'] = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.4, saturation)))
         return context
 
 
