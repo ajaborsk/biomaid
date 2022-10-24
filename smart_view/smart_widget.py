@@ -197,8 +197,14 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
                 context[k] = v
         return context
 
+    def _prepare(self):
+        """prepare the widget for rendering, based on parameters"""
+        pass
+
     def _as_html(self, html_only=False):
         """Render the widget as HTML. The media (JS, CSS) of the widget must have been loaded in the HTML page header"""
+        self._prepare()
+
         context = self._get_context_data()
         context['html_only'] = html_only
 
@@ -357,7 +363,10 @@ class AltairWidget(HtmlWidget):
 
     def _setup(self, **params):
         super()._setup(**params)
+
+    def _prepare(self):
         self.chart = self.params.get('chart')
+        super()._prepare()
 
     def _get_context_data(self, **kwargs):
         context = super()._get_context_data(**kwargs)
@@ -370,14 +379,12 @@ class AltairWidget(HtmlWidget):
 
 
 class BasicChartWidget(AltairWidget):
-    def _setup(self, **params):  # *args, qs=None, category=None, amount=None, **kwargs):
-        super()._setup(**params)
-
+    def _prepare(self):
         qs = self.params.get('qs')
         category = self.params.get('category')
         amount = self.params.get('amount')
 
-        self.chart = (
+        self.params['chart'] = (
             Chart(Data(values=list(qs)))
             .encode(
                 color=Color(category + ':O', scale=Scale(scheme='Category20')),
@@ -386,18 +393,18 @@ class BasicChartWidget(AltairWidget):
             .mark_arc(innerRadius=100)
             .properties(width='container', height='container')
         )
+        super()._prepare()
 
 
 class BarChartWidget(AltairWidget):
-    def _setup(self, **params):
-        super()._setup(**params)
+    def _prepare(self):
 
         qs = self.params.get('qs')
         category = self.params.get('category')
         x = self.params.get('x')
         y = self.params.get('y')
 
-        self.chart = (
+        self.params['chart'] = (
             Chart(Data(values=list(qs)))
             .encode(
                 color=Color(category + ':N', scale=Scale(scheme='Category20')),
@@ -407,27 +414,18 @@ class BarChartWidget(AltairWidget):
             .mark_bar(tooltip=True)
             .properties(width='container', height='container')
         )
-
-
-class TestBarChartWidget(BarChartWidget):
-    def _setup(self, **params):
-        super()._setup(**params)
-        self.params['x'] = 'xx:N'
-        self.params['y'] = 'yy:N'
-        self.params['category'] = 'yy:O'
-        self.params['qs'] = [{'xx': 1, 'yy': 2}]
+        super()._prepare()
 
 
 class DemoPieChartWidget(AltairWidget):
     label = _("Démo Camenbert")
 
-    def _setup(self, **params):
-        super()._setup(**params)
+    def _prepare(self):
 
         qs = [{'category': k, 'value': v} for k, v in {'a': 4, 'b': 6, 'c': 10, 'd': 3, 'e': 7, 'f': 8}.items()]
         category = 'category:N'
         value = 'value:Q'
-        self.chart = (
+        self.params['chart'] = (
             Chart(Data(values=qs))
             .encode(
                 theta=value,
@@ -437,6 +435,7 @@ class DemoPieChartWidget(AltairWidget):
             .properties(width='container', height='container')
             .configure_view(strokeWidth=0)
         )
+        super()._prepare()
 
 
 class SvgWidget(HtmlWidget):
@@ -462,12 +461,7 @@ class SimpleLightWidget(SvgWidget):
         if params:
             self._setup(**params)
 
-    def _setup(self, **params):
-        super()._setup(**params)
-
-    def _get_context_data(self, **kwargs):
-        context = super()._get_context_data(**kwargs)
-
+    def _prepare(self):
         hue = None
         saturation = 1.0
         color = self.params.get('color', 128)
@@ -483,10 +477,17 @@ class SimpleLightWidget(SvgWidget):
                     ', '.join(list(self.COLORS_HS.keys())), color
                 )
             )
+        self.suffix = id(self)
+        self.light_color = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.9, saturation)))
+        self.dark_color = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.4, saturation)))
+        super()._prepare()
 
-        context['suffix'] = id(self)
-        context['light_color'] = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.9, saturation)))
-        context['dark_color'] = '#{:02x}{:02x}{:02x}'.format(*(int(v * 255.0) for v in colorsys.hls_to_rgb(hue, 0.4, saturation)))
+    def _get_context_data(self, **kwargs):
+        context = super()._get_context_data(**kwargs)
+
+        context['suffix'] = self.suffix
+        context['light_color'] = self.light_color
+        context['dark_color'] = self.dark_color
         return context
 
 

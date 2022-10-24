@@ -611,6 +611,7 @@ class AnomalyWidget(HtmlWidget):
 
 class AnalyseWidget(ContainerWidget):
     """"""
+
     class Media:
         css = {'all': ['smart_view/css/analysis.css']}
 
@@ -757,11 +758,12 @@ class OrderRowWidget(ContainerWidget):
                     if anomaly['code'] == '1L01':  # match code
                         try:
                             self.params['row']['intvs'] = self.params['row'].get('intvs', []) + [get_intv(anomaly['data']['intv'])]
+                            self.params['row']['intv_widgets'] = self.params['row'].get('intv_widgets', []) + [
+                                self._add_child(IntervWidget, '-interv-' + str(idx), self.params['row']['intvs'][-1])
+                            ]
                         except DatabaseError:
+                            # Simply ignore
                             pass
-                        self.params['row']['intv_widgets'] = self.params['row'].get('intv_widgets', []) + [
-                            self._add_child(IntervWidget, '-interv-' + str(idx), self.params['row']['intvs'][-1])
-                        ]
 
         # HTML-ize
         self.params['row']['libelle'] = self.params['row']['libelle'].replace('\n', '<br>')

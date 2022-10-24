@@ -90,7 +90,6 @@ from smart_view.smart_widget import (
     RepartirWidget,
     SimpleLightWidget,
     SimpleTextWidget,
-    TestBarChartWidget,
     VueWidget,
 )
 
@@ -444,7 +443,7 @@ class PrevisionnelParExpertWidget(AltairWidget):
         qs = get_data('drachar.previsionnel-par-expert', all_params=self.params)
         category = 'nom_expert:N'
         value = 'nombre:Q'
-        self.chart = (
+        self.params['chart'] = (
             Chart(Data(values=list(qs)))
             .encode(
                 theta=value,
@@ -475,7 +474,7 @@ class MontantPrevisionnelParExpertWidget(AltairWidget):
         qs = get_data('drachar.montant-previsionnel-par-expert', all_params=self.params)
         category = 'nom_expert:N'
         value = 'montant_total:Q'
-        self.chart = (
+        self.params['chart'] = (
             Chart(Data(values=list(qs)))
             .encode(
                 theta=value,
@@ -546,7 +545,6 @@ class VueGridWidget(VueWidget):
         'simple_light': SimpleLightWidget,
         'light_and_text': LightAndTextWidget,
         'a_repartir': RepartirWidget,
-        'bar_chart': TestBarChartWidget,
         'simple_scalar': SimpleScalarWidget,
         'nb_previsionnel_par_expert': PrevisionnelParExpertWidget,
         'montant_previsionnel_par_expert': MontantPrevisionnelParExpertWidget,

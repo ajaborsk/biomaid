@@ -63,7 +63,8 @@ class DracharView(BiomAidViewMixin, TemplateView):
 class TestWidget(BarChartWidget):
     _template_mapping_add = {}
 
-    def params_process(self):
+    def _setup(self, **params):
+        super()._setup(**params)
         self.params['qs'] = (
             PrevisionnelSmartView21(prefix='', view_params=self.params, appname='drachar')
             .get_base_queryset(self.params)
@@ -75,7 +76,6 @@ class TestWidget(BarChartWidget):
         self.params['category'] = 'the_state'
         self.params['x'] = {'field': 'num_dmd__code', 'type': 'ordinal', 'sort': '-y'}
         self.params['y'] = 'age_previsionnel:Q'
-        return super().params_process()
 
 
 class DracharHome(DracharView):
