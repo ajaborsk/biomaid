@@ -11,9 +11,10 @@
 #  along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
 
+from assetplusconnect.models import BEq1996, BFt1996, EnCours, Docliste
 from django.apps import apps
 from django.db import DatabaseError
-from django.db.models import Case, Count, Sum, Value, When
+from django.db.models import Case, Count, Sum, Value, When, F
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
@@ -28,7 +29,6 @@ from analytics.anomaly import (
 )
 from analytics.match import RecordMatcher
 from analytics.models import DataSource
-from assetplusconnect.models import BEq1996, BFt1996, EnCours
 from finance.apps import get_intv_from_order, no_interv_re
 
 
@@ -386,7 +386,12 @@ class CmdCheckerAssetPlus(AnomalySubCheckerMixin, AnomalyChecker):
     def check(self, verbosity=1):
         if verbosity > 1:
             print(_("Analyse (avec Asset+) de la commande {} :").format(self.data[1]['commande']))
-        order_rows = self.data[0].objects.filter(commande=self.data[1]['commande']).order_by('no_ligne_lc')
+        order_rows = (
+            self.data[0]
+            .objects.filter(commande=self.data[1]['commande'])
+            .annotate(no_fournisseur=F('fournisseur__no_fournisseur_fr'))
+            .order_by('no_ligne_lc')
+        )
 
         rows = [
             dict(row, **{'interv': no_interv_re.findall(row['libelle'])})
@@ -397,6 +402,7 @@ class CmdCheckerAssetPlus(AnomalySubCheckerMixin, AnomalyChecker):
                 'lg_soldee_lc',
                 'commande',
                 'no_uf_uf',
+                'no_fournisseur',
             )
         ]
 
@@ -408,6 +414,7 @@ class CmdCheckerAssetPlus(AnomalySubCheckerMixin, AnomalyChecker):
             row_anomalies = {}
             interv_rows = False
             for row in order_rows:
+                # Try only to match some order line to work orders
                 if str(row.no_compte_cp).startswith('615'):
                     best_match = matches[0].get(row.no_ligne_lc, [None])[0]
                     if best_match is not None:
@@ -551,7 +558,19 @@ def get_intv(nu_int: str):
             intv['n_seri'] = eqpt_qs[0]['n_seri']
         else:
             intv['n_seri'] = ''
+        docs_qs = Docliste.objects.using('gmao').filter(nu_int=nu_int).values('nom_doc').distinct()
+        docs = []
+        if len(docs_qs):
+            docs += [dict(doc) for doc in docs_qs]
 
+        intv['docs'] = '<br/>'.join(
+            '<a href="../../common/attachment/gmao/librairie_ASSET/'
+            + doc['nom_doc'].split('\\')[-1]
+            + '" onclick="window.open(this.href); return false;">'
+            + doc['nom_doc'].split('\\')[-1]
+            + '</a>'
+            for doc in docs
+        )
     return intv
 
 
@@ -568,11 +587,13 @@ class IntvLignesRecordMatcher(RecordMatcher):
 
     criteria = (
         (10, match.Contains('libelle', 'nu_int')),
+        (5, match.Equal('commande', 'nu_bon_c')),
+        (2, match.Equal('no_uf_uf', 'n_uf')),
         (2, match.Contains('libelle', 'nu_imm')),
         (2, match.Contains('libelle', 'n_seri')),
+        (1, match.Equal('no_fournisseur', 'code_four')),
         (0.2, match.Contains('libelle', 'typ_mod')),
         (0.1, match.Contains('libelle', 'marque')),
-        (0.1, match.Equal('no_uf_uf', 'n_uf')),
     )
 
 

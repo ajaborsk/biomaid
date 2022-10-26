@@ -31,3 +31,9 @@ table.simple td.euros {
 table.simple td.center {
   text-align: center;
 }
+
+table.simple td.key {
+    font-weight: bolder;
+    font-size: larger;
+    background-color: lightseagreen;
+}

@@ -42,7 +42,7 @@ def get_intv_from_order(order, rows=[]):
     interventions_qs = (
         EnCours.objects.using('gmao')
         .filter(Q(nu_int__in=nu_intv_bn) | Q(nu_bon_c=order['commande']))
-        .values('nu_int', 'nu_imm', 'nu_bon_c', 'n_uf')
+        .values('nu_int', 'nu_imm', 'nu_bon_c', 'n_uf', 'code_four')
     )
     if interventions_qs.count():
         interventions_qs._fetch_all()
@@ -50,7 +50,7 @@ def get_intv_from_order(order, rows=[]):
     interventions_qs = (
         BFt1996.objects.using('gmao')
         .filter(Q(nu_int__in=nu_intv_bn) | Q(nu_bon_c=order['commande']))
-        .values('nu_int', 'nu_imm', 'nu_bon_c', 'n_uf')
+        .values('nu_int', 'nu_imm', 'nu_bon_c', 'n_uf', 'code_four')
     )
     if interventions_qs.count():
         interventions_qs._fetch_all()

@@ -126,7 +126,12 @@ class Criterion:
 
 class Equal(Criterion):
     def __call__(self, left, right):
-        return 1.0 if left[self.left_field] == right[self.right_field] else 0.0
+        if not left[self.left_field] or not right[self.right_field]:
+            return 0.0
+        elif left[self.left_field] == right[self.right_field]:
+            return 1.0
+        else:
+            return -1.0
 
 
 class Contains(Criterion):

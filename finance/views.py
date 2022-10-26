@@ -646,9 +646,8 @@ class OrderHeaderWidget(ContainerWidget):
         }
 
     template_string = """{% load l10n %}<div class="widget" id="{{ html_id }}">
-    <table class="simple" style="width:80%;margin:0 10%;background-color:#eee;">
         <tr>
-            <th>N°</th><td>{{ header.commande }}</td>
+            <th>N°</th><td class="key center">{{ header.commande }}</td>
             <th>Exercice</th><td>{{ header.exercice_ec|unlocalize }}</td>
             <th>Date passation</th><td>{{ header.date_passation_ec }}</td>
             <th>Founisseur</th><td>{{ header.no_fournisseur_fr|unlocalize }}</td><td>{{ header.intitule_fournisseur_fr }}</td>
@@ -660,20 +659,13 @@ class OrderHeaderWidget(ContainerWidget):
             <th>Bloc note</th><td colspan="5">{{ header.bloc_note|safe }}</td>
         </tr>
         {% if analyse_widget %}
-            <tr><th colspan="2">Analyse ({{ header.analyse_cmd.timestamp }})</th><td colspan="12">{{ analyse_widget }}</td></tr>
+            <tr><th colspan="2">Analyse ({{ header.analyse_cmd.timestamp }})</th><td colspan="10">{{ analyse_widget }}</td></tr>
         {% endif %}
-    </table>
     </div>"""
     _template_mapping_add = {
         'header': 'header',
         'analyse_widget': 'analyse_widget',
     }
-
-    # def params_process(self):
-    #     super().params_process()
-    #     self.params['header']['analyse_widget'] = self._add_child(
-    #         AnalyseWidget(self.html_id + '-analyse', self.params['header']['analyse_cmd'])
-    #     )
 
 
 class IntervWidget(HtmlWidget):
@@ -684,7 +676,39 @@ class IntervWidget(HtmlWidget):
             ]
         }
 
-    template_string = """Intervention !"""
+    _template_mapping = {
+        'no_intv': 'no_intv',
+        'intv': 'intv',
+        'db_err': 'db_err',
+    }
+    # observ/, code_tech/, da_int/, da_fin/, nu_imm, n_seri, n_marche/, nu_compte/, mt_engag/
+    template_string = """{% if intv %}<div id="{{ html_id }}" class="widget"><table class="simple" style="width:95%;">
+      <tr>
+        <th>Intervention</th><th>Code UF</th><th>N° Inventaire</th><th>Technicien</th><th>Date début</th><th>Date fin</th>
+        <th>Etat</th><th>Demande initiale</th><th>Commentaire technique</th><th>Documents</th>
+      </tr>
+      <tr>
+        <td rowspan="3" class="key center">{{ no_intv }}</td><td>{{ intv.n_uf }}</td><td>{{ intv.nu_imm }}</td>
+        <td>{{ intv.code_techn }}</td><td>{{ intv.da_int }}</td><td>{{ intv.da_fin }}</td><td>{{ intv.etat }}</td>
+        <td rowspan="3">{{ intv.observ }}</td><td rowspan="3">{{ intv.observ2 }}</td><td rowspan="3">{{ intv.docs|safe }}</td>
+      </tr>
+      <tr>
+        <th>Fournisseur</th><th>N° Série</th><th>Commande liée</th><th>Compte</th><th>Marché</th><th>Engagé</th>
+      </tr>
+      <tr>
+        <td>{{ intv.code_four }} - {{ intv.fourni }}</td><td>{{ intv.n_seri }}</td><td>{{ nu_bon_c }}</td><td>{{ nu_compte }}</td>
+        <td>{{ n_marche }}</td><td>{{ intv.mt_engage }}</td>
+      </tr>
+    </table></div>
+    {% else %}<div id="{{ html_id }}" class="widget analysis">
+    <div class="widget level-3 message">Intervention {{ no_intv }} non accessible ({{ db_err }}) !</div></div>{% endif %}"""
+
+    def _setup(self, **params):
+        super()._setup(**params)
+        try:
+            self.params.update({'intv': get_intv(self.params['no_intv'])})
+        except DatabaseError as exc:
+            self.params['db_err'] = str(exc)
 
 
 class OrderRowWidget(ContainerWidget):
@@ -695,10 +719,10 @@ class OrderRowWidget(ContainerWidget):
             ]
         }
 
-    template_string = """<div id="{{ html_id }}"><br>
-    <table class="simple" style="width:80%;margin:0 10%;background-color:#eee;">
+    template_string = """{% load l10n %}<div id="{{ html_id }}">
+    <table class="simple" style="width:96%;margin:10px 2%;background-color:#eee;">
         <tr>
-            <td class="center" rowspan="8" style="width:5%;">{{ row.no_ligne_lc }}</td>
+            <td class="center key" rowspan="8" style="width:5%;">{{ row.no_ligne_lc }}</td>
             <th colspan="2">Unité Fonctionnelle</th>
             <th style="width:12%;">N° Marché</th>
             <th style="width:12%;">Nomenclature</th>
@@ -706,10 +730,10 @@ class OrderRowWidget(ContainerWidget):
             <th style="width:35%;">Libellé</th>
         </tr>
         <tr>
-            <td colspan="2" class="center">{{ row.no_uf_uf }} - {{ row.libelle_uf_uf }}</td>
-            <td class="center">{{ row.no_marche_ma }}</td>
+            <td colspan="2" class="center">{{ row.no_uf_uf|unlocalize }} - {{ row.libelle_uf_uf }}</td>
+            <td class="center">{{ row.no_marche_ma|unlocalize }}</td>
             <td></td>
-            <td class="center">{{ row.no_compte_cp }}</td>
+            <td class="center">{{ row.no_compte_cp|unlocalize }}</td>
             <td rowspan="3">{{ row.libelle|safe }}</td>
         </tr>
         <tr>
@@ -725,19 +749,18 @@ class OrderRowWidget(ContainerWidget):
             <td class="euros">{{ row.mt_liquide_lc|default_if_none:"---,--" }} €</td>
             <td>{{ row.lg_soldee_lc }}</td>
         </tr>
-        {% if row.intv_widgets %}
-            <tr>
-                <th>Intervention Asset+</th>
-                <td colspan="5">{% for widget in row.intv_widgets %}{{ widget }}{% endfor %}</td>
-            </tr>
-        {% endif %}
         {% if row.analyse_widget %}
             <tr>
                 <th>Analyse ({{ row.analyse.timestamp }})</th>
                 <td colspan="6">{{ row.analyse_widget }}</td>
             </tr>
         {% endif %}
-    </table>
+        {% if row.intv_widgets %}
+            <tr>
+                <td colspan="6" style="background:#fff;">{% for widget in row.intv_widgets %}{{ widget }}{% endfor %}</td>
+            </tr>
+        {% endif %}
+      </table>
     </div>"""
     _template_mapping_add = {
         'row': 'row',
@@ -756,14 +779,9 @@ class OrderRowWidget(ContainerWidget):
             if 'anomalies' in self.params['row']['analyse']:
                 for idx, anomaly in enumerate(self.params['row']['analyse']['anomalies']):
                     if anomaly['code'] == '1L01':  # match code
-                        try:
-                            self.params['row']['intvs'] = self.params['row'].get('intvs', []) + [get_intv(anomaly['data']['intv'])]
-                            self.params['row']['intv_widgets'] = self.params['row'].get('intv_widgets', []) + [
-                                self._add_child(IntervWidget, '-interv-' + str(idx), self.params['row']['intvs'][-1])
-                            ]
-                        except DatabaseError:
-                            # Simply ignore
-                            pass
+                        self.params['row']['intv_widgets'] = self.params['row'].get('intv_widgets', []) + [
+                            self._add_child(IntervWidget, '-interv-' + str(idx), {'no_intv': anomaly['data']['intv']})
+                        ]
 
         # HTML-ize
         self.params['row']['libelle'] = self.params['row']['libelle'].replace('\n', '<br>')
@@ -773,10 +791,14 @@ class OrderWidget(ContainerWidget):
 
     template_string = """<div id="{{ html_id }}">
             {% if order %}
+                <table class="simple" style="width:80%;margin:0 10%;background-color:#eee;">
                 {{ order.header.widget }}
+                <tr><td colspan="12" style="background:#fff;">
                 {% for row in order.rows %}
                     {{ row.widget }}
                 {% endfor %}
+                </td></tr>
+                </table>
             {% else %}
                 Pas de commande avec ce n° : {{ order_id }}
             {% endif %}

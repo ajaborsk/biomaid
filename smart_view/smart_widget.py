@@ -192,7 +192,7 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
             if callable(v):
                 context[k] = v(self, kwargs)
             elif isinstance(v, str):
-                context[k] = self.params[v]
+                context[k] = self.params.get(v)
             else:
                 context[k] = v
         return context
