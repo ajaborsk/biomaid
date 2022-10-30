@@ -10,6 +10,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program. If not, see <http://www.gnu.org/licenses/>.
 import re
+from typing import Any
 
 from assetplusconnect.models import BEq1996, BFt1996, EnCours, Docliste
 from django.apps import apps
@@ -31,6 +32,22 @@ from analytics.match import RecordMatcher
 from analytics.models import DataSource
 from finance.apps import get_intv_from_order, no_interv_re
 
+serial_re = re.compile(r'(\S*)\s*\(.*\)\s*')
+
+
+def order_row_on_work_order(order_row: Any):
+    if 'FRAIS ' in order_row.libelle:
+        return False
+    else:
+        return True
+
+
+def pure_serial(raw_serial: str):
+    m = serial_re.match(raw_serial)
+    if m is not None:
+        return m.group(1)
+    return raw_serial
+
 
 class CmdRowSerialNumberChecker(RecordAnomalyChecker):
     code = '2L11'
@@ -44,10 +61,10 @@ class CmdRowSerialNumberChecker(RecordAnomalyChecker):
     tips = ''
 
     def check(self, verbosity=1):
-        order, order_row, interv = self.data
-        if interv is not None:
-            if interv['n_seri'] not in order_row.libelle:
-                self.add(n_seri=interv['n_seri'], nu_int=interv['nu_int'])
+        order, order_row, interv_list, interv = self.data
+        if interv is not None and order_row.qte_cdee_lc == 1 and order_row_on_work_order(order_row):
+            if pure_serial(interv['n_seri']) not in order_row.libelle:
+                self.add(n_seri=pure_serial(interv['n_seri']), nu_int=interv['nu_int'])
         return super().check(verbosity)
 
 
@@ -63,43 +80,58 @@ class CmdRowInventChecker(RecordAnomalyChecker):
     tips = ''
 
     def check(self, verbosity=1):
-        order, order_row, interv = self.data
-        if interv is not None:
+        order, order_row, interv_list, interv = self.data
+        if interv is not None and order_row.qte_cdee_lc == 1 and order_row_on_work_order(order_row):
             if interv['nu_imm'] not in order_row.libelle:
                 self.add(nu_imm=interv['nu_imm'], nu_int=interv['nu_int'])
         return super().check(verbosity)
 
 
-class CmdRowUfChecker(RecordAnomalyChecker):
+class CmdRowCmdChecker(RecordAnomalyChecker):
     code = '2L10'
     level = 2
     base_score = 2
-    label = _("Commande non saisie dans Asset+")
-    message = _("Aucune commande n'a été saisie dans l'intervention Asset+ associée ({nu_int}).")
-    description = _("Aucune commande n'a été saisie dans l'intervention Asset+ associée.")
-    tips = ''
+    label = _("Commande(s) non saisie dans Asset+")
+    message = _("Le n° de commande n'a pas été saisi dans toutes les interventions Asset+ associées ({nu_int}).")
+    description = _("Le n° de commande n'a pas été saisi dans toutes les interventions Asset+ associées.")
+    tips = _(
+        "Pour chacune des interventions citées, il faut saisir le numéro de commande dans le "
+        "champs 'Numéro de commande' (onglet 'Données économiques')"
+    )
 
     def check(self, verbosity=1):
-        order, order_row, interv = self.data
-        if interv is not None and len(interv['nu_bon_c']) < 2:
-            self.add(nu_int=interv['nu_int'])
+        order, order_row, interv_list, interv = self.data
+        incorrect_work_orders = []
+        for work_order in interv_list:
+            if len(work_order['nu_bon_c']) < 2 or work_order['nu_bon_c'] != order['commande']:
+                incorrect_work_orders.append(work_order['nu_int'])
+        if incorrect_work_orders:
+            self.add(nu_int=', '.join(incorrect_work_orders))
         return super().check(verbosity)
 
 
-class CmdRowCmdChecker(RecordAnomalyChecker):
+class CmdRowUfChecker(RecordAnomalyChecker):
     code = '2L12'
     level = 2
     base_score = 2
     label = _("Non correspondance de l'UF")
-    message = _("L'UF spécifiée pour la ligne de commande ({no_uf_uf:04d}) ne correspond pas à l'UF de l'intervention ({n_uf}).")
-    description = _("L'UF spécifiée pour la ligne de commande ne correspond pas à l'UF de l'intervention.")
+    message = _(
+        "L'UF spécifiée pour la ligne de commande ({no_uf_uf:04d}) ne correspond pas à l'UF"
+        " pour certaines interventions ({n_uf})."
+    )
+    description = _("L'UF spécifiée pour la ligne de commande ne correspond pas aux UF des interventions.")
     tips = ''
 
     def check(self, verbosity=1):
-        order, order_row, interv = self.data
-        if interv is not None:
-            if '{:04d}'.format(order_row.no_uf_uf) != interv['n_uf']:
-                self.add(no_uf_uf=order_row.no_uf_uf, n_uf=interv['n_uf'])
+        order, order_row, interv_list, interv = self.data
+        incorrect_work_orders = []
+        for work_order in interv_list:
+            if '{:04d}'.format(order_row.no_uf_uf) != work_order['n_uf']:
+                incorrect_work_orders.append(str(work_order['nu_int']) + '/' + work_order['n_uf'])
+
+        if incorrect_work_orders:
+            self.add(no_uf_uf=order_row.no_uf_uf, n_uf=', '.join(incorrect_work_orders))
+
         return super().check(verbosity)
 
 
@@ -108,13 +140,13 @@ class CmdRowNullChecker(RecordAnomalyChecker):
     level = 4
     base_score = 10
     label = _("Ligne avec montant nul")
-    message = _("La ligne de commande a un montant d'engagement à 0 €.")
-    description = _("La ligne de commande a un montant d'engagement à 0 €.")
+    message = _("La ligne de commande (non soldée) a un montant d'engagement à 0 €.")
+    description = _("La ligne de commande (non soldée) a un montant d'engagement à 0 €.")
     tips = ''
 
     def check(self, verbosity=1):
         order, order_row = self.data
-        if order_row.mt_engage_lc == 0:
+        if order_row.lg_soldee_lc == 'N' and order_row.mt_engage_lc == 0:
             self.add()
         return super().check(verbosity)
 
@@ -129,13 +161,33 @@ class CmdRowIntervLinkChecker(RecordAnomalyChecker):
     tips = ''
 
     def check(self, verbosity=1):
-        order, order_row, interv = self.data
-        if interv is not None:
+        order, order_row, interv_list, dummy_interv = self.data
+        for interv in interv_list:
             self.add(
                 no_intv=interv['nu_int'],
                 strength=100 * interv['match_strength'],
                 data={'intv': interv['nu_int'], 'strength': 100 * interv['match_strength']},
             )
+        return super().check(verbosity)
+
+
+class CmdRowIntervNoChecker(RecordAnomalyChecker):
+    code = '3L04'
+    level = 3
+    base_score = 10
+    label = _("N° d'intervention liée non retrouvé dans le libellé de la commande")
+    message = _("N° de l'intervention liée ({n_interv}) non retrouvé dans le libellé de la commande.")
+    description = _(
+        "Une (unique) intervention a pu être associée à la ligne de commande mais son numéro "
+        "n'apparaît pas dans le libellé de la commande."
+    )
+    tips = ''
+
+    def check(self, verbosity=1):
+        order, order_row, interv_list, interv = self.data
+        if interv is not None and order_row.qte_cdee_lc == 1 and order_row_on_work_order(order_row):
+            if interv['nu_int'] not in order_row.libelle:
+                self.add(n_interv=interv['nu_int'])
         return super().check(verbosity)
 
 
@@ -146,33 +198,45 @@ class CmdRowNoIntervChecker(RecordAnomalyChecker):
     label = _("Ligne avec montant non nul et non rapprochée d'une intervention")
     message = _("La ligne de commande n'a pas pu être rapprochée d'une intervention.")
     description = _(
-        "La ligne de commande ne contient pas l'expression 'FRAIS DE...'" " et n'a pas pu être rapprochée d'une intervention."
+        "La ligne de commande ne contient pas l'expression 'FRAIS ...'" " et n'a pas pu être rapprochée d'une intervention."
     )
     tips = ''
 
     def check(self, verbosity=1):
-        order, order_row, interv = self.data
-        if interv is None and order_row.mt_engage_lc > 0 and 'FRAIS DE' not in order_row.libelle.upper():
+        order, order_row, interv_list, interv = self.data
+        if interv is None and order_row.mt_engage_lc > 0 and 'FRAIS ' not in order_row.libelle.upper():
             self.add()
         return super().check(verbosity)
 
 
 class CmdRowASolderChecker(RecordAnomalyChecker):
+    """ """
+
     code = '3L01'
     level = 3
     base_score = 5
-    label = _("Ligne non soldée alors que l'intervention est archivée.")
-    message = _("La ligne de commande n'est pas soldée alors que l'intervention est archivée.")
-    description = _("La ligne de commande n'est pas soldée alors que l'intervention associée est archivée.")
+    label = _("Ligne à réceptionner.")
+    message = _(
+        "La quantité reçue ({recues}) de la ligne de commande est inférieur au nombre"
+        " d'intervention(s) archivée(s) : {archivees}."
+    )
+    description = _(
+        "La quantité reçue de la ligne de commande est inférieur au nombre"
+        " d'intervention(s) archivée(s)."
+        )
     tips = _(
         "Après vérification qu'il s'agit bien de la bonne intervention et que le montant engagé correspond"
         " à ce qui a effectivement été réalisé par le fournisseur, la ligne de commande peut être réceptionnée."
     )
 
     def check(self, verbosity=1):
-        order, order_row, interv = self.data
-        if interv is not None and order_row.lg_soldee_lc == 'N' and interv['etat'] == 'Archivée':
-            self.add()
+        order, order_row, interv_list, interv = self.data
+        nb_archivees = 0
+        for interv in interv_list:
+            if interv['etat'] == 'Archivée':
+                nb_archivees += 1
+        if nb_archivees > order_row.qte_recue_lc:
+            self.add(recues=order_row.qte_recue_lc, archivees=nb_archivees)
         return super().check(verbosity)
 
 
@@ -186,7 +250,7 @@ class CmdRowBaseChecker(AnomalyChecker):
     def check(self, verbosity=1):
         if verbosity > 1:
             print(_("  Analyse de la ligne {} :").format(self.data[1].no_ligne_lc))
-        self.append(CmdRowNullChecker(data=self.data).check().anomalies)
+        self.append(CmdRowNullChecker(data=self.data).check(verbosity=verbosity).anomalies)
         if verbosity > 1:
             print(_("    Anomalies:"))
             print_anomalies(self.anomalies, indent=6)
@@ -203,12 +267,14 @@ class CmdRowAssetChecker(AnomalyChecker):
     def check(self, verbosity=1):
         if verbosity > 1:
             print(_("  Analyse de la ligne {} :").format(self.data[1].no_ligne_lc))
-        self.append(CmdRowIntervLinkChecker(data=self.data).check().anomalies)
-        self.append(CmdRowUfChecker(data=self.data).check().anomalies)
-        self.append(CmdRowNoIntervChecker(data=self.data).check().anomalies)
-        self.append(CmdRowASolderChecker(data=self.data).check().anomalies)
-        self.append(CmdRowInventChecker(data=self.data).check().anomalies)
-        self.append(CmdRowSerialNumberChecker(data=self.data).check().anomalies)
+        self.append(CmdRowIntervLinkChecker(data=self.data).check(verbosity=verbosity).anomalies)
+        self.append(CmdRowCmdChecker(data=self.data).check(verbosity=verbosity).anomalies)
+        self.append(CmdRowUfChecker(data=self.data).check(verbosity=verbosity).anomalies)
+        self.append(CmdRowNoIntervChecker(data=self.data).check(verbosity=verbosity).anomalies)
+        self.append(CmdRowIntervNoChecker(data=self.data).check(verbosity=verbosity).anomalies)
+        self.append(CmdRowASolderChecker(data=self.data).check(verbosity=verbosity).anomalies)
+        self.append(CmdRowInventChecker(data=self.data).check(verbosity=verbosity).anomalies)
+        self.append(CmdRowSerialNumberChecker(data=self.data).check(verbosity=verbosity).anomalies)
         if verbosity > 1:
             print(_("    Anomalies:"))
             print_anomalies(self.anomalies, indent=6)
@@ -216,21 +282,31 @@ class CmdRowAssetChecker(AnomalyChecker):
 
 
 class CmdOldChecker(AnomalyChecker):
+    """Contrôle si une commande est ancienne"""
+
     code = '2C01'
     level = 2
-    message = _("La commande a été passée il y a longtemps ({age} mois) et n'est pas soldée.")
+    message = _(
+        "La commande a été passée il y a longtemps ({age} mois) et n'est pas complètement "
+        "soldée ({soldees} soldées sur {lignes} lignes)."
+    )
 
     def check(self, verbosity=1):
         order, rows_anomalies = self.data
 
-        age = (now() - order['date_passation_ec']).days // 30
-        if age > 6:
-            self.add(age=age, score=age - 6)
+        if order['lgs_soldees'] < order['lignes']:
+            age = (now() - order['date_passation_ec']).days // 30
+            if age > 6:
+                self.add(age=age, score=age - 6, soldees=order['lgs_soldees'], lignes=order['lignes'])
 
         return super().check(verbosity)
 
 
 class CmdNoIntervChecker(AnomalyChecker):
+    """Contrôle si une commande ne peut pas être rapprochée de toutes les interventions nécessaires (au moins une ligne
+    a une anomalie 4L01)
+    """
+
     code = '4C03'
     level = 4
     base_score = 80
@@ -246,6 +322,8 @@ class CmdNoIntervChecker(AnomalyChecker):
 
 
 class CmdAllNullChecker(AnomalyChecker):
+    """Contrôle d'une commande pour vérifier que toutes les lignes ne sont pas à 0 €"""
+
     code = '4C01'
     level = 4
     base_score = 80
@@ -261,6 +339,8 @@ class CmdAllNullChecker(AnomalyChecker):
 
 
 class CmdContractChecker(AnomalyChecker):
+    """Contrôle qu'une commande est soi en marché soi avec une dérogation"""
+
     code = '4C02'
     level = 4
     base_score = 50
@@ -270,8 +350,10 @@ class CmdContractChecker(AnomalyChecker):
     def check(self, verbosity=1):
         order, rows_anomalies = self.data
 
-        if not order['no_marche_ma'] and (
-            order['objet_depense_ec'] is None or self.hm_code_re.search(order['objet_depense_ec']) is None
+        if (
+            order['lgs_soldees'] < order['lignes']
+            and not order['no_marche_ma']
+            and (order['objet_depense_ec'] is None or self.hm_code_re.search(order['objet_depense_ec']) is None)
         ):
             self.add()
 
@@ -279,6 +361,8 @@ class CmdContractChecker(AnomalyChecker):
 
 
 class CmdAnyNullChecker(AnomalyChecker):
+    """Contrôle si une commande a au moins une ligne avec un montant à 0 € de façon anormale."""
+
     code = '4C04'
     level = 4
     base_score = 50
@@ -295,6 +379,8 @@ class CmdAnyNullChecker(AnomalyChecker):
 
 
 class CmdSoldeChecker(AnomalyChecker):
+    """Contrôle si une commande a au moins une ligne qui semble pouvoir être soldée."""
+
     code = '3C03'
     level = 3
     base_score = 10
@@ -310,12 +396,41 @@ class CmdSoldeChecker(AnomalyChecker):
 
 
 class CmdWarningChecker(AnomalyChecker):
+    """Contrôle si une commande a au moins une ligne avec une alerte"""
+
+    code = '3C01'
+    level = 3
+    base_score = 2
+    message = _("Ligne(s) {lignes} de la commande avec au moins une alerte.")
+
+    def check(self, verbosity=1):
+        order, rows_anomalies = self.data
+
+        if any([3 in list(an['level'] for an in ra) for ra in rows_anomalies.values()]):
+            self.add(
+                lignes=', '.join(
+                    map(
+                        str,
+                        filter(
+                            lambda lc: 3 in [an['level'] for an in rows_anomalies[lc]],
+                            rows_anomalies.keys(),
+                        ),
+                    )
+                )
+            )
+
+        return super().check(verbosity=verbosity)
+
+
+class CmdLowWarningChecker(AnomalyChecker):
+    """Contrôle si une commande a au moins une ligne avec une anomalie mineure"""
+
     code = '2C01'
     level = 2
     base_score = 2
     message = _("Ligne(s) {lignes} de la commande avec au moins une anomalie mineure.")
 
-    def check(self):
+    def check(self, verbosity=1):
         order, rows_anomalies = self.data
 
         if any([2 in list(an['level'] for an in ra) for ra in rows_anomalies.values()]):
@@ -331,7 +446,7 @@ class CmdWarningChecker(AnomalyChecker):
                 )
             )
 
-        return super().check()
+        return super().check(verbosity=verbosity)
 
 
 class CmdCheckerBase(AnomalySubCheckerMixin, AnomalyChecker):
@@ -356,7 +471,7 @@ class CmdCheckerBase(AnomalySubCheckerMixin, AnomalyChecker):
         order_rows = self.data[0].objects.filter(commande=self.data[1]['commande']).order_by('no_ligne_lc')
         row_anomalies = {}
         for row in order_rows:
-            row_anomalies[row.no_ligne_lc] = CmdRowBaseChecker(data=(self.data[1], row)).check().anomalies
+            row_anomalies[row.no_ligne_lc] = CmdRowBaseChecker(data=(self.data[1], row)).check(verbosity=verbosity).anomalies
         self.append(CmdAllNullChecker(data=(self.data[1], row_anomalies)).check(verbosity=verbosity).anomalies)
         self.append(CmdAnyNullChecker(data=(self.data[1], row_anomalies)).check(verbosity=verbosity).anomalies)
         self.append(CmdContractChecker(data=(self.data[1], row_anomalies)).check(verbosity=verbosity).anomalies)
@@ -366,7 +481,7 @@ class CmdCheckerBase(AnomalySubCheckerMixin, AnomalyChecker):
             print(_("  Cmd simple anomalies:"))
             print_anomalies(self.anomalies, indent=4)
 
-        return super().check()
+        return super().check(verbosity=verbosity)
 
 
 class CmdCheckerAssetPlus(AnomalySubCheckerMixin, AnomalyChecker):
@@ -397,6 +512,8 @@ class CmdCheckerAssetPlus(AnomalySubCheckerMixin, AnomalyChecker):
             dict(row, **{'interv': no_interv_re.findall(row['libelle'])})
             for row in order_rows.values(
                 'no_ligne_lc',
+                'qte_cdee_lc',
+                'qte_recue_lc',
                 'libelle',
                 'mt_engage_lc',
                 'lg_soldee_lc',
@@ -414,21 +531,28 @@ class CmdCheckerAssetPlus(AnomalySubCheckerMixin, AnomalyChecker):
             row_anomalies = {}
             interv_rows = False
             for row in order_rows:
+                interv_list = []
                 # Try only to match some order line to work orders
                 if str(row.no_compte_cp).startswith('615'):
+                    for matched_intv in matches[0].get(row.no_ligne_lc, []):
+                        interv_list.append(get_intv(matched_intv[0]))
+                        interv_list[-1]['match_strength'] = matched_intv[1]
                     best_match = matches[0].get(row.no_ligne_lc, [None])[0]
                     if best_match is not None:
                         interv = get_intv(best_match[0])
                         interv['match_strength'] = best_match[1]
                     else:
                         interv = None
-                    row_anomalies[row.no_ligne_lc] = CmdRowAssetChecker(data=(self.data[1], row, interv)).check().anomalies
+                    row_anomalies[row.no_ligne_lc] = (
+                        CmdRowAssetChecker(data=(self.data[1], row, interv_list, interv)).check(verbosity=verbosity).anomalies
+                    )
                     interv_rows = True
 
             if interv_rows:
-                self.append(CmdNoIntervChecker(data=(self.data[1], row_anomalies)).check().anomalies)
-                self.append(CmdSoldeChecker(data=(self.data[1], row_anomalies)).check().anomalies)
-                self.append(CmdWarningChecker(data=(self.data[1], row_anomalies)).check().anomalies)
+                self.append(CmdNoIntervChecker(data=(self.data[1], row_anomalies)).check(verbosity=verbosity).anomalies)
+                self.append(CmdSoldeChecker(data=(self.data[1], row_anomalies)).check(verbosity=verbosity).anomalies)
+                self.append(CmdLowWarningChecker(data=(self.data[1], row_anomalies)).check(verbosity=verbosity).anomalies)
+                self.append(CmdWarningChecker(data=(self.data[1], row_anomalies)).check(verbosity=verbosity).anomalies)
         except DatabaseError:
             self.append([{'code': 'DBERR', 'message': _("Impossible de se connecter à Asset+"), 'level': 1, 'score': 0}])
 
@@ -436,14 +560,14 @@ class CmdCheckerAssetPlus(AnomalySubCheckerMixin, AnomalyChecker):
             print(_("  Cmd Asset+ anomalies:"))
             print_anomalies(self.anomalies, indent=4)
 
-        return super().check()
+        return super().check(verbosity=verbosity)
 
 
 class AllCmdChecker(AnomalySubCheckerMixin, AnomalyChecker):
     """Checker de la totalité des commandes.
     data is the 'ExtCommande' model"""
 
-    def aggregator(self, records):
+    def aggregator(self, records) -> list[tuple[dict, int]]:
         aggregates = {(gest, level): 0 for gest in ['IF', 'II', 'IM'] for level in range(5)}
         for record in records:
             if record in aggregates:
@@ -469,21 +593,20 @@ class AllCmdChecker(AnomalySubCheckerMixin, AnomalyChecker):
             **kwargs,
         )
 
-    def add(self, **kwargs):
+    def add(self, **kwargs) -> None:
         key = (kwargs['gest'], kwargs['level'])
         self.storage.add(key)
 
     def check(self, verbosity=1):
         order_qs = (
-            self.data.objects.filter(gest_ec__in=self.kwargs['gestionnaires'], lg_soldee_lc='N')
+            # self.data.objects.filter(gest_ec__in=self.kwargs['gestionnaires'], lg_soldee_lc='N')
+            self.data.objects.filter(gest_ec__in=self.kwargs['gestionnaires'], exercice_ec=now().year)
             .order_by()
             .annotate(
-                lg_zero=Case(When(mt_engage_lc__gt=-0.01, mt_engage_lc__lt=0.01, then=Value(1))),
-                default=Value(0),
+                lg_zero=Case(When(mt_engage_lc__gt=-0.01, mt_engage_lc__lt=0.01, then=Value(1)), default=Value(0)),
             )
             .annotate(
-                lg_soldee=Case(When(lg_soldee_lc='O', lg_zero=0, then=Value(1))),
-                default=Value(0),
+                lg_soldee=Case(When(lg_soldee_lc='O', then=Value(1)), default=Value(0)),
             )
             .values(
                 'commande',
@@ -509,24 +632,16 @@ class AllCmdChecker(AnomalySubCheckerMixin, AnomalyChecker):
         for order in order_qs:
             cmd_anomalies = CmdCheckerBase(data=(self.data, order)).check(verbosity=verbosity).anomalies
             cmd_anomalies += CmdCheckerAssetPlus(data=(self.data, order)).check(verbosity=verbosity).anomalies
-            if cmd_anomalies:
-                self.add(
-                    level=max(anomaly['level'] for anomaly in cmd_anomalies),
-                    gest=order['gest_ec'],
-                )
-            else:
-                self.add(level=0, gest=order['gest_ec'])
 
-        # for gest, gest_anomalies in anomalies.items():
-        #     for level, level_anomalies in gest_anomalies.items():
-        #         put_data(
-        #             source=data_source,
-        #             parameters={'gest': gest, 'level': level},
-        #             timestamp=timestamp,
-        #             data=len(level_anomalies),
-        #             link={},
-        #             context={},
-        #         )
+            # Only records (for summary) anomalies of still open orders
+            if order['lgs_soldees'] < order['lignes']:
+                if cmd_anomalies:
+                    self.add(
+                        level=max(anomaly['level'] for anomaly in cmd_anomalies),
+                        gest=order['gest_ec'],
+                    )
+                else:
+                    self.add(level=0, gest=order['gest_ec'])
 
         return super().check(verbosity=verbosity)
 
@@ -586,15 +701,34 @@ class IntvLignesRecordMatcher(RecordMatcher):
     """
 
     criteria = (
-        (10, match.Contains('libelle', 'nu_int')),
-        (5, match.Equal('commande', 'nu_bon_c')),
-        (2, match.Equal('no_uf_uf', 'n_uf')),
-        (2, match.Contains('libelle', 'nu_imm')),
-        (2, match.Contains('libelle', 'n_seri')),
-        (1, match.Equal('no_fournisseur', 'code_four')),
-        (0.2, match.Contains('libelle', 'typ_mod')),
-        (0.1, match.Contains('libelle', 'marque')),
+        (40, match.Contains('libelle', 'nu_int')),  # On retrouve le numéro d'intervention dans le libellé de la ligne
+        (35, match.Equal('commande', 'nu_bon_c')),  # Le numéro de la commande est indiqué dans l'intervention
+        (10, match.Equal('no_uf_uf', 'n_uf')),  # L'UF de l'intervention est identique à celle de la ligne
+        (10, match.Equal('no_fournisseur', 'code_four')),  # Le fournisseur de l'intervention est identique à celui de la commande
+        (2, match.Contains('libelle', 'nu_imm')),  # On retrouve le numéro d'inventaire dans le libellé
+        (2, match.Contains('libelle', 'n_seri')),  # On retrouve le numéro de série dans le libellé
+        (0.5, match.Contains('libelle', 'typ_mod')),  # On retrouve le type modèle dans le libellé
+        (0.5, match.Contains('libelle', 'marque')),  # On retrouver la marque dans le libellé
     )
+
+    cutoff_value = 0.3
+
+    def left_limits(self, left_rec):
+        if "FRAIS " in left_rec['libelle']:
+            min_matches: int = 0
+            max_matches: int = 0
+        else:
+            min_matches: int = int(left_rec['qte_cdee_lc'])
+            max_matches: int = int(left_rec['qte_cdee_lc'])
+        return (min_matches, max_matches)
+
+    def prepare(self):
+        for left_idx, left_rec in self.left.items():
+            left_rec['no_uf_uf'] = '{:04d}'.format(int(left_rec['no_uf_uf']))
+        for right_idx, right_rec in self.right.items():
+            right_rec['n_seri'] = pure_serial(right_rec['n_seri'])
+            right_rec['code_four'] = int(right_rec['code_four'].strip()) if right_rec['code_four'] else None
+        super().prepare()
 
 
 def orders_flaws_processor(*args, **kwargs):

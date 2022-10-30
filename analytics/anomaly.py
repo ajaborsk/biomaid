@@ -90,7 +90,7 @@ class AnomalySubCheckerMixin:
     A class mixin for a checker that run all its subcheckers
     """
 
-    subcheckers = tuple()
+    subcheckers: tuple = tuple()
 
     def get_subdata(self):
         return []

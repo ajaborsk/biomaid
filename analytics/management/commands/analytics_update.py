@@ -12,6 +12,7 @@
 import datetime
 import json
 import warnings
+import sys
 
 from django.apps import apps
 from django.core.management.base import BaseCommand
@@ -19,6 +20,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
+from common import config
 from analytics.data import get_data_timestamp
 from analytics.models import DataSource
 
@@ -100,10 +102,15 @@ class Command(BaseCommand):
                             try:
                                 f(**dict(params, verbosity=verbosity))
                             except Exception as e:
+                                # for debug purpose, raise again the exception, so you can see what's happening
+                                if config.settings.DEBUG:
+                                    raise e
                                 warnings.warn(
                                     _(
-                                        "Analytics data '{}' called with parameters {} (processor '{}') raised an exception: {}"
-                                    ).format(datasource_code, auto_params_json, datasource.processor_name, repr(e))
+                                        "Analytics data '{}' called with parameters {} (processor '{}') raised an exception: {}, {}"
+                                    ).format(
+                                        datasource_code, auto_params_json, datasource.processor_name, repr(e), sys.exc_info()[2]
+                                    )
                                 )
 
                     else:

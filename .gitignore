@@ -12,6 +12,7 @@
 
 *~
 .idea/
+.vscode/
 templates_old/
 media/
 fixtures/production/

@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import sys
+from typing import Callable
 from types import FunctionType
 
 from django.apps import apps
@@ -33,7 +34,7 @@ def set_datasource(
     label: None | str = None,
     parameters: None | dict = None,
     auto: None | list = None,
-    processor: None | str | FunctionType = None,
+    processor: None | str | Callable = None,
 ) -> bool:
 
     if 'migrate' in sys.argv or 'makemigrations' in sys.argv:

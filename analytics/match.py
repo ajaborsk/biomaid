@@ -42,7 +42,9 @@ Idées :
 
 """
 from functools import partial
+from collections import namedtuple
 from math import fabs
+from typing import Any
 
 from django.apps import apps
 from django.db.models import Model, Q
@@ -87,7 +89,7 @@ class RecordFetcher:
             else:
                 self.fieldnames = self.fieldnames.intersection(set(f.attname for f in model._meta.get_fields()))
 
-        print(self.fieldnames)
+        # print(self.fieldnames)
 
         self.qs = []
 
@@ -116,16 +118,16 @@ class RecordFetcher:
 
 
 class Criterion:
-    def __init__(self, left_field, right_field):
-        self.left_field = left_field
-        self.right_field = right_field
+    def __init__(self, left_field: str, right_field: str):
+        self.left_field: str = left_field
+        self.right_field: str = right_field
 
-    def __call__(self, left, right):
+    def __call__(self, left: dict, right: dict) -> float:
         return 0.0
 
 
 class Equal(Criterion):
-    def __call__(self, left, right):
+    def __call__(self, left: dict, right: dict) -> float:
         if not left[self.left_field] or not right[self.right_field]:
             return 0.0
         elif left[self.left_field] == right[self.right_field]:
@@ -135,7 +137,7 @@ class Equal(Criterion):
 
 
 class Contains(Criterion):
-    def __call__(self, left, right):
+    def __call__(self, left: dict, right: dict) -> float:
         return 1.0 if right[self.right_field] in left[self.left_field] else 0.0
 
 
@@ -145,7 +147,7 @@ class IsContained(Criterion):
 
 
 class FloatDifference(Criterion):
-    def __call__(self, left, right):
+    def __call__(self, left: dict, right: dict) -> float:
         return fabs(left[self.left_field] - right[self.right_field])
 
 
@@ -154,62 +156,119 @@ class DateDayDifference(Criterion):
         return abs((left[self.left_field] - right[self.right_field]).days)
 
 
+MatchResult = namedtuple('MatchResult', ['left_matches', 'left_unmatcheds', 'right_matches', 'right_unmatcheds', 'data'])
+
+
 class RecordMatcher:
-    criteria = tuple()
-    cutoff_value = 0.0
+    criteria: tuple[Any, ...] = tuple()
+
+    # Matches with strengh below cutoff_value will be removed at the end of the process
+    cutoff_value: float = 0.5
+
+    # Minimal match strengh to even consider a match
+    candidate_value: float = 0.0
 
     def __init__(self, left: dict = None, right: dict = None, **options):
         self.left: dict = left or {}
         self.right: dict = right or {}
         self.options: dict = options or {}
-        self.match_done = False
+        self.match_done: bool = False
         self.batch_size = None  # Unused
-        self.left_matches = {}
-        self.left_unmatched = []
-        self.right_matches = {}
-        self.right_unmatched = []
+        self.left_matches: dict = {}
+        self.left_unmatched: list = []
+        self.right_matches: dict = {}
+        self.right_unmatched: list = []
         self.weights, self.criteria_obj = zip(*self.criteria)
+        self.data: dict = {}
+
+    def left_limits(self, left: dict) -> tuple[int, int | None]:
+        """Returns, for a left record, the limits of matches to expect.
+
+        Args:
+            left (dict): a left record
+
+        Returns:
+            tuple[int, int | None]: tuple of (minimum matches, maximum matches)
+                to this left record. Maximum can be None (default) to indicate that there is
+                no maximum matches.
+        """
+        return (0, None)
+
+    def right_limits(self, right: dict = None) -> tuple[int, int | None]:
+        return (0, None)
+
+    def prepare(self):
+        """Prepare left and right records lists before the matching process.
+        Methods of inherited classes should call super().prepare() AFTER theirs own code
+        """
+        for left_idx, left_rec in self.left.items():
+            left_rec['__min_matches'], left_rec['__max_matches'] = self.left_limits(left_rec)
+            if left_rec['__max_matches'] is None:
+                left_rec['__max_matches'] = len(self.right)
+        for right_idx, right_rec in self.right.items():
+            right_rec['__min_matches'], right_rec['__max_matches'] = self.right_limits(right_rec)
+            if right_rec['__max_matches'] is None:
+                right_rec['__max_matches'] = len(self.left)
 
     def records_distance(self, left: dict, right: dict) -> float:
-        coords = []
+        coords: list = []
         for i in range(len(self.criteria_obj)):
             coords.append(self.weights[i] * self.criteria_obj[i](left, right))
         return sum(coords) / sum(self.weights)
 
-    def do_match(self):
+    def do_match(self) -> None:
+        # 1 - Prepare the two records lists
+        self.prepare()
+
+        # 2 - Build, for each left record, a sorted list of matching candidates
         for l_k, l_v in self.left.items():
             self.left_matches[l_k] = []
             for r_k, r_v in self.right.items():
-                self.right_matches[r_k] = self.right_matches.get(r_k, [])
+                # self.right_matches[r_k] = self.right_matches.get(r_k, [])
                 strength = self.records_distance(l_v, r_v)
-                if strength > self.cutoff_value:
+                if strength > self.candidate_value:
                     self.left_matches[l_k].append((r_k, strength))
-                    self.right_matches[r_k].append((l_k, strength))
+                    # self.right_matches[r_k].append((l_k, strength))
+            # 2.1 - Sort the candidates list
             if len(self.left_matches[l_k]):
                 self.left_matches[l_k].sort(key=lambda a: -a[1])
             else:
                 del self.left_matches[l_k]
-        for r_k in self.right.keys():
-            if len(self.right_matches[r_k]):
-                self.right_matches[r_k].sort(key=lambda a: -a[1])
-            else:
-                del self.right_matches[r_k]
+
+        # 3 - reduce the (left) matching list
+        for l_k in self.left_matches:
+            self.left_matches[l_k] = [r for r in self.left_matches[l_k] if r[1] > self.cutoff_value][
+                : self.left[l_k]['__max_matches']
+            ]
+            if len(self.left_matches[l_k]) < self.left[l_k]['__min_matches']:
+                # do something !!
+                pass
+
+            # 3.2 - Add match to the corresponding right_matches list
+            for r_k, strengh in self.left_matches[l_k]:
+                self.right_matches[r_k] = self.right_matches.get(r_k, []) + [(l_k, strength)]
+
+        # 3.3 - remove the unmatched left items from the matched list
+        self.left_matches = {k: v for k, v in self.left_matches.items() if v}
+
+        # 4 - Sort the right matches
+        for r_k in self.right_matches.keys():
+            # if len(self.right_matches[r_k]):
+            self.right_matches[r_k].sort(key=lambda a: -a[1])
+            # else:
+            #     del self.right_matches[r_k]
+
+        # 5 - collects unmatched records
         self.left_unmatched = list(set(self.left.keys()) - set(self.left_matches.keys()))
         self.right_unmatched = list(set(self.right.keys()) - set(self.right_matches.keys()))
+
+        # 6 - The match process is done !
         self.match_done = True
 
-    def get_all_results(self):
+    def get_all_results(self) -> MatchResult:
         if not self.match_done:
             self.do_match()
-        return (
-            self.left_matches,
-            self.left_unmatched,
-            self.right_matches,
-            self.right_unmatched,
-        )
-
-
-# -----------------------------------------------------------------------------------------------------------------------------------
+        return MatchResult(self.left_matches, self.left_unmatched, self.right_matches, self.right_unmatched, self.data)
 
 
 # -----------------------------------------------------------------------------------------------------------------------------------

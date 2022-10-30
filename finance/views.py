@@ -696,8 +696,8 @@ class IntervWidget(HtmlWidget):
         <th>Fournisseur</th><th>N° Série</th><th>Commande liée</th><th>Compte</th><th>Marché</th><th>Engagé</th>
       </tr>
       <tr>
-        <td>{{ intv.code_four }} - {{ intv.fourni }}</td><td>{{ intv.n_seri }}</td><td>{{ nu_bon_c }}</td><td>{{ nu_compte }}</td>
-        <td>{{ n_marche }}</td><td>{{ intv.mt_engage }}</td>
+        <td>{{ intv.code_four }} - {{ intv.fourni }}</td><td>{{ intv.n_seri }}</td><td>{{ intv.nu_bon_c }}</td>
+        <td>{{ nu_compte }}</td><td>{{ n_marche }}</td><td>{{ intv.mt_engage }}</td>
       </tr>
     </table></div>
     {% else %}<div id="{{ html_id }}" class="widget analysis">
