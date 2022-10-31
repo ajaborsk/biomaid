@@ -220,10 +220,7 @@ class CmdRowASolderChecker(RecordAnomalyChecker):
         "La quantité reçue ({recues}) de la ligne de commande est inférieur au nombre"
         " d'intervention(s) archivée(s) : {archivees}."
     )
-    description = _(
-        "La quantité reçue de la ligne de commande est inférieur au nombre"
-        " d'intervention(s) archivée(s)."
-        )
+    description = _("La quantité reçue de la ligne de commande est inférieur au nombre" " d'intervention(s) archivée(s).")
     tips = _(
         "Après vérification qu'il s'agit bien de la bonne intervention et que le montant engagé correspond"
         " à ce qui a effectivement été réalisé par le fournisseur, la ligne de commande peut être réceptionnée."

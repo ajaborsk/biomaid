@@ -2110,7 +2110,8 @@ class DemandeSmartView(SmartView):
                 ],
             },
             'enveloppe_allouee': {
-                'title': _("Mt validé"),
+                'hidden': True,
+                'title': _("XX Mt validé"),  # Use 'montant_valide_conditional' for display
                 "format": "money",
                 "decimal_symbol": ",",
                 "thousands_separator": " ",
@@ -2118,12 +2119,12 @@ class DemandeSmartView(SmartView):
                 "symbol_is_after": True,
                 "precision": 0,
                 "max_width": 120,
-                "footer_data": "sum_if_ext",
-                "calc_data_test": 'valide_flag',
-                'data_if_null': 'montant_arbitrage',
-                'depends': [
-                    'montant_arbitrage',
-                ],
+                # "footer_data": "sum_if_ext",
+                # "calc_data_test": 'valide_flag',
+                # 'data_if_null': 'montant_arbitrage',
+                # 'depends': [
+                #     'montant_arbitrage',
+                # ],
             },
             'gel': {
                 'title': _("Définitif"),
@@ -2916,7 +2917,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'arbitrage_commission',
             'commentaire_provisoire_commission',
             'commentaire_definitif_commission',
-            'quantite_validee_conditional',  # hidden
+            'quantite_validee_conditional',
             'montant_qte_validee',
             'montant_valide_conditional',
             'montant_final',
@@ -2959,7 +2960,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'programme',
             'domaine',
             'expert_metier',
-            'montant_unitaire_expert_metier',
+            # 'montant_unitaire_expert_metier',
             'prix_unitaire_conditional',
             'it_cout_formation',
             # 'montant_unitaire_expert_metier',
@@ -2972,8 +2973,8 @@ class DemandeEqptSmartView(DemandeSmartView):
             'quantite_validee_conditional',
             'montant_valide_conditional',
             'arbitrage',
-            'quantite_validee',
-            'enveloppe_allouee',
+            # 'quantite_validee',
+            # 'enveloppe_allouee',
             'gel',
         )
         settings = {
@@ -3002,6 +3003,15 @@ class DemandeEqptSmartView(DemandeSmartView):
                 'title': 'Qté',
                 'header_sort': False,
             },  # on peut aussi ne changer que quelques propriétés
+            'montant_expert_metier': {
+                'hidden': True,  # Use prix_unitaire_conditional instead
+            },
+            'quantite_validee': {
+                'hidden': True,  # Use quantite_validee_conditional instead
+            },
+            'enveloppe_allouee': {
+                'hidden': True,  # Use montant_valide_conditional instead
+            },
         }
         # Exclusion des demandes de travaux (kind of hack...)
         base_filter = Q(discipline_dmd__isnull=True) | ~Q(discipline_dmd__code='TX')
@@ -3256,7 +3266,7 @@ class MesDemandesSmartView(DemandeEqptSmartView):
             )
 
 
-class DemandesEnCoursSmartView(MesDemandesSmartView):
+class DemandesEnCoursSmartView(DemandeEqptSmartView):
     class Meta:
         help_text = _(
             "Toutes les demandes qui n'ont pas encore été arbitrées définitivement se trouvent dans ce tableau."
@@ -3264,9 +3274,6 @@ class DemandesEnCoursSmartView(MesDemandesSmartView):
             " puis arbitrée soit par une commission (pour la matériel des services de soin) soit par un responsable."
         )
         settings = {
-            'prix_unitaire_conditional': {
-                'hidden': True,
-            },
             'quantite_validee_conditional': {
                 'hidden': True,
             },
@@ -3275,32 +3282,11 @@ class DemandesEnCoursSmartView(MesDemandesSmartView):
             },
         }
         columns__remove = (
-            'programme',
-            'domaine',
-            'expert_metier',
-            # 'prix_unitaire_conditional',
-            # 'montant_unitaire_expert_metier',
-            # 'montant_total_expert_metier',
             'arbitrage_commission',
-            'commentaire_provisoire_commission',
             'commentaire_definitif_commission',
-            # 'quantite_validee_conditional',
-            # 'montant_valide_conditional',
             'gel',
         )
-        selectable_columns__remove = (
-            'programme',
-            'domaine',
-            'expert_metier',
-            'prix_unitaire_conditional',
-            # 'montant_unitaire_expert_metier',
-            # 'montant_total_expert_metier',
-            'arbitrage_commission',
-            'commentaire_provisoire_commission',
-            'commentaire_definitif_commission',
-            'quantite_validee_conditional',
-            'montant_valide_conditional',
-        )
+        selectable_columns__remove = ('arbitrage_commission', 'commentaire_definitif_commission', 'gel')
 
         exports = {
             'xlsx': {
@@ -3338,13 +3324,6 @@ class DemandesEnCoursSmartView(MesDemandesSmartView):
                 ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
             )
 
-        # user_filters__update = {
-        #     'state_code': {
-        #         'type': 'select',
-        #         'choices': '__STYLES__',
-        #     },
-        # }
-
 
 class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
     class Meta:
@@ -3358,28 +3337,38 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
             " pour approuver automatiquement les demandes (dans ses préférences)."
         )
         columns__remove = (
+            'expert_metier',
+            'programme',
+            'domaine',
             'commentaire_biomed',
-            # 'avis_biomed',
+            'avis_biomed',
             # 'montant_arbitrage',
             # 'montant_unitaire_expert_metier',
             # 'quantite_validee_conditional',  # hidden
+            'prix_unitaire_conditional',
             'montant_qte_validee',
             'montant_valide_conditional',
             'montant_final',
             'montant_consomme',
             # 'arbitrage',
+            'commentaire_provisoire_commission',
             'quantite_validee',
             'enveloppe_allouee',
             # 'gel',
         )
         selectable_columns__remove = (
+            'expert_metier',
+            'programme',
+            'domaine',
             'commentaire_biomed',
             'avis_biomed',
             'montant_arbitrage',
             'montant_unitaire_expert_metier',
+            'prix_unitaire_conditional',
             'quantite_validee_conditional',  # hidden
             'montant_qte_validee',
             'montant_valide_conditional',
+            'commentaire_provisoire_commission',
             'montant_final',
             'montant_consomme',
             'arbitrage',
@@ -3438,6 +3427,11 @@ class DemandesEtudeSmartView(DemandesEnCoursSmartView):
             'quantite_validee',
             'enveloppe_allouee',
             'gel',
+        )
+        selectable_columns__remove = (
+            'quantite_validee_conditional',  # hidden
+            'montant_valide_conditional',
+            'arbitrage',
         )
 
         def base_filter(self, view_params: dict):  # NOQA
@@ -3524,10 +3518,14 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
         )
         columns__remove = (
             'commentaire_provisoire_commission',
+            'arbitrage',
             'quantite_validee',
             'enveloppe_allouee',
         )
-        selectable_columns__remove = ('commentaire_provisoire_commission',)
+        selectable_columns__remove = (
+            'commentaire_provisoire_commission',
+            'arbitrage',
+        )
 
         def base_filter(self, view_params: dict):  # NOQA : Method could be static
             tmp_scope = roles_demandes_possibles(view_params['user'])
