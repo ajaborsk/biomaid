@@ -639,15 +639,7 @@ class SmartViewMetaclass(MediaDefiningClass):
 
             # Step 6.5 : Get 'real' data fields => bound directly to the table database (Django Model)
             try:
-                if _meta['columns']:
-                    # print("data fields for class", name)
-                    _meta['data_fields'] = [
-                        attrs[column].get('data')
-                        for column in _meta['columns']
-                        if attrs[column].get('data') and isinstance(attrs[column].get('data'), str)
-                    ]
-                    # print(_meta['data_fields'])
-                elif _meta['fields']:
+                if _meta['fields']:
                     _meta['data_fields'] = [
                         attrs[column].get('data')
                         for column in _meta['fields']
@@ -664,6 +656,44 @@ class SmartViewMetaclass(MediaDefiningClass):
 
             # print("Step 6.5 (_meta.data_fields created)"+"-"*80+"\n  _meta.data_fields:")
             # pprint(_meta.data_fields)
+
+            # Step 6.5 : Build queryset function
+
+            # from django.db.models import Value
+
+            annotations_fields = {
+                k: v.get_annotation for k, v in _meta["smartfields_dict"].items() if isinstance(v, ComputedSmartField)
+            }
+
+            defined = set(_meta['data_fields'])
+            for sfn, sfd in _meta['smartfields_dict'].items():
+                if isinstance(sfd, ComputedSmartField):
+                    if set(sfd.get('depends', default=[])) <= defined:
+                        annotations_fields[sfn] = sfd.get_annotation
+                        defined.add(sfn)
+                    else:
+                        raise RuntimeError(
+                            _(
+                                "While defining class {}, impossible to add computed field {}, which depends on {}"
+                                " and only {} are defined"
+                            ).format(name, sfn, repr(sfd.get('depends')), repr(defined))
+                        )
+
+            # print("\nClass:", name, ":")
+            # for sfn, sfo in _meta['smartfields_dict'].items():
+            #     if sfn not in annotations_fields:
+            #         print("Field:     ", sfn)
+            #     else:
+            #         print("Annotation:", sfn, repr(sfo.get('depends')))
+
+            def queryset(view_params: dict):
+                return (
+                    _meta['model']
+                    .objects.using(_meta['database'])
+                    .annotate(**{k: v(view_params) for k, v in annotations_fields.items()})
+                )
+
+            _meta['queryset'] = queryset
 
         # Step 7 : Process filters
 
@@ -1597,12 +1627,17 @@ class SmartView(metaclass=SmartViewMetaclass):
         #     'user': request.user,
         # }
 
-        annotation_fields = [sf for sf in self._meta['columns'] if getattr(self, sf).get_annotation(view_attrs)]
-        queryset = (
-            self._meta['model']
-            .objects.using(self._meta['database'])
-            .annotate(**{sf: getattr(self, sf).get_annotation(self._view_params) for sf in annotation_fields})
-        )
+        # print(self._meta['queryset'](view_attrs))
+
+        # annotation_fields = [sf for sf in self._meta['columns'] if getattr(self, sf).get_annotation(view_attrs)]
+        # queryset = (
+        #     self._meta['model']
+        #     .objects.using(self._meta['database'])
+        #     .annotate(**{sf: getattr(self, sf).get_annotation(self._view_params) for sf in annotation_fields})
+        # )
+
+        queryset = self._meta['queryset'](view_attrs)
+
         read_permissions = self._meta['permissions'].get('read', {}).keys()
         if len(read_permissions):  # TODO : Comportement par défaut = lecture autorisée pour tous. Sans doute à revoir...
             queryset = queryset.filter(reduce(lambda a, b: a | b, [Q(roles__contains=k) for k in read_permissions]))

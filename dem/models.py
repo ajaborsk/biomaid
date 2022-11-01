@@ -81,8 +81,8 @@ class Campagne(models.Model):
         #   dans les listes de choix
         ordering = ['message', 'code']
 
-    code = models.CharField(max_length=16, null=True, blank=True)  # Code
-    nom = models.CharField(max_length=64, null=True, blank=True)  # Nom du "calendrier"
+    code: models.CharField = models.CharField(max_length=16, null=True, blank=True)  # Code
+    nom: models.CharField = models.CharField(max_length=64, null=True, blank=True)  # Nom du "calendrier"
     description = models.TextField(null=True, blank=True, default=None)  # commentaires si nécessaire
     message = models.TextField(null=True, blank=True, default=None)  # message à présenter à l'utilisateur (alerte ou explications)
     annee = models.IntegerField(
@@ -132,7 +132,7 @@ class Arbitrage(models.Model):
         verbose_name = 'Arbitrage'
         verbose_name_plural = 'Arbitrages'
 
-    code = models.CharField(max_length=8, default='')
+    code: models.CharField = models.CharField(max_length=8, default='')
     discipline = models.ForeignKey(
         'common.Discipline',
         on_delete=models.PROTECT,
@@ -144,7 +144,7 @@ class Arbitrage(models.Model):
         null=False,
         default=False,
     )
-    nom = models.CharField(max_length=30)
+    nom: models.CharField = models.CharField(max_length=30)
     commentaire = models.TextField(null=True, blank=True, default=None)
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name='date de création')
     cloture = models.DateField(verbose_name='date de fin', null=True, blank=True)
@@ -331,7 +331,7 @@ class Demande(models.Model):
         related_name='demande_redirect',
     )
 
-    nature = models.CharField(
+    nature: models.CharField = models.CharField(
         verbose_name=_("Nature"),
         max_length=2,
         choices=NATURE_CHOICES,
@@ -353,7 +353,7 @@ class Demande(models.Model):
         null=True,
     )
     # Titre du projet, si plusieurs demande sont liées
-    nom_projet = models.CharField(
+    nom_projet: models.CharField = models.CharField(
         verbose_name=_("Nom du Projet"),
         max_length=120,
         default=None,
@@ -365,7 +365,7 @@ class Demande(models.Model):
             Sauf exception, toutes les demandes d'un même projet seront validées (ou pas) simultanément."
         ),
     )
-    target = models.CharField(
+    target: models.CharField = models.CharField(
         verbose_name=_("Cible"),
         help_text=_(
             "'programme' ou 'année' cible de la demande. Si Null, la demande est immédiate."
@@ -379,7 +379,7 @@ class Demande(models.Model):
         null=True,
     )
     description = models.TextField(null=True, blank=True, default=None)  # commentaires si nécessaire
-    localisation = models.CharField(max_length=128, default=None, blank=True, null=True)
+    localisation: models.CharField = models.CharField(max_length=128, default=None, blank=True, null=True)
     # décision OUI/NON/vide du cadre sup
     # Personne qui a rédigé la demande
     redacteur = models.ForeignKey(
@@ -422,18 +422,18 @@ class Demande(models.Model):
         'common.Uf',
         on_delete=models.PROTECT,
     )
-    nom_organisation = models.CharField(max_length=50)
-    code_pole = models.CharField(max_length=8, default='0000', verbose_name=_("Code pôle"))
-    nom_pole_court = models.CharField(max_length=50)
-    code_uf = models.CharField(
+    nom_organisation: models.CharField = models.CharField(max_length=50, null=True, blank=True)
+    code_pole: models.CharField = models.CharField(max_length=8, default='0000', verbose_name=_("Code pôle"))
+    nom_pole_court: models.CharField = models.CharField(max_length=50, null=True, blank=True)
+    code_uf: models.CharField = models.CharField(
         verbose_name=_("Code UF"),
         help_text=_("Code de l'UF qui va bénéficier de ce matériel"),
         max_length=8,
         default='0000',
     )
-    nom_uf_court = models.CharField(max_length=50)
+    nom_uf_court: models.CharField = models.CharField(max_length=50, null=True, blank=True)
     # Personne du service à l'origine  de la demande
-    referent = models.CharField(
+    referent: models.CharField = models.CharField(
         verbose_name=_("Référent"),
         help_text=(
             "Personne du service à l'origine  de la demande, \
@@ -889,7 +889,7 @@ class Demande(models.Model):
         ('AU', _("Autre")),
     )
 
-    tvx_batiment = models.CharField(
+    tvx_batiment: models.CharField = models.CharField(
         max_length=8,
         choices=TVX_BATIMENT_CHOICE,
         null=True,
