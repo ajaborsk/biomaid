@@ -56,6 +56,7 @@ Tabulator.extendModule("format", "formatters", {
         if (add_default_class) {
             if (cell_value['flag']) {
                 cell.getElement().classList.add('default-value');
+                cell.getElement().classList.remove('set-value');
                 return value;
             } else {
                 return '';
@@ -64,6 +65,7 @@ Tabulator.extendModule("format", "formatters", {
         } else {
             if (cell_value['flag']) {
                 cell.getElement().classList.add('set-value');
+                cell.getElement().classList.remove('default-value');
                 return value;
             } else {
                 return '';

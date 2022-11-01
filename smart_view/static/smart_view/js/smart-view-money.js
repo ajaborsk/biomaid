@@ -1,6 +1,6 @@
 Tabulator.extendModule("format", "formatters", {
     //currency formatting
-    money_ext: function(cell, formatterParams, onRendered) {
+    money_ext: function (cell, formatterParams, onRendered) {
         let floatVal, number, integer, decimal, rgx;
         var add_default_class = false;
 
@@ -99,9 +99,11 @@ Tabulator.extendModule("format", "formatters", {
         },
     */
     //currency formatting with coalesce
-    money_conditional: function(cell, formatterParams, onRendered) {
+    money_conditional: function (cell, formatterParams, onRendered) {
         var floatVal, number, integer, decimal, rgx;
-        var add_default_class = false;
+
+        cell.getElement().classList.add('set-value');
+        cell.getElement().classList.remove('default-value');
 
         var cell_value = cell.getValue();
         floatVal = null;
@@ -110,7 +112,8 @@ Tabulator.extendModule("format", "formatters", {
                 floatVal = cell_value['fields'][i];
                 break;
             }
-            add_default_class = true;
+            cell.getElement().classList.add('default-value');
+            cell.getElement().classList.remove('set-value');
         }
         if (floatVal === null) {
             return '';
@@ -148,29 +151,18 @@ Tabulator.extendModule("format", "formatters", {
         }
 
         var value = after ? integer + decimal + symbol : symbol + integer + decimal;
-        if (add_default_class) {
-            if (cell_value['flag']) {
-                cell.getElement().classList.add('default-value');
-                return value;
-            } else {
-                return '';
-                // return '<span class="default-value">' + value + '</span>';
-            }
+        if (cell_value['flag']) {
+            return value;
         } else {
-            if (cell_value['flag']) {
-                cell.getElement().classList.add('set-value');
-                return value;
-            } else {
-                return '';
-                // return value;
-            }
+            return '';
+            // return '<span class="default-value">' + value + '</span>';
         }
     },
 
 });
 
 Tabulator.extendModule("columnCalcs", "calculations", {
-    'sum_if_ext': function(values, data, calcParams) {
+    'sum_if_ext': function (values, data, calcParams) {
         //values - array of column values
         //data - all table data
         //calcParams - params passed from the column definition object
@@ -179,7 +171,7 @@ Tabulator.extendModule("columnCalcs", "calculations", {
         var test_column = calcParams['test']; //'gel';
 
         var sum = 0;
-        data.forEach(function(row_data) {
+        data.forEach(function (row_data) {
             if (row_data[test_column]) {
                 if (row_data[value_column] !== null)
                     sum += parseFloat(row_data[value_column]);
@@ -190,7 +182,7 @@ Tabulator.extendModule("columnCalcs", "calculations", {
         return sum;
     },
 
-    'sum_conditional': function(values, data, calcParams) {
+    'sum_conditional': function (values, data, calcParams) {
         //values - array of column values
         //data - all table data
         //calcParams - params passed from the column definition object
@@ -200,7 +192,7 @@ Tabulator.extendModule("columnCalcs", "calculations", {
 
         var sum = 0;
 
-        values.forEach(function(cell_value_raw) {
+        values.forEach(function (cell_value_raw) {
             var cell_value = cell_value_raw;
             if (cell_value['flag']) {
                 var values = cell_value['fields'];
@@ -220,7 +212,7 @@ Tabulator.extendModule("columnCalcs", "calculations", {
 
 Tabulator.extendModule("edit", "editors", {
 
-    moneyCoalesceEditor: function(cell, onRendered, success, cancel, editorParams) {
+    moneyCoalesceEditor: function (cell, onRendered, success, cancel, editorParams) {
         //cell - the cell component for the editable cell
         //onRendered - function to call when the editor has been rendered
         //success - function to call to pass the successfuly updated value to Tabulator
@@ -238,7 +230,7 @@ Tabulator.extendModule("edit", "editors", {
         editor.value = values_list[0];
 
         //set focus on the select box when the editor is selected (timeout allows for editor to be added to DOM)
-        onRendered(function() {
+        onRendered(function () {
             editor.focus({
                 preventScroll: true
             });
@@ -258,7 +250,7 @@ Tabulator.extendModule("edit", "editors", {
         return editor;
     },
 
-    moneyConditionnalEditor: function(cell, onRendered, success, cancel, editorParams) {
+    moneyConditionnalEditor: function (cell, onRendered, success, cancel, editorParams) {
         //cell - the cell component for the editable cell
         //onRendered - function to call when the editor has been rendered
         //success - function to call to pass the successfuly updated value to Tabulator
@@ -278,7 +270,7 @@ Tabulator.extendModule("edit", "editors", {
         editor.value = values_list[0];
 
         //set focus on the select box when the editor is selected (timeout allows for editor to be added to DOM)
-        onRendered(function() {
+        onRendered(function () {
             editor.focus({
                 preventScroll: true
             });
@@ -304,11 +296,11 @@ Tabulator.extendModule("edit", "editors", {
 });
 
 Tabulator.extendModule('sort', 'sorters', {
-    moneySorter: function(a, b, aRow, bRow, column,dir, sorterParams) {
+    moneySorter: function (a, b, aRow, bRow, column, dir, sorterParams) {
         return a - b;
     },
 
-    moneyConditionalSorter: function(a, b, aRow, bRow, column, dir, sorterParams) {
+    moneyConditionalSorter: function (a, b, aRow, bRow, column, dir, sorterParams) {
         let va = 0;
         let vb = 0;
 
