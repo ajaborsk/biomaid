@@ -3015,7 +3015,14 @@ class DemandeEqptSmartView(DemandeSmartView):
         # Exclusion des demandes de travaux (kind of hack...)
         base_filter = Q(discipline_dmd__isnull=True) | ~Q(discipline_dmd__code='TX')
         user_filters = {
-            'calendrier': {'type': 'select'},
+            'campagne': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'calendrier',
+                    'label': F('calendrier__nom'),
+                    'sort': F('calendrier__code'),
+                },
+            },
             'pole': {
                 'label': _("Pôle"),
                 'type': 'select',
