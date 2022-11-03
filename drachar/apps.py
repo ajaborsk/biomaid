@@ -147,9 +147,9 @@ class DracharConfig(AppConfig):
                 Previsionnel.objects.order_by()
                 .filter(solder_ligne=False, programme__discipline__code=discipline)
                 .annotate(nom_expert=Concat(F('expert__first_name'), Value(' '), F('expert__last_name')))
-                .values('nom_expert')
+                .values('expert', 'nom_expert')
                 .annotate(nombre=Count('pk'))
-                .values('nom_expert', 'nombre')
+                .values('expert', 'nom_expert', 'nombre')
             )
 
         def montant_previsionnel_par_expert(discipline):
@@ -157,9 +157,9 @@ class DracharConfig(AppConfig):
                 Previsionnel.objects.order_by()
                 .filter(solder_ligne=False, programme__discipline__code=discipline)
                 .annotate(nom_expert=Concat(F('expert__first_name'), Value(' '), F('expert__last_name')))
-                .values('nom_expert')
+                .values('expert', 'nom_expert')
                 .annotate(montant_total=Cast(Sum('budget'), output_field=IntegerField()))
-                .values('nom_expert', 'montant_total')
+                .values('expert', 'nom_expert', 'montant_total')
             )
 
         set_datasource('drachar.previsionnel.count', {}, processor=lambda: None)

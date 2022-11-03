@@ -254,14 +254,18 @@ class PrevisionnelParExpertWidget(AltairWidget):
         super()._setup(**params)
 
         qs = get_data('drachar.previsionnel-par-expert', all_params=self.params)
-        category = 'nom_expert:N'
+        category = altair.Color('nom_expert', type='nominal', title="Chargé d'opération")
         value = 'nombre:Q'
         self.params['chart'] = (
             Chart(Data(values=list(qs)))
-            .encode(
-                theta=value,
-                color=altair.Color(category),
+            .transform_calculate(
+                url=reverse('drachar:previsionnel', kwargs={'url_prefix': params['url_prefix']})
+                + '?filters=['
+                + '{"name":+"expert",+"value":+{"expert":+'
+                + altair.datum.expert
+                + '}},+{"name":+"solder_ligne",+"value":+{"solder_ligne":+false}}]'
             )
+            .encode(theta=value, color=category, href='url:N', tooltip=[category, 'nombre:Q'])
             .mark_arc(tooltip=True)
             .properties(width='container', height='container')
             .configure_view(strokeWidth=0)
