@@ -15,6 +15,10 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 # Create your views here.
+import json
+from json import JSONDecodeError
+
+
 from django.utils import timezone
 
 
@@ -35,6 +39,9 @@ class DoubleSmartViewMixin:
     field_prefix = 'field_table'
 
     def setup(self, request, *args, **kwargs):
+
+        load_filters = {}
+
         # print("AJA 11")
         super().setup(request, *args, **kwargs)
         if 'url_prefix' in kwargs:
@@ -54,9 +61,24 @@ class DoubleSmartViewMixin:
             },
             **dict(kwargs),
         )
+        if 'filters' in self.request.GET:
+            try:
+                get_filters = json.loads(self.request.GET['filters'])
+                if isinstance(get_filters, list):
+                    for get_filter in get_filters:
+                        if (
+                            isinstance(get_filter, dict)
+                            and 'name' in get_filter
+                            and get_filter['name'] in self.main_smart_view_class._meta['user_filters']
+                            and 'value' in get_filter
+                        ):
+                            load_filters[get_filter['name']] = get_filter['value']
+            except JSONDecodeError:
+                pass
         self.main_smart_view = self.main_smart_view_class(
             prefix=self.name.replace('-', '_') + '_' + self.main_prefix,
             view_params=self.view_params,
+            load_filters=load_filters,
             request=request,
             appname=self.my_app_name,
             url_prefix=self.url_prefix,
