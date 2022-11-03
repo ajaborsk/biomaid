@@ -3348,19 +3348,21 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
             'domaine',
             'commentaire_biomed',
             'avis_biomed',
-            # 'montant_arbitrage',
-            # 'montant_unitaire_expert_metier',
-            # 'quantite_validee_conditional',  # hidden
+            'montant_arbitrage',
+            'montant_unitaire_expert_metier',
+            'quantite_validee_conditional',  # hidden
             'prix_unitaire_conditional',
             'montant_qte_validee',
             'montant_valide_conditional',
             'montant_final',
             'montant_consomme',
-            # 'arbitrage',
+            'arbitrage',
+            'arbitrage_commission',
             'commentaire_provisoire_commission',
+            'commentaire_definitif_commission',
             'quantite_validee',
             'enveloppe_allouee',
-            # 'gel',
+            'gel',
         )
         selectable_columns__remove = (
             'expert_metier',
@@ -3375,9 +3377,11 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
             'montant_qte_validee',
             'montant_valide_conditional',
             'commentaire_provisoire_commission',
+            'commentaire_definitif_commission',
             'montant_final',
             'montant_consomme',
             'arbitrage',
+            'arbitrage_commission',
             'quantite_validee',
             'enveloppe_allouee',
             'gel',
@@ -3432,12 +3436,16 @@ class DemandesEtudeSmartView(DemandeEqptSmartView):
             'montant_valide_conditional',
             'montant_final',
             'montant_consomme',
+            'arbitrage_commission',
+            'commentaire_definitif_commission',
             'gel',
         )
         selectable_columns__remove = (
             'quantite_validee_conditional',  # hidden
             'montant_valide_conditional',
             'arbitrage',
+            'arbitrage_commission',
+            'commentaire_definitif_commission',
         )
 
         def base_filter(self, view_params: dict):  # NOQA
