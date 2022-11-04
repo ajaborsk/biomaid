@@ -64,7 +64,7 @@
             </span>
             <span class="dem-cockpit-subtile{% if campagne_row.arbitrer_moi.count %} highlight{% endif %}">
               <span class="dem-cockpit-number">{{ campagne_row.arbitrer_moi.count }}</span>
-              <span class="dem-cockpit-precision">Pour moi</span>
+              <span class="dem-cockpit-precision">{% if campagne_row.arbitrer_moi.count %}<a href="{% url_kwargs 'dem:arbitrage-all' %}?filters={{ campagne_row.arbitrer_filters }}">Pour moi</a>{% else %}Pour moi{% endif %}</span>
             </span>
           </span>
           <span class="dem-cockpit-tile">

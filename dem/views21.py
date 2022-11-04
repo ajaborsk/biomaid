@@ -179,6 +179,20 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
                         programme__arbitre=self.request.user,
                         calendrier=campagne.pk,
                     ),
+                    'arbitrer_filters': quote_plus(
+                        json.dumps(
+                            [
+                                {
+                                    'name': 'campagne',
+                                    'value': {'calendrier': campagne.pk},
+                                },
+                                {
+                                    'name': 'arbitre',
+                                    'value': {'arbitre': self.request.user.pk},
+                                },
+                            ]
+                        )
+                    ),
                 }
             )
 
@@ -413,4 +427,7 @@ class DemandeArbitrageView(SmartPage):
     menu_left = ({'label': 'Synthèse', 'url_name': 'dem:vue-filtre-synthese'},)
 
     def view_filters(self, *args, **kwargs):  # NOQA : Unused self, but it could have been
-        return {'programme__code': kwargs['programme_code']}
+        if 'programme_code' in kwargs:
+            return {'programme__code': kwargs['programme_code']}
+        else:
+            return {}

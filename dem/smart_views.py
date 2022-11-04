@@ -3466,26 +3466,28 @@ class DemandesEtudeSmartView(DemandeEqptSmartView):
 
 class DemandesArbitrageSmartView(DemandeEqptSmartView):
     class Meta:
-        help_text = _("Toutes les demandes qui peuvent être arbitrées")
+        help_text = _("Toutes les demandes qui **peuvent** être arbitrées par moi")
         columns__remove = ('arbitrage',)
         columns__add = (
             'workflow_alert',
             'valide_flag',
             # 'montant_final', # test
         )
-        # selectable_columns__add = ('gel',)
         selectable_columns__remove = ('arbitrage',)
-        base_filter = (
-            # Demandes non validées
-            Q(gel=False) | Q(gel__isnull=True),
-            ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
-        )
+
+        def base_filter(self, view_params):
+            return (
+                # Demandes non validées
+                Q(gel=False),
+                Q(programme__arbitre=view_params['user'].pk),
+                ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
+            )
+
         user_filters__update = {
             'expert_metier': {'label': _("Expert métier"), 'type': 'select'},
             'avis_biomed': {'label': _("Avis favorable expert"), 'type': 'select'},
             'domaine': {'type': 'select'},
             'arbitrage_commission': {'label': _("Arbitrage"), 'type': 'select'},
-            'gel': {'label': _("Arbitrage définitif"), 'type': 'select'},
         }
         row_styler = {
             'fieldname': 'state_code',

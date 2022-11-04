@@ -112,6 +112,11 @@ urlpatterns = (
             name='arbitrage',
         ),
         path(
+            'arbitrage/',
+            views21.DemandeArbitrageView.as_view(),
+            name='arbitrage-all',
+        ),
+        path(
             'demandes-archivees-expert/',
             views21.DemandesArchiveesExpert.as_view(),
             name='demandes-archivees-expert',
