@@ -64,7 +64,7 @@ h1 {
 
 main {
   grid-template-rows: minmax(0, 1fr);
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 .active-tab-content {
@@ -102,6 +102,14 @@ main {
 
 div.smart-view-menu-bar {
 margin: 0 0 3px 0 !important;
+}
+
+div.smart-page-header-message {
+  height: 0;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden;
 }
 
 .table-topbar .button i {
