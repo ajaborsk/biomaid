@@ -1124,7 +1124,19 @@ class GenericRole(models.Model):
     content_type: models.ForeignKey = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id: models.CharField = models.CharField(max_length=64)
     content_object = GenericForeignKey('content_type', 'object_id')
-    role_code: models.CharField = models.CharField(max_length=8, choices=UserUfRole.NAME_CHOICES)
+    role_code: models.CharField = models.CharField(
+        max_length=8,
+        choices=tuple(
+            list(UserUfRole.NAME_CHOICES)
+            + [
+                ('ADM', _("Administrateur")),
+                ('OWN', _("Propriétaire")),
+                ('MAN', _("Manager")),
+                ('ARB', _("Arbitre")),
+                ('DIS', _("Aiguilleur")),
+            ]
+        ),
+    )
 
     objects = models.Manager()  # The default manager.
     active_objects = ActiveManagerCloture()  # The active_objects manager.
