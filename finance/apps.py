@@ -136,6 +136,15 @@ class FinanceConfig(AppConfig):
                     'url_name': 'finance:home',
                 },
                 {
+                    'label': _("Programmes"),
+                    'entries': (
+                        {
+                            'label': _("Liste des programmes"),
+                            'url_name': 'common:programme',
+                        },
+                    ),
+                },
+                {
                     'label': _("Commandes"),
                     'entries': (
                         {

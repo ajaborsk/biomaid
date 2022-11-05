@@ -1671,7 +1671,7 @@ ldap = ["python-ldap", "python-ldap", "django-auth-ldap"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "8b00b5fb48bcf01f0f31547bf27dfc6162697f34842e8b13983ac5f1eb6770e4"
+content-hash = "3e862fb496309326444fceb1e259d81e31b3336709baf8e8b77fb68966d5f01a"
 
 [metadata.files]
 alabaster = [

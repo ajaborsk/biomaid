@@ -20,7 +20,7 @@ from collections.abc import Callable
 
 import django.db.models
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Value, TextField, OuterRef, Expression
+from django.db.models import Value, TextField, OuterRef, Expression, CharField
 from django.db.models.functions import Concat, Cast, JSONObject, Coalesce
 import functools
 
@@ -54,7 +54,9 @@ def _all_documents_json(model: django.db.models.Model, name: str | None, view_pa
     return Concat(
         Value('['),
         Coalesce(
-            GenericDocument.objects.filter(content_type_id=model_id, object_id=OuterRef('pk'), name=name)
+            GenericDocument.objects.filter(
+                content_type_id=model_id, object_id=Cast(OuterRef('pk'), output_field=CharField()), name=name
+            )
             .order_by()
             .values('content_type_id', 'object_id')
             .annotate(

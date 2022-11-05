@@ -1092,7 +1092,7 @@ class Alert(models.Model):
     id = models.AutoField(primary_key=True)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
-    object_id = models.PositiveIntegerField(null=True)
+    object_id = models.CharField(max_length=64, null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
     niveau = models.IntegerField(

@@ -2013,7 +2013,7 @@ class SmartView(metaclass=SmartViewMetaclass):
                 user_filters = filter_args(request.GET.get("filters", "{}"))
                 # print("AJA>>>", user_filters)
 
-                annotation_fields = [sf for sf in self._meta['columns'] if getattr(self, sf).get_annotation(self._view_params)]
+                # annotation_fields = [sf for sf in self._meta['columns'] if getattr(self, sf).get_annotation(self._view_params)]
                 # print("Annotations :", annotation_fields)
 
                 query_set = (
@@ -2022,7 +2022,7 @@ class SmartView(metaclass=SmartViewMetaclass):
                     .filter(*user_filters[0], **user_filters[1])
                 )
 
-                fields = list(self._meta['data_fields']) + list(annotation_fields)
+                # fields = list(self._meta['data_fields']) + list(annotation_fields)
                 # print("All :", fields)
 
                 if request.GET.get("export") in self._meta['exports']:
@@ -2033,7 +2033,7 @@ class SmartView(metaclass=SmartViewMetaclass):
                     else:
                         raise RuntimeError(_("Unknown export engine: {}").format(export.get("engine")))
                 else:
-                    return JsonResponse({"data": list(query_set.values(*fields))})
+                    return JsonResponse({"data": list(query_set.values())})
         # Renvoyer None indique à l'appelant (la vue) que la requête n'a pas été traitée
 
     def __str__(self):
