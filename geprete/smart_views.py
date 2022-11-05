@@ -205,7 +205,7 @@ class GepreteSmartView(SmartView):
         ComputedSmartField,
         {
             'special': 'roles',
-            'data': class_roles_expression(),
+            'data': class_roles_expression(Geprete),
         },
     )
     state = (
@@ -451,7 +451,7 @@ class GessayeSmartView(SmartView):
         ComputedSmartField,
         {
             'special': 'roles',
-            'data': class_roles_expression(),
+            'data': class_roles_expression(Gessaye),
         },
     )
     state = (

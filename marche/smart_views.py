@@ -252,7 +252,7 @@ class MarcheSmartView(SmartView):
         ComputedSmartField,
         {
             'special': 'roles',
-            'data': class_roles_expression(),
+            'data': class_roles_expression(Marche),
         },
     )
     state = (
@@ -452,7 +452,7 @@ class ExceptionMarcheSmartView(SmartView):
         ComputedSmartField,
         {
             'special': 'roles',
-            'data': class_roles_expression(),
+            'data': class_roles_expression(ExceptionMarche),
         },
     )
     state = (

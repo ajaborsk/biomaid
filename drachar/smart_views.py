@@ -610,6 +610,7 @@ class PrevisionnelSmartView(SmartView):
             'title': _("Rôles"),
             'hidden': True,
             'data': class_roles_expression(
+                Previsionnel,
                 owner_field='expert',
                 uf_field='uf',
                 programme_field='programme',
@@ -1299,6 +1300,7 @@ class PrevTvxSmartView(SmartView):
             'title': _("Rôles"),
             'hidden': True,
             'data': class_roles_expression(
+                Previsionnel,
                 owner_field='expert',
                 uf_field='num_dmd__uf',
                 programme_field='programme',
