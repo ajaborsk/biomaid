@@ -571,12 +571,10 @@ class PrevisionnelView(DoubleSmartViewMixin, BiomAidViewMixin, TemplateView):
     }
     main_smart_view_class = PrevisionnelSmartView21
     name = 'previsionnel'
-    main_field_name = 'num_dmd'
+    main_field_name = 'num_dmd_id'
+    managed_field_name = 'num_dmd'
     field_smart_view_class = SingleDemandeSmartView
     title = _("Prévisionnel")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
 
 class SuiviAcquisitions(SmartPage):

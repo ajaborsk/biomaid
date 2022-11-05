@@ -91,6 +91,7 @@ class DoubleSmartViewMixin:
             url_prefix=self.url_prefix,
             manager={
                 'fieldname': self.main_field_name,
+                'managed_fieldname': self.managed_field_name,
                 'smartview': self.main_smart_view,
                 'prefix': self.main_smart_view._prefix,
             },

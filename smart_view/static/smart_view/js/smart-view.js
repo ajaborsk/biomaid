@@ -306,7 +306,8 @@ class SmartView {
         if (this.options.manager) {
             this.options.manager.smart_view.add_managed({
                 'smartview': this,
-                'fieldname': this.options.manager.manager_fieldname
+                'fieldname': this.options.manager.manager_fieldname,
+                'managed_fieldname': this.options.manager.managed_fieldname
             });
         } else {
             let self = this;
@@ -425,7 +426,7 @@ class SmartView {
 
                 // console.debug("Update managed...", managed_smartview, row.getData()[managed_smartview.fieldname]);
                 var filter = {};
-                filter[managed_smartview.fieldname] = managed_smartview.last_manage_value;
+                filter[managed_smartview.managed_fieldname] = managed_smartview.last_manage_value;
                 managed_smartview.smartview.filters_apply(null, managed_smartview.smartview, filter);
             }
         }
