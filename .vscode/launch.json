@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Django",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "runserver"
+            ],
+            "django": true,
+            "justMyCode": true
+        },
+        {
             "name": "Python: analytics_update",
             "type": "python",
             "request": "launch",
@@ -16,15 +27,15 @@
             "justMyCode": true
         },
         {
-            "name": "Python: Django",
+            "name": "Python: documents_check",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "runserver"
+                "documents_check"
             ],
             "django": true,
             "justMyCode": true
-        }
+        },
     ]
 }
