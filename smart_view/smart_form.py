@@ -214,52 +214,53 @@ class SmartFormMixin:
         return media
 
     def clean(self):
-        # Ensure current user can write all fields of the form
-        # This is a 'hard' security since form should be built to avoid this case
-        errors = {}
-        if self.instance.pk is None:
-            # Creating a new object in the database...
+        if isinstance(self, ModelForm):
+            # Ensure current user can write all fields of the form
+            # This is a 'hard' security since form should be built to avoid this case
+            errors = {}
+            if self.instance.pk is None:
+                # Creating a new object in the database...
 
-            # Two step validation :
-            # Step 1 : Can the user create a record ?
-            allowed = set(self.smart_view_class._meta['permissions']['create'])
-            if not (allowed & set(self.user_roles)):
-                raise ValidationError(_("Vous n'avez pas les droits suffisants pour créer un élément"))
+                # Two step validation :
+                # Step 1 : Can the user create a record ?
+                allowed = set(self.smart_view_class._meta['permissions']['create'])
+                if not (allowed & set(self.user_roles)):
+                    raise ValidationError(_("Vous n'avez pas les droits suffisants pour créer un élément"))
 
-            # Step 2 : Check every fields (similar code than with 'update',
-            # but instance state is None and roles are user_roles not instance roles)
-            permissions = self.smart_view_class._meta['permissions']['write'].get(None, {})
-            for fieldname in self.changed_data:
-                can_update = False
-                for role in self.user_roles:
-                    if permissions.get(role, {}).get(fieldname, False):
-                        can_update = True
-                        break
-                if not can_update:
-                    errors[fieldname] = _("Vous n'avez pas les droits suffisants pour ajouter ce champ.")
-        else:
-            # Check fields for updating a existing object OR creating a new one in the database
-            permissions = self.smart_view_class._meta['permissions']['write'].get(self.instance_state, {})
+                # Step 2 : Check every fields (similar code than with 'update',
+                # but instance state is None and roles are user_roles not instance roles)
+                permissions = self.smart_view_class._meta['permissions']['write'].get(None, {})
+                for fieldname in self.changed_data:
+                    can_update = False
+                    for role in self.user_roles:
+                        if permissions.get(role, {}).get(fieldname, False):
+                            can_update = True
+                            break
+                    if not can_update:
+                        errors[fieldname] = _("Vous n'avez pas les droits suffisants pour ajouter ce champ.")
+            else:
+                # Check fields for updating a existing object OR creating a new one in the database
+                permissions = self.smart_view_class._meta['permissions']['write'].get(self.instance_state, {})
 
-            for fieldname in self.changed_data:
-                can_update = False
-                for role in self.instance_roles:
-                    if permissions.get(role, {}).get(fieldname, False):
-                        can_update = True
-                        break
-                if not can_update:
-                    errors[fieldname] = _("Vous n'avez pas les droits suffisants pour modifier ce champ.")
+                for fieldname in self.changed_data:
+                    can_update = False
+                    for role in self.instance_roles:
+                        if permissions.get(role, {}).get(fieldname, False):
+                            can_update = True
+                            break
+                    if not can_update:
+                        errors[fieldname] = _("Vous n'avez pas les droits suffisants pour modifier ce champ.")
 
-        # Check for mandatory smart_fields
-        # Do not handle model mandatory (not null, not blank...) because Django already take care of that
-        for smart_field_name, smart_field in self.smart_view_class._meta['smartfields_dict'].items():
-            needed = not smart_field.get('blank', context='form.html', default=True) and smart_field_name in self.cleaned_data
-            if needed:
-                if self.cleaned_data.get(smart_field_name) is None or self.cleaned_data.get(smart_field_name) == '':
-                    errors[smart_field_name] = _("Ce champ est obligatoire")
+            # Check for mandatory smart_fields
+            # Do not handle model mandatory (not null, not blank...) because Django already take care of that
+            for smart_field_name, smart_field in self.smart_view_class._meta['smartfields_dict'].items():
+                needed = not smart_field.get('blank', context='form.html', default=True) and smart_field_name in self.cleaned_data
+                if needed:
+                    if self.cleaned_data.get(smart_field_name) is None or self.cleaned_data.get(smart_field_name) == '':
+                        errors[smart_field_name] = _("Ce champ est obligatoire")
 
-        if errors:
-            raise ValidationError(errors)
+            if errors:
+                raise ValidationError(errors)
         return super().clean()
 
     def api_handle(self, path: list[str], request: HttpRequest):
