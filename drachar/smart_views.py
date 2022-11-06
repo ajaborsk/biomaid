@@ -623,24 +623,6 @@ class PrevisionnelSmartView(SmartView):
 
 class PrevisionnelSmartView21(PrevisionnelSmartView):
     class Meta:
-        # form_layout = (
-        #     'form',
-        #     {},
-        #     (
-        #         ('title', "Titre du formulaire"),
-        #         ('row', ('$num_dmd$',)),
-        #         (
-        #             'section',
-        #             {},
-        #             (
-        #                 ('title', "Titre de la section"),
-        #                 ('row', ('$num_dmd$', '$dmd_quantite$')),
-        #                 ('row', ('$dmd_libelle$', '$commentaire$')),
-        #                 ('sep',),
-        #             ),
-        #         ),
-        #     ),
-        # )
         columns__add = ('age_previsionnel',)
 
         user_filters__update = {
@@ -1368,20 +1350,3 @@ class DraSmartView(SmartView):
                 'filename': "Demandes en cours.xlsx",
             }
         }
-        # form_layout = """
-        #   # Formulaire de demande d'achat {{ instance.code }}
-        #       <num_dra>
-        #       <expert_metier>
-        #       <intitule>
-        #       <fournisseur>
-        #       <contact_fournisseur>
-        #       <num_dossier>
-        #       <contact_livraison>
-        #       # Documents joints
-        #
-        #       # Devis
-        #           <num_devis> <date_devis>
-        #           <num_marche>
-        #       #Commande
-        #           <num_bon_commande> <date_commande>
-        #   """
