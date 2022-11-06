@@ -866,7 +866,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "phonenumberslite"
-version = "8.12.57"
+version = "8.13.0"
 description = "Python version of Google's common library for parsing, formatting, storing and validating international phone numbers."
 category = "main"
 optional = false
@@ -1671,7 +1671,7 @@ ldap = ["python-ldap", "python-ldap", "django-auth-ldap"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "3e862fb496309326444fceb1e259d81e31b3336709baf8e8b77fb68966d5f01a"
+content-hash = "9cebf6cd975a01d1b493c5c5bc7d8c1ec77ea05d7c627496230496810ad124d0"
 
 [metadata.files]
 alabaster = [
@@ -2278,8 +2278,8 @@ pathspec = [
     {file = "pathspec-0.10.1.tar.gz", hash = "sha256:7ace6161b621d31e7902eb6b5ae148d12cfd23f4a249b9ffb6b9fee12084323d"},
 ]
 phonenumberslite = [
-    {file = "phonenumberslite-8.12.57-py2.py3-none-any.whl", hash = "sha256:438b993ff2fd25956f31aa6a4ed693130635e39ceebf15d3d96bb64dd22d85f0"},
-    {file = "phonenumberslite-8.12.57.tar.gz", hash = "sha256:8940c6f887aabb5d1a6095dbc6e35144d0b53f75a9e9b2018e2703d9b9a71090"},
+    {file = "phonenumberslite-8.13.0-py2.py3-none-any.whl", hash = "sha256:f72d16a3963e1ad2fcff3780aab5acbc4cea99a5df4df06404a268fa68f5c81f"},
+    {file = "phonenumberslite-8.13.0.tar.gz", hash = "sha256:ba3921bd7e6064a949865dbf41476a9665555fe548d88f345ab505503448efdd"},
 ]
 platformdirs = [
     {file = "platformdirs-2.5.2-py3-none-any.whl", hash = "sha256:027d8e83a2d7de06bbac4e5ef7e023c02b863d7ea5d079477e722bb41ab25788"},
