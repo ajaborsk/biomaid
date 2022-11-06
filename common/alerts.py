@@ -148,11 +148,18 @@ class AlertsManager:
                 stdout.write("       Email policy: {}".format(email_policy))
 
             # contexte qui sera envoyé au template, le cas échéant
-            context = {'user': user, 'preferences': preferences, 'categories': {}}
+            context = {
+                'user': user,
+                'preferences': preferences,
+                'categories': {},
+                'group_size': preferences['notifications.alert-email-group-size'],
+            }
+            if stdout and verbosity > 2:
+                stdout.write("       Email category group size: {}".format(context['group_size']))
 
             # Booléen pour savoir s'il faudra envoyer l'email à la fin du traitement
             # On récupère la préférence common.alerts_mail comme valeur de départ
-            send_email = email_policy == 'always'
+            send_email = False
 
             # Cloture toutes les alertes en cours qui ne sont pas/plus dans une catégorie
             # active (par exemple désactivée dans le fichier de configuration)
@@ -170,6 +177,10 @@ class AlertsManager:
                 .distinct()
             )
 
+            email_delay = int(preferences['notifications.alert-email-delay'])
+            if stdout and verbosity > 2:
+                stdout.write("       Email delay (h): {}".format(email_delay))
+
             for category in categories:
                 if stdout and verbosity > 2:
                     stdout.write("         Catégorie: {}".format(category), ending=': ')
@@ -177,7 +188,9 @@ class AlertsManager:
                     'category': alerts_manager.alert_categories[category],
                     'alerts': [],
                 }
-                email_delay = 12  # 12h ; TODO: A mettre dans les préférences ? Ou le fichier de config ?
+
+                # category_email_delay = email_delay
+
                 # Queryset de la liste des alarmes actives
                 active_alerts = Alert.objects.filter(cloture__isnull=True, destinataire=user, categorie=category)  # noqa
                 count = 0
@@ -185,13 +198,20 @@ class AlertsManager:
                     alert.intitule_txt = HTMLFilter.convert_html_to_text(alert.intitule)
                     context['categories'][category]['alerts'].append(alert)
                     if (
-                        email_policy == 'only_new'
-                        and alert.date_lecture is None
-                        and alert.dernier_email is None
-                        and (now() - alert.date_creation).total_seconds() / 3600.0 > email_delay
+                        (email_policy == 'only_new' and alert.date_lecture is None and alert.dernier_email is None)
+                        or (
+                            email_policy == 'always'
+                            and (
+                                alert.dernier_email is None or (now() - alert.dernier_email).total_seconds() / 3600.0 > email_delay
+                            )
+                        )
+                        # and (now() - alert.date_creation).total_seconds() / 3600.0 > category_email_delay
                     ):
                         send_email = True
                     count += 1
+                context['categories'][category]['show_all_alerts'] = count < int(
+                    preferences['notifications.alert-email-group-size']
+                )
                 if stdout and verbosity > 2:
                     stdout.write("{} alerte{}".format(count, "s" if count >= 2 else ""))
 

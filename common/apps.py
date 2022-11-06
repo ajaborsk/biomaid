@@ -330,6 +330,34 @@ class CommonConfig(AppConfig):
                 },
                 'default': 'never',
             },
+            'notifications.alert-email-delay': {
+                'label': _("Délai minimum entre les emails"),
+                'help_text': _("Délai minimum entre deux emails d'alerte"),
+                'format': 'choices',
+                'choices': {
+                    '6': _("6 heures"),
+                    '12': _("12 heures"),
+                    '24': _("1 journée"),
+                    '48': _("2 jours"),
+                    '72': _("3 jours"),
+                },
+                'default': '12',
+            },
+            'notifications.alert-email-group-size': {
+                'label': _("Nombre limite d'alertes avant groupement"),
+                'help_text': _(
+                    "Lorsque le nombre d'alertes d'une même catégorie dépasse ce nombre, "
+                    "elles sont groupées dans un seul message et plus listées individuellement."
+                ),
+                'format': 'choices',
+                'choices': {
+                    '0': _("Groupement désactivé"),
+                    '100': _("100 alertes"),
+                    '50': _("50 alertes"),
+                    '10': _("10 alertes"),
+                },
+                'default': '100',
+            },
         },
     }
     biom_aid_roles = '__ALL__'

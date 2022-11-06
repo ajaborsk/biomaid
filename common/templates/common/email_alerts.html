@@ -8,9 +8,10 @@
 <p>Bonjour {{ ext_user.user.first_name }} {{ ext_user.user.last_name }},</p>
 <p>GÉQIP a déclenché les alertes suivantes, qui vous concernent :</p>{% for category_id, category in categories.items %}
 <h4>{{ category.category.label }}</h4>
-<ul>{% for alert in category.alerts %}
+<p><b>{{ category.alerts|length }}</b> alertes dans cette catégorie.</p>
+{% if category.show_all_alerts %}<ul>{% for alert in category.alerts %}
   <li>{{ alert.intitule | safe }}</li>{% endfor %}
-</ul>{% endfor %}
+</ul>{% endif %}{% endfor %}
 <p>Ce message a été émis depuis une boîte mail qui ne peut pas recevoir de réponse. En cas de problème, merci de vous adresser à l'équipe des développeurs (voir en bas de page sur le site)</p>
 </body>
 </html>
