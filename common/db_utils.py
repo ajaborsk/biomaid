@@ -35,10 +35,12 @@ from django.db.models import (
     Value,
     ExpressionWrapper,
     CharField,
+    Model,
 )
-from django.db.models.functions import Concat, Left, Length
+from django.db.models.functions import Concat, Left, Length, Cast
 from django.utils.translation import gettext as _
 
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.aggregates import StringAgg as PsqlStringAgg
 
 from common import config
@@ -52,6 +54,7 @@ from common.models import (
     Service,
     CentreResponsabilite,
     User,
+    GenericRole,
 )
 from dem.models import Demande
 from smart_view.smart_widget import LightAndTextWidget
@@ -208,13 +211,14 @@ def filter_choices_from_column_values(klass, fieldname, label_expr=None, order_b
 
 
 def class_roles_expression(
-    owner_field=None,
-    uf_field=None,
-    domaine_field=None,
-    programme_field=None,
-    campagne_field=None,
-    expert_field=None,
-    discipline_field=None,
+    model_class: Model,
+    owner_field: str = None,
+    uf_field: str = None,
+    domaine_field: str = None,
+    programme_field: str = None,
+    campagne_field: str = None,
+    expert_field: str = None,
+    discipline_field: str = None,
 ):
     """
     Fonction destinée à être utilisée lors de la définition de SmartViews pour la colonne des rôles
@@ -229,13 +233,14 @@ def class_roles_expression(
     ATTENTION: Le champ discipline est utilisé pour déterminer le responsable technique, pas l'expert.
     Pour la discipline de l'expert, cela passe par le champ 'domaine_field', qui a un champ 'discipline' de lui-même...
     """
+    content_type = ContentType.objects.get_for_model(model_class)
 
     # noinspection PyListCreation
     def instance_roles_expression(view_attrs):
         args = []
 
         # L'utilisateur est-il administrateur ?
-        args.append(Value('ADM,') if view_attrs['user'].is_staff else Value(''))
+        args.append(Value(',ADM,') if view_attrs['user'].is_staff else Value(','))
 
         # L'utilisateur est-il expert potentiel ?
         # TODO: Grosse bidouille à corriger avec une vraie gestion des rôles potentiels
@@ -468,6 +473,29 @@ def class_roles_expression(
                         .values('m_roles')
                     )
                 )
+
+        args.append(Value(','))
+        # The generic roles (can be attached to any object)
+        args.append(
+            Subquery(
+                GenericRole.active_objects.filter(
+                    content_type=content_type,
+                    object_id=Cast(OuterRef('pk'), output_field=CharField()),
+                    user_id=view_attrs['user'].id,
+                )
+                .values('user')
+                .annotate(
+                    m_roles=StringAgg(
+                        'role_code',
+                        ",",
+                        distinct=True,
+                        output_field=CharField(),
+                    )
+                )
+                .values('m_roles')
+            )
+        )
+        args.append(Value(','))
 
         if len(args) > 1:
             return ExpressionWrapper(Concat(*args), CharField())

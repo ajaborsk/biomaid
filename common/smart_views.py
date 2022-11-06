@@ -184,7 +184,7 @@ class RoleScopeSmartView(SmartView):
         ComputedSmartField,
         {
             'special': 'roles',
-            'data': class_roles_expression(),
+            'data': class_roles_expression(UserUfRole),
         },
     )
     tools = (
@@ -430,7 +430,7 @@ class ProgrammeSmartView(SmartView):
         ComputedSmartField,
         {
             'special': 'roles',
-            'data': class_roles_expression(),
+            'data': class_roles_expression(Programme),
         },
     )
     # Do not use 'comments' since this is a model fieldname

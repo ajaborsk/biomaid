@@ -20,7 +20,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 # from django.contrib.auth.models import User
 from common.models import Site, Pole, Service, Uf, CentreResponsabilite, Alert
-from common.models import Etablissement, UserUfRole
+from common.models import Etablissement, UserUfRole, GenericRole
 from common.models import Domaine, Discipline, Programme
 from common.models import (
     Fournisseur,
@@ -69,6 +69,11 @@ class UserAdmin(BaseUserAdmin):
             ),
         )
     )
+    search_fields = (
+        'first_name',
+        'last_name',
+        'username',
+    )
 
 
 class UserUfRoleAdmin(admin.ModelAdmin):
@@ -76,6 +81,21 @@ class UserUfRoleAdmin(admin.ModelAdmin):
     list_filter = (
         'role_code',
         'uf',
+    )
+    search_fields = (
+        'user__first_name',
+        'user__last_name',
+        'user__username',
+    )
+
+
+class GenericRoleAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role_code', 'content_object', 'creator')
+    list_filter = ('role_code', 'user', 'content_type')
+    search_fields = (
+        'user__first_name',
+        'user__last_name',
+        'user__username',
     )
 
 
@@ -179,6 +199,7 @@ admin.site.register(Site)
 admin.site.register(Service)
 admin.site.register(Uf, UfAdmin)
 admin.site.register(UserUfRole, UserUfRoleAdmin)
+admin.site.register(GenericRole, GenericRoleAdmin)
 
 admin.site.register(Programme, ProgrammeAdmin)
 admin.site.register(Discipline)

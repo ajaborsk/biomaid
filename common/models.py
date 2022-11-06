@@ -66,7 +66,7 @@ class ActiveManagerCloture(ActiveManager):
 
 
 class User(AbstractUser):
-    from_ldap = models.BooleanField(_("LDAP user"), editable=False, default=False)
+    from_ldap: models.BooleanField = models.BooleanField(_("LDAP user"), editable=False, default=False)
 
     etablissement = models.ForeignKey(
         'Etablissement',
@@ -133,87 +133,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return "{} {} ({})".format(self.first_name, self.last_name, self.username)
-
-
-# class ExtensionUser(models.Model):
-#     EXTENSION_CHOICES = (
-#         ('ND', 'NON DEFINI'),
-#         ('EQ', 'EQUIPEMENTS'),
-#         ('LI', 'BLANCHISSERIE'),
-#         ('LO', 'LOGISTIQUE'),
-#         ('BE', 'ELECTRONIQUE'),
-#         ('BI', 'INSTRUMENTATION'),
-#         ('DE', 'STERILISATION'),
-#         ('ST', 'SERVICES TECHNIQUES'),
-#         ('SI', 'SECURITE INCENDIE'),
-#         ('CQ', 'CONTROLE QUALITE'),
-#         ('BM', 'BIOMEDICAL'),
-#         ('IT', 'INFORMATIQUE'),
-#         ('AM', 'AMORTISSEMENT'),
-#     )
-#
-#     FONCTION_CHOICES = (
-#         ('ACH', 'ACHETEUR'),
-#         ('EXP', 'EXPERT METIER'),
-#         ('CAD', 'CADRE'),
-#         ('CADS', 'CADRE SUP'),
-#         ('CADA', 'CADRE ADMINISTRATIF'),
-#         ('CHP', 'CHEF DE POLE'),
-#         ('CHS', 'CHEF DE SERVICE'),
-#         ('ADCP', 'ADJOINT AU CHEF DE POLE'),
-#         ('DIR', 'DIRECTEUR'),
-#         ('INGTX', 'INGENIEUR TRAVAUX'),
-#     )
-#
-#     user = models.OneToOneField(config.settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-#     # fonction = models.CharField(max_length=4, choices=FONCTION_CHOICES, default='A')
-#     titre = models.CharField(
-#         verbose_name=_("Titre"),
-#         help_text=_("M. / Mme / Mlle / Dr / Pr ..."),
-#         max_length=32,
-#         null=True,
-#         blank=True,
-#     )
-#     intitule_fonction = models.CharField(
-#         verbose_name=_("Fonction (intitulé)"),
-#         max_length=256,
-#         null=True,
-#         blank=True,
-#     )
-#     vocation_fonctionnelle = models.CharField(max_length=3, choices=EXTENSION_CHOICES, default='ND')
-#     # code_uf                = models.ForeignKey('Structure',  on_delete=models.PROTECT,default=0)
-#     # groupe_uf = models.ManyToManyField('Groupe_uf')
-#     # role = models.ManyToManyField('Uf', through='UserUfRole', related_name='rn_role')
-#     etablissement = models.ForeignKey('Etablissement', on_delete=models.PROTECT)
-#     initiales = models.CharField(max_length=10)
-#     tel_fixe = models.CharField(
-#         verbose_name=_("Tél. fixe"),
-#         max_length=17,
-#         blank=True,
-#         null=False,
-#     )
-#     tel_dect = models.CharField(
-#         verbose_name=_("Tél. DECT"),
-#         max_length=17,
-#         blank=True,
-#         null=False,
-#     )
-#     tel_mobile = models.CharField(verbose_name=_("Tél. mobile"), max_length=17, blank=True, null=False)
-#     preferences = models.TextField(
-#         verbose_name=_("Préférences"),
-#         help_text=_("Préférences de l'utilisateur, stockées sous forme d'une chaine JSON"),
-#         null=False,
-#         blank=False,
-#         default="{}",
-#     )
-#     last_seen = models.DateTimeField(
-#         verbose_name=_("Dernière visite"), help_text=_("Date de la dernière visite sur le portail"), null=True, blank=True
-#     )
-#     date_creation = models.DateTimeField(auto_now_add=True, verbose_name=_("date de création"))
-#     date_modification = models.DateTimeField(auto_now=True, verbose_name=_("date de modification"))
-#
-#     def __str__(self):
-#         return "{} {} ({})".format(self.user.first_name, self.user.last_name, self.user.username)
 
 
 class Uf(models.Model):
@@ -1177,6 +1096,46 @@ class Alert(models.Model):
     date_modification = models.DateTimeField(
         auto_now=True,
         verbose_name=_("date de modification"),
+    )
+
+    objects = models.Manager()  # The default manager.
+    active_objects = ActiveManagerCloture()  # The active_objects manager.
+
+
+class GenericRole(models.Model):
+    user: models.ForeignKey = models.ForeignKey(
+        config.settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        verbose_name=_("User that benefit this specific role on linked object"),
+    )
+
+    creator: models.ForeignKey = models.ForeignKey(
+        config.settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        verbose_name=_("User that created this link"),
+        related_name='created_role',
+        null=True,
+    )
+
+    creation_datetime: models.DateTimeField = models.DateTimeField(auto_now_add=True, verbose_name=_("date de création"))
+    modification_datetime: models.DateTimeField = models.DateTimeField(auto_now=True, verbose_name=_("date de modification"))
+    cloture: models.DateTimeField = models.DateTimeField(null=True, blank=True)
+
+    content_type: models.ForeignKey = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id: models.CharField = models.CharField(max_length=64)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    role_code: models.CharField = models.CharField(
+        max_length=8,
+        choices=tuple(
+            list(UserUfRole.NAME_CHOICES)
+            + [
+                ('ADM', _("Administrateur")),
+                ('OWN', _("Propriétaire")),
+                ('MAN', _("Manager")),
+                ('ARB', _("Arbitre")),
+                ('DIS', _("Aiguilleur")),
+            ]
+        ),
     )
 
     objects = models.Manager()  # The default manager.

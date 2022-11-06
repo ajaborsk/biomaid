@@ -150,7 +150,7 @@ class CampagneSmartView(SmartView):
         ComputedSmartField,
         {
             'special': 'roles',
-            'data': class_roles_expression(),
+            'data': class_roles_expression(Campagne),
         },
     )
 
@@ -2706,6 +2706,7 @@ class DemandeSmartView(SmartView):
             'special': 'roles',
             'hidden': True,
             'data': class_roles_expression(
+                Demande,
                 owner_field='redacteur',
                 uf_field='uf',
                 programme_field='programme',
