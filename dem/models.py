@@ -154,121 +154,125 @@ class Arbitrage(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
+# This class is now useless but while it's used in a migration, we need to keep a definition
 class DemandeStateCodeField(models.CharField):
-    """Champ spécial pour calculer l'état d'une demande à partir des différentes valeurs enregistrées
-       Cela permet de simuler certaines fonctions d'un workflow (lignes colorées, etc.) sans véritable moteur.
+    pass
 
-         En fonction de la page (en cours, expertise, toutes)
-         et des fonctions de l'utilisateur (chef de pôle, cadre, cadre sup,
-       expert, arbitre...), la couleur des lignes pourra varier (cf. table à faire dans la doc)
 
-    Etats calculés (Dans cet ordre !) :
+#     """Champ spécial pour calculer l'état d'une demande à partir des différentes valeurs enregistrées
+#        Cela permet de simuler certaines fonctions d'un workflow (lignes colorées, etc.) sans véritable moteur.
 
-    Phase 1 : Recensement
-    ---------------------
+#          En fonction de la page (en cours, expertise, toutes)
+#          et des fonctions de l'utilisateur (chef de pôle, cadre, cadre sup,
+#        expert, arbitre...), la couleur des lignes pourra varier (cf. table à faire dans la doc)
 
-    NOUVELLE  : Demande nouvelle, en cours de saisie (aucun avis)
-               => Aucune condition
+#     Etats calculés (Dans cet ordre !) :
 
-    AVFAV_CSP : Demande avec avis favorable CSP
-               => avis_cadre_sup is True
+#     Phase 1 : Recensement
+#     ---------------------
 
-    AVDEF_CSP : Demande avec avis défavorable CSP
-               => avis_cadre_sup is False
+#     NOUVELLE  : Demande nouvelle, en cours de saisie (aucun avis)
+#                => Aucune condition
 
-    VALIDE_CP : Demande validée par le chef de pôle
-               => decision_validateur is True
+#     AVFAV_CSP : Demande avec avis favorable CSP
+#                => avis_cadre_sup is True
 
-    NONVAL_CP : Demande refusée par le chef de pôle
-               => decision_validateur is False
+#     AVDEF_CSP : Demande avec avis défavorable CSP
+#                => avis_cadre_sup is False
 
-    Phase 2 : Instruction (Attention ! Une demande peut commencer à être instruite avant sa validation !)
-    -----------------------------------------------------------------------------------------------------
+#     VALIDE_CP : Demande validée par le chef de pôle
+#                => decision_validateur is True
 
-    INSTRUCTION : Demande attribuée à un expert
-    INSTR_OK : Demande avec un montant valide (soit en provenance de l'utilisateur, soit en provenance de l'expert)
-    XXXXXXXX : Demande instruite avec avis favorable
-    XXXXXXXX : Demande instruite avec avis défavorable
-    XXXXXXXX : Demande incorrectement/incomplètement instruite : avis mais pas de montant valide
-                (état amené à disparaître avec vrai moteur WF car impossible à atteindre)
+#     NONVAL_CP : Demande refusée par le chef de pôle
+#                => decision_validateur is False
 
-    Phase 3 : Arbitrage
-    XXXXXXXX : Demande validée par l'arbitre (sur le programme et avec le montant proposés)
-    XXXXXXXX : Demande non validée par l'arbitre (cf. commentaire arbitre)
-    """
+#     Phase 2 : Instruction (Attention ! Une demande peut commencer à être instruite avant sa validation !)
+#     -----------------------------------------------------------------------------------------------------
 
-    def pre_save(self, instance, add):
-        state_code = 'NOUVELLE'
+#     INSTRUCTION : Demande attribuée à un expert
+#     INSTR_OK : Demande avec un montant valide (soit en provenance de l'utilisateur, soit en provenance de l'expert)
+#     XXXXXXXX : Demande instruite avec avis favorable
+#     XXXXXXXX : Demande instruite avec avis défavorable
+#     XXXXXXXX : Demande incorrectement/incomplètement instruite : avis mais pas de montant valide
+#                 (état amené à disparaître avec vrai moteur WF car impossible à atteindre)
 
-        # if instance.montant_total_expert_metier is not None:
-        #     montant = float(instance.montant_total_expert_metier)
-        # elif instance.montant_unitaire_expert_metier is not None:
-        #     montant = int(instance.quantite) * float(instance.montant_unitaire_expert_metier)
-        # elif instance.montant is not None:
-        #     montant = float(instance.montant)
-        if instance.prix_unitaire is not None:
-            montant = int(instance.quantite) * float(instance.prix_unitaire)
-        else:
-            montant = None
+#     Phase 3 : Arbitrage
+#     XXXXXXXX : Demande validée par l'arbitre (sur le programme et avec le montant proposés)
+#     XXXXXXXX : Demande non validée par l'arbitre (cf. commentaire arbitre)
+#     """
 
-        if instance.avis_cadre_sup is True:
-            state_code = 'AVFAV_CSP'
+#     def pre_save(self, instance, add):
+#         state_code = 'NOUVELLE'
 
-        if instance.avis_cadre_sup is False:
-            state_code = 'AVDEF_CSP'
+#         # if instance.montant_total_expert_metier is not None:
+#         #     montant = float(instance.montant_total_expert_metier)
+#         # elif instance.montant_unitaire_expert_metier is not None:
+#         #     montant = int(instance.quantite) * float(instance.montant_unitaire_expert_metier)
+#         # elif instance.montant is not None:
+#         #     montant = float(instance.montant)
+#         if instance.prix_unitaire is not None:
+#             montant = int(instance.quantite) * float(instance.prix_unitaire)
+#         else:
+#             montant = None
 
-        if instance.decision_validateur is True:
-            state_code = 'VALIDE_CP'
+#         if instance.avis_cadre_sup is True:
+#             state_code = 'AVFAV_CSP'
 
-        if instance.decision_validateur is False:
-            state_code = 'NONVAL_CP'
+#         if instance.avis_cadre_sup is False:
+#             state_code = 'AVDEF_CSP'
 
-        if instance.decision_validateur is False and instance.gel is True:
-            state_code = 'NONVAL_CP_DEF'
+#         if instance.decision_validateur is True:
+#             state_code = 'VALIDE_CP'
 
-        if instance.decision_validateur is True and instance.expert_metier is not None:
-            state_code = 'INSTRUCTION'
+#         if instance.decision_validateur is False:
+#             state_code = 'NONVAL_CP'
 
-        if instance.decision_validateur is True and instance.expert_metier is not None and montant is not None:
-            state_code = 'INSTR_OK'
+#         if instance.decision_validateur is False and instance.gel is True:
+#             state_code = 'NONVAL_CP_DEF'
 
-        if instance.decision_validateur is True and instance.avis_biomed is True:
-            state_code = 'AVFAV_EXP'
+#         if instance.decision_validateur is True and instance.expert_metier is not None:
+#             state_code = 'INSTRUCTION'
 
-        if instance.decision_validateur is True and instance.avis_biomed is False:
-            state_code = 'AVDEF_EXP'
+#         if instance.decision_validateur is True and instance.expert_metier is not None and montant is not None:
+#             state_code = 'INSTR_OK'
 
-        if (
-            instance.decision_validateur is True
-            and instance.arbitrage_commission is not None
-            and str(instance.arbitrage_commission.code) in ['1', '2', '5']
-        ):
-            state_code = 'VALIDE_ARB'
+#         if instance.decision_validateur is True and instance.avis_biomed is True:
+#             state_code = 'AVFAV_EXP'
 
-        if (
-            instance.decision_validateur is True
-            and instance.arbitrage_commission is not None
-            and str(instance.arbitrage_commission.code) in ['3', '4', '6']
-        ):
-            state_code = 'NONVAL_ARB'
+#         if instance.decision_validateur is True and instance.avis_biomed is False:
+#             state_code = 'AVDEF_EXP'
 
-        if (
-            instance.decision_validateur is True
-            and instance.arbitrage_commission is not None
-            and str(instance.arbitrage_commission.code) in ['1', '2', '5']
-            and instance.gel is True
-        ):
-            state_code = 'VALIDE_DEF'
+#         if (
+#             instance.decision_validateur is True
+#             and instance.arbitrage_commission is not None
+#             and str(instance.arbitrage_commission.code) in ['1', '2', '5']
+#         ):
+#             state_code = 'VALIDE_ARB'
 
-        if (
-            instance.decision_validateur is True
-            and instance.arbitrage_commission is not None
-            and str(instance.arbitrage_commission.code) in ['3', '4', '6']
-            and instance.gel is True
-        ):
-            state_code = 'NONVAL_DEF'
+#         if (
+#             instance.decision_validateur is True
+#             and instance.arbitrage_commission is not None
+#             and str(instance.arbitrage_commission.code) in ['3', '4', '6']
+#         ):
+#             state_code = 'NONVAL_ARB'
 
-        return state_code
+#         if (
+#             instance.decision_validateur is True
+#             and instance.arbitrage_commission is not None
+#             and str(instance.arbitrage_commission.code) in ['1', '2', '5']
+#             and instance.gel is True
+#         ):
+#             state_code = 'VALIDE_DEF'
+
+#         if (
+#             instance.decision_validateur is True
+#             and instance.arbitrage_commission is not None
+#             and str(instance.arbitrage_commission.code) in ['3', '4', '6']
+#             and instance.gel is True
+#         ):
+#             state_code = 'NONVAL_DEF'
+
+#         return state_code
 
 
 # Nature "globale" de la demande, qui permet de configurer le formulaire de départ
@@ -714,13 +718,13 @@ class Demande(models.Model):
     # C'est un champ calculé
     # MAIS le calcul n'est pas automatique (pour l'instant) : Il faut sauver ce champ avec les autres pour
     # déclencher le calcul !
-    state_code = DemandeStateCodeField(
-        max_length=16,
-        verbose_name=_("Etat de la demande"),
-        default=None,
-        blank=True,
-        null=True,
-    )
+    # state_code = DemandeStateCodeField(
+    #     max_length=16,
+    #     verbose_name=_("Etat de la demande"),
+    #     default=None,
+    #     blank=True,
+    #     null=True,
+    # )
 
     # Flag pour le gel de la demande (clôture du traitement ==> acceptée ou refusée)
     gel = models.BooleanField(blank=True, null=False, default=False)

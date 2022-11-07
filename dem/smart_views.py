@@ -255,7 +255,7 @@ class DemandeSmartView(SmartView):
             },
             "delete": {  # 3 niveaux (en tout) pour l'action 'delete' ; la notion de champ n'a pas de sens ici
                 None: ('OWN',),  # Seul le demandeur peut supprimer sa demande
-                "NOUVELLE": (  # Seules les demandes non encore validées peuvent être supprimées
+                "AAP": (  # Seules les demandes non encore validées peuvent être supprimées
                     'OWN',
                 ),  # Seul le demandeur peut supprimer sa demande
                 'TVX_NEW': (  # Seules les demandes non encore traitées peuvent être supprimées
@@ -968,7 +968,7 @@ class DemandeSmartView(SmartView):
                         'tvx_arg_securite_comment': True,
                     },
                 },
-                "NOUVELLE": {
+                "AAP_AREP": {
                     "OWN": {
                         'state_code': True,
                         "referent": True,
@@ -1016,22 +1016,18 @@ class DemandeSmartView(SmartView):
                         "localisation": True,
                     },
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CSP": {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1040,7 +1036,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1048,6 +1043,245 @@ class DemandeSmartView(SmartView):
                         'montant_total_expert_metier': False,
                         'commentaire_biomed': True,
                         'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'workflow_alert': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
+                },
+                "AAP_AEXP": {
+                    "OWN": {
+                        'state_code': True,
+                        "referent": True,
+                        "uf": True,
+                        "priorite": True,
+                        "cause": True,
+                        "libelle": True,
+                        "nom_projet": True,
+                        "contact": True,
+                        "dect_contact": True,
+                        "date_premiere_demande": True,
+                        "materiel_existant": True,
+                        'it_caracteristiques_minimales': True,
+                        'it_a_installer': True,
+                        'tmp_int_year': True,
+                        'tmp_int_remain': True,
+                        'arg_interet_medical': True,
+                        'arg_commentaire_im': True,
+                        'arg_oblig_reglementaire': True,
+                        'arg_commentaire_or': True,
+                        'arg_recommandations': True,
+                        'arg_commentaire_r': True,
+                        'arg_projet_chu_pole': True,
+                        'arg_commentaire_pcp': True,
+                        'arg_confort_patient': True,
+                        'arg_commentaire_cp': True,
+                        'arg_confort_perso_ergo': True,
+                        'arg_commentaire_pe': True,
+                        'arg_notoriete': True,
+                        'arg_commentaire_n': True,
+                        'arg_innovation_recherche': True,
+                        'arg_commentaire_ir': True,
+                        'arg_gain_financier': True,
+                        'arg_commentaire_gf': True,
+                        'arg_mutualisation': True,
+                        'arg_commentaire_m': True,
+                        "autre_argumentaire": True,
+                        "consommables_eventuel": True,
+                        "impact_travaux": True,
+                        "impact_informatique": True,
+                        "quantite": True,
+                        "prix_unitaire": True,
+                        'montant': True,
+                        "description": True,
+                        "localisation": True,
+                    },
+                    "DIR": {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    "CHP": {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    "CSP": {
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'campagne_redirect': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'dispatcher_note': True,
+                        'workflow_alert': True,
+                    },
+                    'EXP': {
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'workflow_alert': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
+                },
+                "AREP": {
+                    "DIR": {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    "CHP": {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    "CSP": {
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'campagne_redirect': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'dispatcher_note': True,
+                        'workflow_alert': True,
+                    },
+                    'EXP': {
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'workflow_alert': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
+                },
+                "AEXP": {
+                    "DIR": {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    "CHP": {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIS': {
+                        'campagne_redirect': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'dispatcher_note': True,
+                        'workflow_alert': True,
+                    },
+                    "ARB": {
+                        'workflow_alert': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
+                    'EXP': {
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                },
+                "AAP_AARB": {
+                    "OWN": {
+                        'state_code': True,
+                        "referent": True,
+                        "uf": True,
+                        "priorite": True,
+                        "cause": True,
+                        "libelle": True,
+                        "nom_projet": True,
+                        "contact": True,
+                        "dect_contact": True,
+                        "date_premiere_demande": True,
+                        "materiel_existant": True,
+                        'it_caracteristiques_minimales': True,
+                        'it_a_installer': True,
+                        'tmp_int_year': True,
+                        'tmp_int_remain': True,
+                        'arg_interet_medical': True,
+                        'arg_commentaire_im': True,
+                        'arg_oblig_reglementaire': True,
+                        'arg_commentaire_or': True,
+                        'arg_recommandations': True,
+                        'arg_commentaire_r': True,
+                        'arg_projet_chu_pole': True,
+                        'arg_commentaire_pcp': True,
+                        'arg_confort_patient': True,
+                        'arg_commentaire_cp': True,
+                        'arg_confort_perso_ergo': True,
+                        'arg_commentaire_pe': True,
+                        'arg_notoriete': True,
+                        'arg_commentaire_n': True,
+                        'arg_innovation_recherche': True,
+                        'arg_commentaire_ir': True,
+                        'arg_gain_financier': True,
+                        'arg_commentaire_gf': True,
+                        'arg_mutualisation': True,
+                        'arg_commentaire_m': True,
+                        "autre_argumentaire": True,
+                        "consommables_eventuel": True,
+                        "impact_travaux": True,
+                        "impact_informatique": True,
+                        "quantite": True,
+                        "prix_unitaire": True,
+                        'montant': True,
+                        "description": True,
+                        "localisation": True,
+                    },
+                    "DIR": {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    "CHP": {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'campagne_redirect': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'dispatcher_note': True,
                         'workflow_alert': True,
                     },
                     'ARB': {
@@ -1061,7 +1295,26 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                 },
-                "AVFAV_CSP": {
+                "AARB": {
+                    'DIS': {
+                        'campagne_redirect': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'dispatcher_note': True,
+                        'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'workflow_alert': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
+                },
+                "AEXP_AAP": {
                     "DIR": {
                         'state_code': True,
                         "decision_validateur": True,
@@ -1072,11 +1325,6 @@ class DemandeSmartView(SmartView):
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
-                    "CSP": {
-                        'state_code': True,
-                        "avis_cadre_sup": True,
-                        "commentaire_cadre_sup": True,
-                    },
                     'DIS': {
                         'state_code': True,
                         'campagne_redirect': True,
@@ -1084,17 +1332,6 @@ class DemandeSmartView(SmartView):
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
-                        'workflow_alert': True,
-                    },
-                    'EXP': {
-                        'state_code': True,
-                        'programme': True,
-                        'domaine': True,
-                        'expert_metier': True,
-                        'montant_unitaire_expert_metier': True,
-                        'montant_total_expert_metier': False,
-                        'commentaire_biomed': True,
-                        'avis_biomed': True,
                         'workflow_alert': True,
                     },
                     'ARB': {
@@ -1107,34 +1344,7 @@ class DemandeSmartView(SmartView):
                         "enveloppe_allouee": True,
                         'gel': True,
                     },
-                },
-                "AVDEF_CSP": {
-                    "DIR": {
-                        'state_code': True,
-                        "decision_validateur": True,
-                        "decision_soumission": True,
-                    },
-                    "CHP": {
-                        'state_code': True,
-                        "decision_validateur": True,
-                        "decision_soumission": True,
-                    },
-                    "CSP": {
-                        'state_code': True,
-                        "avis_cadre_sup": True,
-                        "commentaire_cadre_sup": True,
-                    },
-                    'DIS': {
-                        'state_code': True,
-                        'campagne_redirect': True,
-                        'programme': True,
-                        'domaine': True,
-                        'expert_metier': True,
-                        'dispatcher_note': True,
-                        'workflow_alert': True,
-                    },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1144,36 +1354,15 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
-                    'ARB': {
-                        'state_code': True,
-                        'workflow_alert': True,
-                        "arbitrage_commission": True,
-                        "commentaire_provisoire_commission": True,
-                        "commentaire_definitif_commission": True,
-                        "quantite_validee": True,
-                        "enveloppe_allouee": True,
-                        'gel': True,
-                    },
                 },
-                "VALIDE_CP": {
+                "AAP_AREP_AARB": {
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
-                    },
-                    'DIS': {
-                        'state_code': True,
-                        'campagne_redirect': True,
-                        'programme': True,
-                        'domaine': True,
-                        'expert_metier': True,
-                        'dispatcher_note': True,
-                        'workflow_alert': True,
                     },
                     "ARB": {
                         'state_code': True,
@@ -1185,135 +1374,7 @@ class DemandeSmartView(SmartView):
                         "enveloppe_allouee": True,
                         'gel': True,
                     },
-                    'EXP': {
-                        'state_code': True,
-                        'programme': True,
-                        'domaine': True,
-                        'expert_metier': True,
-                        'montant_unitaire_expert_metier': True,
-                        'montant_total_expert_metier': False,
-                        'commentaire_biomed': True,
-                        'avis_biomed': True,
-                        'workflow_alert': True,
-                    },
-                },
-                "NONVAL_CP": {
-                    "DIR": {
-                        'state_code': True,
-                        "decision_validateur": True,
-                        "decision_soumission": True,
-                    },
-                    "CHP": {
-                        'state_code': True,
-                        "decision_validateur": True,
-                        "decision_soumission": True,
-                    },
                     'DIS': {
-                        'state_code': True,
-                        'campagne_redirect': True,
-                        'programme': True,
-                        'domaine': True,
-                        'expert_metier': True,
-                        'dispatcher_note': True,
-                        'workflow_alert': True,
-                    },
-                    'ARB': {
-                        'state_code': True,
-                        'workflow_alert': True,
-                        "arbitrage_commission": True,
-                        "commentaire_provisoire_commission": True,
-                        "commentaire_definitif_commission": True,
-                        "quantite_validee": True,
-                        "enveloppe_allouee": True,
-                        'gel': True,
-                    },
-                },
-                "NONVAL_CP_DEF": {
-                    'DIS': {
-                        'state_code': True,
-                        'campagne_redirect': True,
-                        'programme': True,
-                        'domaine': True,
-                        'expert_metier': True,
-                        'dispatcher_note': True,
-                        'workflow_alert': True,
-                    },
-                    'ARB': {
-                        'state_code': True,
-                        'workflow_alert': True,
-                        "arbitrage_commission": True,
-                        "commentaire_provisoire_commission": True,
-                        "commentaire_definitif_commission": True,
-                        "quantite_validee": True,
-                        "enveloppe_allouee": True,
-                        'gel': True,
-                    },
-                },
-                "INSTRUCTION": {
-                    "DIR": {
-                        'state_code': True,
-                        "decision_validateur": True,
-                        "decision_soumission": True,
-                    },
-                    "CHP": {
-                        'state_code': True,
-                        "decision_validateur": True,
-                        "decision_soumission": True,
-                    },
-                    'DIS': {
-                        'state_code': True,
-                        'campagne_redirect': True,
-                        'programme': True,
-                        'domaine': True,
-                        'expert_metier': True,
-                        'dispatcher_note': True,
-                        'workflow_alert': True,
-                    },
-                    'ARB': {
-                        'state_code': True,
-                        'workflow_alert': True,
-                        "arbitrage_commission": True,
-                        "commentaire_provisoire_commission": True,
-                        "commentaire_definitif_commission": True,
-                        "quantite_validee": True,
-                        "enveloppe_allouee": True,
-                        'gel': True,
-                    },
-                    'EXP': {
-                        'state_code': True,
-                        'programme': True,
-                        'domaine': True,
-                        'expert_metier': True,
-                        'montant_unitaire_expert_metier': True,
-                        'montant_total_expert_metier': False,
-                        'commentaire_biomed': True,
-                        'avis_biomed': True,
-                        'workflow_alert': True,
-                    },
-                },
-                "INSTR_OK": {
-                    "DIR": {
-                        'state_code': True,
-                        "decision_validateur": True,
-                        "decision_soumission": True,
-                    },
-                    "CHP": {
-                        'state_code': True,
-                        "decision_validateur": True,
-                        "decision_soumission": True,
-                    },
-                    "ARB": {
-                        'state_code': True,
-                        'workflow_alert': True,
-                        "arbitrage_commission": True,
-                        "commentaire_provisoire_commission": True,
-                        "commentaire_definitif_commission": True,
-                        "quantite_validee": True,
-                        "enveloppe_allouee": True,
-                        'gel': True,
-                    },
-                    'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1491,14 +1552,16 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                 },
-                "VALIDE_DEF": {
+                "TRAITE": {},
+                "VALIDE": {},
+                "A_BASCULER": {
                     "ARB": {
                         'state_code': True,
                         'workflow_alert': True,
                         'gel': True,
                     },
                 },
-                "NONVAL_DEF": {
+                "ANNULE": {
                     "ARB": {
                         'state_code': True,
                         'workflow_alert': True,
@@ -1778,24 +1841,24 @@ class DemandeSmartView(SmartView):
                 'form.html.show-if': 'if ((args[0]!=6)&&(args[0]!=17)) {return true;} else {return false;}',
                 'form.html.show-depends': ['calendrier'],
             },
-            'state_code': {
-                'title': _("Etat (debug)"),
-                'hidden': not (hasattr(config.settings, 'SMARTVIEW_DEBUG') and config.settings.SMARTVIEW_DEBUG),
-                'special': 'state',
-                'depends': [
-                    'avis_cadre_sup',
-                    'decision_validateur',
-                    'expert_metier',
-                    'avis_biomed',
-                    # "montant",
-                    'quantite',
-                    'prix_unitaire',
-                    'montant_unitaire_expert_metier',
-                    # "montant_total_expert_metier",
-                    'arbitrage_commission',
-                    'gel',
-                ],
-            },
+            # 'state_code': {
+            #     'title': _("Etat (debug)"),
+            #     'hidden': not (hasattr(config.settings, 'SMARTVIEW_DEBUG') and config.settings.SMARTVIEW_DEBUG),
+            #     'special': 'state',
+            #     'depends': [
+            #         'avis_cadre_sup',
+            #         'decision_validateur',
+            #         'expert_metier',
+            #         'avis_biomed',
+            #         # "montant",
+            #         'quantite',
+            #         'prix_unitaire',
+            #         'montant_unitaire_expert_metier',
+            #         # "montant_total_expert_metier",
+            #         'arbitrage_commission',
+            #         'gel',
+            #     ],
+            # },
             'quantite': {
                 'table.title': _("Qté"),
                 'form.title': _("Quantité"),
@@ -2729,6 +2792,7 @@ class DemandeSmartView(SmartView):
         ComputedSmartField,
         {
             'hidden': not config.settings.DEBUG,
+            'special': 'state',
             'title': _("Etat dyn."),
             'help_text': _("Etat calculé dynamiquement à partir des valuers des champs de chaque demande."),
             'data': lambda view_params: Case(
@@ -2846,7 +2910,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'campagne_redirect',
             'can_copy_to_campagnes',
             'roles',
-            'state_code',
+            # 'state_code',
             'redacteur',
             'redacteur_view',
             'contact',
@@ -3408,7 +3472,7 @@ class DemandesEtudeSmartView(DemandeEqptSmartView):
     class Meta:
         help_text = _("Ce tableau regroupe les demandes qui ont été approuvées (ou non) par le chef de pôle et qui sont à l'étude.")
         user_filters__update = {
-            'state_code': {
+            'dyn_state': {
                 'type': 'select',
                 'label': _('Validation chef de pôle / directeur'),
                 'choices': '__STYLES__',
@@ -3416,7 +3480,7 @@ class DemandesEtudeSmartView(DemandeEqptSmartView):
             },
         }
         row_styler = {
-            'fieldname': 'state_code',
+            'fieldname': 'dyn_state',
             'styles': {
                 ('VALIDE_CP', 'INSTR_OK', 'ERR_VAL_EXP', 'AVFAV_EXP'): (
                     "background-color:#efe",
@@ -3491,7 +3555,7 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
             'arbitrage_commission': {'label': _("Arbitrage"), 'type': 'select'},
         }
         row_styler = {
-            'fieldname': 'state_code',
+            'fieldname': 'dyn_state',
             'styles': {
                 'NONVAL_CP': (
                     "background:#fdd",
@@ -3555,9 +3619,9 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
                 | Q(uf__pole__in=tmp_scope.values('pole'))
                 | Q(uf__site__in=tmp_scope.values('site'))
                 | Q(uf__etablissement__in=tmp_scope.values('etablissement')),
-                Q(state_code__in=['NONVAL_DEF', 'NONVAL_CP_DEF'])
+                Q(dyn_state__in=['REFUSE', 'ANNULE'])
                 | Q(
-                    state_code__in=['VALIDE_DEF'],
+                    dyn_state__in=['VALIDE', 'TRAITE', 'A_BASCULER'],
                     previsionnel__suivi_mes__startswith='1-',
                     previsionnel__date_modification__lt=timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
                 ),
@@ -3584,19 +3648,19 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
             # }
 
         settings = {
-            'state_code': {
+            'dyn_state': {
                 'title': _("Filtre type de demande"),
             },
         }
 
         row_styler = {
-            'fieldname': 'state_code',
+            'fieldname': 'dyn_state',
             'styles': {
-                ('NONVAL_DEF', 'NONVAL_CP_DEF'): (
+                ('REFUSE', 'ANNULE'): (
                     "background:#fcc",
                     "Demande non validée",
                 ),
-                'VALIDE_DEF': ("background:#cfc", "Demande validée et traitée"),
+                ('TRAITE', 'VALIDE', 'A_BASCULER'): ("background:#cfc", "Demande validée et traitée"),
             },
         }
         exports = {
@@ -3669,7 +3733,7 @@ class DemandesRepartitionSmartView(DemandeEqptSmartView):
         columns = (
             'num_dmd',
             'code',
-            'state_code',
+            # 'state_code',
             'roles',
             'calendrier',
             'campagne_redirect',
@@ -3919,7 +3983,7 @@ class DemandesEnCoursTable(SmartTable):
         'calendrier',
         'campagne_redirect',
         'roles',
-        'state_code',
+        # 'state_code',
         'redacteur',
         'contact',
         'dect_contact',

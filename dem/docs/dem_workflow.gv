@@ -1,0 +1,49 @@
+digraph {
+label="Workflow des états d'une demande
+Some notes:
+- program/arb : A arbitrator is set for request program
+ef zef zee";
+ start [shape=oval, label="None"];
+ AAP_AREP [shape=rect];
+ AAP_AEXP [shape=rect];
+ AAP_AARB [shape=rect];
+ AAP_AEXP_AARB [shape=rect];
+ AAP_AREP_AEXP [shape=rect];
+ AREP_AEXP [shape=rect];
+ AREP [shape=rect];
+ AAP [shape=rect];
+ AEXP [shape=rect];
+ AEXP_AARB [shape=rect];
+ AARB [shape=rect];
+ WAIT [shape=rect];
+ A_BASCULER [shape=rect];
+ TRAITE [shape=rect];
+ REFUSE [shape=rect];
+ ANNULE [shape=rect];
+ VALIDE [shape=rect];
+ start -> AAP_AREP [label="**ALL**\nCreate"];
+ AAP_AREP -> AAP_AREP [label="OWN\nEdit"];
+ AAP_AEXP -> AAP_AEXP [label="OWN\nEdit"];
+ AAP_AARB -> AAP_AARB [label="OWN\nEdit"];
+ AAP -> AAP [label="OWN\nEdit"];
+ AAP_AREP -> AAP_AREP_AEXP [label="DIS\nSet expert"];
+ AAP_AREP_AEXP -> AAP_AREP_AEXP [label="OWN\nEdit"];
+ AAP_AREP -> AREP [label="CHP/DIR\nApprove"];
+ AREP -> AREP_AEXP [label="DIS\nSet expert\n(wo program)"];
+ AREP -> AEXP [label="DIS\nSet expert\n(w program)"];
+ AEXP -> AARB [label="EXP\nExpertise"];
+ AAP_AEXP -> AEXP [label="CHP/DIR\nApprove"];
+ AAP_AEXP -> AAP [label="EXP\nExpertise"];
+ AAP_AARB -> AARB [label="CHP/DIR\nApprove"];
+ AAP_AEXP -> AAP_AEXP_AARB [label="MAN\nprogram/arb"];
+ AAP_AEXP_AARB -> AEXP_AARB [label="CHP/DIR\nApprove"];
+ AEXP_AARB -> AARB [label="EXP\nExpertise"]
+ AAP_AREP_AEXP -> AAP_AEXP [label="DIS\nSet program"];
+ AREP -> AARB [label="MAN\nprogram/arb"];
+ AAP_AEXP_AARB -> AAP_AARB [label="EXP\nExpertise"];
+ AAP_AEXP_AARB -> AAP_AEXP_AARB [label="OWN\nEdit"];
+ AAP -> WAIT [label="CHP/DIR\nApprove"]
+ WAIT -> AARB [label="MAN\nprogram/arb"];
+ AREP -> AREP [label="DIS\nSet program"];
+ AREP_AEXP -> AEXP [label="DIS\nSet program"];
+}
