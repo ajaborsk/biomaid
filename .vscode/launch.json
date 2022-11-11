@@ -37,5 +37,14 @@
             "django": true,
             "justMyCode": true
         },
+        {
+            "name": "Python: workflow",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/common/workflow.py",
+            "args": [
+            ],
+            "justMyCode": true
+        },
     ]
 }
