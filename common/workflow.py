@@ -1,21 +1,91 @@
 from copy import deepcopy
-import json
+from collections.abc import Mapping
 from pprint import pprint
 
-from django.db.models import Value
+import tomli
 
 """
 # TODO
 
-- [ ] Sorties d'actions (liste des états possibles)
-- [ ] Noms des états en utilisant les noms des conditions 'manuelles'
+- [X] Sorties d'actions (liste des états possibles)
+- [-] Noms des états en utilisant les noms des conditions 'manuelles'
 - [ ] Arbre syntaxique pour les conditions + moteur simplification (assez gros travail)...
-  - [ ] Meilleurs gestion des conflits entre conditions
+  - [-] Meilleurs gestion des conflits entre conditions
 - [ ] Expression ORM Django pour les états
 - [ ] dict python pour les permissions
 - [ ] Récupération des données (fields, default, etc.) depuis SmartView/Django
-- [ ] Export Graphviz (.gv)
+- [X] Export Graphviz (.gv)
 """
+
+
+def _(m):
+    return m
+
+
+def get_deps(expr):
+    if isinstance(expr, dict):
+        r = set()
+        for k, v in expr.items():
+            if k.startswith(':'):  # Special case ':or' ':and' ':not'
+                if isinstance(v, list):
+                    for vv in v:
+                        r |= get_deps(vv)
+                else:
+                    r |= get_deps(v)
+            else:
+                r.add(k.partition('__')[0])
+        return r
+    else:
+        raise RuntimeError(_("Expression {} is not valid (not a dict) !").format(repr(expr)))
+
+
+def make_states(cond_list):
+    if len(cond_list) > 0:
+        cond = cond_list[0]
+        rem = make_states(cond_list[1:])
+        return [[(cond[0], k, v)] + r for k, v in cond[1]['values'].items() for r in rem]
+    else:
+        return [[]]
+
+
+def parse_condition_expression(expression):
+    # STUB !
+    return expression
+
+
+def evaluate_condition_expression(expression, values):
+    # print('  ', expression, values)
+    if isinstance(expression, dict):
+        for value in values:
+            if value[0] in expression and expression[value[0]] != value[1]:
+                return False
+        return True
+    else:
+        raise RuntimeError(_("Only simple dict expressions are supported, not : '{}'").repr(expression))
+
+
+def filter_match(filter_def, values):
+    # print("       filter_match", filter_def, values)
+    for c, v in filter_def.items():
+        fieldname, sep, lookup = c.partition('__')
+        field_value = values.get(fieldname)
+        if sep == '' and v != field_value:
+            return False
+        if lookup == 'isnull' and v is False and field_value is None:
+            return False
+        if lookup == 'isnull' and v is True and field_value is not None:
+            return False
+        # There is others lookups to handle...
+        ...
+    return True
+
+
+def propagate_reachable(states, state):
+    if state['reachable'] is False:
+        state['reachable'] = True
+        for action in state['actions'].values():
+            for end in action['ends']:
+                propagate_reachable(states, states[end])
 
 
 class Workflow:
@@ -24,315 +94,182 @@ class Workflow:
         self.fields = fields
         self.cfg = deepcopy(cfg)
         self.states: dict = dict()
-        self.permissions: dict = dict()
+        # self.permissions: dict = dict()
+        self.next_state_index = 0
 
-        # Check that workflow name, all condition names and action names are identifiers
-        if not self.name.isidentifier():
-            raise RuntimeError(f"Workflow name '{self.name}' is not a valid identifier")
-        for condition_name in self.cfg['conditions']:
-            if not condition_name.isidentifier():
-                raise RuntimeError(f"Workflow '{self.name}' condition name '{condition_name}' is not a identifier.")
-        for action_name in self.cfg['actions']:
-            if not action_name.isidentifier():
-                raise RuntimeError(f"Workflow '{self.name}' action name '{action_name}' is not a identifier.")
-
-        def condition_unpack(conditions_cfg: dict, condition: str | tuple | list | dict | None) -> list | None:
-            if condition is None:
-                return condition
-            elif isinstance(condition, dict):
-                return [condition]
-            elif isinstance(condition, str):
-                if condition in conditions_cfg:
-                    unpacked_condition = conditions_cfg.get(condition)
-                    if isinstance(unpacked_condition, dict):
-                        return [unpacked_condition]
-                    else:
-                        return condition_unpack(conditions_cfg, unpacked_condition)
-                else:
-                    raise RuntimeError("Condition '{}' not found in workflow '{}'".format(condition, self.name))
-            elif isinstance(condition, list) or isinstance(condition, tuple):
-                return sum([condition_unpack(conditions_cfg, c) for c in condition], [])
-            else:
-                raise RuntimeError("Type of condition must be str or tuple or list, not {}".format(type(condition)))
-
-        def conflict_detect(lu1, v1, lu2, v2):
-            # field__isnull=True is in conflict with almost everything (except itself)
-            if lu1 == 'isnull' and v1 is True and (lu2 != 'isnull' or not (v2 is True)):
-                return True
-            # field__isnull=True is in conflict with almost everything (except itself) ; mirror
-            if lu2 == 'isnull' and v2 is True and (lu1 != 'isnull' or not (v1 is True)):
-                return True
-            # different values with same lookup -> conflict
-            if lu1 == lu2 and v1 != v2:
-                return True
-
-            # For now, everything else seems not lead to a conflict
-            return False
-
-        def are_sconditions_conflicting(c1: dict, c2: dict) -> bool:
-            # If conditions not on same fields => not problem
-            if c1['fields'].isdisjoint(c2['fields']):
-                return False
-            # just a simple for a start :
-            if len(c1['def']) == 1 and len(c2['def']) == 1:
-                k1 = list(c1['def'].keys())[0]
-                k2 = list(c2['def'].keys())[0]
-                if not k1.startswith(':') and not k2.startswith(':'):
-                    lu1, v1 = k1.partition('__')[2], c1['def'][k1]
-                    lu2, v2 = k2.partition('__')[2], c2['def'][k2]
-                    conflict = conflict_detect(lu1, v1, lu2, v2)
-                    return conflict
-            return False
-
-        def scondition_fields(scondition: dict) -> set:
+        all_deps = set()
+        fieldnames_set = set(fields.keys())
+        # For each condition
+        for cname, condition in self.cfg['conditions'].items():
+            # Build dependencies list
             deps = set()
-            for name, data in scondition.items():
-                if name[0] != ':':
-                    deps.add(name.split('__')[0])
-            return deps
+            for key, value in condition['values'].items():
+                vdeps = get_deps(value)
 
-        def build_states(sconditions: dict, indexes: list | None = None, conflicts_sconditions: dict or None = None) -> list:
-            """Build a list of states (as list of sconditions indexes) while preventing conflics (ie does not
-                include in a same state conficting conditions)
+                if not vdeps.issubset(fieldnames_set):
+                    raise RuntimeError(
+                        _("Workflow '{}': In condition '{}', for value '{}', dependencies {} are not all in fields ({})").format(
+                            self.name, cname, key, vdeps, fieldnames_set
+                        )
+                    )
 
-            :param sconditions: all workflow sconditions definitions
-            :type sconditions: dict
-            :param conflicts_sconditions: dict of sconditions used to check for conflicts (indexes sconditions is used if None)
-            :type conflicts_sconditions: dictorNone
-            :param indexes: List of indexes used to generate states combinations (sconditions keys are used if None),
-                defaults to None
-            :type indexes: list | None, optional
-            :return: list of states as lists of sconditions indexes
-            :rtype: list
-            """
-            if indexes is None:
-                indexes = list(sconditions.keys())
-            else:
-                indexes = list(indexes)
+                if not all_deps.isdisjoint(vdeps):
+                    raise RuntimeError(
+                        _(
+                            "Workflow '{}', Condition '{}' : value '{}' use "
+                            "field(s) '{}' that are already used by previous conditions !"
+                        ).format(self.name, cname, key, ', '.join(list(vdeps)))
+                    )
+                deps |= vdeps
+            condition['dependencies'] = deps
+            all_deps |= deps
 
-            conflicts_sconditions = conflicts_sconditions or {i: sconditions[i] for i in indexes}
-
-            states: list[list] = [[]]
-            while indexes:
-                index = indexes[0]
-                indexes = indexes[1:]
-                states += [
-                    state + [index] for state in states if set(conflicts_sconditions[index]['conflicts']).isdisjoint(set(state))
-                ]
-            return states
-
-        # print(build_states(list(range(10))), len(build_states(list(range(10)))))
-        # Process all conditions lists to get states
-
-        # For each action, resolve conditions names (= build a list of 'single' conditions)
-        # And build the workflow wide 'single' conditions list.
-        all_sconditions_set: set = set()
-        for action_name, action_def in self.cfg['actions'].items():
-            sconditions_list: list | None = condition_unpack(self.cfg.get('conditions', {}), action_def.get('condition', tuple()))
-            # print(action_name, sconditions_list)
-
-            # keep this list for later use
-            if sconditions_list is not None:
-                action_def['sconditions_json_set'] = {
-                    json.dumps(c, sort_keys=True, separators=(',', ':')) for c in sconditions_list
-                }
-            else:
-                action_def['sconditions_json_set'] = set()
-
-            # Add conditions to the global set
-            # Use a JSON compact canonic encoding to prevent (almost ?) multiple registrations for a same condition
-            all_sconditions_set |= action_def['sconditions_json_set']
-
-        # print(f"all_conditions_set: {all_conditions_set}")
-
-        # Build a list of all 'single' conditions in the workflow
-        all_sconditions: dict = {
-            idx: {'json_def': json_definition, 'def': json.loads(json_definition)}
-            for idx, json_definition in enumerate(sorted(list(all_sconditions_set)))
+        # Build states (basic, no link, just conditions & names)
+        self.states = {
+            self.make_state_id(state_l): {
+                'def': state_l,
+                'actions': {},
+                'dict': dict((s[0], s[1]) for s in state_l),
+                'can_be_initial': None,
+                'reachable': False,
+            }
+            for state_l in make_states(list(self.cfg['conditions'].items()))
         }
 
-        reversed_sconditions = {v['json_def']: k for k, v in all_sconditions.items()}
+        # Parse actions conditions expressions
+        for action_name, action_cfg in self.cfg['actions'].items():
+            action_cfg['condition_expr'] = parse_condition_expression(action_cfg['condition'])
 
-        # For each action, set unique conditions indexes set
-        for action_name, action_def in self.cfg['actions'].items():
-            if action_def['condition'] is None:
-                action_def['sconditions_idx_set'] = None
-            else:
-                action_def['sconditions_idx_set'] = {reversed_sconditions[j] for j in action_def['sconditions_json_set']}
+        # Fields that can be set at creation
+        creation_fields = set(self.cfg['create']['permissions'].keys())
 
-        # Extract field names in every 'single' condition
-        for idx, scondition_data in all_sconditions.items():
-            scondition_data['fields'] = scondition_fields(scondition_data['def'])
+        # Defaults
+        defaults_values = {k: v['default'] for k, v in fields.items()}
 
-        # Detect 'single' conditions conflicts
-        for idx, scondition_data in all_sconditions.items():
-            scondition_data['conflicts'] = []
-            for idx2, scondition_data2 in all_sconditions.items():
-                if idx2 != idx and are_sconditions_conflicting(scondition_data, scondition_data2):
-                    scondition_data['conflicts'].append(idx2)
-                    # print("Conflict !", idx, idx2, scondition_data['def'], scondition_data2['def'])
+        # For each state
+        for state_name, state_def in self.states.items():
+            # print(state_name)
+            # Build state --> action --> state links
+            for action_name, action_cfg in self.cfg['actions'].items():
+                if evaluate_condition_expression(action_cfg['condition_expr'], state_def['def']):
+                    state_def['actions'][action_name] = {'ends': set()}
+                    # print(' ', action_name)
+                    for dest_state_name, dest_state_def in self.states.items():
+                        dest_ok = True
+                        for dest_cond_name, dest_cond_value in dest_state_def['dict'].items():
+                            if (
+                                set(action_cfg['permissions'].keys()).isdisjoint(
+                                    self.cfg['conditions'][dest_cond_name]['dependencies']
+                                )
+                                and state_def['dict'][dest_cond_name] != dest_cond_value
+                            ):
+                                dest_ok = False
+                                break
+                        if dest_ok:
+                            state_def['actions'][action_name]['ends'].add(dest_state_name)
 
-        # preliminary states dict
-        self.states = {'-'.join(['c' + str(s) for s in p]): {'sconditions_set': set(p)} for p in build_states(all_sconditions)}
+            # Determine if this state can be a initial state
+            can_be_initial = True
+            for cond in state_def['def']:
+                cond_fields = self.cfg['conditions'][cond[0]]['dependencies']
+                # print('   ', cond[0], cond_fields)
+                if cond_fields.isdisjoint(creation_fields) and not filter_match(cond[2], defaults_values):
+                    can_be_initial = False
+                    break
+            state_def['can_be_initial'] = can_be_initial
+            # print('    ', can_be_initial)
 
-        for state_def in self.states.values():
-            # links actions sources to states
-            state_def['actions'] = {
-                k: {}
-                for k, v in self.cfg['actions'].items()
-                if v['sconditions_idx_set'] is not None and v['sconditions_idx_set'].issubset(state_def['sconditions_set'])
-            }
-            # build fields dependencies (useful ??)
-            state_def['fields'] = set()  # field dependencies
-            for sc in state_def['sconditions_set']:
-                state_def['fields'] |= all_sconditions[sc]['fields']
+        # Propagate 'reachable' attribute
+        for state_name, state_def in self.states.items():
+            if state_def['can_be_initial']:
+                propagate_reachable(self.states, state_def)
 
-        # For every action, compute which condition can be affected
-        for k, v in self.cfg['actions'].items():
-            # potentialy modified conditions
-            pmc = set()
-            for sc in all_sconditions.keys():
-                if not all_sconditions[sc]['fields'].isdisjoint(v['permissions'].keys()):
-                    # at least a fields
-                    pmc.add(sc)
-            # set(v['permissions'].keys()).intersection(all_sconditions[] state_def['sconditions_set'])  # list of fields
-            v['can_alter_sconditions_set'] = pmc
+        self.states = {k: v for k, v in self.states.items() if v['reachable'] is True}
 
-        # print("List of all states :")
-        # pprint(self.states)
-
-        # links actions ends to states
-        for state_def in self.states.values():
-            print("state:", state_def['sconditions_set'])
-            for k in state_def['actions'].keys():
-                v = self.cfg['actions'][k]
-                unmodified_sconditions = state_def['sconditions_set'] - v['can_alter_sconditions_set']
-                # print("  action:", k)
-                # print("    unmodified:", unmodified_sconditions)
-                # print("    indexes:", list(v['can_alter_sconditions_set']))
-                # print(
-                #     "    conflicts:", {i: all_sconditions[i] for i in list(unmodified_sconditions | v['can_alter_sconditions_set'])}
-                # )
-                modified_conditions = build_states(
-                    all_sconditions,
-                    indexes=list(v['can_alter_sconditions_set']),
-                    conflicts_sconditions={
-                        i: all_sconditions[i] for i in list(unmodified_sconditions | v['can_alter_sconditions_set'])
-                    },
-                )
-                final_conditions = [set(msc) | unmodified_sconditions for msc in modified_conditions]
-                state_def['actions'][k]['ends'] = final_conditions
-                print(f'    {k}: pmc {final_conditions}')
-
-        print("List of all single conditions :")
-        pprint(all_sconditions)
-        print()
-        print("List of all single actions :")
-        pprint(self.cfg['actions'])
-        print()
-        print("List of all states :")
-        pprint(self.states)
-
-        # Build a preliminary workflow tree
-        ...
-
-        # Remove every unreachable state
-        ...
-
-    @property
-    def states_expr(self):
-        return Value('')
-
-    # @property
-    # def permissions(self):
-    #     return dict()
+    def make_state_id(self, state_l: list[tuple]) -> str:
+        # return '__'.join(s[0] + ':' + s[1] for s in state_l)
+        state_id = 'S' + str(self.next_state_index)
+        self.next_state_index += 1
+        return state_id
 
     def dot(self):
+        bn = '\n'
         output = "digraph {\n"
         for k, v in self.states.items():
             if k:
-                output += f'  "{k}" [shape=rect];\n'
+                attrs = 'style="filled", fillcolor="#ffff88", ' if v['can_be_initial'] else ''
+                output += f'''  "{k}" [{attrs}shape=box, label="{k}\n{bn.join([c[0]+'='+c[1] for c in v['def']])}"];\n'''
                 for ak, av in v['actions'].items():
                     for lnk in av['ends']:
-                        lnk_name = '-'.join(['c' + str(s) for s in lnk])
-                        output += f'    "{k}" -> "{lnk_name}" [label="{ak}"];\n'
+                        # lnk_name = self.mk_state_id(lnk)
+                        output += f'''    "{k}" -> "{lnk}" [label="{ak}\n({', '.join(self.cfg['actions'][ak]['roles'])})"];\n'''
         output += "}\n"
         return output
+
+    @property
+    def permissions(self) -> dict:
+        perms = {}
+        # 'Creation' permissions (quite simple, can be written with comprehensions)
+        perms[None] = {
+            role: {fieldname: permission for fieldname, permission in self.cfg['create']['permissions'].items()}
+            for role in self.cfg['create']['roles']
+        }
+        # 'states' permissions ; a little more complicated since a role can be granted for multiple actions
+        for state_n, state_d in self.states.items():
+            state_roles_perms = {}
+            for action_n in state_d['actions'].keys():
+                action_d = self.cfg['actions'][action_n]
+                for role in action_d['roles']:
+                    state_roles_perms[role] = dict(state_roles_perms.get(role, {}), **action_d['permissions'])
+            perms.update({state_n: state_roles_perms})
+        return perms
 
     def __str__(self):
         return self.dot()
 
 
-simple_fields_cfg = {
-    'cloture': {'default': None},
-    'p1': {'default': None},
-    'p2': {'default': None},
-    'nom': {'default': None},
-}
+def toml_to_dict(cfg, dict_id: str | None = None):
+    """Get a object and transform any included list of dictionnaries in a single dictionnary
+    with its keys as `dict_id` parameter entry (only if every dict in the list has this key).
+    Designed to be used with [[something]] TOML syntax with every section with a 'name' or
+    'id' or any other identifier/key.
 
-simple_workflow_cfg = {
-    'conditions': {
-        'active': {'cloture__isnull': True},
-        'closed': (
-            {'cloture__isnull': False},
-            # {'cloture__lt': 'NOW'},
-        ),
-        'c1': {'p1': True},
-        'c2': {'p2': True},
-    },
-    'actions': {
-        'create': {
-            'roles': (
-                'DIR',
-                'EXP',
-            ),
-            'condition': None,
-            'permissions': {
-                'nom': True,
-            },
-        },
-        'modify': {
-            'roles': (
-                'OWN',
-                'ADM',
-            ),
-            'condition': 'active',
-            'permissions': {
-                'nom': True,
-            },
-        },
-        'update1': {'roles': ('P1',), 'condition': 'active', 'permissions': {'p2': True}},
-        'update2': {'roles': ('P2'), 'condition': 'active', 'permissions': {'p1': True}},
-        'close': {
-            'roles': ('ADM',),
-            'condition': ('c1', 'c2', 'active'),
-            'permissions': {
-                'cloture': True,
-            },
-        },
-        'reopen': {
-            'roles': ('ADM',),
-            'condition': 'closed',
-            'permissions': {
-                'cloture': True,
-            },
-        },
-    },
-}
+    Use a recursive algorithm.
 
-double_workflow_cfg = {
-    'conditions': {
-        'c1': {'f1': True},
-        'c2': {'f2': True},
-    },
-    'actions': {
-        'update1': {'roles': ('P1', 'P2'), 'condition': 'c1', 'permissions': {'p2': True}},
-        'update2': {'roles': ('P1', 'P2'), 'condition': 'c2', 'permissions': {'p1': True}},
-    },
-}
+    :param cfg: The
+    :type cfg: Any litteral type
+    :param dict_id: name of the id field, defaults to None (=> does nothing)
+    :type dict_id: str or None, optional
+    :return: The treated cfg object
+    :rtype: Same as one provided in input (cfg)
+    """
+    if isinstance(cfg, list):
+        if all([isinstance(v, dict) and dict_id in v for v in cfg]):
+            return {v[dict_id]: toml_to_dict({kk: vv for kk, vv in v.items() if kk != dict_id}, dict_id) for v in cfg}
+        else:
+            return [toml_to_dict(v, dict_id) for v in cfg]
+    elif isinstance(cfg, Mapping):
+        return {k: toml_to_dict(v, dict_id) for k, v in cfg.items()}
+    else:
+        return cfg
+
 
 if __name__ == '__main__':
     # Experimental code (to work on class creation)
-    wf = Workflow('demo', simple_workflow_cfg, simple_fields_cfg)
+
+    # This should come from SmartView (don't forget to add dependencies !!)
+    simple_fields_cfg = {
+        'cloture': {'default': None},
+        'd1': {'default': None},
+        'd2': {'default': None},
+        'nom': {'default': None},
+    }
+
+    with open('local/config.d/workflows.toml', 'rb') as f:
+        cfg = toml_to_dict(tomli.load(f), dict_id='name')['workflows']
+
+    wf = Workflow('demo', cfg['demo'], simple_fields_cfg)
     with open('test.gv', 'w+') as f:
         f.write(wf.dot())
+
+    pprint(wf.permissions)
