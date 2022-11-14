@@ -71,6 +71,7 @@ from django.apps import apps
 from django.urls import reverse
 from django.forms import modelform_factory
 from django.forms.utils import ErrorList
+from django.contrib.contenttypes.fields import GenericRelation
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
@@ -263,7 +264,8 @@ def tablefield_default(field, **kwargs):
 
     # Comme on crée le SmartView Field à partir du model, on peut indiquer le champ de la base de données
     #  qui porte le même nom
-    settings[1]['data'] = field.name
+    if not isinstance(field, GenericRelation):
+        settings[1]['data'] = field.name
 
     # lien vers le ModelField (l'objet Python, pas le nom)
     settings[1]['model_field'] = field
@@ -694,6 +696,9 @@ class SmartViewMetaclass(MediaDefiningClass):
                 )
 
             _meta['queryset'] = queryset
+
+            # All fieldnames that should be passed to values() Queryset method to mimic a values() without arg
+            _meta['values_fields'] = _meta['data_fields'] + list(annotations_fields.keys())
 
         # Step 7 : Process filters
 
@@ -2033,7 +2038,7 @@ class SmartView(metaclass=SmartViewMetaclass):
                     else:
                         raise RuntimeError(_("Unknown export engine: {}").format(export.get("engine")))
                 else:
-                    return JsonResponse({"data": list(query_set.values())})
+                    return JsonResponse({"data": list(query_set.values(*self._meta['values_fields']))})
         # Renvoyer None indique à l'appelant (la vue) que la requête n'a pas été traitée
 
     def __str__(self):
