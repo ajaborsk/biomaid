@@ -38,6 +38,7 @@ from django.db.models import (
     Model,
 )
 from django.db.models.functions import Concat, Left, Length, Cast
+from django.db.utils import ProgrammingError
 from django.utils.translation import gettext as _
 
 from django.contrib.contenttypes.models import ContentType
@@ -233,7 +234,11 @@ def class_roles_expression(
     ATTENTION: Le champ discipline est utilisé pour déterminer le responsable technique, pas l'expert.
     Pour la discipline de l'expert, cela passe par le champ 'domaine_field', qui a un champ 'discipline' de lui-même...
     """
-    content_type = ContentType.objects.get_for_model(model_class)
+    # This trick allow to launch migrations from a empty database
+    try:
+        content_type = ContentType.objects.get_for_model(model_class)
+    except ProgrammingError:
+        content_type = None
 
     # noinspection PyListCreation
     def instance_roles_expression(view_attrs):
