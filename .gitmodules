@@ -1,4 +1,4 @@
 [submodule "tpsread"]
 	path = tpsread
-	url = git@github.com:ajaborsk/tpsread.git
+	url = https://github.com/ajaborsk/tpsread.git
 	branch = master
