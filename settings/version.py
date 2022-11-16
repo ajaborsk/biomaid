@@ -14,6 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-DEM_VERSION = '0.11.3'
-DEM_VERSION_DATE = '12 août 2022'
+DEM_VERSION = '0.12.2'
+DEM_VERSION_DATE = '16 novembre 2022'
 DEM_VERSION_NAME = 'stable + bugfix #2'
