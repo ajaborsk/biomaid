@@ -136,7 +136,11 @@ class UserSettings:
 def get_user_settings(user, keys):
     response = {}
     # timer = time.time()
-    settings = json.loads(user.preferences)
+
+    if user.is_anonymous:
+        settings = dict()
+    else:
+        settings = json.loads(user.preferences)
 
     if isinstance(keys, str):
         keys = [keys]

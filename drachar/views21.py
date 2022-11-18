@@ -571,7 +571,7 @@ class PrevisionnelView(DoubleSmartViewMixin, BiomAidViewMixin, TemplateView):
     }
     main_smart_view_class = PrevisionnelSmartView21
     name = 'previsionnel'
-    main_field_name = 'num_dmd_id'
+    main_field_name = 'num_dmd'
     managed_field_name = 'num_dmd'
     field_smart_view_class = SingleDemandeSmartView
     title = _("Prévisionnel")

@@ -15,29 +15,29 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import logging
-from django.utils.translation import gettext as _
+
+# from django.utils.translation import gettext as _
 
 # -----------------------------------------------------------------------
 # Choisir la fréqence d'exécution du job ici.
 # Utiliser la première ligne (BaseJob) pour désactiver le job
 # -----------------------------------------------------------------------
-from django_extensions.management.jobs import BaseJob as MyJob
-
-# from django_extensions.management.jobs import HourlyJob as MyJob
+# from django_extensions.management.jobs import BaseJob as MyJob
+# from django_extensions.management.jobs import QuarterHourlyJob as MyJob
+from django_extensions.management.jobs import HourlyJob as MyJob
 
 # from django_extensions.management.jobs import DailyJob as MyJob
+
 
 logger = logging.getLogger(__name__)
 
 
 class Job(MyJob):
-    help = _("Analyse de l'état des commandes")
+    help = "Importe les tables externes (via extable) et lance toutes les analyses."
 
     def execute(self):
-        # executing empty sample job
-        logger.info(_("Analyse de l'état des commandes..."))
-
         # Pour exécuter une commande (de manage.py):
         from django.core import management
 
-        management.call_command("gest_analyse")
+        management.call_command("extable_update")
+        management.call_command("analytics_update")
