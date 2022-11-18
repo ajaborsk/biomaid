@@ -27,6 +27,8 @@ from django.template.response import TemplateResponse
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.views.generic import CreateView, TemplateView
+from django.utils.decorators import method_decorator
+from django.views.decorators.debug import sensitive_post_parameters
 
 from django.contrib.auth import views as auth_views
 
@@ -45,6 +47,7 @@ class LoginView(BiomAidViewMixin, auth_views.LoginView):
     title = _("Connexion")
     permissions = '__PUBLIC__'
 
+    @method_decorator(sensitive_post_parameters('password'))
     def post(self, request, *args, **kwargs):
         resp = super().post(request, *args, **kwargs)
         # messages.info(self.request, "Vous êtes connecté (ou pas) !")
@@ -134,6 +137,7 @@ class Sign(BiomAidViewMixin, TemplateView):
         super().__init__(*args, **kwargs)
         self.message = ""
 
+    @method_decorator(sensitive_post_parameters('password', 'password1', 'password2'))
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.extra_email_context = {'url_prefix': self.url_prefix}
@@ -287,6 +291,7 @@ class SignUp(BiomAidViewMixin, CreateView):
         )
         return super().get(request, *args, **kwargs)
 
+    @method_decorator(sensitive_post_parameters('password1', 'password2'))
     def post(self, request, *args, **kwargs):
         # debug("SignUp.post()", request.POST)
 
