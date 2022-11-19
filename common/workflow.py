@@ -4,6 +4,8 @@ from pprint import pprint
 
 import tomli
 
+from django.db.models import Expression, Value, Case, When
+
 """
 # TODO
 
@@ -224,6 +226,17 @@ class Workflow:
             perms.update({state_n: state_roles_perms})
         return perms
 
+    @property
+    def django_orm_state_expr(self) -> Expression:
+        # First, lazy, implementation. Rely on database engine optimizer
+        cases = []
+        for state_name, state_def in self.states.items():
+            conds = {}
+            for name, value, condition_expr in state_def['def']:
+                conds.update(condition_expr)
+            cases.append(When(**conds, then=Value(state_name)))
+        return Case(*cases, default=Value('Undefined'))
+
     def __str__(self):
         return self.dot()
 
@@ -273,3 +286,4 @@ if __name__ == '__main__':
         f.write(wf.dot())
 
     pprint(wf.permissions)
+    print(wf.django_orm_state_expr)
