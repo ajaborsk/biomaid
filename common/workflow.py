@@ -210,9 +210,9 @@ class Workflow:
 
     @property
     def permissions(self) -> dict:
-        perms = {}
+        perms = {'create': tuple(role for role in self.cfg['create']['permissions']), 'write': {}}
         # 'Creation' permissions (quite simple, can be written with comprehensions)
-        perms[None] = {
+        perms['write'][None] = {
             role: {fieldname: permission for fieldname, permission in self.cfg['create']['permissions'].items()}
             for role in self.cfg['create']['roles']
         }
@@ -223,7 +223,7 @@ class Workflow:
                 action_d = self.cfg['actions'][action_n]
                 for role in action_d['roles']:
                     state_roles_perms[role] = dict(state_roles_perms.get(role, {}), **action_d['permissions'])
-            perms.update({state_n: state_roles_perms})
+            perms['write'].update({state_n: state_roles_perms})
         return perms
 
     @property

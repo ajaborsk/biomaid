@@ -78,6 +78,8 @@ from crispy_forms.layout import Submit
 from xlsxwriter import Workbook
 
 from common.utils import DataWorksheet, HTMLFilter
+from common import config
+from common.workflow import toml_to_dict, Workflow
 from document.smart_fields import DocumentsSmartField
 from smart_view.smart_expression import SmartExpression
 from generic_comment.smart_fields import CommentsSmartField
@@ -564,6 +566,41 @@ class SmartViewMetaclass(MediaDefiningClass):
         if _meta['model'] is not None:
             # Si le modèle n'est pas défini, c'est une classe abstraite (inutilisable) et il
             # ne faut donc pas créer les instances des champs (ce serait inutile)
+
+            if _meta['workflow']:
+                if _meta['workflows']:
+                    raise RuntimeError(_("SmartView '{}' have a workflow name and a workflows list simultaneously !").format(name))
+                else:
+                    _meta['workflows'] = [_meta['workflow']]
+            if _meta['workflow']:
+                model_cfg = {n: {'default': None} for n in _meta['fields']}
+                all_workflows = toml_to_dict(config['workflows'], dict_id='name')
+                workflows = [Workflow(wf, all_workflows[wf], model_cfg) for wf in _meta['workflows']]
+
+                workflow = workflows[0]
+
+                if _meta['permissions']:
+                    raise RuntimeError(_("SmartView '{}' has a permissions attribute AND a workflow attribute...").format(name))
+                else:
+                    _meta['permissions'] = workflow.permissions
+
+                _meta['fields'] = list(_meta['fields']) + [workflow.name + '_state_code']
+                _meta['settings'] = dict(
+                    _meta['settings'],
+                    **{
+                        workflow.name
+                        + '_state_code': (
+                            ComputedSmartField,
+                            {
+                                'title': workflow.name + ' state code (DEBUG)',
+                                'hidden': not config.settings.DEBUG,
+                                'data': workflow.django_orm_state_expr,
+                                'special': 'state',
+                            },
+                        )
+                    },
+                )
+
             dependencies = {}
             smartfields = []
             for smartfield_name in _meta['fields']:
@@ -1286,6 +1323,9 @@ class SmartView(metaclass=SmartViewMetaclass):
         database = 'default'
         model = None
         model_fields = ALL_FIELDS
+
+        workflow = None
+        workflows = []
 
         help_text = None
         fields = ()  # Could be a set instead of a list ?
