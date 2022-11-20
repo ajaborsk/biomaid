@@ -188,17 +188,7 @@ class FinanceConfig(AppConfig):
 
     def ready(self):
         from django.apps import apps
-        from finance.analytics import orders_flaws_processor
+        from finance.analytics import orders_flaws_processor, dem_financial_assess
 
         apps.get_app_config('analytics').register_data_processor('orders_flaws_processor', orders_flaws_processor)
-
-    # def server_ready(self) -> None:
-    #     from analytics.data import set_datasource
-
-    #     set_datasource(
-    #         'finance.orders-flaws',
-    #         label=_("Problèmes liés aux commandes"),
-    #         auto=[{}],
-    #         parameters={},
-    #         processor='orders_flaws_processor',
-    #     )
+        apps.get_app_config('analytics').register_data_processor('dem_financial_assess', dem_financial_assess)

@@ -32,6 +32,8 @@ from analytics.match import RecordMatcher
 from analytics.models import DataSource
 from finance.apps import get_intv_from_order, no_interv_re
 
+from dem.models import Demande
+
 serial_re = re.compile(r'(\S*)\s*\(.*\)\s*')
 
 
@@ -741,3 +743,13 @@ def orders_flaws_processor(*args, **kwargs):
 
     print(_("Fait."))
     pass
+
+
+class DemAnalyser(RecordAnomalyChecker):
+    def check(self, verbosity=1):
+        print(f"    DemAnalyser... {self.data=}")
+
+
+def dem_financial_assess(*args, **kwargs):
+    verbosity = kwargs.get('verbosity') or 0
+    DemAnalyser(Demande).check(verbosity=verbosity)
