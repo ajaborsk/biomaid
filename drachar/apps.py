@@ -138,11 +138,12 @@ class DracharConfig(AppConfig):
         # TODO: Une alerte lorsqu'un prévisionnel "arrive" chez un chargé d'opération
     }
 
-    def server_ready(self):
-        from analytics.data import set_datasource
-        from drachar.models import Previsionnel
+    def ready(self):
+        from django.apps import apps
 
         def previsionnel_par_expert(discipline):
+            from drachar.models import Previsionnel
+
             return (
                 Previsionnel.objects.order_by()
                 .filter(solder_ligne=False, programme__discipline__code=discipline)
@@ -153,6 +154,8 @@ class DracharConfig(AppConfig):
             )
 
         def montant_previsionnel_par_expert(discipline):
+            from drachar.models import Previsionnel
+
             return (
                 Previsionnel.objects.order_by()
                 .filter(solder_ligne=False, programme__discipline__code=discipline)
@@ -162,7 +165,8 @@ class DracharConfig(AppConfig):
                 .values('expert', 'nom_expert', 'montant_total')
             )
 
-        set_datasource('drachar.previsionnel.count', {}, processor=lambda: None)
+        apps.get_app_config('analytics').register_data_processor('previsionnel_par_expert', previsionnel_par_expert)
+        apps.get_app_config('analytics').register_data_processor('montant_previsionnel_par_expert', montant_previsionnel_par_expert)
 
-        set_datasource('drachar.previsionnel-par-expert', {}, processor=previsionnel_par_expert)
-        set_datasource('drachar.montant-previsionnel-par-expert', {}, processor=montant_previsionnel_par_expert)
+    # def server_ready(self):
+    #     from analytics.data import set_datasource

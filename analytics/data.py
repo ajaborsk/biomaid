@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import sys
-from typing import Callable
-from types import FunctionType
+# import sys
+# from typing import Callable
+# from types import FunctionType
 
 from django.apps import apps
 from django.utils.timezone import now
@@ -29,50 +29,52 @@ def register_data_processor(*args, **kwargs) -> bool:
     return apps.get_app_config('analytics').register_data_processor(*args, **kwargs)
 
 
-def set_datasource(
-    code: str,
-    label: None | str = None,
-    parameters: None | dict = None,
-    auto: None | list = None,
-    processor: None | str | Callable = None,
-) -> bool:
+# def set_datasource(
+#     code: str,
+#     label: None | str = None,
+#     parameters: None | dict = None,
+#     auto: None | list = None,
+#     processor: None | str | Callable = None,
+# ) -> bool:
 
-    if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
-        # Do not try to update AppConfig.ready() datasources if we are in a migration phase
-        return False
+#     raise RuntimeError("Do not use ! Use migration instead.")
 
-    # return False
-    datasource, created = DataSource.objects.get_or_create(code=code)
-    datasource.label = label or ''
-    datasource.parameters = parameters or {}
-    datasource.auto = auto or []
+#     if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
+#         # Do not try to update AppConfig.ready() datasources if we are in a migration phase
+#         return False
 
-    # if isinstance(processor, LambdaType):  # does not work ??!!!?
-    if isinstance(processor, FunctionType) and '<lambda>' in processor.__qualname__:
-        processor_name_base = processor.__qualname__.replace('.<locals>', '').replace('.<lambda>', '.lambda')
-        idx = 0
-        while processor_name_base + '-' + str(idx) in apps.get_app_config('analytics').data_processors:
-            idx += 1
-        processor_name = processor_name_base + '_' + str(idx)
-        # signature = inspect.signature(processor)
-        register_data_processor(processor_name, processor)
-    elif isinstance(processor, FunctionType):
-        processor_name = processor.__qualname__.replace('.<locals>', '')
-        register_data_processor(processor_name, processor)
-        # signature = inspect.signature(processor)
-    elif isinstance(processor, str):
-        if processor in apps.get_app_config('analytics').data_processors:
-            raise RuntimeError(_("Unknown processor name: '{}'").format(processor))
-        else:
-            processor_name = processor
-            # signature = inspect.signature(apps.get_app_config('analytics').data_processors[processor]['function'])
-    else:
-        raise RuntimeError(_("Unable to get data processor {}: Unknow type").format(repr(processor)))
-    datasource.processor_name = processor_name
+#     # return False
+#     datasource, created = DataSource.objects.get_or_create(code=code)
+#     datasource.label = label or ''
+#     datasource.parameters = parameters or {}
+#     datasource.auto = auto or []
 
-    datasource.save()
+#     # if isinstance(processor, LambdaType):  # does not work ??!!!?
+#     if isinstance(processor, FunctionType) and '<lambda>' in processor.__qualname__:
+#         processor_name_base = processor.__qualname__.replace('.<locals>', '').replace('.<lambda>', '.lambda')
+#         idx = 0
+#         while processor_name_base + '-' + str(idx) in apps.get_app_config('analytics').data_processors:
+#             idx += 1
+#         processor_name = processor_name_base + '_' + str(idx)
+#         # signature = inspect.signature(processor)
+#         register_data_processor(processor_name, processor)
+#     elif isinstance(processor, FunctionType):
+#         processor_name = processor.__qualname__.replace('.<locals>', '')
+#         register_data_processor(processor_name, processor)
+#         # signature = inspect.signature(processor)
+#     elif isinstance(processor, str):
+#         if processor in apps.get_app_config('analytics').data_processors:
+#             raise RuntimeError(_("Unknown processor name: '{}'").format(processor))
+#         else:
+#             processor_name = processor
+#             # signature = inspect.signature(apps.get_app_config('analytics').data_processors[processor]['function'])
+#     else:
+#         raise RuntimeError(_("Unable to get data processor {}: Unknow type").format(repr(processor)))
+#     datasource.processor_name = processor_name
 
-    return created
+#     datasource.save()
+
+#     return created
 
 
 def get_data_timestamp(code: str, parameters=None):

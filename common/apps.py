@@ -485,19 +485,26 @@ class CommonConfig(AppConfig):
         # Initialize universal config object
         config._initialize()
 
-    def server_ready(self):
-        # Setup analytics (if needed)
-        from analytics import data
-        from common.models import Alert, User
-
+        # Register analytics processors
         def user_alerts(user):
+            from common.models import Alert
+
             return Alert.objects.filter(destinataire=user, cloture__isnull=True).count()
 
         def user_counter():
+            from common.models import User
+
             return User.objects.filter(last_login__gt=now() - datetime.timedelta(days=7), is_active=True).count()
 
-        data.set_datasource(
-            'common.users-count', processor=lambda: User.objects.filter(last_login__isnull=False, is_active=True).count()
-        )
-        data.set_datasource('common.users-count-lastweek', processor=user_counter)
-        data.set_datasource('common.user-active-alerts', processor=user_alerts)
+        apps.get_app_config('analytics').register_data_processor('user_alerts', user_alerts)
+        apps.get_app_config('analytics').register_data_processor('user_counter', user_counter)
+
+    # def server_ready(self):
+    #     # Setup analytics (if needed)
+    #     from analytics import data
+
+    #     data.set_datasource(
+    #         'common.users-count', processor=lambda: User.objects.filter(last_login__isnull=False, is_active=True).count()
+    #     )
+    #     data.set_datasource('common.users-count-lastweek', processor='user_counter')
+    #     data.set_datasource('common.user-active-alerts', processor='user_alerts')
