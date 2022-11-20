@@ -485,6 +485,7 @@ class CommonConfig(AppConfig):
         # Initialize universal config object
         config._initialize()
 
+    def server_ready(self):
         # Setup analytics (if needed)
         from analytics import data
         from common.models import Alert, User
@@ -500,6 +501,3 @@ class CommonConfig(AppConfig):
         )
         data.set_datasource('common.users-count-lastweek', processor=user_counter)
         data.set_datasource('common.user-active-alerts', processor=user_alerts)
-
-    def server_ready(self):
-        pass

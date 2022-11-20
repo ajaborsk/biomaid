@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Django",
+            "name": "Django server",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
@@ -36,6 +36,17 @@
             ],
             "django": true,
             "justMyCode": true
+        },
+        {
+            "name": "Django: reset_db",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "reset_db"
+            ],
+            "django": true,
+            "justMyCode": false
         },
     ]
 }

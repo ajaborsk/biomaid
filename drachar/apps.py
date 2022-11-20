@@ -138,7 +138,7 @@ class DracharConfig(AppConfig):
         # TODO: Une alerte lorsqu'un prévisionnel "arrive" chez un chargé d'opération
     }
 
-    def ready(self):
+    def server_ready(self):
         from analytics.data import set_datasource
         from drachar.models import Previsionnel
 

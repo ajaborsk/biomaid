@@ -186,7 +186,7 @@ class FinanceConfig(AppConfig):
         }
     }
 
-    def ready(self) -> None:
+    def server_ready(self) -> None:
         from analytics.data import set_datasource
         from finance.analytics import orders_flaws_processor
 

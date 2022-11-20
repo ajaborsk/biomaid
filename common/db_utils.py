@@ -19,6 +19,7 @@ Ensemble d'utilitaires (constantes, classes et fonctions)
 destiné à être utilisé avec la base de données (plus précisément l'ORM) de Django
 """
 import json
+import sys
 import logging
 
 from django.apps import apps
@@ -234,11 +235,13 @@ def class_roles_expression(
     ATTENTION: Le champ discipline est utilisé pour déterminer le responsable technique, pas l'expert.
     Pour la discipline de l'expert, cela passe par le champ 'domaine_field', qui a un champ 'discipline' de lui-même...
     """
-    # This trick allow to launch migrations from a empty database
-    try:
-        content_type = ContentType.objects.get_for_model(model_class)
-    except ProgrammingError:
-        content_type = None
+    # This trick allow to launch migrations from a empty database and reset_db command
+    content_type = None
+    if set(sys.argv).isdisjoint({'reset_db', 'migrate', 'makemigrations'}):
+        try:
+            content_type = ContentType.objects.get_for_model(model_class)
+        except ProgrammingError:
+            pass
 
     # noinspection PyListCreation
     def instance_roles_expression(view_attrs):
