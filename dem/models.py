@@ -556,15 +556,15 @@ class Demande(models.Model):
 
     # Calcul automatique du cout du projet sur 7 ans => voir comment intégrer
     # le résultat de calculs automatiques.
-    montant_bak = models.DecimalField(
-        verbose_name=_("Montant de la demande (TTC)"),
-        help_text=_("Par défaut, le montant est calculé à partir de la quantité et du prix unitaire."),
-        max_digits=9,
-        decimal_places=2,
-        default=None,
-        blank=True,
-        null=True,
-    )
+    # montant_bak = models.DecimalField(
+    #     verbose_name=_("Montant de la demande (TTC)"),
+    #     help_text=_("Par défaut, le montant est calculé à partir de la quantité et du prix unitaire."),
+    #     max_digits=9,
+    #     decimal_places=2,
+    #     default=None,
+    #     blank=True,
+    #     null=True,
+    # )
 
     # consommables éventuels
     consommables_eventuels = models.CharField(
@@ -632,15 +632,15 @@ class Demande(models.Model):
     )
 
     # montant total estimé par l'expert/acheteur : = quantite x montant acheteur unitaire
-    montant_total_expert_metier_bak = models.DecimalField(
-        max_digits=9,
-        verbose_name="Montant Total estimé par l'expert métier",
-        decimal_places=0,
-        default=None,
-        blank=True,
-        null=True,
-        help_text=_("Montant Total estimé par l'expert métier en fonction du projet et des quantités souhaitées"),
-    )
+    # montant_total_expert_metier_bak = models.DecimalField(
+    #     max_digits=9,
+    #     verbose_name="Montant Total estimé par l'expert métier",
+    #     decimal_places=0,
+    #     default=None,
+    #     blank=True,
+    #     null=True,
+    #     help_text=_("Montant Total estimé par l'expert métier en fonction du projet et des quantités souhaitées"),
+    # )
 
     # acquisition possible annee N
     acquisition_possible = models.BooleanField(verbose_name='Acquisition possible en année N', blank=True, null=True)
@@ -1129,6 +1129,13 @@ class Demande(models.Model):
     workflow_alert = models.CharField(
         verbose_name=_("Alerte traitement"),
         max_length=1024,
+        default=None,
+        blank=True,
+        null=True,
+    )
+
+    analyse = models.JSONField(
+        verbose_name=_("Analyse technique de la demande"),
         default=None,
         blank=True,
         null=True,

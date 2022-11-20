@@ -50,6 +50,7 @@ from common.base_views import BiomAidViewMixin
 
 from finance.apps import no_interv_re, inv_re_list
 from finance.management.commands.gest_analyse import ORDER_ANOMALIES
+from finance.smart_views import DemAssessmentSmartView
 from smart_view.smart_page import SmartPage
 
 
@@ -1288,6 +1289,17 @@ class InvoicesView(SmartPage):
         'ADM',
         'GES',
     }
+    smart_modes = {
+        None: {'view': 'list'},
+    }
+
+
+class DemAssessmentView(SmartPage):
+    name = 'dem-assessment'
+    lable = _("Bilan demandes")
+    title = _("Bilan demandes")
+    smart_view_class = DemAssessmentSmartView
+    permissions = {'ADM', 'P-ARB'}
     smart_modes = {
         None: {'view': 'list'},
     }

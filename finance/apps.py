@@ -142,6 +142,10 @@ class FinanceConfig(AppConfig):
                             'label': _("Liste des programmes"),
                             'url_name': 'common:programme',
                         },
+                        {
+                            'label': _("Bilan demandes"),
+                            'url_name': 'finance:dem-assessment',
+                        },
                     ),
                 },
                 {
