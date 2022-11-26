@@ -175,6 +175,12 @@ class Previsionnel(models.Model):
         blank=True,
         null=True,
     )
+    analyse = models.JSONField(
+        verbose_name=_("Analyse technique du prévisionnel"),
+        default=None,
+        blank=True,
+        null=True,
+    )
 
     # -  Partie dédiée au suivi des travaux ---------------------------------------------------------------------------------------
 

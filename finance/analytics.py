@@ -745,11 +745,43 @@ def orders_flaws_processor(*args, **kwargs):
     pass
 
 
-class DemAnalyser(RecordAnomalyChecker):
+class PrevAnalyser(RecordAnomalyChecker):
+    code = '123'
+    level = 0
+    message = ""
+
+    def __init__(self, data):
+        super().__init__(data, storage=JsonAnomaliesStorage(data, 'analyse'))
+
     def check(self, verbosity=1):
-        print(f"    DemAnalyser... {self.data=}")
+        # print(f"      DemAnalyse... {self.data[1].code=}")
+        self.add(data={'mokil': 'ok'})
+
+
+class DemAnalyser(RecordAnomalyChecker):
+    code = '123'
+    level = 1
+    message = 'test'
+
+    def __init__(self, data):
+        super().__init__(data, storage=JsonAnomaliesStorage(data[1], 'analyse'))
+
+    def check(self, verbosity=1):
+        # print(f"      DemAnalyse... {self.data[1].code=}")
+        for prev in self.data[1].previsionnel_set.all():
+            PrevAnalyser(prev)
+        self.add(data={'argl': 'ok'})
+
+
+class DemAllAnalyser(AnomalyChecker):
+    def check(self, verbosity=1):
+        # print(f"    DemAllAnalyser... {self.data=}")
+        qs = self.data.objects.filter()
+        for demande in qs:
+            DemAnalyser(data=(self.data, demande)).check(verbosity=verbosity)
+        return super().check(verbosity=verbosity)
 
 
 def dem_financial_assess(*args, **kwargs):
     verbosity = kwargs.get('verbosity') or 0
-    DemAnalyser(Demande).check(verbosity=verbosity)
+    DemAllAnalyser(Demande).check(verbosity=verbosity)
