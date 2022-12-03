@@ -155,6 +155,33 @@ class DemConfig(AppConfig):
                     'label': _("Demandes archivées"),
                     'url_name': 'dem:demandes-archivees-expert',
                 },
+                {
+                    'label': _("Synthèses"),
+                    # 'url_name': 'dem:demandes-archivees-expert',
+                    'permissions': (
+                        'P-ARB',
+                        'P-EXP',
+                    ),
+                    'show-only-if-allowed': True,
+                    'entries': [
+                        {
+                            'label': _("Parc"),
+                            'url_name': 'dem:all-assets-view',
+                        },
+                        {
+                            'label': _("Historique validées"),
+                            'url_name': 'dem:history-view',
+                        },
+                        {
+                            'label': _("Demandes en cours"),
+                            'url_name': 'dem:current-requests-view',
+                        },
+                        {
+                            'label': _("Aides à l'arbitrage"),
+                            'url_name': 'dem:arbitration-help-view',
+                        },
+                    ],
+                },
             ),
         },
         'user-settings-categories': {

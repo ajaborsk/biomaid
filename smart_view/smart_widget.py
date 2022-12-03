@@ -345,7 +345,11 @@ class AltairWidget(HtmlWidget):
             'smart_view/js/vega-lite@4.min.js',
             'smart_view/js/vega-embed@6.min.js',
         ]
-        css = {'all': 'smart_view/css/vega-widget.css'}
+        css = {
+            'all': [
+                'smart_view/css/vega-widget.css',
+            ],
+        }
 
     # height = 500
     template_name = 'smart_view/smart_widget_altair.html'
