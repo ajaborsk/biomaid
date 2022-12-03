@@ -157,6 +157,10 @@ urlpatterns = (
             views.VueFiltreSynthese2.as_view(),
             name='vue-filtre-synthese2',
         ),
+        path('all-assets-view', views22.AllAssetsView.as_view(), name='all-assets-view'),
+        path('history-view', views22.DemHistoryView.as_view(), name='history-view'),
+        path('current-requests-view', views22.CurrentRequestsView.as_view(), name='current-requests-view'),
+        path('arbitration-help-view', views22.ArbitrationHelpView.as_view(), name='arbitration-help-view'),
         # ===================================================================================================
         # Partie spécifique aux travaux - Pas très intégrée pour l'instant...
         path('tvx/', views_tvx.DemTvxHome.as_view(), name='tvx-home'),
