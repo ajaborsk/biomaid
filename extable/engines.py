@@ -300,21 +300,7 @@ class FileExtableEngine(ExtableEngine, ABC):
         # raise NotImplementedError("Method update() must be overloaded.")
 
 
-class DatabaseEngine(ExtableEngine):
-    @staticmethod
-    def filename_match(filename: str) -> bool:
-        if filename.endswith('__DATABASE__'):
-            return True
-        return False
-
-    def update(self, msg_callback=None, options={}):
-        if msg_callback is not None:
-            msg_callback(_("Database engine not yet implemented. Ignoring this extable."))
-
-
-repository: dict[str, Type[ExtableEngine]] = {
-    'database': DatabaseEngine,
-}
+repository: dict[str, Type[ExtableEngine]] = {}
 
 try:
     from extable.engine_csv import CsvEngine
@@ -329,3 +315,17 @@ try:
     repository['excel'] = ExcelEngine
 except ImportError as exception:
     print(_("Unable to initialize Excel extable engine: {}").format(repr(exception)))
+
+try:
+    from extable.engine_database import DatabaseEngine
+
+    repository['database'] = DatabaseEngine
+except ImportError as exception:
+    print(_("Unable to initialize Database extable engine: {}").format(repr(exception)))
+
+try:
+    from extable.engine_tps import TpsEngine
+
+    repository['tps'] = TpsEngine
+except ImportError as exception:
+    print(_("Unable to initialize TPS extable engine: {}").format(repr(exception)))
