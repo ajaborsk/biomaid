@@ -12,8 +12,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+  colors:
+
+  Blue (from the logo) : #106cc2
+  Dark blue (from the logo) : #106cc2
+  Light blue (from the logo) : #779ec2
+  Cyan (from the logo) : #09aea7
+  Dark Cyan (from the logo) : #055d59
+  Light Cyan (from the logo) : #91aead
+  Purple (title) : #832b83
+*/
+
 footer a {
-    color: #35beea;
+    color: #91aead;
 }
 
 .menu-image > a {
@@ -43,7 +55,7 @@ footer a {
 }
 
 .topbar ul.dropdown li:hover {
-    background: #4495e0;
+    background: #779ec2;
 }
 
 .topbar .main-title-tile {
@@ -53,12 +65,12 @@ footer a {
 }
 
 .links-tile a:hover {
-	background: #4495e0;
+	background: #779ec2;
 }
 
 .topbar2 {
     color: #000;
-    background: #95e9e5;
+    background: #ddd;
 }
 
 .menubar {
@@ -74,7 +86,7 @@ footer a {
 }
 
 .menubar ul.dropdown li:hover {
-    background: #4495e0;
+    background: #779ec2;
 }
 
 .menubar i.fa {
