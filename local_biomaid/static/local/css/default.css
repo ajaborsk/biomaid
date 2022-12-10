@@ -1,0 +1,90 @@
+/*
+ * Copyright (c) 2020 Brice Nord, Romuald Kliglich, Alexandre Jaborska, Philomène Mazand.
+ * This file is part of the BiomAid distribution.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+footer a {
+    color: #35beea;
+}
+
+.menu-image > a {
+    width: 158px;
+    height: 100px;
+    border: solid 10px #fff;
+    box-shadow: rgba(0, 0, 0, 0.2) 10px 10px 10px 7px;
+    background-color: #fff;
+    background-image: url("../Logo BiomAid.png");
+    background-size: 158px 100px;
+}
+
+.topbar {
+    background: #106cc2;
+}
+
+.topbar i.fa {
+    color: #9c1012;
+}
+
+.topbar ul.dropdown {
+    background: #106cc2;
+}
+
+.topbar ul.dropdown li {
+    background: #106cc2;
+}
+
+.topbar ul.dropdown li:hover {
+    background: #4495e0;
+}
+
+.topbar .main-title-tile {
+    background-image: url('../Lille_2022_skyline.png');
+    background-position: right 15px top 2px;
+    background-repeat: no-repeat;
+}
+
+.links-tile a:hover {
+	background: #4495e0;
+}
+
+.topbar2 {
+    color: #000;
+    background: #95e9e5;
+}
+
+.menubar {
+    background: #106cc2;
+}
+
+.menubar ul.dropdown {
+    background: #106cc2;
+}
+
+.menubar ul.dropdown li {
+    background: #106cc2;
+}
+
+.menubar ul.dropdown li:hover {
+    background: #4495e0;
+}
+
+.menubar i.fa {
+    color: #9c1012;
+}
+
+footer {
+    background: #106cc2;
+}
+
+.has-badge[data-count]::after {
+	background: rgba(255, 166, 0, 0.85);
+}
