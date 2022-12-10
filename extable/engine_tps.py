@@ -67,6 +67,7 @@ class TpsEngine(FileExtableEngine):
             return True
         return False
 
+    @staticmethod
     def columns_autodetect(filename: str, cfg: dict | None = None):
         cfg = cfg or {}
         schema: dict = {}

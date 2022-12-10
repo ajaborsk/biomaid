@@ -22,7 +22,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "analytics_update", "-v3"
+                "analytics_update", "-v3", "finance.dem_financial_assess",
             ],
             "django": true,
             "justMyCode": true

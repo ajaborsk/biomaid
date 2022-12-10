@@ -31,6 +31,7 @@ from analytics.anomaly import (
 from analytics.match import RecordMatcher
 from analytics.models import DataSource
 from finance.apps import get_intv_from_order, no_interv_re
+from smart_view.smart_expression import find_magh2_order
 
 from dem.models import Demande
 
@@ -746,6 +747,10 @@ def orders_flaws_processor(*args, **kwargs):
 
 
 class PrevAnalyser(RecordAnomalyChecker):
+    """
+    data is a Previsionnel record
+    """
+
     code = '123'
     level = 0
     message = ""
@@ -755,7 +760,124 @@ class PrevAnalyser(RecordAnomalyChecker):
 
     def check(self, verbosity=1):
         # print(f"      DemAnalyse... {self.data[1].code=}")
-        self.add(data={'mokil': 'ok'})
+        dra94_dossier_model = apps.get_model('extable', 'ExtDra94Dossier')
+        dra94_ligne_model = apps.get_model('extable', 'ExtDra94Ligne')
+        order_row_model = apps.get_model('extable', 'ExtCommande')
+
+        analysis: dict = {}
+
+        manual_orders = find_magh2_order(self.data.suivi_appro)
+        if manual_orders:
+            no_commandes = set(manual_orders.split())
+        else:
+            no_commandes = set()
+
+        prev_code_uf = self.data.uf.code
+
+        no_ligne_dra94 = self.data.num_dmd.pk
+        code_prog_dra94 = self.data.programme.anteriorite
+        if code_prog_dra94:
+            dossiers_dra94 = dra94_dossier_model.objects.filter(programme=code_prog_dra94, ligne=no_ligne_dra94)
+            for dossier_dra94 in dossiers_dra94:
+                analysis['dra'] = {
+                    'code': 'DRA' + str(dossier_dra94.numero)[:4] + '-' + str(dossier_dra94.numero)[4:],
+                    'date': str(dossier_dra94.date_dossier),
+                    'montant': float(dossier_dra94.montant),
+                    'code_fournisseur': int(dossier_dra94.code_fournisseur),
+                    'fournisseur': str(dossier_dra94.fournisseur),
+                    'no_commande': str(dossier_dra94.no_commande),
+                    'date_commande': str(dossier_dra94.date_commande),
+                }
+                if dossier_dra94.no_commande:
+                    no_commandes.add(str(dossier_dra94.no_commande))
+                lignes_dra94 = dra94_ligne_model.objects.filter(dossier=dossier_dra94)
+                analysis['dra']['lignes'] = []
+                for ligne in lignes_dra94:
+                    analysis['dra']['lignes'].append(
+                        {
+                            'code_uf': str(ligne.code_uf),
+                            'qte': int(ligne.quantite),
+                            'designation': str(ligne.designation),
+                            'montant': float(ligne.montant),
+                        }
+                    )
+        commandes_analysis = []
+        commandes_on_uf_analysis = []
+        prev_mt_engage = 0
+        prev_mt_engage_on_uf = 0
+        prev_mt_liquide = 0
+        prev_mt_liquide_on_uf = 0
+        for no_commande in no_commandes:
+            rows_on_uf = 0
+            order_rows = order_row_model.objects.filter(commande=no_commande)
+            mt_engage = 0
+            mt_liquide = 0
+            for row in order_rows:
+                # print(row)
+                row_uf = '{:04d}'.format(row.no_uf_uf)
+                mt_engage += row.mt_engage_lc or 0
+                mt_liquide += row.mt_liquide_lc or 0
+                if row_uf == prev_code_uf:
+                    rows_on_uf += 1
+                    prev_mt_engage_on_uf += row.mt_engage_lc or 0
+                    prev_mt_liquide_on_uf += row.mt_liquide_lc or 0
+            if rows_on_uf:
+                commandes_on_uf_analysis.append(
+                    {
+                        'no_commande': no_commande,
+                        'rows_found': rows_on_uf,
+                        'mt_engage': prev_mt_engage_on_uf,
+                        'mt_liquide': prev_mt_liquide_on_uf,
+                    }
+                )
+            commandes_analysis.append(
+                {
+                    'no_commande': no_commande,
+                    'rows_found': len(order_rows),
+                    'mt_engage': mt_engage,
+                    'mt_liquide': mt_liquide,
+                }
+            )
+            prev_mt_engage += mt_engage
+            prev_mt_liquide += mt_liquide
+        analysis['commandes'] = commandes_analysis
+        analysis['commandes_sur_uf'] = commandes_on_uf_analysis
+        analysis['mt_engage'] = prev_mt_engage
+        analysis['mt_liquide'] = prev_mt_liquide
+
+        try:
+            eqpts = []
+            for no_commande in no_commandes:
+                eqpts += list(BEq1996.objects.using('gmao').filter(n_order__contains=no_commande))
+            # print(eqpts)
+            analysis_eqpts = []
+            analysis_eqpts_uf = []
+            eqpts_montant = 0
+            eqpts_montant_uf = 0
+            for eqpt in eqpts:
+                analysis_eqpts.append({
+                    'code': eqpt.n_imma,
+                    'code_uf': eqpt.n_uf,
+                    'mise_en_service': eqpt.mes1,
+                    'prix': float(eqpt.prix),
+                })
+                eqpts_montant += float(eqpt.prix)
+                if eqpt.n_uf == prev_code_uf:
+                    analysis_eqpts_uf.append({
+                        'code': eqpt.n_imma,
+                        'mise_en_service': eqpt.mes1,
+                        'prix': float(eqpt.prix),
+                    })
+                    eqpts_montant_uf += float(eqpt.prix)
+            analysis['equipements'] = analysis_eqpts
+            analysis['equipements_uf'] = analysis_eqpts_uf
+            analysis['equipements_amount'] = eqpts_montant
+            analysis['equipements_uf_amount'] = eqpts_montant_uf
+        except DatabaseError:
+            pass
+
+        # print(analysis)
+        self.add(data=analysis)
 
 
 class DemAnalyser(RecordAnomalyChecker):
@@ -769,7 +891,7 @@ class DemAnalyser(RecordAnomalyChecker):
     def check(self, verbosity=1):
         # print(f"      DemAnalyse... {self.data[1].code=}")
         for prev in self.data[1].previsionnel_set.all():
-            PrevAnalyser(prev)
+            PrevAnalyser(prev).check(verbosity=verbosity)
         self.add(data={'argl': 'ok'})
 
 
