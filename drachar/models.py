@@ -170,13 +170,74 @@ class Previsionnel(models.Model):
         verbose_name=_("Prise en charge"),
         help_text=_("Date de début du traitement du dossier"),
     )
+
+    # -----------------------------------------------------------------------------------------------------------------------------
+    #
+    # Champs remplis automatiquement (il y a aussi le champs 'interface' plus haut)
+    #
+    # -----------------------------------------------------------------------------------------------------------------------------
+
+    nombre_commandes = models.IntegerField(
+        verbose_name="Nombre de commandes",
+        help_text="Nombre de commandes sur cette ligne de prévisionnel (détecté automatiquement)",
+        default=None,
+        blank=True,
+        null=True,
+    )
+
+    nombre_lignes_commandes = models.IntegerField(
+        verbose_name="Nombre de lignes de commande",
+        help_text="Nombre de lignes de commande sur cette ligne de prévisionnel (détecté automatiquement)",
+        default=None,
+        blank=True,
+        null=True,
+    )
+
+    montant_engage = models.DecimalField(
+        verbose_name="Montant engagé",
+        help_text="Montant total engagé sur cette ligne de prévisionnel (détecté automatiquement)",
+        max_digits=11,
+        decimal_places=2,
+        default=None,
+        blank=True,
+        null=True,
+    )
+
+    montant_liquide = models.DecimalField(
+        verbose_name="Montant liquidé",
+        help_text="Montant total liquidé sur cette ligne de prévisionnel (détecté automatiquement)",
+        max_digits=11,
+        decimal_places=2,
+        default=None,
+        blank=True,
+        null=True,
+    )
+
+    nombre_equipements = models.IntegerField(
+        verbose_name="Nombre équipements",
+        help_text="Montant total des équipements inventoriés sur cette ligne de prévisionnel (détecté automatiquement)",
+        default=None,
+        blank=True,
+        null=True,
+    )
+
+    valeur_inventaire = models.DecimalField(
+        verbose_name="Montant inventaire",
+        help_text="Montant total des équipements inventoriés sur cette ligne de prévisionnel (détecté automatiquement)",
+        max_digits=11,
+        decimal_places=2,
+        default=None,
+        blank=True,
+        null=True,
+    )
+
     interface = models.TextField(
         verbose_name=_("Interface avec les autres logiciels (DRA94, magh2, Asset+, ...)"),
         blank=True,
         null=True,
     )
     analyse = models.JSONField(
-        verbose_name=_("Analyse technique du prévisionnel"),
+        verbose_name=_("Analyse technique du prévisionnel (détecté automatiquement)"),
         default=None,
         blank=True,
         null=True,
@@ -241,6 +302,7 @@ class Previsionnel(models.Model):
         verbose_name=_("Estimation MES"),
         help_text=_("Date estimative de mise en service"),
     )
+
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name=_("date de création"))
     date_modification = models.DateTimeField(auto_now=True, verbose_name=_("date de modification"))
 

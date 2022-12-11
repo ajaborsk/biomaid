@@ -373,6 +373,39 @@ class PrevisionnelSmartView(SmartView):
             'interface': {
                 'format': 'html',
             },
+            'montant_engage': {
+                'title': _("Montant engagé"),
+                'format': 'money',
+                'decimal_symbol': ",",
+                'thousands_separator': " ",
+                'currency_symbol': " €",
+                'symbol_is_after': True,
+                'precision': 0,
+                'max_width': 95,
+                'footer_data': "sum",
+            },
+            'montant_liquide': {
+                'title': _("Montant liquidé"),
+                'format': 'money',
+                'decimal_symbol': ",",
+                'thousands_separator': " ",
+                'currency_symbol': " €",
+                'symbol_is_after': True,
+                'precision': 0,
+                'max_width': 95,
+                'footer_data': "sum",
+            },
+            'valeur_inventaire': {
+                'title': _("Valeur dans l'inventaire"),
+                'format': 'money',
+                'decimal_symbol': ",",
+                'thousands_separator': " ",
+                'currency_symbol': " €",
+                'symbol_is_after': True,
+                'precision': 0,
+                'max_width': 95,
+                'footer_data': "sum",
+            },
         }
         user_filters = {
             'expert': {
@@ -624,7 +657,24 @@ class PrevisionnelSmartView(SmartView):
 
 class PrevisionnelSmartView21(PrevisionnelSmartView):
     class Meta:
-        columns__add = ('age_previsionnel',)
+        columns__add = (
+            'age_previsionnel',
+            'nombre_commandes',
+            'nombre_lignes_commandes',
+            'montant_engage',
+            'montant_liquide',
+            'nombre_equipements',
+            'valeur_inventaire',
+        )
+        selectable_columns__add = (
+            'age_previsionnel',
+            'nombre_commandes',
+            'nombre_lignes_commandes',
+            'montant_engage',
+            'montant_liquide',
+            'nombre_equipements',
+            'valeur_inventaire',
+        )
 
         user_filters__update = {
             'domaine': {

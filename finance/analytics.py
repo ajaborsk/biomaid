@@ -16,6 +16,8 @@ from assetplusconnect.models import BEq1996, BFt1996, EnCours, Docliste
 from django.apps import apps
 from django.db import DatabaseError
 from django.db.models import Case, Count, Sum, Value, When, F
+from django.template.engine import Engine
+from django.template import Context
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
@@ -754,6 +756,7 @@ class PrevAnalyser(RecordAnomalyChecker):
     code = '123'
     level = 0
     message = ""
+    template = Engine.get_default().get_template('finance/interface.html')
 
     def __init__(self, data):
         super().__init__(data, storage=JsonAnomaliesStorage(data, 'analyse'))
@@ -778,22 +781,25 @@ class PrevAnalyser(RecordAnomalyChecker):
         code_prog_dra94 = self.data.programme.anteriorite
         if code_prog_dra94:
             dossiers_dra94 = dra94_dossier_model.objects.filter(programme=code_prog_dra94, ligne=no_ligne_dra94)
+            analysis['dra'] = []
             for dossier_dra94 in dossiers_dra94:
-                analysis['dra'] = {
-                    'code': 'DRA' + str(dossier_dra94.numero)[:4] + '-' + str(dossier_dra94.numero)[4:],
-                    'date': str(dossier_dra94.date_dossier),
-                    'montant': float(dossier_dra94.montant),
-                    'code_fournisseur': int(dossier_dra94.code_fournisseur),
-                    'fournisseur': str(dossier_dra94.fournisseur),
-                    'no_commande': str(dossier_dra94.no_commande),
-                    'date_commande': str(dossier_dra94.date_commande),
-                }
+                analysis['dra'].append(
+                    {
+                        'code': 'DRA' + str(dossier_dra94.numero)[:4] + '-' + str(dossier_dra94.numero)[4:],
+                        'date': str(dossier_dra94.date_dossier),
+                        'montant': float(dossier_dra94.montant),
+                        'code_fournisseur': int(dossier_dra94.code_fournisseur),
+                        'fournisseur': str(dossier_dra94.fournisseur),
+                        'no_commande': str(dossier_dra94.no_commande),
+                        'date_commande': str(dossier_dra94.date_commande),
+                    }
+                )
                 if dossier_dra94.no_commande:
                     no_commandes.add(str(dossier_dra94.no_commande))
                 lignes_dra94 = dra94_ligne_model.objects.filter(dossier=dossier_dra94)
-                analysis['dra']['lignes'] = []
+                analysis['dra'][-1]['lignes'] = []
                 for ligne in lignes_dra94:
-                    analysis['dra']['lignes'].append(
+                    analysis['dra'][-1]['lignes'].append(
                         {
                             'code_uf': str(ligne.code_uf),
                             'qte': int(ligne.quantite),
@@ -855,24 +861,53 @@ class PrevAnalyser(RecordAnomalyChecker):
             eqpts_montant = 0
             eqpts_montant_uf = 0
             for eqpt in eqpts:
-                analysis_eqpts.append({
-                    'code': eqpt.n_imma,
-                    'code_uf': eqpt.n_uf,
-                    'mise_en_service': eqpt.mes1,
-                    'prix': float(eqpt.prix),
-                })
-                eqpts_montant += float(eqpt.prix)
-                if eqpt.n_uf == prev_code_uf:
-                    analysis_eqpts_uf.append({
+                analysis_eqpts.append(
+                    {
                         'code': eqpt.n_imma,
+                        'code_uf': eqpt.n_uf,
                         'mise_en_service': eqpt.mes1,
                         'prix': float(eqpt.prix),
-                    })
+                    }
+                )
+                eqpts_montant += float(eqpt.prix)
+                if eqpt.n_uf == prev_code_uf:
+                    analysis_eqpts_uf.append(
+                        {
+                            'code': eqpt.n_imma,
+                            'mise_en_service': eqpt.mes1,
+                            'prix': float(eqpt.prix),
+                        }
+                    )
                     eqpts_montant_uf += float(eqpt.prix)
             analysis['equipements'] = analysis_eqpts
             analysis['equipements_uf'] = analysis_eqpts_uf
             analysis['equipements_amount'] = eqpts_montant
             analysis['equipements_uf_amount'] = eqpts_montant_uf
+
+            # A small hack here, since we don't have (yet) a API to sava data in multiple fields
+            self.data.interface = 'Montant équipements : {equipements_amount:8.2f} €\nMontant engagé : {mt_engage:8.2f} €'.format(
+                **analysis
+            )
+            self.data.interface = self.template.render(Context(analysis))
+            self.data.nombre_commandes = len(analysis['commandes'])
+            self.data.nombre_lignes_commandes = sum(cmd['rows_found'] for cmd in analysis['commandes'])
+            self.data.nombre_equipements = len(analysis['equipements'])
+            self.data.valeur_inventaire = analysis['equipements_amount']
+            self.data.montant_engage = analysis['mt_engage']
+            self.data.montant_liquide = analysis['mt_liquide']
+
+            self.data.save(
+                update_fields=[
+                    'interface',
+                    'nombre_commandes',
+                    'nombre_lignes_commandes',
+                    'valeur_inventaire',
+                    'montant_engage',
+                    'montant_liquide',
+                    'nombre_equipements',
+                    'date_modification',
+                ]
+            )
         except DatabaseError:
             pass
 

@@ -1,0 +1,13 @@
+{% spaceless %}
+<div>
+{% if dra %}DRAs :
+<ul>{% for the_dra in dra %}<li>{{ the_dra.code }} du {{ the_dra.date|truncatechars:11 }} : {{ the_dra.montant|floatformat:"2g" }} €</li>{% endfor %}</ul>
+{% endif %}
+{% if commandes %}Commandes :
+<ul>{% for commande in commandes %}<li><a href="../../finance/order/?order_id={{ commande.no_commande }}">{{ commande.no_commande }}</a> : {{ commande.rows_found }} lignes, {{ commande.mt_engage|floatformat:"2g" }} € engagé, {{ commande.mt_liquide|floatformat:"2g" }} € liquidé,</li>{% endfor %}</ul>
+{% endif %}
+{% if equipements %}Dans l'inventaire :
+<ul>{% for eqpt in equipements %}<li>{{ eqpt.code }} : MES {{ eqpt.mise_en_service|truncatechars:11 }}, Prix = {{ eqpt.prix|floatformat:"2g" }} €,</li>{% endfor %}</ul>
+{% endif %}
+</div>
+{% endspaceless %}
