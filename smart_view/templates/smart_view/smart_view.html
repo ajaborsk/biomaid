@@ -8,7 +8,7 @@
                 <div class="smart-view-filter-bar-label"><p>{{ filter.label }}&nbsp;: </p></div>
                 {% for option in filter.choices %}
                     <div class="smart-view-filter-bar-option" style="{{ option.style }}"><input
-                            data-fieldname="{{ filter.fieldname }}" name="{{ filter_name }}" type="radio"
+                            data-fieldname="{{ filter.fieldname }}" data-filtertype="{{ filter.type }}" name="{{ filter_name }}" type="radio"
                             value="{{ option.value }}" id="{{ filter_name }}_option_{{ forloop.counter }}"
                             {% if forloop.first %} checked{% endif %}><label
                             for="{{ filter_name }}_option_{{ forloop.counter }}">{{ option.label }}</label></div>
@@ -40,14 +40,18 @@
                         {% for filter_name, filter in menu_user_filters.items %}
                             <li><label name="{{ filter_name }}">{{ filter.label }}</label>&nbsp;:&nbsp;
                                 {% if filter.type == 'select' %}
-                                    <select name="{{ filter_name }}">{% for choice in filter.choices %}
+                                    <select data-filtertype="{{ filter.type }}" name="{{ filter_name }}">{% for choice in filter.choices %}
                                         <option value="{{ choice.value }}"{% if choice.selected %}
                                                 selected{% endif %}>{{ choice.label }}</option>{% endfor %}
                                     </select>
                                 {% elif filter.type == 'contains' %}
-                                    <input data-fieldname="{{ filter.fieldnames|to_json_attr }}"
+                                    <input data-filtertype="{{ filter.type }}" data-fieldname="{{ filter.fieldnames|to_json_attr }}"
                                            name="{{ filter_name }}"{% if filter.default %}
-                                           value="{{ filter.default }}"{% endif %}>{% else %}Unhandled
+                                           value="{{ filter.default }}"{% endif %}>
+                                {% elif filter.type == 'like' %}
+                                           <input data-filtertype="{{ filter.type }}" data-fieldname="{{ filter.fieldnames|to_json_attr }}"
+                                                  name="{{ filter_name }}"{% if filter.default %}
+                                                  value="{{ filter.default }}"{% endif %}>{% else %}Unhandled
                                     {{ filter.label }}{% endif %}</li>
                         {% endfor %}</ul>
                 </li>{% endif %}{% if menu_user_filters %}</ul>

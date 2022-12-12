@@ -15,9 +15,8 @@
 /*
   colors:
 
-  Blue (from the logo) : #106cc2
-  Dark blue (from the logo) : #106cc2
-  Light blue (from the logo) : #779ec2
+  Blue (from the logo) : #151455
+  Dark blue (from the logo) : #151455
   Cyan (from the logo) : #09aea7
   Dark Cyan (from the logo) : #055d59
   Light Cyan (from the logo) : #91aead
@@ -39,7 +38,7 @@ footer a {
 }
 
 .topbar {
-    background: #106cc2;
+    background: #151455;
 }
 
 .topbar i.fa {
@@ -47,15 +46,15 @@ footer a {
 }
 
 .topbar ul.dropdown {
-    background: #106cc2;
+    background: #151455;
 }
 
 .topbar ul.dropdown li {
-    background: #106cc2;
+    background: #151455;
 }
 
 .topbar ul.dropdown li:hover {
-    background: #779ec2;
+    background: #6658a5;
 }
 
 .topbar .main-title-tile {
@@ -65,7 +64,7 @@ footer a {
 }
 
 .links-tile a:hover {
-	background: #779ec2;
+	background: #6658a5;
 }
 
 .topbar2 {
@@ -74,19 +73,23 @@ footer a {
 }
 
 .menubar {
-    background: #106cc2;
+    background: #151455;
 }
 
 .menubar ul.dropdown {
-    background: #106cc2;
+    background: #151455;
+}
+
+.menubar ul.dropdown ul {
+    background: #151455;
 }
 
 .menubar ul.dropdown li {
-    background: #106cc2;
+    background: #151455;
 }
 
 .menubar ul.dropdown li:hover {
-    background: #779ec2;
+    background: #6658a5;
 }
 
 .menubar i.fa {
@@ -94,7 +97,7 @@ footer a {
 }
 
 footer {
-    background: #106cc2;
+    background: #151455;
 }
 
 .has-badge[data-count]::after {
