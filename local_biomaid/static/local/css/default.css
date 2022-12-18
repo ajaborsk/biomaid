@@ -57,12 +57,6 @@ footer a {
     background: #6658a5;
 }
 
-.topbar .main-title-tile {
-    background-image: url('../Lille_2022_skyline.png');
-    background-position: right 15px top 2px;
-    background-repeat: no-repeat;
-}
-
 .links-tile a:hover {
 	background: #6658a5;
 }

@@ -16,6 +16,7 @@
 #
 import configparser
 import os
+import logging
 
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
@@ -26,7 +27,8 @@ from settings import INSTALLED_APPS
 import dem
 import common
 
-print('Configuration AFIB...')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%dT%H:%M:%S')
+logging.getLogger(__name__).info("AFIB demo config")
 
 ADMINS = (
     ('NORD Brice', 'nord.brice@chu-amiens.fr'),

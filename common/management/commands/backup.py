@@ -15,11 +15,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from django.core.management.base import BaseCommand
+from common.command import BiomAidCommand
 from django.utils.translation import gettext as _
 
 
-class Command(BaseCommand):
+class Command(BiomAidCommand):
     help = _("Effectue un backup des données avec les options permettant une bonne récupération")
 
     def add_arguments(self, parser):
