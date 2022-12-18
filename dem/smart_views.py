@@ -3360,10 +3360,10 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
             'arbitrage',
             'arbitrage_commission',
             'commentaire_provisoire_commission',
-            'commentaire_definitif_commission',
+            # 'commentaire_definitif_commission',
             'quantite_validee',
             'enveloppe_allouee',
-            'gel',
+            # 'gel',
         )
         selectable_columns__remove = (
             'expert_metier',
@@ -3371,21 +3371,21 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
             'domaine',
             'commentaire_biomed',
             'avis_biomed',
-            'montant_arbitrage',
-            'montant_unitaire_expert_metier',
+            # 'montant_arbitrage',
+            # 'montant_unitaire_expert_metier',
             'prix_unitaire_conditional',
             'quantite_validee_conditional',  # hidden
-            'montant_qte_validee',
+            # 'montant_qte_validee',
             'montant_valide_conditional',
             'commentaire_provisoire_commission',
-            'commentaire_definitif_commission',
-            'montant_final',
-            'montant_consomme',
+            # 'commentaire_definitif_commission',
+            # 'montant_final',
+            # 'montant_consomme',
             'arbitrage',
-            'arbitrage_commission',
-            'quantite_validee',
-            'enveloppe_allouee',
-            'gel',
+            # 'arbitrage_commission',
+            # 'quantite_validee',
+            # 'enveloppe_allouee',
+            # 'gel',
         )
 
         def base_filter(self, view_params: dict):  # NOQA
@@ -3815,7 +3815,7 @@ class DemandesExpertiseSmartView(DemandeEqptSmartView):
             'quantite_validee_conditional',
             'quantite_validee',
             # 'montant_valide_conditional',
-            'montant_valide',
+            # 'montant_valide',
             'arbitrage',
         )
         selectable_columns__remove = (
@@ -3823,10 +3823,10 @@ class DemandesExpertiseSmartView(DemandeEqptSmartView):
             'commentaire_provisoire_commission',
             'commentaire_definitif_commission',
             'quantite_validee_conditional',
-            'quantite_validee',
+            # 'quantite_validee',
             'montant_valide_conditional',
-            'montant_valide',
-            'montant_unitaire_expert_metier',
+            # 'montant_valide',
+            # 'montant_unitaire_expert_metier',
             'arbitrage',
             'gel',
         )
