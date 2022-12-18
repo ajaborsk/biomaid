@@ -257,19 +257,22 @@ class DebugOnlyFilter(logging.Filter):
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'filters': {
         'debug_only_filter': {
             '()': DebugOnlyFilter,
         },
     },
     'formatters': {
-        'default': {'format': '[%(asctime)s]: %(levelname)s "%(message)s"'},
+        'default': {
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S',
+        },
         'debug_format': {'format': '[%(asctime)s]: %(levelname)s in %(name)s at line %(lineno)s: "%(message)s"'},
     },
     'handlers': {
         'console': {
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'class': 'logging.StreamHandler',
             'formatter': 'default',
         },
@@ -291,6 +294,10 @@ LOGGING = {
         'level': 'DEBUG',
     },
     'loggers': {
+        'django': {
+            'handlers': ['console', 'debug_console'],
+            'propagate': False,
+        },
         'common': {
             'handlers': ['console', 'debug_console'],
             'propagate': False,
