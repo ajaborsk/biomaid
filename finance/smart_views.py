@@ -19,22 +19,44 @@ from django.db.models import F, Value
 from django.db.models.functions import Concat
 from django.utils.translation import gettext as _
 
-from smart_view.smart_view import SmartView
+from dem.smart_views import DemandeSmartView
 from smart_view.smart_fields import ComputedSmartField
 
 # from common.models import Programme
 from dem.models import Demande
 
 
-class DemAssessmentSmartView(SmartView):
+class DemAssessmentSmartView(DemandeSmartView):
     class Meta:
         model = Demande
+        fields__add = [
+            'documents_sf',
+            'montant_qte_validee',
+            'enveloppe_finale',
+            'montant_arbitrage',
+        ]
         columns = (
             'code',
             'programme',
             'calendrier',
             'uf',
             'libelle',
+            'montant_arbitrage',
+            'arbitrage_commission',
+            'enveloppe_finale',
+            'documents_sf',
+            'prev_commande',
+            'prev_commentaire',
+        )
+        selectable_columns = (
+            'programme',
+            'calendrier',
+            'uf',
+            'libelle',
+            'montant_arbitrage',
+            'arbitrage_commission',
+            'enveloppe_finale',
+            'documents_sf',
             'prev_commande',
             'prev_commentaire',
         )
@@ -99,6 +121,13 @@ class DemAssessmentSmartView(SmartView):
                 'type': 'select',
                 'label': _('Décision Chef de pôle'),
             },
+        }
+        exports = {
+            'xlsx': {
+                'engine': 'xlsx',
+                'label': 'Microsoft Excel 2003+',
+                'filename': "Bilan demandes.xlsx",
+            }
         }
 
     prev_commande = (

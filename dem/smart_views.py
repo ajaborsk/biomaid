@@ -22,7 +22,6 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db.models import (
-    BooleanField,
     Case,
     CharField,
     DecimalField,
@@ -2648,6 +2647,32 @@ class DemandeSmartView(SmartView):
             ],
         },
     )
+    enveloppe_finale = (
+        ComputedSmartField,
+        {
+            'title': _("Enveloppe"),
+            'help_text': _("Montant de l'enveloppe finale"),
+            "format": "money",
+            "decimal_symbol": ",",
+            "thousands_separator": " ",
+            "currency_symbol": " €",
+            "symbol_is_after": True,
+            "precision": 0,
+            "max_width": 120,
+            "footer_data": "sum",
+            'data': Case(
+                When(
+                    arbitrage_commission__valeur=True,
+                    then=Coalesce(F('enveloppe_allouee'), F('montant_qte_validee'), Value(Decimal(0.0))),
+                ),
+            ),
+            'depends': [
+                'arbitrage_commission',
+                'enveloppe_allouee',
+                'montant_qte_validee',
+            ],
+        },
+    )
     montant_consomme = (
         ComputedSmartField,
         {
@@ -2681,16 +2706,16 @@ class DemandeSmartView(SmartView):
     )
     # Ce drapeau peut désormais être remplacé par artitrage__valeur, qui donne le même résultat, mais sans dépendre de
     # l'interprétation d'un code...
-    valide_flag = (
-        ComputedSmartField,
-        {
-            'hidden': True,
-            'data': ExpressionWrapper(
-                Q(arbitrage_commission__code=1) | Q(arbitrage_commission__code=2),
-                output_field=BooleanField(),
-            ),
-        },
-    )
+    # valide_flag = (
+    #     ComputedSmartField,
+    #     {
+    #         'hidden': True,
+    #         'data': ExpressionWrapper(
+    #             Q(arbitrage_commission__code=1) | Q(arbitrage_commission__code=2),
+    #             output_field=BooleanField(),
+    #         ),
+    #     },
+    # )
     arbitrage = (
         ComputedSmartField,
         {
