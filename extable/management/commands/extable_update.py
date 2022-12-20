@@ -35,7 +35,7 @@ class Command(BaseCommand):
             metavar='table',
             type=lambda a: a.lower(),
             nargs='*',
-            help='Tables list (if none provided, all tables will be processed)',
+            help="Tables list, lower case, without 'ext_': 'tablename' (if none provided, all tables will be processed)",
         )
         parser.add_argument(
             '-f',

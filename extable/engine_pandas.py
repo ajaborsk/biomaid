@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Type, Union
+from warnings import warn
 
 import numpy as np
 import pandas as pd
@@ -76,16 +77,27 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
         for src_index, src_record in df.iterrows():
             # Columns from file
             record_dict = {
-                column: src_record[col_def['src_column']] if not src_record[col_def['src_column']] is pd.NA else None
+                column: (src_record[col_def['src_column']] if not src_record[col_def['src_column']] is pd.NA else None)
                 for column, col_def in self.schema['columns'].items()
                 if 'src_column' in col_def and col_def['src_column'] in df.columns
             }
 
-            computed = {
-                column: col_def['expr'].python_eval(expr_vars=record_dict)
-                for column, col_def in self.schema['columns'].items()
-                if 'expr' in col_def
-            }
+            computed = {}
+            for column_name, column_def in self.schema['columns'].items():
+                try:
+                    if 'expr' in column_def:
+                        computed[column_name] = column_def['expr'].python_eval(expr_vars=record_dict)
+                except NameError as exc:
+                    warn(
+                        "NameError '{}' while evaluating '{}', namespace:{}".format(
+                            str(exc), str(column_def['expr']), repr(record_dict)
+                        )
+                    )
+            # computed = {
+            #     column: col_def['expr'].python_eval(expr_vars=record_dict)
+            #     for column, col_def in self.schema['columns'].items()
+            #     if 'expr' in col_def
+            # }
             record_dict.update(computed)
 
             for column, col_def in self.schema['columns'].items():
