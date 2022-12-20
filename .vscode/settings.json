@@ -1,5 +1,7 @@
 {
     "python.linting.flake8Enabled": true,
     "python.testing.pytestEnabled": true,
-    "restructuredtext.preview.name": "docutils"
+    "restructuredtext.preview.name": "docutils",
+    "editor.tabCompletion": "on",
+    "diffEditor.codeLens": true
 }
