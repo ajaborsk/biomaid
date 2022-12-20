@@ -30,6 +30,7 @@ class DemAssessmentSmartView(DemandeSmartView):
     class Meta:
         model = Demande
         fields__add = [
+            'argumentaire_detaille',
             'documents_sf',
             'montant_qte_validee',
             'enveloppe_finale',
@@ -40,25 +41,55 @@ class DemAssessmentSmartView(DemandeSmartView):
             'programme',
             'calendrier',
             'uf',
+            'nature',
+            'cause',
+            'quantite',
             'libelle',
+            'argumentaire_detaille',
+            'domaine',
+            'expert_metier',
             'montant_arbitrage',
             'arbitrage_commission',
             'enveloppe_finale',
             'documents_sf',
+            'prev_besoin',
+            'prev_achat',
+            'prev_devis',
             'prev_commande',
+            'prev_mes',
             'prev_commentaire',
+            'prev_solde',
+            'montant_engage',
+            'montant_liquide',
+            'valeur_inventaire',
+            'prev_interface',
         )
         selectable_columns = (
             'programme',
             'calendrier',
             'uf',
+            'nature',
+            'cause',
+            'quantite',
             'libelle',
+            'argumentaire_detaille',
+            'domaine',
+            'expert_metier',
             'montant_arbitrage',
             'arbitrage_commission',
             'enveloppe_finale',
             'documents_sf',
+            'prev_besoin',
+            'prev_achat',
+            'prev_devis',
             'prev_commande',
+            'prev_mes',
             'prev_commentaire',
+            'prev_solde',
+            'montant_engage',
+            'montant_liquide',
+            'valeur_inventaire',
+            'prev_interface',
         )
         user_filters = {
             'campagne': {
@@ -67,6 +98,14 @@ class DemAssessmentSmartView(DemandeSmartView):
                     'fieldname': 'calendrier',
                     'label': F('calendrier__nom'),
                     'sort': F('calendrier__code'),
+                },
+            },
+            'programme': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'programme',
+                    'label': Concat(F('programme__code'), Value(' : '), F('programme__nom')),
+                    'sort': F('programme__code'),
                 },
             },
             'pole': {
@@ -88,6 +127,16 @@ class DemAssessmentSmartView(DemandeSmartView):
             },
             'priorite': {'type': 'select'},
             'cause': {'type': 'select'},
+            'nature': {'type': 'select'},
+            'domaine': {'type': 'select'},
+            'expert_metier': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'expert_metier',
+                    'label': Concat(F('expert_metier__first_name'), Value(' '), F('expert_metier__last_name')),
+                    'sort': F('expert_metier__last_name'),
+                },
+            },
             'demande_contains': {
                 'type': 'contains',
                 'fieldnames': [
@@ -121,6 +170,8 @@ class DemAssessmentSmartView(DemandeSmartView):
                 'type': 'select',
                 'label': _('Décision Chef de pôle'),
             },
+            'arbitrage_commission': {'type': 'select'},
+            'prev_solde': {'type': 'select'},
         }
         exports = {
             'xlsx': {
@@ -130,11 +181,52 @@ class DemAssessmentSmartView(DemandeSmartView):
             }
         }
 
+    prev_solde = (
+        ComputedSmartField,
+        {
+            'title': 'Soldé',
+            'data': F('previsionnel__solder_ligne'),
+            'format': 'boolean',
+        },
+    )
+    prev_besoin = (
+        ComputedSmartField,
+        {
+            'title': 'Suivi besoin',
+            'data': F('previsionnel__suivi_besoin'),
+            'formatter': "'suivi'",
+        },
+    )
+    prev_achat = (
+        ComputedSmartField,
+        {
+            'title': 'Suivi marché',
+            'data': F('previsionnel__suivi_achat'),
+            'formatter': "'suivi'",
+        },
+    )
+    prev_devis = (
+        ComputedSmartField,
+        {
+            'title': 'Suivi devis',
+            'data': F('previsionnel__suivi_offre'),
+            'formatter': "'suivi'",
+        },
+    )
     prev_commande = (
         ComputedSmartField,
         {
-            'title': 'Commande',
+            'title': 'Suivi Commande',
             'data': F('previsionnel__suivi_appro'),
+            'formatter': "'suivi'",
+        },
+    )
+    prev_mes = (
+        ComputedSmartField,
+        {
+            'title': 'Suivi mise en service',
+            'data': F('previsionnel__suivi_mes'),
+            'formatter': "'suivi'",
         },
     )
     prev_commentaire = (
@@ -142,5 +234,58 @@ class DemAssessmentSmartView(DemandeSmartView):
         {
             'title': 'Commentaire exécution',
             'data': F('previsionnel__commentaire_public'),
+        },
+    )
+    prev_interface = (
+        ComputedSmartField,
+        {
+            'title': 'Interfaces',
+            'data': F('previsionnel__interface'),
+            'format': 'html',
+        },
+    )
+    montant_engage = (
+        ComputedSmartField,
+        {
+            'data': F('previsionnel__montant_engage'),
+            'title': _("Montant engagé"),
+            'format': 'money',
+            'decimal_symbol': ",",
+            'thousands_separator': " ",
+            'currency_symbol': " €",
+            'symbol_is_after': True,
+            'precision': 0,
+            'max_width': 95,
+            'footer_data': "sum",
+        },
+    )
+    montant_liquide = (
+        ComputedSmartField,
+        {
+            'data': F('previsionnel__montant_liquide'),
+            'title': _("Montant liquidé"),
+            'format': 'money',
+            'decimal_symbol': ",",
+            'thousands_separator': " ",
+            'currency_symbol': " €",
+            'symbol_is_after': True,
+            'precision': 0,
+            'max_width': 95,
+            'footer_data': "sum",
+        },
+    )
+    valeur_inventaire = (
+        ComputedSmartField,
+        {
+            'data': F('previsionnel__valeur_inventaire'),
+            'title': _("Valeur dans l'inventaire"),
+            'format': 'money',
+            'decimal_symbol': ",",
+            'thousands_separator': " ",
+            'currency_symbol': " €",
+            'symbol_is_after': True,
+            'precision': 0,
+            'max_width': 95,
+            'footer_data': "sum",
         },
     )
