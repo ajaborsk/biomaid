@@ -18,7 +18,7 @@ from argparse import ArgumentParser
 from typing import Any
 
 from django.apps import apps
-from django.core.management.base import BaseCommand
+from common.command import BiomAidCommand
 from django.utils.translation import gettext as _
 
 from common import config
@@ -28,7 +28,7 @@ def column_value(columns_dict: dict, name: str) -> Any:
     return columns_dict[name]
 
 
-class Command(BaseCommand):
+class Command(BiomAidCommand):
     def add_arguments(self, parser: ArgumentParser):
         parser.add_argument(
             'tables',
@@ -52,7 +52,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         def msg_callback(message, ending='\n'):
-            self.stdout.write(message, ending=ending)
+            if ending == '\n':
+                self.log(self.INFO, message)
+            else:
+                self.stdout.write(message, ending=ending)
 
         tables_cfg = config.get('extable', {}).get('tables', [])
         if options['tables']:
@@ -60,40 +63,6 @@ class Command(BaseCommand):
         for table_def in tables_cfg:
             schema = apps.get_app_config('extable').schemas[table_def['name']]
             model = schema['model']
-            self.stdout.write(_("Updating external table: {}...").format(str(model)))
+            self.log(self.INFO, _("Updating external table: {}...").format(str(model)))
             engine = schema['engine']
             engine.update(msg_callback, options)
-
-            # if engine is not None:
-            #     ...
-            # else:
-            #     self.stdout.write(self.style.ERROR(_("No update engine defined.").format(engine)))
-            #
-            # # model = getattr(extable.models, EXTABLE_PREFIX + table_def['name'])
-            # table = Table.objects.get(table_name=model._meta.db_table)
-            # filename: str = table_def.get('filename', '__DATABASE__')
-            # if 'path' in table_def and config.get('paths') and config.get('paths').get(table_def['path']):
-            #     filename = config.get('paths').get(table_def['path'], '') + filename
-            # try:
-            #     mtime = datetime.datetime.fromtimestamp(os.stat(filename).st_mtime, tz=utc)
-            #     if not table.update_ts or table.update_ts < mtime or options['force']:
-            #
-            #         if engine.key is None or options['clear']:
-            #             # Empty the model/table
-            #             self.stdout.write(_("  Emptying table..."))
-            #             model.objects.all().delete()
-            #         else:
-            #             self.stdout.write(_("  Keeping table records and updating using key {}...").format(repr(engine.key)))
-            #
-            #         self.stdout.write(_("  Reading file: '{}'...").format(filename))
-            #         n_records = engine.read_into_model(filename, model, self.stdout)
-            #
-            #         table.update_ts = mtime
-            #         table.save()
-            #         self.stdout.write(_("  {} records read and stored.").format(n_records))
-            #     else:
-            #         self.stdout.write(_("  File if older than last table update timestamp ; no update."))
-            # except FileNotFoundError:
-            #     self.stdout.write(self.style.ERROR(_("  File '{}' not found. Aborting update from this file.").format(filename)))
-            #     # generate a alert towards admin
-            #     ...
