@@ -15,7 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from django.apps import apps
-from django.db.models import CharField, ExpressionWrapper, F, OuterRef, TextField, Value
+from django.db.models import CharField, ExpressionWrapper, F, OuterRef, TextField, Value, Count, Subquery, Sum
 from django.db.models.functions import Coalesce, Concat
 from django.utils.translation import gettext as _
 
@@ -365,6 +365,8 @@ class ExceptionMarcheSmartView(SmartView):
             'date_debut',
             'date_fin',
             'no_marche',
+            'used_count',
+            'used_amount',
             'comments_sf',
             'tools',
         )
@@ -396,6 +398,75 @@ class ExceptionMarcheSmartView(SmartView):
                 'filename': 'Exceptions_marché.xlsx',
             }
         }
+
+    def used_count_data(view_data):
+        try:
+            orders_model = apps.get_model('extable.extcommande')
+
+            return Subquery(
+                orders_model.objects.filter(
+                    fournisseur__no_fournisseur_fr=OuterRef('code_fournisseur'),
+                    no_marche_ma=0,
+                    objet_depense_ec__contains=OuterRef('code_hm'),
+                    date_passation_ec__gt=OuterRef('date_debut'),
+                )
+                .order_by()
+                .values('fournisseur')
+                .annotate(cnt=Count('fournisseur'))
+                .values('cnt')
+            )
+
+            return Value(15.33)
+        except LookupError:
+            return Value('Erreur tables commandes')
+
+    used_count = (
+        ComputedSmartField,
+        {
+            'title': _("Lignes"),
+            'help_text': _("Nombre de lignes de commandes qui utilisent ce code"),
+            'data': used_count_data,
+            'footer_data': "sum",
+        },
+    )
+
+    def used_amount_data(view_data):
+        try:
+            orders_model = apps.get_model('extable.extcommande')
+
+            return Subquery(
+                orders_model.objects.filter(
+                    fournisseur__no_fournisseur_fr=OuterRef('code_fournisseur'),
+                    no_marche_ma=0,
+                    objet_depense_ec__contains=OuterRef('code_hm'),
+                    date_passation_ec__gt=OuterRef('date_debut'),
+                )
+                .order_by()
+                .values('fournisseur')
+                .annotate(total=Sum('mt_engage_lc'))
+                .values('total')
+            )
+
+            return Value(15.33)
+        except LookupError:
+            return Value('Erreur tables commandes')
+
+    used_amount = (
+        ComputedSmartField,
+        {
+            'title': _("Montant"),
+            'help_text': _("Montant engagé qui utilise ce code"),
+            'data': used_amount_data,
+            'format': 'money',
+            'decimal_symbol': ",",
+            'thousands_separator': " ",
+            'currency_symbol': " €",
+            'symbol_is_after': True,
+            'precision': 0,
+            'max_width': 95,
+            'footer_data': "sum",
+        },
+    )
 
     # Do not use 'comments' since this is a model fieldname
     comments_sf = (
