@@ -8,6 +8,6 @@ Cela comporte notamment toute la configuration de l'instance et les tâches de m
 
 .. toctree::
     initialize.rst
-    loggin.rst
+    logging.rst
 
 **à compléter...**
