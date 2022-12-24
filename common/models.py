@@ -493,8 +493,8 @@ class Programme(models.Model):
 
 class Fournisseur(models.Model):
     """Table des fournisseurs de base dans BiomAid.
-    Pour les établissements, il sera nécessaire d'avoir une table supplémentaire
-    qui fera un lien entre la codification propre de l'établissement et cette table.
+    Pour les établissements, il est nécessaire d'avoir une table supplémentaire FournisseurEtablissement
+    qui fait le lien entre la codification propre de l'établissement (dans sa GEF) et cette table.
     """
 
     code: models.IntegerField = models.IntegerField(
@@ -506,6 +506,10 @@ class Fournisseur(models.Model):
         null=False,
         blank=False,
     )
+
+    # Il faudra ajouter ici tous les champs qui sont identiques pour un fournisseur quelque soit l'établissement :
+    #   n°SIRET, adresse siège social, etc.
+
     date_creation: models.DateTimeField = models.DateTimeField(auto_now_add=True, verbose_name='date de création')
     cloture: models.DateTimeField = models.DateTimeField(verbose_name='date de fin', null=True, blank=True)
     date_modification: models.DateTimeField = models.DateTimeField(auto_now=True, verbose_name='date de modification')

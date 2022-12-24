@@ -113,3 +113,4 @@ urlpatterns = [
 urlpatterns.extend(get_view_url_patterns(views.ProgrammePage))
 urlpatterns.extend(get_view_url_patterns(views.RoleScopeView))
 urlpatterns.extend(get_view_url_patterns(views.CalendrierView))
+urlpatterns.extend(get_view_url_patterns(views.FournisseurPage))

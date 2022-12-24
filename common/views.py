@@ -78,7 +78,7 @@ from common.models import (
     Type,
     Compte,
 )
-from common.smart_views import MyAlertsSmartView, ProgrammeSmartView, RoleScopeSmartView
+from common.smart_views import MyAlertsSmartView, ProgrammeSmartView, RoleScopeSmartView, FournisseurSmartView
 
 from common.db_utils import MyAlertsWidget, StringAgg
 from smart_view.smart_page import SmartPage
@@ -2148,3 +2148,11 @@ class StructureView(BiomAidViewMixin, TemplateView):
         html_table += '</tr></table>'
         context['structure_table'] = html_table
         return context
+
+
+class FournisseurPage(SmartPage):
+    application = 'common'
+    name = 'fournisseur'
+    permissions = {'ADM'}
+    smart_view_class = FournisseurSmartView
+    title = "Fournisseurs"

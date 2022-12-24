@@ -34,7 +34,7 @@ from django.utils.translation import gettext as _
 from django.apps import apps
 
 from common.db_utils import class_roles_expression, user_choices, user_lookup
-from common.models import Programme, UserUfRole, Alert, Uf
+from common.models import Fournisseur, Programme, UserUfRole, Alert, Uf
 from dem.models import Demande
 from document.views import all_documents_json_partial
 from drachar.models import Previsionnel
@@ -564,3 +564,23 @@ class MyAlertsSmartView(UserAlertsSmartView):
 
         def base_filter(self, view_params: dict):
             return ((), {'destinataire': view_params['user']})
+
+
+class FournisseurSmartView(SmartView):
+    class Meta:
+        model = Fournisseur
+        columns = (
+            'code',
+            'nom',
+        )
+        user_filters = {
+            'contient': {
+                'type': 'contains',
+                'fields': ['code', 'nom'],
+            },
+        }
+        form_layout = """
+        #
+            # Fournisseur
+                <code> <nom>
+        """

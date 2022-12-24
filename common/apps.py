@@ -326,6 +326,10 @@ class CommonConfig(AppConfig):
                     'label': _("Programmes"),
                     'url_name': 'common:programme',
                 },
+                {
+                    'label': _("Fournisseurs"),
+                    'url_name': 'common:fournisseur',
+                },
             ),
         },
         'user-settings-categories': {
