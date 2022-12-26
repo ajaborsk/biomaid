@@ -51,11 +51,13 @@ class Command(BiomAidCommand):
         )
 
     def handle(self, *args, **options):
+        log, progress = self.get_loggers(**options)
+
         def msg_callback(message, ending='\n'):
             if ending == '\n':
-                self.log(self.INFO, message)
+                log(self.INFO, message)
             else:
-                self.stdout.write(message, ending=ending)
+                progress(message)
 
         tables_cfg = config.get('extable', {}).get('tables', [])
         if options['tables']:
@@ -63,6 +65,6 @@ class Command(BiomAidCommand):
         for table_def in tables_cfg:
             schema = apps.get_app_config('extable').schemas[table_def['name']]
             model = schema['model']
-            self.log(self.INFO, _("Updating external table: {}...").format(str(model)))
+            log(self.INFO, _("Updating external table: {}...").format(str(model)))
             engine = schema['engine']
-            engine.update(msg_callback, options)
+            engine.update(log, progress, options)

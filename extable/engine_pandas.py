@@ -1,17 +1,18 @@
 from abc import ABC
 from typing import Type, Union
-from warnings import warn
 
 import numpy as np
 import pandas as pd
-from django.apps import apps
-from django.db import models
-from django.db.models import IntegerField
 from numpy import dtype
 from pandas import DataFrame, Int64Dtype, StringDtype, Series
 from pandas.core.arrays.floating import Float64Dtype
+from django.apps import apps
+from django.db import models
+from django.db.models import IntegerField
+from django.utils.translation import gettext as _
 
 from common import config
+from common.command import BiomAidCommand
 
 
 from extable.engines import FileExtableEngine, ExtableEngine
@@ -57,7 +58,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
             schema[column] = {'type': guessed_type, 'src_column': src_column}
         return schema
 
-    def dataframe_to_model(self, df: DataFrame, model: Type[models.Model], msg_callback=None, **kwargs) -> int:
+    def dataframe_to_model(self, df: DataFrame, model: Type[models.Model], log, progress, **kwargs) -> int:
         n_records = 0
 
         df = DataFrame(df.convert_dtypes())
@@ -88,10 +89,11 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
                     if 'expr' in column_def:
                         computed[column_name] = column_def['expr'].python_eval(expr_vars=record_dict)
                 except NameError as exc:
-                    warn(
-                        "NameError '{}' while evaluating '{}', namespace:{}".format(
+                    log(
+                        BiomAidCommand.WARN,
+                        _("NameError '{}' while evaluating '{}', namespace:{}").format(
                             str(exc), str(column_def['expr']), repr(record_dict)
-                        )
+                        ),
                     )
             # computed = {
             #     column: col_def['expr'].python_eval(expr_vars=record_dict)
@@ -108,10 +110,11 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
                     if foreign_object_qs.count() == 1:
                         foreign_object = foreign_object_qs[0]
                     else:
-                        msg_callback(
+                        log(
+                            BiomAidCommand.FINE,
                             "Key not found for column {}: {} (type {}, count:{})".format(
                                 column, repr(record_dict[column]), type(record_dict[column]), foreign_object_qs.count()
-                            )
+                            ),
                         )
                         foreign_object = None
                     record_dict[column] = foreign_object
@@ -134,7 +137,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
             # Save record to the database
             record.save()
             n_records += 1
-            if n_records % 100 == 0 and msg_callback is not None:
-                msg_callback("  records written: {}".format(n_records), ending='\r')
+            if n_records % 100 == 0:
+                progress(n_records, len(df))
 
         return n_records

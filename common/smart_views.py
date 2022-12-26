@@ -579,6 +579,7 @@ class FournisseurSmartView(SmartView):
                 'fields': ['code', 'nom'],
             },
         }
+        menu_left = ({'label': 'Ajouter un fournisseur', 'url_name': 'common:fournisseur-create'},)
         form_layout = """
         #
             # Fournisseur

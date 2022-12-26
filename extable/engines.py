@@ -38,6 +38,7 @@ from django.db.models import (
 )
 from django.db.models.fields import DateTimeField
 from django.utils.translation import gettext as _
+from common.command import BiomAidCommand
 from pytz import utc
 
 from common import config
@@ -222,10 +223,10 @@ class ExtableEngine(ABC):
         self.key = schema['parser_opts'].get('key')
         self.preprocess = schema['parser_opts'].get('preprocess')
 
-    def read_into_model(self, filename: str, model: Type[models.Model], stdout=None) -> int:
+    def read_into_model(self, filename: str, model: Type[models.Model], log, progress) -> int:
         raise NotImplementedError("Method read_into_model() must be overloaded.")
 
-    def update(self, msg_callback=None, options={}):
+    def update(self, log=None, progress=None, options={}):
         raise NotImplementedError("Method update() must be overloaded.")
 
 
@@ -234,7 +235,7 @@ class FileExtableEngine(ExtableEngine, ABC):
     def filename_match(filename: str) -> bool:  # NOQA: U101
         raise NotImplementedError("Static method filename_match() must be overloaded.")
 
-    def update(self, msg_callback=None, options={}):
+    def update(self, log=None, progress=None, options={}):
         from extable.models import Table  # noqa
 
         # pprint(self.schema)
@@ -270,8 +271,7 @@ class FileExtableEngine(ExtableEngine, ABC):
                     )
                 ]
             else:
-                if msg_callback is not None:
-                    msg_callback(_("File '{}' does not exists. Skipping update.").format(root + filename))
+                log(BiomAidCommand.WARNING, _("  File '{}' does not exists. Skipping update.").format(root + filename))
                 filenames = []
         # print(filenames)
         for filename in filenames:
@@ -280,22 +280,17 @@ class FileExtableEngine(ExtableEngine, ABC):
                 # print('====>', filename)
                 if self.key is None or options['clear']:
                     # Empty the model/table
-                    if msg_callback is not None:
-                        msg_callback(_("  Emptying table..."))
+                    log(BiomAidCommand.FINE, _("  Emptying table..."))
                     model.objects.all().delete()
                 else:
-                    if msg_callback is not None:
-                        msg_callback(_("  Keeping table records and updating using key {}...").format(repr(self.key)))
-                if msg_callback is not None:
-                    msg_callback(_("  Reading file: '{}'...").format(filename[0]))
-                n_records = self.read_into_model(filename[0], model, msg_callback)
+                    log(BiomAidCommand.FINE, _("  Keeping table records and updating using key {}...").format(repr(self.key)))
+                log(BiomAidCommand.FINE, _("  Reading file: '{}'...").format(filename[0]))
+                n_records = self.read_into_model(filename[0], model, log, progress)
                 table.update_ts = filename[1]
                 table.save()
-                if msg_callback is not None:
-                    msg_callback(_("  {} records read and stored.").format(n_records))
+                log(BiomAidCommand.INFO, _("  {} records read and stored.").format(n_records))
             else:
-                if msg_callback is not None:
-                    msg_callback(_("File '{}' is older the extable data. Skipping.").format(filename[0]))
+                log(BiomAidCommand.INFO, _("  File '{}' is older the extable data. Skipping.").format(filename[0]))
 
         # raise NotImplementedError("Method update() must be overloaded.")
 

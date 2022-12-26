@@ -2,6 +2,7 @@ import os
 from io import StringIO
 from logging import warning
 from typing import Type
+from common.command import BiomAidCommand
 
 import pandas as pd
 from django.db import models
@@ -47,7 +48,7 @@ class CsvEngine(DataFrameExtableEngine):
             warning(_("File not found: '{}'. No schema guessing.").format(filename))
         return {}
 
-    def read_into_model(self, filename: str, model: Type[models.Model], msg_callback=None, **kwargs) -> int:
+    def read_into_model(self, filename: str, model: Type[models.Model], log, progress, **kwargs) -> int:
         separator = self.schema['parser_opts'].get('separator', ',')
 
         # A dict that associate src_columns (= CSV columns headers) to columns id
@@ -74,7 +75,7 @@ class CsvEngine(DataFrameExtableEngine):
                     file.write(line + '\n')
                 file.seek(0)
         else:
-            warning(_("Unknown preprocess mode :'{}' ; Ignoring it.").format(self.preprocess))
+            log(BiomAidCommand.WARN, _("Unknown preprocess mode :'{}' ; Ignoring it.").format(self.preprocess))
             file = open(filename, encoding='utf8')
 
         # Get only columns names
@@ -111,5 +112,5 @@ class CsvEngine(DataFrameExtableEngine):
         df.fillna(value=pd.NA, inplace=True)
         df.replace(pd.NA, None, inplace=True)
         # print(df)
-        n_records = self.dataframe_to_model(df, model, msg_callback, **kwargs)
+        n_records = self.dataframe_to_model(df, model, log, progress, **kwargs)
         return n_records

@@ -19,7 +19,9 @@ from common.command import BiomAidCommand
 
 class Command(BiomAidCommand):
     def handle(self, *args, **options):
-        self.log(self.INFO, "Called from cmdline: " + str(self._called_from_command_line))
-        self.log(self.FINE, "structure_check !")
+        log, progress = self.get_loggers(**options)
+
+        log(self.INFO, "Called from cmdline: " + str(self._called_from_command_line))
+        log(self.FINE, "structure_check !")
         """COLLER ICI LE CODE DE MISE A JOUR QUAND IL SERA PRET ET REFLECHIR
         EN FONCTION DES ETABLISSEMENTS : N°1 CHU et voir ensuite pour les autres"""

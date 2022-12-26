@@ -30,7 +30,7 @@ class ExcelEngine(DataFrameExtableEngine):
             warning(_("File not found: '{}'. No schema guessing.").format(filename))
         return {}
 
-    def read_into_model(self, filename: str, model: Type[models.Model], stdout=None) -> int:
+    def read_into_model(self, filename: str, model: Type[models.Model], log, progress) -> int:
         header_row = self.schema['parser_opts'].get('header_row', 1) - 1
         df = read_excel(filename, header=header_row)
-        return self.dataframe_to_model(df, model, stdout)
+        return self.dataframe_to_model(df, model, log, progress)
