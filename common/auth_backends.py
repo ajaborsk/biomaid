@@ -14,40 +14,45 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from django_auth_ldap.backend import LDAPBackend
 from django.contrib.auth import get_user_model, get_backends
 from django.contrib.auth.backends import ModelBackend
 
 from common import config
 
 
-class MyLDAPBackend(LDAPBackend):
-    """A custom LDAP authentication backend"""
+try:
+    from django_auth_ldap.backend import LDAPBackend
+except ImportError:
+    pass
+else:
 
-    def authenticate(self, request, username, password, **kwargs):
-        """Overrides LDAPBackend.authenticate to save user password in django"""
-        # print("authenticate LDAP")
-        user = LDAPBackend.authenticate(self, request, username, password, **kwargs)
+    class MyLDAPBackend(LDAPBackend):
+        """A custom LDAP authentication backend"""
 
-        # If user has successfully logged, save his password in django database
-        if user:
-            user.set_password(password)
-            user.save()
+        def authenticate(self, request, username, password, **kwargs):
+            """Overrides LDAPBackend.authenticate to save user password in django"""
+            # print("authenticate LDAP")
+            user = LDAPBackend.authenticate(self, request, username, password, **kwargs)
 
-        # print("  user=", user)
-        return user
+            # If user has successfully logged, save his password in django database
+            if user:
+                user.set_password(password)
+                user.save()
 
-    def get_or_build_user(self, username, ldap_user):
-        """Overrides LDAPBackend.get_or_create_user to force from_ldap to True"""
-        # print('Get or build LDAP user', username)
+            # print("  user=", user)
+            return user
 
-        user, built = super().get_or_build_user(username, ldap_user)
+        def get_or_build_user(self, username, ldap_user):
+            """Overrides LDAPBackend.get_or_create_user to force from_ldap to True"""
+            # print('Get or build LDAP user', username)
 
-        if built:
-            user.from_ldap = True
-            user.save()
+            user, built = super().get_or_build_user(username, ldap_user)
 
-        return (user, built)
+            if built:
+                user.from_ldap = True
+                user.save()
+
+            return (user, built)
 
 
 class MyAuthBackend(ModelBackend):

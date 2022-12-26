@@ -35,10 +35,17 @@ from django.contrib.auth import views as auth_views
 from common import config
 from django.conf import settings
 
-from common.auth_backends import MyLDAPBackend
 from common.base_views import BiomAidViewMixin
 from common.forms import BiomAidUserCreationForm
 from common.models import User
+
+try:
+    from common.auth_backends import MyLDAPBackend
+
+    USING_LDAP = True
+except ImportError:
+    USING_LDAP = False
+
 
 logger = logging.getLogger(__name__)
 
@@ -190,7 +197,8 @@ class Sign(BiomAidViewMixin, TemplateView):
             else:
                 # a_user is None => No identification
                 form = AuthenticationForm(request.POST)
-                if MyLDAPBackend in [b.__class__ for b in get_backends()]:
+
+                if USING_LDAP and MyLDAPBackend in [b.__class__ for b in get_backends()]:
                     message = _(
                         """Ces identifiants de connexion ne permettent pas de vous connecter au portail.
                     Si vous avez des identifiants Windows, vous pouvez les utiliser avec GEQIP/KOS."""
