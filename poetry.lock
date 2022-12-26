@@ -1920,22 +1920,19 @@ six = ">=1.5"
 
 [[package]]
 name = "python-ldap"
-version = "3.4.0"
+version = "3.4.3"
 description = "Python modules for implementing LDAP clients"
 category = "main"
 optional = true
 python-versions = ">=3.6"
 files = [
-    {file = "python_ldap-3.4.0-cp310-cp310-win_amd64.whl", hash = "sha256:378c157d5f20d47b2f996a4a2bc6bff20a7eaf303407b2e48518a4fe7702ba6d"},
+    {file = "python-ldap-3.4.3.tar.gz", hash = "sha256:ab26c519a0ef2a443a2a10391fa3c5cb52d7871323399db949ebfaa9f25ee2a0"},
 ]
 
 [package.dependencies]
 pyasn1 = ">=0.3.7"
-pyasn1-modules = ">=0.1.5"
+pyasn1_modules = ">=0.1.5"
 
-[package.source]
-type = "url"
-url = "https://download.lfd.uci.edu/pythonlibs/archived/python_ldap-3.4.0-cp310-cp310-win_amd64.whl"
 [[package]]
 name = "python-slugify"
 version = "7.0.0"
@@ -2837,9 +2834,9 @@ docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker
 testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-ldap = ["python-ldap", "python-ldap", "django-auth-ldap"]
+ldap = ["python-ldap", "django-auth-ldap"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.11"
-content-hash = "3123727716838cebc44482c0581c1ecb60a8797d403befab28934e2f4f31ea8f"
+content-hash = "94395a23e84a9a6504719be79ad9f681beb2c61c5e2ad129e16094f5d5f53091"

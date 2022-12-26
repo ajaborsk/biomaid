@@ -115,8 +115,8 @@ tomlkit = "^0.11.0"
 toml = "^0.10.2"
 django-auth-ldap = {version="^4.1.0", optional=true}
 python-ldap = [
-    { url="https://download.lfd.uci.edu/pythonlibs/archived/python_ldap-3.4.0-cp310-cp310-win_amd64.whl", markers="platform_system=='Windows'", optional=true },
-    { version="^3.4.0", markers="platform_system!='Windows'", optional=true }
+#    { url = "https://download.lfd.uci.edu/pythonlibs/archived/python_ldap-3.4.0-cp310-cp310-win_amd64.whl", markers = "platform_system == 'Windows'", optional = true },
+    { version = "^3.0.0", markers = "platform_system != 'Windows'", optional = true }
 ]
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^7.0.0"}
 
