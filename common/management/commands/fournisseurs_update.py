@@ -53,7 +53,5 @@ class Command(BiomAidCommand):
                     case 1:
                         found += 1
                         log(self.FINE, "Found fournisseur : '{:s}'".format(str(fournisseur_magh2.no_fournisseur_fr)))
-                    case n:
-                        pass
                 progress(count, total)
             log(self.INFO, "Found {:d}, Added {:d} fournisseurs from extable.ExtFournisseur".format(found, added))
