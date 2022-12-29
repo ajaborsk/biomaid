@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.apps import apps
 
 from extable.engines import FileExtableEngine
+from common.command import BiomAidCommand
 
 locale.setlocale(locale.LC_ALL, 'fr_FR.UTF-8')
 
@@ -94,7 +95,7 @@ class TpsEngine(FileExtableEngine):
                     schema[k] = {'type': guessed_type, 'src_column': k}
                 return schema
 
-    def read_into_model(self, filename: str, model: Type[models.Model], msg_callback=None, **kwargs) -> int:
+    def read_into_model(self, filename: str, model: Type[models.Model], log, progress, **kwargs) -> int:
         n_records = 0
 
         records = get_tps_data(filename)
@@ -139,10 +140,11 @@ class TpsEngine(FileExtableEngine):
                     if foreign_object_qs.count() == 1:
                         foreign_object = foreign_object_qs[0]
                     else:
-                        msg_callback(
+                        log(
+                            BiomAidCommand.WARN,
                             "Key not found for column {}: {} (type {}, count:{})".format(
                                 column, repr(record_dict[column]), type(record_dict[column]), foreign_object_qs.count()
-                            )
+                            ),
                         )
                         foreign_object = None
                     record_dict[column] = foreign_object
@@ -165,7 +167,7 @@ class TpsEngine(FileExtableEngine):
             # Save record to the database
             record.save()
             n_records += 1
-            if n_records % 100 == 0 and msg_callback is not None:
-                msg_callback("  records written: {}".format(n_records), ending='\r')
+            if n_records % 100 == 0:
+                progress(n_records, -1)
 
         return n_records
