@@ -3,5 +3,6 @@
     "python.testing.pytestEnabled": true,
     "restructuredtext.preview.name": "docutils",
     "editor.tabCompletion": "on",
-    "diffEditor.codeLens": true
+    "diffEditor.codeLens": true,
+    "esbonio.sphinx.confDir": ""
 }

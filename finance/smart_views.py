@@ -30,6 +30,9 @@ class DemAssessmentSmartView(DemandeSmartView):
     class Meta:
         model = Demande
         fields__add = [
+            'service_view',
+            'pole_view',
+            'etablissement_view',
             'argumentaire_detaille',
             'documents_sf',
             'montant_qte_validee',
@@ -41,6 +44,9 @@ class DemAssessmentSmartView(DemandeSmartView):
             'programme',
             'calendrier',
             'uf',
+            'service_view',
+            'pole_view',
+            'etablissement_view',
             'nature',
             'cause',
             'quantite',
@@ -68,6 +74,9 @@ class DemAssessmentSmartView(DemandeSmartView):
             'programme',
             'calendrier',
             'uf',
+            'service_view',
+            'pole_view',
+            'etablissement_view',
             'nature',
             'cause',
             'quantite',

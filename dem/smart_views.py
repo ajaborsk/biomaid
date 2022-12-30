@@ -2253,6 +2253,66 @@ class DemandeSmartView(SmartView):
         },
     )
 
+    # Maintenant les colonnes créées 'manuellement' (déclarées)
+    redacteur_view = (
+        ComputedSmartField,
+        {
+            'title': 'Rédacteur',
+            'help_text': _(
+                "Le rédacteur de la fiche est déterminé à partir "
+                "du nom de la personne connectée au moment de la création de la demande."
+            ),
+            'initial': lambda view_params: view_params['user'].first_name + ' ' + view_params['user'].last_name,
+            'data': Concat('redacteur__first_name', Value(' '), 'redacteur__last_name'),
+            'depends': ['redacteur'],
+        },
+    )
+
+    service_view = (
+        ComputedSmartField,
+        {
+            'title': 'Service',
+            'form.help_text': _("Le service est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("Automatique"),
+            'data': Concat('uf__service__code', Value(' - '), 'uf__service__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'service__nom')},
+            },
+            'depends': ['uf'],
+        },
+    )
+
+    pole_view = (
+        ComputedSmartField,
+        {
+            'title': 'Pôle',
+            'form.help_text': _("Le pôle est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("- Automatique -"),
+            'data': Concat('uf__pole__code', Value(' - '), 'uf__pole__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'pole__nom')},
+            },
+            'depends': ['uf'],
+        },
+    )
+
+    etablissement_view = (
+        ComputedSmartField,
+        {
+            'title': 'Etablissement',
+            'form.help_text': _("L'établissement est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("- Automatique -"),
+            'data': Concat('uf__etablissement__code', Value(' - '), 'uf__etablissement__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'etablissement__nom')},
+            },
+            'depends': ['uf'],
+        },
+    )
+
     redacteur_nom = (
         ComputedSmartField,
         {
@@ -3169,66 +3229,6 @@ class DemandeEqptSmartView(DemandeSmartView):
                 'targets': ['fieldset-arg'],
             },
         }
-
-    # Maintenant les colonnes créées 'manuellement' (déclarées)
-    redacteur_view = (
-        ComputedSmartField,
-        {
-            'title': 'Rédacteur',
-            'help_text': _(
-                "Le rédacteur de la fiche est déterminé à partir "
-                "du nom de la personne connectée au moment de la création de la demande."
-            ),
-            'initial': lambda view_params: view_params['user'].first_name + ' ' + view_params['user'].last_name,
-            'data': Concat('redacteur__first_name', Value(' '), 'redacteur__last_name'),
-            'depends': ['redacteur'],
-        },
-    )
-
-    service_view = (
-        ComputedSmartField,
-        {
-            'title': 'Service',
-            'form.help_text': _("Le service est déterminé automatiquement à partir de l'UF"),
-            'initial': lambda view_params: _("Automatique"),
-            'data': Concat('uf__service__code', Value(' - '), 'uf__service__nom'),
-            'form.data': {
-                'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'service__nom')},
-            },
-            'depends': ['uf'],
-        },
-    )
-
-    pole_view = (
-        ComputedSmartField,
-        {
-            'title': 'Pôle',
-            'form.help_text': _("Le pôle est déterminé automatiquement à partir de l'UF"),
-            'initial': lambda view_params: _("- Automatique -"),
-            'data': Concat('uf__pole__code', Value(' - '), 'uf__pole__nom'),
-            'form.data': {
-                'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'pole__nom')},
-            },
-            'depends': ['uf'],
-        },
-    )
-
-    etablissement_view = (
-        ComputedSmartField,
-        {
-            'title': 'Etablissement',
-            'form.help_text': _("L'établissement est déterminé automatiquement à partir de l'UF"),
-            'initial': lambda view_params: _("- Automatique -"),
-            'data': Concat('uf__etablissement__code', Value(' - '), 'uf__etablissement__nom'),
-            'form.data': {
-                'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'etablissement__nom')},
-            },
-            'depends': ['uf'],
-        },
-    )
 
     documents_sf = (
         DocumentsSmartField,
