@@ -89,16 +89,16 @@ class SmartWidgetMixin:
 
 class MoneyWidget(SmartWidgetMixin, Input):
     class Media(forms.Media):
-        js = ('/static/smart_view/js/money.js',)
-        css = {'all': ('/static/smart_view/css/jquery.flexdatalist.min.css',)}
+        js = ('smart_view/js/money.js',)
+        css = {'all': ('smart_view/css/jquery.flexdatalist.min.css',)}
 
 
 class AutocompleteWidget(SmartWidgetMixin, Input):
     template_name = 'smart_view/autocomplete_widget.html'
 
     class Media(forms.Media):
-        js = ('/static/smart_view/js/jquery.flexdatalist.min.js',)
-        css = {'all': ('/static/smart_view/css/jquery.flexdatalist.min.css',)}
+        js = ('smart_view/js/jquery.flexdatalist.min.js',)
+        css = {'all': ('smart_view/css/jquery.flexdatalist.min.css',)}
 
     def __init__(self, smart_field=None):
         super().__init__()
