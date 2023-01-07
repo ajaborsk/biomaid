@@ -65,7 +65,10 @@ class MyAuthBackend(ModelBackend):
     @staticmethod
     def _is_ldap_backend_activated():
         """Returns True if MyLDAPBackend is activated"""
-        return MyLDAPBackend in [b.__class__ for b in get_backends()]
+        try:
+            return MyLDAPBackend in [b.__class__ for b in get_backends()]
+        except NameError:
+            return False
 
     def authenticate(self, request, username, password, **kwargs):
         """Overrides ModelBackend to refuse LDAP users if MyLDAPBackend is activated.
