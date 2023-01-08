@@ -942,3 +942,33 @@ class DemAllAnalyser(AnomalyChecker):
 def dem_financial_assess(*args, **kwargs):
     verbosity = kwargs.get('verbosity') or 0
     DemAllAnalyser(Demande).check(verbosity=verbosity)
+
+
+class ImmoAnalyser(RecordAnomalyChecker):
+    code = '123'
+    level = 1
+    message = 'test'
+
+    def __init__(self, data):
+        super().__init__(data, storage=JsonAnomaliesStorage(data[1], 'analyse'))
+
+    def check(self, verbosity=1):
+        # print(f"      ImmoAnalyse... {self.data[1].code=}")
+        # for prev in self.data[1].previsionnel_set.all():
+        #     PrevAnalyser(prev).check(verbosity=verbosity)
+        self.add(data={'argl': 'ok'})
+
+
+class ImmoAllAnalyser(AnomalyChecker):
+    def check(self, verbosity=1):
+        # print(f"    ImmoAllAnalyser... {self.data=}")
+        qs = self.data.objects.filter()
+        for demande in qs:
+            # ImmoAnalyser(data=(self.data, demande)).check(verbosity=verbosity)
+            pass
+        return super().check(verbosity=verbosity)
+
+
+def immo_financial_assess(*args, **kwargs):
+    verbosity = kwargs.get('verbosity') or 0
+    ImmoAllAnalyser(Demande).check(verbosity=verbosity)

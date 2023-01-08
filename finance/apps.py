@@ -188,7 +188,8 @@ class FinanceConfig(AppConfig):
 
     def ready(self):
         from django.apps import apps
-        from finance.analytics import orders_flaws_processor, dem_financial_assess
+        from finance.analytics import orders_flaws_processor, dem_financial_assess, immo_financial_assess
 
         apps.get_app_config('analytics').register_data_processor('orders_flaws_processor', orders_flaws_processor)
         apps.get_app_config('analytics').register_data_processor('dem_financial_assess', dem_financial_assess)
+        apps.get_app_config('analytics').register_data_processor('immo_financial_assess', immo_financial_assess)
