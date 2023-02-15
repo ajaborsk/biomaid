@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "runserver"
+                "runserver",
+                "--insecure",
             ],
             "django": true,
             "justMyCode": true
@@ -21,7 +22,9 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "analytics_update", "-v3", "finance.dem_financial_assess",
+                "analytics_update",
+                "-v3",
+                "finance.dem_financial_assess",
             ],
             "django": true,
             "justMyCode": true
@@ -43,7 +46,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "extable_update", "-v3"
+                "extable_update",
+                "-v3"
             ],
             "django": true,
             "justMyCode": true

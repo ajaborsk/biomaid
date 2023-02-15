@@ -1141,6 +1141,13 @@ class Alert(models.Model):
 
 
 class GenericRole(models.Model):
+    class Meta:
+        indexes = [
+            models.Index(fields=['cloture'], name='gen_role_end_idx'),
+            models.Index(fields=['role_code'], name='gen_role_code_idx'),
+            models.Index(fields=['content_type', 'object_id'], name='gen_role_ref_idx'),
+        ]
+
     user: models.ForeignKey = models.ForeignKey(
         config.settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,

@@ -3496,7 +3496,7 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
         columns__remove = ('arbitrage',)
         columns__add = (
             'workflow_alert',
-            'valide_flag',
+            # 'valide_flag',
             # 'montant_final', # test
         )
         selectable_columns__remove = ('arbitrage',)
