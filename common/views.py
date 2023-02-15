@@ -106,17 +106,11 @@ def no_ie_view(request, **kwargs):
 
 
 def redirect_to_home(request, url_prefix=None):
-    if url_prefix:
-        return redirect('/{}/dem/'.format(url_prefix))
-    else:
-        return redirect('/dem/')
+    return redirect('dem:home', url_prefix=url_prefix)
 
 
 def redirect_to_kos_home(request, url_prefix=None):
-    if url_prefix:
-        return redirect('/{}/dem/tvx/'.format(url_prefix))
-    else:
-        return redirect('/dem/tvx/')
+    return redirect('dem:tvx-home', url_prefix=url_prefix)
 
 
 class AttachmentView(View):
