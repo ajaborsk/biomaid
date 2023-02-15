@@ -122,6 +122,12 @@ class User(AbstractUser):
         null=True,
         blank=True,
     )
+    last_email: models.DateTimeField = models.DateTimeField(
+        verbose_name=_("Dernier message"),
+        help_text=_("Date du dernier mail envoyé"),
+        null=True,
+        blank=True,
+    )
     date_creation: models.DateTimeField = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_("date de création"),
