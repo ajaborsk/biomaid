@@ -62,7 +62,7 @@ from common.models import (
     User,
     GenericRole,
 )
-from dem.models import Demande
+from dem.models import Campagne, Demande
 from smart_view.smart_widget import LightAndTextWidget
 
 logger = logging.getLogger(__name__)
@@ -273,7 +273,7 @@ def class_roles_expression(
         try:
             main_content_type = ContentType.objects.get_for_model(model_class)
             programme_content_type = ContentType.objects.get_for_model(Programme)
-            # campagne_content_type = ContentType.objects.get_for_model(Campagne)
+            campagne_content_type = ContentType.objects.get_for_model(Campagne)
         except ProgrammingError:
             pass
 
@@ -312,7 +312,7 @@ def class_roles_expression(
                             Subquery(
                                 GenericRole.active_objects.filter(
                                     content_type=programme_content_type,
-                                    object_id=Cast(OuterRef('programme'), output_field=CharField()),
+                                    object_id=Cast(OuterRef(programme_field), output_field=CharField()),
                                     role_code='ARB',
                                     user_id=view_attrs['user'].id,
                                 )
@@ -330,6 +330,19 @@ def class_roles_expression(
                 Case(
                     When(
                         **{campagne_field + '__dispatcher': view_attrs['user']},
+                        then=Value('DIS,'),
+                    ),
+                    When(
+                        Exists(
+                            Subquery(
+                                GenericRole.active_objects.filter(
+                                    content_type=campagne_content_type,
+                                    object_id=Cast(OuterRef(campagne_field), output_field=CharField()),
+                                    role_code='DIS',
+                                    user_id=view_attrs['user'].id,
+                                )
+                            )
+                        ),
                         then=Value('DIS,'),
                     ),
                     default=Value(''),
