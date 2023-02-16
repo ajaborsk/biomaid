@@ -19,7 +19,7 @@
 Created on Mon Dec 17 19:54:59 2018
 @author: kligliro
 """
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
@@ -63,6 +63,15 @@ class ActiveManager(models.Manager):
 
 class ActiveManagerCloture(ActiveManager):
     END_FIELDNAME = 'cloture'
+
+
+class ActiveManagerUser(models.Manager):
+    """
+    A ORM manager that returns only active users. Works only for Django 'User' herited classes
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
 
 
 class User(AbstractUser):
@@ -136,6 +145,9 @@ class User(AbstractUser):
         auto_now=True,
         verbose_name=_("date de modification"),
     )
+
+    objects = UserManager()  # The default manager.
+    active_objects = ActiveManagerUser()  # The active_objects manager.
 
     def __str__(self):
         return "{} {} ({})".format(self.first_name, self.last_name, self.username)

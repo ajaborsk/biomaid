@@ -53,7 +53,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = BaseUserAdmin.fieldsets + (
         (
             (
-                'Extensions BIOM_AID',
+                'Extensions BiomAid',
                 {
                     'fields': (
                         'titre',
@@ -64,6 +64,7 @@ class UserAdmin(BaseUserAdmin):
                         'tel_dect',
                         'preferences',
                         'last_seen',
+                        'last_email',
                     )
                 },
             ),
