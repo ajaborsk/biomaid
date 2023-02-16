@@ -126,14 +126,14 @@ class AlertsManager:
         if users is None:
             users = (
                 get_user_model()
-                .objects.all()
+                .active_objects.all()
                 .annotate(active_alerts=Count('alert', filter=Q(alert__cloture__isnull=True)))
                 .filter(active_alerts__gt=0)
             )
         else:
             users = (
                 get_user_model()
-                .objects.filter(pk__in=users)
+                .active_objects.filter(pk__in=users)
                 .annotate(active_alerts=Count('alert', filter=Q(alert__cloture__isnull=True)))
                 .filter(active_alerts__gt=0)
             )
@@ -143,9 +143,17 @@ class AlertsManager:
             if stdout and verbosity > 1:
                 stdout.write("     Utilisateur: {}".format(user))
             preferences = UserSettings(user)
+
             email_policy = preferences['notifications.alert-email']
             if stdout and verbosity > 2:
                 stdout.write("       Email policy: {}".format(email_policy))
+
+            email_delay = int(preferences['notifications.alert-email-delay'])
+            if stdout and verbosity > 2:
+                stdout.write("       Email delay (h): {}".format(email_delay))
+
+            if email_delay and user.last_email and (user.last_email + timedelta(hours=email_delay)) > now():
+                break
 
             # contexte qui sera envoyé au template, le cas échéant
             context = {
@@ -176,10 +184,6 @@ class AlertsManager:
                 .values_list('categorie', flat=True)
                 .distinct()
             )
-
-            email_delay = int(preferences['notifications.alert-email-delay'])
-            if stdout and verbosity > 2:
-                stdout.write("       Email delay (h): {}".format(email_delay))
 
             for category in categories:
                 if stdout and verbosity > 2:
@@ -233,6 +237,8 @@ class AlertsManager:
                     for alert in context['categories'][category]['alerts']:
                         alert.dernier_email = now()
                         alert.save(update_fields=['dernier_email', 'date_modification'])
+                user.last_email = now()
+                user.save(update_fields=['last_email', 'date_modification'])
 
     def notify(self):
         """Do the actual notification (messages, etc.)"""
