@@ -32,6 +32,8 @@ from django.db.models import (
     TextField,
     Value,
     When,
+    Subquery,
+    Sum,
 )
 from django.db.models.functions import Cast, Coalesce, Concat
 from django.utils import timezone
@@ -2785,6 +2787,48 @@ class DemandeSmartView(SmartView):
             'data': F('arbitrage_commission__valeur'),
         },
     )
+    available = (
+        ComputedSmartField,
+        {
+            'title': 'Disponible',
+            'help_text': _(
+                "Montant restant disponible dans l'enveloppe (une valeur négative empêchera "
+                "le passage en définitif vers le plan d'équipements)"
+            ),
+            "format": "money",
+            "decimal_symbol": ",",
+            "thousands_separator": " ",
+            "currency_symbol": " €",
+            "symbol_is_after": True,
+            "precision": 0,
+            "max_width": 120,
+            'data': F('programme__enveloppe')
+            - Subquery(
+                Demande.objects.filter(programme=OuterRef('programme'))
+                .values('programme')
+                .annotate(
+                    total=Sum(  # Recompute 'enveloppe_finale' from primary fields
+                        Case(
+                            When(
+                                arbitrage_commission__valeur=True,
+                                then=Coalesce(
+                                    F('enveloppe_allouee'),
+                                    Coalesce(F('quantite_validee'), F('quantite'))
+                                    * Coalesce(F('montant_unitaire_expert_metier'), F('prix_unitaire')),
+                                    Value(Decimal(0.0)),
+                                ),
+                            ),
+                        )
+                    )
+                )
+                .values('total')
+            ),
+            'depends': [
+                'programme',
+                'enveloppe_finale',
+            ],
+        },
+    )
     roles = (
         ComputedSmartField,
         {
@@ -3007,6 +3051,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'quantite_validee_conditional',
             'montant_qte_validee',
             'enveloppe_allouee',
+            'enveloppe_finale',
             'montant_valide_conditional',
             'montant_final',
             'montant_consomme',
@@ -3493,11 +3538,13 @@ class DemandesEtudeSmartView(DemandeEqptSmartView):
 class DemandesArbitrageSmartView(DemandeEqptSmartView):
     class Meta:
         help_text = _("Toutes les demandes qui **peuvent** être arbitrées par moi")
+        # fields__add = ('available',)
         columns__remove = ('arbitrage',)
         columns__add = (
             'workflow_alert',
             # 'valide_flag',
-            # 'montant_final', # test
+            # 'enveloppe_finale',  # test
+            'available',
         )
         selectable_columns__remove = ('arbitrage',)
 
