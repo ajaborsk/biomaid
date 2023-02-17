@@ -235,6 +235,7 @@ class ProgrammeSmartView(SmartView):
                         'uf': True,
                         'nom': True,
                         'enveloppe': True,
+                        'limit': True,
                         'arbitre': True,
                         'discipline': True,
                         'description': True,
@@ -251,6 +252,7 @@ class ProgrammeSmartView(SmartView):
                         'uf': True,
                         'nom': True,
                         'enveloppe': True,
+                        'limit': True,
                         'arbitre': True,
                         'discipline': True,
                         'description': True,
@@ -279,12 +281,24 @@ class ProgrammeSmartView(SmartView):
                 'title': _("Campagne"),
             },
             'nom': {
-                'format': 'text',
+                'format': 'string',
             },
             'uf': {
-                'editor': 'autocomplete',
+                'autocomplete': True,
             },
             'enveloppe': {
+                'title': _("Enveloppe"),
+                'help_text': _("Enveloppe estimative (non contraignante)"),
+                'format': 'money',
+                'decimal_symbol': ',',
+                'thousands_separator': ' ',
+                'currency_symbol': ' €',
+                'symbol_is_after': True,
+                'precision': 0,
+            },
+            'limit': {
+                'title': _("Limite"),
+                'help_text': _("Limite d'affectation : Il sera impossible de valider des demandes au delà de cette limite."),
                 'format': 'money',
                 'decimal_symbol': ',',
                 'thousands_separator': ' ',
@@ -296,7 +310,7 @@ class ProgrammeSmartView(SmartView):
                 'title': "Code DRAV94",
             },
             'arbitre': {
-                'editor': 'autocomplete',
+                'autocomplete': True,
                 # La SmartView peut détecter seule les choix à faire mais comme elle ne dispose pas d'expression
                 # Django pour créer l'étiquette de ces choix (seulement la méthode __str__() du modèle User, qui est du pur python)
                 # C'est beaucoup plus long car elle doit faire de multiples requêtes SQL.
@@ -322,6 +336,7 @@ class ProgrammeSmartView(SmartView):
             'anteriorite',
             'nom',
             'enveloppe',
+            'limit',
             'distribue',
             'previsionnel_total',
             'arbitre',
@@ -353,8 +368,8 @@ class ProgrammeSmartView(SmartView):
                 <calendrier> <etablissement>
                 <pole> <uf>
                 <discipline> <arbitre>
-                <anteriorite> <enveloppe>
-                <cloture>
+                <enveloppe> <limit>
+                <anteriorite> <cloture>
                 <description+--->
             # Documents joints
                 <documents_sf+--->

@@ -2802,7 +2802,7 @@ class DemandeSmartView(SmartView):
             "symbol_is_after": True,
             "precision": 0,
             "max_width": 120,
-            'data': F('programme__enveloppe')
+            'data': F('programme__limit')
             - Subquery(
                 Demande.objects.filter(programme=OuterRef('programme'))
                 .values('programme')

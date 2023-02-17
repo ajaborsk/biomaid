@@ -476,6 +476,7 @@ class Programme(models.Model):
     pole = models.ForeignKey(Pole, null=True, blank=True, on_delete=models.SET_NULL)
     uf = models.ForeignKey(Uf, null=True, blank=True, on_delete=models.SET_NULL)
     enveloppe = models.DecimalField(max_digits=10, decimal_places=0, null=False, blank=False)  # enveloppe budgetaire prévisionnelle
+    limit = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True)  # enveloppe budgetaire limite (bloquante)
     arbitre = models.ForeignKey(
         config.settings.AUTH_USER_MODEL,
         db_column='arbitre_new',
