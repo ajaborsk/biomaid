@@ -234,7 +234,7 @@ STATICFILES_FINDERS = (
 FIXTURE_DIRS = [os.path.join(BASE_DIR, 'fixtures')]
 
 LOGIN_URL_NAME = 'common:sign'
-LOGIN_URL = '/geqip-chuap/sign/'  # Never used in regular code but seems used in tests
+LOGIN_URL = '/geqip-chuap/common/sign/'  # Never used in regular code but seems used in tests
 LOGIN_REDIRECT_URL = '/geqip-chuap/common/login_check/'
 LOGIN_REDIRECT_URL_NAME = 'common:login_check'
 LOGOUT_REDIRECT_URL_NAME = 'home'
