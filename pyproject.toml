@@ -119,6 +119,7 @@ python-ldap = [
     { version = "^3.0.0", markers = "platform_system != 'Windows'", optional = true }
 ]
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^7.0.0"}
+pysftp = "^0.2.9"
 
 [tool.poetry.group.doc.dependencies]
 sphinx = "^5.0.0"

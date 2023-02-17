@@ -144,7 +144,7 @@ pytz = ">=2015.7"
 name = "bcrypt"
 version = "4.0.1"
 description = "Modern password hashing for your software and your servers"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -241,7 +241,7 @@ files = [
 name = "cffi"
 version = "1.15.1"
 description = "Foreign Function Interface for Python calling C code."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 files = [
@@ -490,7 +490,7 @@ requests = ">=2.23.0"
 name = "cryptography"
 version = "39.0.0"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -1512,7 +1512,7 @@ dev = ["jinja2"]
 name = "paramiko"
 version = "3.0.0"
 description = "SSH2 protocol library"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -1757,7 +1757,7 @@ files = [
 name = "pycparser"
 version = "2.21"
 description = "C parser in Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
@@ -1811,7 +1811,7 @@ plugins = ["importlib-metadata"]
 name = "pynacl"
 version = "1.5.0"
 description = "Python binding to the Networking and Cryptography (NaCl) library"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -1875,7 +1875,7 @@ files = [
 name = "pysftp"
 version = "0.2.9"
 description = "A friendly face on SFTP"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 files = [
@@ -2917,4 +2917,4 @@ ldap = ["python-ldap", "django-auth-ldap"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.11"
-content-hash = "94395a23e84a9a6504719be79ad9f681beb2c61c5e2ad129e16094f5d5f53091"
+content-hash = "e59a30c014fa2498c678f22a736ff982f0ff3508484303a09b1323a82e6da482"
