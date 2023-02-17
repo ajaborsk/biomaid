@@ -584,6 +584,19 @@ class MyAlertsSmartView(UserAlertsSmartView):
 class FournisseurSmartView(SmartView):
     class Meta:
         model = Fournisseur
+        permissions = {
+            'create': ('ADM',),
+            'delete': ('ADM',),
+            'write': {
+                None: {
+                    'ADM': {
+                        'code': True,
+                        'nom': True,
+                    }
+                },
+            },
+        }
+
         columns = (
             'code',
             'nom',
