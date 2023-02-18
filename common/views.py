@@ -28,7 +28,7 @@ import tomlkit
 import pathlib
 
 from altair import Chart, Data
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView
@@ -409,10 +409,29 @@ class VueGridWidget(VueWidget):
                 r_layout[widget['i']] = {'html': 'Not found'}
         return JsonResponse({'ok': 'it s me !', 'layout': r_layout})
 
+    def _get_as_toml(self, request, cockpit_name, *args, **kwargs):
+        toml_doc = tomlkit.TOMLDocument()
+        grid_layout = self.contents['layout']
+        if self.editable:
+            if not request.GET.get('reset'):
+                try:
+                    grid_layout = self.params['user_preferences'][self.portal_name + '.my-cockpit.grid-layout']
+                except KeyError:
+                    pass
+        base_cfg = {}
+        cfg = base_cfg
+        while '.' in cockpit_name:
+            root, cockpit_name = cockpit_name.split('.', 1)
+            cfg[root] = {}
+            cfg = cfg[root]
+        cfg[cockpit_name] = {'editable': False, 'layout': grid_layout}
+        toml_doc.update(base_cfg)
+        return HttpResponse(toml_doc.as_string(), content_type="text/plain")
+
     def _get_context_data(self, **kwargs):
         context = super()._get_context_data(**kwargs)
-        grid_layout = self.contents['layout']
         available_widgets = []
+        grid_layout = self.contents['layout']
         if self.editable:
             if not self.params['request_get'].get('reset'):
                 try:
@@ -471,6 +490,10 @@ class BiomAidCockpit(BiomAidViewMixin, TemplateView):
         self.widgets[self.main_widget.html_id] = self.main_widget
 
     def get(self, request, *args, **kwargs):
+        # Small trick to get toml text response (ready to cut/paste in a config file :-)
+        if 'get_toml' in request.GET:
+            return self.main_widget._get_as_toml(request, request.GET['get_toml'], *args, **kwargs)
+
         if 'id' in request.GET and request.GET['id'] in self.widgets:
             return self.widgets[request.GET['id']]._get(request, *args, **kwargs)
         else:
