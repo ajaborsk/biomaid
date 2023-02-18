@@ -361,6 +361,37 @@ class VueGridWidget(VueWidget):
         'montant_previsionnel_par_expert': MontantPrevisionnelParExpertWidget,
     }
 
+    def __init__(self, *args, **kwargs):
+        if 'contents' in kwargs:
+            self.contents = kwargs['contents']
+            del kwargs['contents']
+        else:
+            self.contents = None
+
+        if 'portal_name' in kwargs:
+            self.portal_name = kwargs['portal_name']
+            del kwargs['portal_name']
+        else:
+            self.portal_name = 'common'
+
+        if isinstance(self.contents, str):
+            config_name = self.contents
+            self.contents = common.config.get(config_name)
+            if self.contents is None:
+                logging.warning("Portal home contents '{}' not found in config files.".format(config_name))
+            elif not isinstance(self.contents, dict):
+                logging.warning("Portal home contents '{}' is not a dict.".format(config_name))
+            elif 'layout' not in self.contents:
+                logging.warning("Portal home contents '{}' does not have a 'layout' entry.".format(config_name))
+
+        if not isinstance(self.contents, dict) or 'layout' not in self.contents:
+            logging.warning("Using fallback layout for portal home content (not using {}).".format(repr(self.contents)))
+            self.contents = {'layout': self.default_grid_layout}
+
+        self.editable = self.contents.get('editable', True)
+
+        super().__init__(*args, **kwargs)
+
     def _get(self, request, *args, **kwargs):
         layout = json.loads(request.GET['layout'])
         r_layout = {}
@@ -380,36 +411,39 @@ class VueGridWidget(VueWidget):
 
     def _get_context_data(self, **kwargs):
         context = super()._get_context_data(**kwargs)
-        grid_layout = self.default_grid_layout
-        if not self.params['request_get'].get('reset'):
-            try:
-                grid_layout = self.params['user_preferences']['common.my-cockpit.grid-layout']
-            except KeyError:
-                pass
+        grid_layout = self.contents['layout']
         available_widgets = []
-        for k, v in self.available_widgets.items():
-            label = k
-            help_text = ""
-            manual_params = {}
-            if hasattr(v, 'label'):
-                label = v.label
-            if hasattr(v, 'help_text'):
-                help_text = v.help_text
-            if hasattr(v, 'manual_params'):
-                if callable(v.manual_params):
-                    manual_params = v.manual_params(self.params)
-                else:
-                    manual_params = v.manual_params
+        if self.editable:
+            if not self.params['request_get'].get('reset'):
+                try:
+                    grid_layout = self.params['user_preferences'][self.portal_name + '.my-cockpit.grid-layout']
+                except KeyError:
+                    pass
+            for k, v in self.available_widgets.items():
+                label = k
+                help_text = ""
+                manual_params = {}
+                if hasattr(v, 'label'):
+                    label = v.label
+                if hasattr(v, 'help_text'):
+                    help_text = v.help_text
+                if hasattr(v, 'manual_params'):
+                    if callable(v.manual_params):
+                        manual_params = v.manual_params(self.params)
+                    else:
+                        manual_params = v.manual_params
 
-            available_widgets.append(
-                {
-                    'w_class': k,
-                    'label': label,
-                    'help_text': help_text,
-                    'm_params': manual_params,
-                }
-            )
+                available_widgets.append(
+                    {
+                        'w_class': k,
+                        'label': label,
+                        'help_text': help_text,
+                        'm_params': manual_params,
+                    }
+                )
         context['grid_params'] = {
+            'portal_name': self.portal_name,
+            'editable': self.editable,
             'init_layout': grid_layout,
             'settings_url': reverse('common:api_user_settings', kwargs={'url_prefix': 'portal-config'}),
             'available_widgets': available_widgets,
@@ -431,7 +465,9 @@ class BiomAidCockpit(BiomAidViewMixin, TemplateView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        self.main_widget = VueGridWidget(params=self.view_params)
+        self.main_widget = VueGridWidget(
+            params=self.view_params, contents=self.portal.get('home-contents'), portal_name=self.url_prefix.split('-', 1)[0]
+        )
         self.widgets[self.main_widget.html_id] = self.main_widget
 
     def get(self, request, *args, **kwargs):
