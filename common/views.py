@@ -389,6 +389,10 @@ class VueGridWidget(VueWidget):
             self.contents = {'layout': self.default_grid_layout}
 
         self.editable = self.contents.get('editable', True)
+        self.columns = self.contents.get('columns', 16)
+        self.rows = self.contents.get('rows', 32)
+        self.v_spacing = self.contents.get('v_spacing', 12)
+        self.h_spacing = self.contents.get('h_spacing', 12)
 
         super().__init__(*args, **kwargs)
 
@@ -462,6 +466,10 @@ class VueGridWidget(VueWidget):
                 )
         context['grid_params'] = {
             'portal_name': self.portal_name,
+            'columns': self.columns,
+            'rows': self.rows,
+            'v_spacing': self.v_spacing,
+            'h_spacing': self.h_spacing,
             'editable': self.editable,
             'init_layout': grid_layout,
             'settings_url': reverse('common:api_user_settings', kwargs={'url_prefix': 'portal-config'}),
@@ -554,7 +562,7 @@ class BiomAidAccueil(BiomAidViewMixin, TemplateView):
     application = 'common'
     name = 'home-main'
     permissions = '__PUBLIC__'
-    template_name = 'common/accueil.html'
+    template_name = 'common/cockpit.html'
 
 
 # page d'accueil / Cockpite

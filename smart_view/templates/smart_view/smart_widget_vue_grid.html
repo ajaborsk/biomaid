@@ -169,13 +169,13 @@
       template: `{% verbatim %}<div @click="layoutClick">
                   <grid-layout
                   :layout.sync="layout"
-                  :col-num="16"
-                  :row-height="32"
+                  v-bind:col-num="grid_params.columns"
+                  v-bind:row-height="grid_params.rows"
                   :is-draggable="unlocked"
                   :is-resizable="unlocked"
                   :is-mirrored="false"
-                  :vertical-compact="true"
-                  :margin="[12, 12]"
+                  :vertical-compact="false"
+                  v-bind:margin="[grid_params.h_spacing, grid_params.v_spacing]"
                   :use-css-transforms="true"
                   @layout-updated="layoutUpdatedEvent"
                   @layout-ready="layoutReadyEvent"

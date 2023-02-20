@@ -309,6 +309,7 @@ class CommonConfig(AppConfig):
             'main-name': _("Common"),
             'permissions': ('ADM', 'MAN'),
             'home': 'common:manager-home',
+            'home-contents': 'cockpit.common.common',
             'main-menu': (
                 {
                     'label': _("Accueil"),
