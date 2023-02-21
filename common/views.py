@@ -21,6 +21,7 @@ import logging
 import tempfile
 from os import path
 from os.path import exists
+from copy import deepcopy
 
 import altair
 import pysftp
@@ -388,6 +389,17 @@ class VueGridWidget(VueWidget):
             logging.warning("Using fallback layout for portal home content (not using {}).".format(repr(self.contents)))
             self.contents = {'layout': self.default_grid_layout}
 
+        try:
+            for widget in self.contents['layout']:
+                if 'w_params' in widget and not isinstance(widget['w_params'], str):
+                    # convert w_params to a JSON string (if needed)
+                    widget['w_params'] = json.dumps(widget['w_params'])
+        except TypeError:
+            logging.warning(
+                "Using fallback layout for portal home content (layout is not iterable: {}).".format(repr(self.contents['layout']))
+            )
+            self.contents = {'layout': self.default_grid_layout}
+
         self.editable = self.contents.get('editable', True)
         self.columns = self.contents.get('columns', 16)
         self.rows = self.contents.get('rows', 32)
@@ -428,7 +440,9 @@ class VueGridWidget(VueWidget):
             root, cockpit_name = cockpit_name.split('.', 1)
             cfg[root] = {}
             cfg = cfg[root]
-        cfg[cockpit_name] = {'editable': False, 'layout': grid_layout}
+        cfg[cockpit_name] = {'editable': False, 'layout': deepcopy(grid_layout)}
+        for widget in cfg[cockpit_name]['layout']:
+            widget['w_params'] = json.loads(widget['w_params'])
         toml_doc.update(base_cfg)
         return HttpResponse(toml_doc.as_string(), content_type="text/plain")
 
