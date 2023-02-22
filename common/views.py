@@ -376,14 +376,16 @@ class VueGridWidget(VueWidget):
             self.portal_name = 'common'
 
         if isinstance(self.contents, str):
-            config_name = self.contents
-            self.contents = common.config.get(config_name)
+            self.config_name = self.contents
+            self.contents = common.config.get(self.config_name)
             if self.contents is None:
-                logging.warning("Portal home contents '{}' not found in config files.".format(config_name))
+                logging.warning("Portal home contents '{}' not found in config files.".format(self.config_name))
             elif not isinstance(self.contents, dict):
-                logging.warning("Portal home contents '{}' is not a dict.".format(config_name))
+                logging.warning("Portal home contents '{}' is not a dict.".format(self.config_name))
             elif 'layout' not in self.contents:
-                logging.warning("Portal home contents '{}' does not have a 'layout' entry.".format(config_name))
+                logging.warning("Portal home contents '{}' does not have a 'layout' entry.".format(self.config_name))
+        else:
+            self.config_name = 'cockpit'
 
         if not isinstance(self.contents, dict) or 'layout' not in self.contents:
             logging.warning("Using fallback layout for portal home content (not using {}).".format(repr(self.contents)))
@@ -436,11 +438,24 @@ class VueGridWidget(VueWidget):
                     pass
         base_cfg = {}
         cfg = base_cfg
+        if not cockpit_name:
+            cockpit_name = self.config_name
         while '.' in cockpit_name:
             root, cockpit_name = cockpit_name.split('.', 1)
             cfg[root] = {}
             cfg = cfg[root]
-        cfg[cockpit_name] = {'editable': False, 'layout': deepcopy(grid_layout)}
+        cfg[cockpit_name] = {
+            'layout': deepcopy(grid_layout),
+            'rows': self.rows,
+            'columns': self.columns,
+            'h_spacing': self.h_spacing,
+            'v_spacing': self.v_spacing,
+        }
+        if self.editable:
+            cfg[cockpit_name]['editable'] = True
+            cfg[cockpit_name]['available_widgets'] = list(self.available_widgets.keys())
+        else:
+            cfg[cockpit_name]['editable'] = False
         for widget in cfg[cockpit_name]['layout']:
             widget['w_params'] = json.loads(widget['w_params'])
         toml_doc.update(base_cfg)
