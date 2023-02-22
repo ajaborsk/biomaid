@@ -3867,6 +3867,8 @@ class DemandesArchiveesExpertSmartView(DemandesArchiveesSmartView):
             'programme': {
                 'type': 'select',
             },
+            'domaine': {'type': 'select'},
+            'expert_metier': {'type': 'select'},
         }
 
 
