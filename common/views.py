@@ -444,7 +444,7 @@ class VueGridWidget(VueWidget):
         for widget in cfg[cockpit_name]['layout']:
             widget['w_params'] = json.loads(widget['w_params'])
         toml_doc.update(base_cfg)
-        return HttpResponse(toml_doc.as_string(), content_type="text/plain")
+        return HttpResponse(toml_doc.as_string(), content_type='text/plain; charset=utf-8')
 
     def _get_context_data(self, **kwargs):
         context = super()._get_context_data(**kwargs)
