@@ -3556,6 +3556,7 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
             )
 
         user_filters__update = {
+            'programme': {'label': _("Programme"), 'type': 'select'},
             'expert_metier': {'label': _("Expert métier"), 'type': 'select'},
             'avis_biomed': {'label': _("Avis de l'expert"), 'type': 'select'},
             'domaine': {'type': 'select'},
