@@ -792,8 +792,12 @@ class SmartViewMetaclass(MediaDefiningClass):
                             + (
                                 [
                                     {
+                                        'label': _("-- Défini --"),
+                                        'value': '{{{}__isnull:false}}'.format(mf['fieldname']),
+                                    },
+                                    {
                                         'label': _("-- Indéfini --"),
-                                        'value': '{{{}__isnull:null}}'.format(mf['fieldname']),
+                                        'value': '{{{}__isnull:true}}'.format(mf['fieldname']),
                                     }
                                 ]
                                 if add_null
@@ -833,6 +837,10 @@ class SmartViewMetaclass(MediaDefiningClass):
                                 + (
                                     [
                                         {
+                                            'label': _("-- Défini --"),
+                                            'value': '{"' + mf["fieldname"] + '__isnull":false}',
+                                        },
+                                        {
                                             'label': _("-- Indéfini --"),
                                             'value': '{"' + mf["fieldname"] + '__isnull":true}',
                                         }
@@ -858,6 +866,10 @@ class SmartViewMetaclass(MediaDefiningClass):
                                 + (
                                     [
                                         {
+                                            'label': _("-- Défini --"),
+                                            'value': '{"' + mf["fieldname"] + '__isnull":false}',
+                                        },
+                                        {
                                             'label': _("-- Indéfini --"),
                                             'value': '{"' + mf["fieldname"] + '__isnull":true}',
                                         }
@@ -879,6 +891,10 @@ class SmartViewMetaclass(MediaDefiningClass):
                         ]
                         if smartfield.get('null'):
                             choices += [
+                                {
+                                    "label": _("-- Défini --"),
+                                    "value": json.dumps({mfilter["fieldname"] + "__isnull": False}),
+                                },
                                 {
                                     "label": _("-- Indéfini --"),
                                     "value": json.dumps({mfilter["fieldname"] + "__isnull": True}),
