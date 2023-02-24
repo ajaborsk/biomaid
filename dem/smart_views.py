@@ -3550,15 +3550,14 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
 
         def base_filter(self, view_params):
             return (
-                # Demandes non validées
-                Q(gel=False),
-                Q(programme__arbitre=view_params['user'].pk),
+                Q(gel=False),  # Demandes non validées
+                Q(programme__arbitre=view_params['user'].pk),  # Dont je suis l'arbitre
                 ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
             )
 
         user_filters__update = {
             'expert_metier': {'label': _("Expert métier"), 'type': 'select'},
-            'avis_biomed': {'label': _("Avis favorable expert"), 'type': 'select'},
+            'avis_biomed': {'label': _("Avis de l'expert"), 'type': 'select'},
             'domaine': {'type': 'select'},
             'arbitrage_commission': {'label': _("Arbitrage"), 'type': 'select'},
         }
