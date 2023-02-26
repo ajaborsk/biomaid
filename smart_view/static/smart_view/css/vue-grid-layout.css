@@ -12,8 +12,34 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+.cockpit-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.cockpit-palette {
+    height: 100%;
+    width: 240px;
+}
+
 .vue-resizable {
     box-sizing: border-box;
+}
+
+.palette-item {
+    width: 220px;
+    height: 80px;
+    border: solid 1px black;
+    background-color: #eee;
+    padding: 10px;
+}
+
+.grid-container {
+    width: 100%;
+    height: 100%;
+    flex: auto;
 }
 
 .vue-grid-layout {
@@ -53,8 +79,7 @@
     height: 100%;
 }
 
-.vue-grid-item .frame.with-title {
-}
+.vue-grid-item .frame.with-title {}
 
 .vue-grid-item .content {
     width: 100%;
@@ -64,17 +89,17 @@
 .vue-grid-item .content.with-title {
     width: 100%;
     height: 100%;
-    margin-top:20px;
+    margin-top: 20px;
 }
 
 .vue-grid-item .frame-overlay {
     position: absolute;
     width: 100%;
     height: 100%;
-    top:0;
-    left:0;
+    top: 0;
+    left: 0;
 
-    display:grid;
+    display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: auto minmax(0, 1fr);
 }
@@ -155,7 +180,7 @@
     height: 20px;
     top: 0;
     left: 0;
-    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><circle cx='5' cy='5' r='5' fill='#999999'/></svg>") no-repeat  bottom right;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><circle cx='5' cy='5' r='5' fill='#999999'/></svg>") no-repeat bottom right;
     padding: 0 8px 8px 0;
     background-origin: content-box;
     box-sizing: border-box;
