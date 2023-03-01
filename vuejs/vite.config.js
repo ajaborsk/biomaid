@@ -25,13 +25,13 @@ export default defineConfig({
     emptyOutDir: true,
 
     // Don't minify for now so it's easyier to understand what's really happening
-    //minify: 'terser',
-    minify: false,
+    minify: 'terser',
+    //minify: false,
 
     rollupOptions: {
         external:['window', 'vue'],
         // Multiple entries does not work for iife format :-(
-        input: 'src/widget_demo.js',
+        input: 'src/demo_widget.js',
 
         // Only names so it's easier to refer from Django templates
         output: {

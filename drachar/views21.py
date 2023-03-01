@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from django.forms import Media
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q, F, Case, When
@@ -60,31 +61,39 @@ class DracharView(BiomAidViewMixin, TemplateView):
         return context
 
 
-class TestWidget(HtmlWidget):
-    class Media:
-        js = ['common/vue/widget_demo.js']
-        css = {
-            'all': [
-                "https://unpkg.com/primevue@^3/resources/themes/saga-blue/theme.css",
-                "https://unpkg.com/primevue@^3/resources/primevue.min.css",
-                "https://unpkg.com/primeflex@^3/primeflex.min.css",
-                "https://unpkg.com/primeicons/primeicons.css",
-            ]
-        }
+class VueWidget(HtmlWidget):
+    @property
+    def media(self):
+        return Media(
+            js=['common/vue/{}.js'.format(self._vue_widget_name)],
+            css={
+                'all': [
+                    "https://unpkg.com/primevue@^3/resources/themes/saga-blue/theme.css",
+                    "https://unpkg.com/primevue@^3/resources/primevue.min.css",
+                    "https://unpkg.com/primeflex@^3/primeflex.min.css",
+                    "https://unpkg.com/primeicons/primeicons.css",
+                ]
+            },
+        )
 
-    _template_mapping_add = {'vue_props': 'vue_props', 'vue_opts': 'vue_opts'}
+    _template_mapping_add = {'vue_widget_name': 'vue_widget_name', 'vue_props': 'vue_props', 'vue_opts': 'vue_opts'}
 
     template_string = (
         '''{% load json_tags %}<div id="{{ html_id }}"></div>'''
-        '''<script>const {{ html_id }}_app = Vue.createApp(demo_widget, {{ vue_props|to_json }})'''
+        '''<script>const {{ html_id }}_app = Vue.createApp({{ vue_widget_name }}, {{ vue_props|to_json }})'''
         '''.use(primevue.config.default, {{ vue_opts|to_json }}).mount('#{{ html_id }}');'''
         '''</script>'''
     )
 
     def _setup(self, **params):
         super()._setup(**params)
+        self.params['vue_widget_name'] = self._vue_widget_name
         self.params['vue_opts'] = {'ripple': True}
         self.params['vue_props'] = {'msg': "I did it !"}
+
+
+class DemoWidget(VueWidget):
+    _vue_widget_name = 'demo_widget'
 
 
 class DracharHome(DracharView):
@@ -96,7 +105,7 @@ class DracharHome(DracharView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['main_widget'] = TestWidget(params=self.view_params)
+        context['main_widget'] = DemoWidget(params=self.view_params)
         # context['main_widget'] = VueGridWidget(**self.view_params)
         return context
 
