@@ -91,7 +91,7 @@ from smart_view.smart_widget import (
     RepartirWidget,
     SimpleLightWidget,
     SimpleTextWidget,
-    VueWidget,
+    Vue2Widget,
 )
 
 logger = logging.getLogger(__name__)
@@ -298,7 +298,7 @@ class MontantPrevisionnelParExpertWidget(AltairWidget):
         )
 
 
-class VueGridWidget(VueWidget):
+class Vue2GridWidget(Vue2Widget):
     class Media:
         css = {
             'all': [
@@ -521,7 +521,7 @@ class BiomAidCockpit(BiomAidViewMixin, TemplateView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        self.main_widget = VueGridWidget(
+        self.main_widget = Vue2GridWidget(
             params=self.view_params, contents=self.portal.get('home-contents'), portal_name=self.url_prefix.split('-', 1)[0]
         )
         self.widgets[self.main_widget.html_id] = self.main_widget

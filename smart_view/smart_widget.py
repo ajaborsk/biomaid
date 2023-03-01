@@ -519,7 +519,7 @@ class RepartirWidget(LightAndTextWidget):
         self.params['color'] = 'orange'
 
 
-class VueWidget(HtmlWidget):
+class Vue2Widget(HtmlWidget):
     class Media:
         js = [
             'smart_view/js/vue-2.7.8.min.js',

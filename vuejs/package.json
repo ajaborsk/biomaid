@@ -10,6 +10,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "primeicons": "^6.0.1",
+    "primevue": "^3.23.0",
+    "terser": "^5.16.5",
     "vue": "^3.2.47"
   },
   "devDependencies": {

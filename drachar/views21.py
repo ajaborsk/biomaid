@@ -16,7 +16,7 @@
 #
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Q, F, Case, Value, When
+from django.db.models import Q, F, Case, When
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 
@@ -30,7 +30,7 @@ from drachar.models import Previsionnel, ContactLivraison, Dra, Dossier
 from drachar.forms import NouvelleDra, LigneForm
 from smart_view.smart_page import SmartPage
 from smart_view.smart_view import ComputedSmartField
-from smart_view.smart_widget import BarChartWidget
+from smart_view.smart_widget import HtmlWidget
 from smart_view.views import DoubleSmartViewMixin
 from marche.models import Marche
 
@@ -60,22 +60,31 @@ class DracharView(BiomAidViewMixin, TemplateView):
         return context
 
 
-class TestWidget(BarChartWidget):
-    _template_mapping_add = {}
+class TestWidget(HtmlWidget):
+    class Media:
+        js = ['common/vue/widget_demo.js']
+        css = {
+            'all': [
+                "https://unpkg.com/primevue@^3/resources/themes/saga-blue/theme.css",
+                "https://unpkg.com/primevue@^3/resources/primevue.min.css",
+                "https://unpkg.com/primeflex@^3/primeflex.min.css",
+                "https://unpkg.com/primeicons/primeicons.css",
+            ]
+        }
+
+    _template_mapping_add = {'vue_props': 'vue_props', 'vue_opts': 'vue_opts'}
+
+    template_string = (
+        '''{% load json_tags %}<div id="{{ html_id }}"></div>'''
+        '''<script>const {{ html_id }}_app = Vue.createApp(demo_widget, {{ vue_props|to_json }})'''
+        '''.use(primevue.config.default, {{ vue_opts|to_json }}).mount('#{{ html_id }}');'''
+        '''</script>'''
+    )
 
     def _setup(self, **params):
         super()._setup(**params)
-        self.params['qs'] = (
-            PrevisionnelSmartView21(prefix='', view_params=self.params, appname='drachar')
-            .get_base_queryset(self.params)
-            .filter(expert=self.params['user'], solder_ligne=False)
-            .order_by('-age_previsionnel')
-            .annotate(the_state=Value('R'))
-            .values('num_dmd__code', 'age_previsionnel', 'the_state')
-        )
-        self.params['category'] = 'the_state'
-        self.params['x'] = {'field': 'num_dmd__code', 'type': 'ordinal', 'sort': '-y'}
-        self.params['y'] = 'age_previsionnel:Q'
+        self.params['vue_opts'] = {'ripple': True}
+        self.params['vue_props'] = {'msg': "I did it !"}
 
 
 class DracharHome(DracharView):
@@ -83,7 +92,7 @@ class DracharHome(DracharView):
     name = 'drachar-home'
     title = _("Demandes de Réalisation d'ACHAt Reloaded")
     permissions = '__LOGIN__'
-    template_name = 'drachar/home.html'
+    template_name = 'common/basic_w_vue.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
