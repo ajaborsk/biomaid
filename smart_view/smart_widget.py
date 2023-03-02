@@ -526,3 +526,42 @@ class Vue2Widget(HtmlWidget):
             'smart_view/js/axios-0.27.2.min.js',
             'smart_view/js/get-coockie.js',
         ]
+
+
+class VueWidget(HtmlWidget):
+    @property
+    def media(self):
+        return Media(
+            js=[
+                'https://unpkg.com/vue@3/dist/vue.global.js',
+                'https://unpkg.com/primevue@^3/core/core.min.js',
+                'common/vue/{}.js'.format(self._vue_widget_name),
+            ],
+            css={
+                'all': [
+                    "https://unpkg.com/primevue@^3/resources/themes/saga-blue/theme.css",
+                    "https://unpkg.com/primevue@^3/resources/primevue.min.css",
+                    "https://unpkg.com/primeflex@^3/primeflex.min.css",
+                    "https://unpkg.com/primeicons/primeicons.css",
+                ]
+            },
+        )
+
+    _template_mapping_add = {'vue_widget_name': 'vue_widget_name', 'vue_props': 'vue_props', 'vue_opts': 'vue_opts'}
+
+    template_string = (
+        '''{% load json_tags %}<div id="{{ html_id }}"></div>'''
+        '''<script>const {{ html_id }}_app = Vue.createApp({{ vue_widget_name }}, {{ vue_props|to_json }})'''
+        '''.use(primevue.config.default, {{ vue_opts|to_json }}).mount('#{{ html_id }}');'''
+        '''</script>'''
+    )
+
+    def _setup(self, **params):
+        super()._setup(**params)
+        self.params['vue_widget_name'] = self._vue_widget_name
+        self.params['vue_opts'] = {'ripple': True}
+        self.params['vue_props'] = {'msg': "I did it !"}
+
+
+class DemoWidget(VueWidget):
+    _vue_widget_name = 'demo_widget'
