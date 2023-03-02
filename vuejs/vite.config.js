@@ -25,8 +25,8 @@ export default defineConfig({
     emptyOutDir: true,
 
     // Don't minify for now so it's easyier to understand what's really happening
-    minify: 'terser',
-    //minify: false,
+    // minify: 'terser',
+    minify: false,
 
     rollupOptions: {
         external:['window', 'vue'],

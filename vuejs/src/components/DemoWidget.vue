@@ -1,5 +1,7 @@
 <script setup>
+import { ref } from 'vue'
 import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 
 defineProps({
   msg: {
@@ -7,6 +9,11 @@ defineProps({
     required: true
   }
 })
+var displayModal = ref(false)
+
+function openModal(ev) {
+  displayModal.value = true
+}
 </script>
 
 <template>
@@ -17,7 +24,14 @@ defineProps({
       <a href="https://vitejs.dev/" target="_blank" rel="noopener">Vite</a> +
       <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue 3</a>.
     </h3>
-    <Button v-bind:label="msg" icon="pi pi-check" iconPos="right" />
+    <Button v-bind:label="msg" icon="pi pi-check" iconPos="right" @click="openModal" />
+    <Dialog
+      header="Confirmation"
+      v-model:visible="displayModal"
+      :style="{ width: '350px' }"
+      :modal="true"
+      >{{ msg }}</Dialog
+    >
   </div>
 </template>
 
