@@ -29,7 +29,7 @@ export default defineConfig({
     minify: false,
 
     rollupOptions: {
-        external:['window', 'vue'],
+        external:['window', 'vue', 'primevue'],
         // Multiple entries does not work for iife format :-(
         input: 'src/demo_widget.js',
 
@@ -39,7 +39,7 @@ export default defineConfig({
           // file: 'bundle.js',
           format: 'iife',
           //name: 'hw',
-          globals: {window:'window', vue:'Vue'},
+          globals: {window:'window', vue:'Vue', primevue:'primevue'},
           // inlineDynamicImports: true,
           // manualChunks: ['vue'],
         },

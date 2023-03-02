@@ -1,7 +1,14 @@
 <script setup>
 import { ref } from 'vue'
-import Button from 'primevue/button'
-import Dialog from 'primevue/dialog'
+import primevue from 'primevue'
+
+// This is the good way to use a primevue component.
+// If you try this :
+// "import Button from 'primevue/button'"
+// it'll work but not using externally provided primevue (via iife for instance) and lead to much bigger code
+const Button = primevue.button
+
+const Dialog = primevue.dialog
 
 defineProps({
   msg: {
@@ -9,7 +16,7 @@ defineProps({
     required: true
   }
 })
-var displayModal = ref(false)
+const displayModal = ref(false)
 
 function openModal(ev) {
   displayModal.value = true
