@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from distutils.log import warn
 import json
 import logging
 import urllib.parse
@@ -117,8 +118,13 @@ class BiomAidViewMixin(UserPassesTestMixin, metaclass=BiomAidViewMixinMetaclass)
     """
 
     # Default permissions = None !
-    permissions = set()
+    permissions: set[str] = set()
     footer_text = ""
+
+    def __init__(self, *args, **kwargs):
+        self.widgets = {}
+        self.main_widget = None
+        super().__init__(*args, **kwargs)
 
     def reverse(self, viewname, urlconf=None, args=None, kwargs=None, current_app=None):
         kwargs = kwargs or {}
@@ -351,6 +357,26 @@ class BiomAidViewMixin(UserPassesTestMixin, metaclass=BiomAidViewMixinMetaclass)
             step_idx += 1
         context[tour_name + '_steps'] = tour_steps
         return context
+
+    def get(self, request, *args, **kwargs):
+        if 'widget_id' in request.GET:
+            if request.GET['widget_id'] in self.widgets:
+                return self.widgets[request.GET['widget_id']]._get(request, *args, **kwargs)
+            else:
+                warn("GET with widget_id='{}' but there is no widget with that id in this view...".format(request.GET['widget_id']))
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if 'widget_id' in request.POST:
+            if request.POST['widget_id'] in self.widgets:
+                return self.widgets[request.POST['widget_id']]._get(request, *args, **kwargs)
+            else:
+                warn(
+                    "POST with widget_id='{}' but there is no widget with that id in this view...".format(request.POST['widget_id'])
+                )
+
+        return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
