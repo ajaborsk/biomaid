@@ -64,7 +64,7 @@ h3 {
     text-align: center;
   }
 }
-
+/*
 .p-button {
   margin-right: 0.5rem;
   text-align: center;
@@ -82,4 +82,5 @@ h3 {
 .template .p-button i {
   line-height: 2.25rem;
 }
+*/
 </style>

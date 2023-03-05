@@ -23,12 +23,10 @@ from os import path
 from os.path import exists
 from copy import deepcopy
 
-import altair
 import pysftp
 import tomlkit
 import pathlib
 
-from altair import Chart, Data
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views import View
@@ -45,7 +43,6 @@ from django.apps import apps
 from django.db.models import F, Value
 
 import common
-from analytics.data import get_data
 from common.base_views import BiomAidViewMixin
 from dem.smart_views import CampagneSmartView
 from importationdata.views import BddImportation, FileImportation
@@ -63,7 +60,6 @@ from common.forms import (
     EtablissementForm,
 )
 from common.models import (
-    Discipline,
     Uf,
     UserUfRole,
     Service,
@@ -81,17 +77,20 @@ from common.models import (
 )
 from common.smart_views import MyAlertsSmartView, ProgrammeSmartView, RoleScopeSmartView, FournisseurSmartView
 
-from common.db_utils import MyAlertsWidget, StringAgg
+from common.db_utils import StringAgg
 from smart_view.smart_page import SmartPage
 from smart_view.smart_widget import (
     AltairWidget,
     DemoPieChartWidget,
-    HtmlWidget,
     LightAndTextWidget,
+    MontantPrevisionnelParExpertWidget,
+    PrevisionnelParExpertWidget,
     RepartirWidget,
     SimpleLightWidget,
+    SimpleScalarWidget,
     SimpleTextWidget,
     Vue2Widget,
+    MyAlertsWidget,
 )
 
 logger = logging.getLogger(__name__)
@@ -198,104 +197,6 @@ class Profile(BiomAidViewMixin, TemplateView):
             user_profile_form=self.user_profile_form,
         )
         return context
-
-
-class SimpleScalarWidget(HtmlWidget):
-    template_string = (
-        '<div id="{{ html_id }}" style="'
-        'text-align:center;font-size:{{ font_size }}px;display:flex;'
-        'flex-direction:column;width:100%;height:100%;justify-content:space-evenly;'
-        '"><div style="color:{{ text_color }}">{{ prefix }}&nbsp;{{ scalar }}&nbsp;{{ suffix }}</div></div>'
-    )
-    PARAMS_ADD = ('font_size', 'text_color', 'scalar', 'prefix', 'suffix')
-    _template_mapping_add = {
-        'text_color': 'text_color',
-        'font_size': 'font_size',
-        'prefix': 'prefix',
-        'suffix': 'suffix',
-        'scalar': 'scalar',
-    }
-
-    label = _("Donnée simple")
-    help_text = _("Donnée unique (nombre)")
-    manual_params = {
-        'font_size': {'label': 'Taille du texte', 'type': 'int'},
-        'text_color': {'label': "Couleur du texte", 'type': 'color'},
-        'prefix': {'label': "Préfixe", 'type': 'string'},
-        'suffix': {'label': "Suffixe", 'type': 'string'},
-    }
-
-    def _setup(self, **params):
-        super()._setup(**params)
-        self.params['prefix'] = self.params.get('prefix', '')
-        self.params['suffix'] = self.params.get('suffix', '')
-        self.params['scalar'] = get_data('common.user-active-alerts', all_params=self.params)
-
-
-class PrevisionnelParExpertWidget(AltairWidget):
-    label = _("Nb prévisionnels par expert")
-
-    @staticmethod
-    def manual_params(params):
-        return {
-            'discipline': {
-                'label': "Discipline",
-                'type': 'choice',
-                'choices': list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
-            },
-        }
-
-    def _setup(self, **params):
-        super()._setup(**params)
-
-        qs = get_data('drachar.previsionnel-par-expert', all_params=self.params)
-        category = altair.Color('nom_expert', type='nominal', title="Chargé d'opération")
-        value = 'nombre:Q'
-        self.params['chart'] = (
-            Chart(Data(values=list(qs)))
-            .transform_calculate(
-                url=reverse('drachar:previsionnel', kwargs={'url_prefix': params['url_prefix']})
-                + '?filters=['
-                + '{"name":+"expert",+"value":+{"expert":+'
-                + altair.datum.expert
-                + '}},+{"name":+"solder_ligne",+"value":+{"solder_ligne":+false}}]'
-            )
-            .encode(theta=value, color=category, href='url:N', tooltip=[category, 'nombre:Q'])
-            .mark_arc(tooltip=True)
-            .properties(width='container', height='container')
-            .configure_view(strokeWidth=0)
-        )
-
-
-class MontantPrevisionnelParExpertWidget(AltairWidget):
-    label = _("Montant prévisionnel par expert")
-
-    @staticmethod
-    def manual_params(params):
-        return {
-            'discipline': {
-                'label': "Discipline",
-                'type': 'choice',
-                'choices': list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
-            },
-        }
-
-    def _setup(self, **params):
-        super()._setup(**params)
-
-        qs = get_data('drachar.montant-previsionnel-par-expert', all_params=self.params)
-        category = 'nom_expert:N'
-        value = 'montant_total:Q'
-        self.params['chart'] = (
-            Chart(Data(values=list(qs)))
-            .encode(
-                theta=value,
-                color=altair.Color(category),
-            )
-            .mark_arc(tooltip=True)
-            .properties(width='container', height='container')
-            .configure_view(strokeWidth=0)
-        )
 
 
 class Vue2GridWidget(Vue2Widget):

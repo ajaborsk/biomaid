@@ -29,20 +29,27 @@ export default defineConfig({
     minify: false,
 
     rollupOptions: {
-        external:['window', 'vue', 'primevue'],
-        // Multiple entries does not work for iife format :-(
-        input: 'src/demo_widget.js',
+      external: ['window', 'vue', 'axios', 'primevue'],
+      // Multiple entries does not work for iife format :-(
+      input: 'src/cockpit.js',
 
-        // Only names so it's easier to refer from Django templates
-        output: {
-          entryFileNames: '[name].js',
-          // file: 'bundle.js',
-          format: 'iife',
-          //name: 'hw',
-          globals: {window:'window', vue:'Vue', primevue:'primevue'},
-          // inlineDynamicImports: true,
-          // manualChunks: ['vue'],
-        },
-      },
-  },
+      // Only names so it's easier to refer from Django templates
+      output: {
+        entryFileNames: '[name].js',
+        // file: 'bundle.js',
+        format: 'iife',
+        name: 'cockpit',
+        globals: {
+          window: 'window',
+          vue: 'Vue',
+          axios: 'axios',
+          primevue: 'primevue'
+        }
+        // manualChunks: ['vue'],
+        //manualChunks: {
+        //  lodash: ['vue', 'primevue']
+        //}
+      }
+    }
+  }
 })

@@ -50,7 +50,6 @@ from django.contrib.postgres.aggregates import StringAgg as PsqlStringAgg
 
 from common import config
 from common.models import (
-    Alert,
     Programme,
     Uf,
     UserUfRole,
@@ -63,7 +62,6 @@ from common.models import (
     GenericRole,
 )
 from dem.models import Campagne, Demande
-from smart_view.smart_widget import LightAndTextWidget
 
 logger = logging.getLogger(__name__)
 
@@ -797,12 +795,3 @@ def group_by_entities(uf_datalist, class_list=(Pole, Service)):
             outlist.append((uf, fdata if not isinstance(fdata, frozenset) else dict(fdata)))
 
     return outlist
-
-
-class MyAlertsWidget(LightAndTextWidget):
-    label = _("Mes alertes")
-
-    def params_process(self):
-        qs = Alert.objects.filter(destinataire=self.params['user'], cloture__isnull=True)
-        self.params['color'] = 'red'
-        self.params['text'] = 'Yop ' + str(qs.count())

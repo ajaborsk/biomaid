@@ -16,18 +16,24 @@
 #
 import colorsys
 import json
+import logging
 import re
 from abc import ABCMeta, ABC
 from copy import deepcopy
 
+from django.urls import reverse
+import tomlkit
+
 import altair
 from altair import Chart, Data, Color, Scale
 from django.forms.widgets import MediaDefiningClass, Media
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import Context, Engine
 from django.utils.translation import gettext as _
+from analytics.data import get_data
 
 from common.base_views import BiomAidViewMixinMetaclass
+from common.models import Alert, Discipline
 
 
 def media_property(cls):
@@ -178,6 +184,9 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
 
     def _get(self, request, *args, **kwargs):
         return JsonResponse({'error': 'Widget _get method not overloaded'})
+
+    def _post(self, request, *args, **kwargs):
+        return JsonResponse({'error': 'Widget _post method not overloaded'})
 
     # def params_process(self):
     #     pass
@@ -519,6 +528,113 @@ class RepartirWidget(LightAndTextWidget):
         self.params['color'] = 'orange'
 
 
+class MyAlertsWidget(LightAndTextWidget):
+    label = _("Mes alertes")
+
+    def params_process(self):
+        qs = Alert.objects.filter(destinataire=self.params['user'], cloture__isnull=True)
+        self.params['color'] = 'red'
+        self.params['text'] = 'Yop ' + str(qs.count())
+
+
+class SimpleScalarWidget(HtmlWidget):
+    template_string = (
+        '<div id="{{ html_id }}" style="'
+        'text-align:center;font-size:{{ font_size }}px;display:flex;'
+        'flex-direction:column;width:100%;height:100%;justify-content:space-evenly;'
+        '"><div style="color:{{ text_color }}">{{ prefix }}&nbsp;{{ scalar }}&nbsp;{{ suffix }}</div></div>'
+    )
+    PARAMS_ADD = ('font_size', 'text_color', 'scalar', 'prefix', 'suffix')
+    _template_mapping_add = {
+        'text_color': 'text_color',
+        'font_size': 'font_size',
+        'prefix': 'prefix',
+        'suffix': 'suffix',
+        'scalar': 'scalar',
+    }
+
+    label = _("Donnée simple")
+    help_text = _("Donnée unique (nombre)")
+    manual_params = {
+        'font_size': {'label': 'Taille du texte', 'type': 'int'},
+        'text_color': {'label': "Couleur du texte", 'type': 'color'},
+        'prefix': {'label': "Préfixe", 'type': 'string'},
+        'suffix': {'label': "Suffixe", 'type': 'string'},
+    }
+
+    def _setup(self, **params):
+        super()._setup(**params)
+        self.params['prefix'] = self.params.get('prefix', '')
+        self.params['suffix'] = self.params.get('suffix', '')
+        self.params['scalar'] = get_data('common.user-active-alerts', all_params=self.params)
+
+
+class PrevisionnelParExpertWidget(AltairWidget):
+    label = _("Nb prévisionnels par expert")
+
+    @staticmethod
+    def manual_params(params):
+        return {
+            'discipline': {
+                'label': "Discipline",
+                'type': 'choice',
+                'choices': list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
+            },
+        }
+
+    def _setup(self, **params):
+        super()._setup(**params)
+
+        qs = get_data('drachar.previsionnel-par-expert', all_params=self.params)
+        category = altair.Color('nom_expert', type='nominal', title="Chargé d'opération")
+        value = 'nombre:Q'
+        self.params['chart'] = (
+            Chart(Data(values=list(qs)))
+            .transform_calculate(
+                url=reverse('drachar:previsionnel', kwargs={'url_prefix': params['url_prefix']})
+                + '?filters=['
+                + '{"name":+"expert",+"value":+{"expert":+'
+                + altair.datum.expert
+                + '}},+{"name":+"solder_ligne",+"value":+{"solder_ligne":+false}}]'
+            )
+            .encode(theta=value, color=category, href='url:N', tooltip=[category, 'nombre:Q'])
+            .mark_arc(tooltip=True)
+            .properties(width='container', height='container')
+            .configure_view(strokeWidth=0)
+        )
+
+
+class MontantPrevisionnelParExpertWidget(AltairWidget):
+    label = _("Montant prévisionnel par expert")
+
+    @staticmethod
+    def manual_params(params):
+        return {
+            'discipline': {
+                'label': "Discipline",
+                'type': 'choice',
+                'choices': list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
+            },
+        }
+
+    def _setup(self, **params):
+        super()._setup(**params)
+
+        qs = get_data('drachar.montant-previsionnel-par-expert', all_params=self.params)
+        category = 'nom_expert:N'
+        value = 'montant_total:Q'
+        self.params['chart'] = (
+            Chart(Data(values=list(qs)))
+            .encode(
+                theta=value,
+                color=altair.Color(category),
+            )
+            .mark_arc(tooltip=True)
+            .properties(width='container', height='container')
+            .configure_view(strokeWidth=0)
+        )
+
+
 class Vue2Widget(HtmlWidget):
     class Media:
         js = [
@@ -534,7 +650,9 @@ class VueWidget(HtmlWidget):
         return Media(
             js=[
                 'https://unpkg.com/vue@3/dist/vue.global.js',
+                'https://unpkg.com/vue-router@4/dist/vue-router.global.js',
                 'https://unpkg.com/primevue@^3/core/core.min.js',
+                'smart_view/js/axios-0.27.2.min.js',
                 'common/vue/{}.js'.format(self._vue_widget_name),
             ],
             css={
@@ -547,12 +665,18 @@ class VueWidget(HtmlWidget):
             },
         )
 
-    _template_mapping_add = {'vue_widget_name': 'vue_widget_name', 'vue_props': 'vue_props', 'vue_opts': 'vue_opts'}
+    _template_mapping_add = {
+        'vue_widget_name': 'vue_widget_name',
+        'vue_props': 'vue_props',
+        'vue_opts': 'vue_opts',
+    }
 
     template_string = (
         '''{% load json_tags %}<div id="{{ html_id }}"></div>'''
-        '''<script>const {{ html_id }}_app = Vue.createApp({{ vue_widget_name }}, {{ vue_props|to_json }})'''
-        '''.use(primevue.config.default, {{ vue_opts|to_json }}).mount('#{{ html_id }}');'''
+        '''<script>const routes = [{ path: "/", component: {{ vue_widget_name }} }];'''
+        '''const router = VueRouter.createRouter({ history: VueRouter.createWebHashHistory(), routes });'''
+        '''const {{ html_id }}_app = Vue.createApp({{ vue_widget_name }}, {{ vue_props|to_json }})'''
+        '''.use(primevue.config.default, {{ vue_opts|to_json }}).use(router).mount('#{{ html_id }}');'''
         '''</script>'''
     )
 
@@ -560,8 +684,199 @@ class VueWidget(HtmlWidget):
         super()._setup(**params)
         self.params['vue_widget_name'] = self._vue_widget_name
         self.params['vue_opts'] = {'ripple': True}
-        self.params['vue_props'] = {'msg': "I did it !"}
+        # self.params['vue_props'] = {'msg': "I did it !", 'html_id': self.params['html_id']}
 
 
 class DemoWidget(VueWidget):
     _vue_widget_name = 'demo_widget'
+
+
+class VueCockpit(VueWidget):
+    class Media:
+        js = [
+            'smart_view/js/vega@5.min.js',
+            'smart_view/js/vega-lite@4.min.js',
+            'smart_view/js/vega-embed@6.min.js',
+        ]
+
+    _vue_widget_name = 'cockpit'
+
+    default_grid_layout: list[dict] = []
+
+    categories = {
+        'generic': {'label': _("Génériques"), 'help_text': _("Tuiles sans source de données (toujours identiques)")},
+        'demo': {'label': _("Démo"), 'help_text': _("Tuiles de démontration")},
+        'common': {'label': _("Globaux"), 'help_text': _("Tuiles globales pour toute l'application")},
+        'dem': {'label': _("Demandes"), 'help_text': _("Tuiles du module de gestion des demandes")},
+        'drachar': {'label': _("DraCHAr"), 'help_text': _("Tuiles du module de suivi plan d'équipement")},
+    }
+
+    # Later, these templates could be defined in each module (ie Django application) as alarms, views, models, etc.
+    available_tile_templates: dict = {
+        'simple_text': {
+            'category': 'generic',
+            'label': _("Texte"),
+            'help_text': _("Widget qui affiche un texte fixe"),
+            'w': 3,
+            'h': 1,
+            'class': SimpleTextWidget,
+        },
+        'my_alerts': {
+            'category': 'common',
+            'label': _("Mes alertes"),
+            'class': MyAlertsWidget,
+        },
+        'demo_pie_chart': {
+            'category': 'demo',
+            'label': _("Camenbert"),
+            'class': DemoPieChartWidget,
+        },
+        'simple_light': {
+            'category': 'demo',
+            'label': _("Voyant coloré"),
+            'class': SimpleLightWidget,
+        },
+        'light_and_text': {
+            'category': 'demo',
+            'label': _("Texte et voyant"),
+            'class': LightAndTextWidget,
+        },
+        'a_repartir': {
+            'category': 'dem',
+            'label': _("Demandes à répartir"),
+            'class': RepartirWidget,
+        },
+        'simple_scalar': {
+            'category': 'demo',
+            'label': _("Valeur numérique"),
+            'class': SimpleScalarWidget,
+        },
+        'nb_previsionnel_par_expert': {
+            'category': 'drachar',
+            'label': _("Prévisionnel par expert (qté)"),
+            'class': PrevisionnelParExpertWidget,
+        },
+        'montant_previsionnel_par_expert': {
+            'category': 'drachar',
+            'label': _("Prévisionnel par expert (€)"),
+            'class': MontantPrevisionnelParExpertWidget,
+        },
+    }
+
+    def __init__(self, *args, **kwargs):
+        self.contents = kwargs.pop('contents', None)
+        self.config_name = kwargs.pop('config_name', 'cockpit')
+        self.user_settings_path = kwargs.pop('user_settings_path', None)
+
+        if not isinstance(self.contents, dict) or 'layout' not in self.contents:
+            logging.warning("Using fallback layout for portal home content (not using {}).".format(repr(self.contents)))
+            self.contents = {'layout': self.default_grid_layout}
+
+        try:
+            for widget in self.contents['layout']:
+                if 'w_params' in widget and not isinstance(widget['w_params'], str):
+                    # convert w_params to a JSON string (if needed)
+                    widget['w_params'] = json.dumps(widget['w_params'])
+        except TypeError:
+            logging.warning(
+                "Using fallback layout for portal home content (layout is not iterable: {}).".format(repr(self.contents['layout']))
+            )
+            self.contents = {'layout': self.default_grid_layout}
+
+        self.editable = self.contents.get('editable', True)
+        self.columns = self.contents.get('columns', 16)
+        self.rows = self.contents.get('rows', 32)
+        self.v_spacing = self.contents.get('v_spacing', 12)
+        self.h_spacing = self.contents.get('h_spacing', 12)
+        self.initial_layout = []
+
+        super().__init__(*args, **kwargs)
+
+    def _setup(self, **params):
+        super()._setup(**params)
+        try:
+            self.initial_layout = self.params['user_preferences'][self.user_settings_path]
+        except KeyError:
+            pass
+        print('initial layout', repr(self.initial_layout))
+
+    def _get_as_toml(self, request, cockpit_name, *args, **kwargs):
+        toml_doc = tomlkit.TOMLDocument()
+        grid_layout = self.contents['layout']
+        if self.editable:
+            if not request.GET.get('reset'):
+                try:
+                    grid_layout = self.params['user_preferences'][self.config_name + '.grid-layout']
+                except KeyError:
+                    pass
+        base_cfg = {}
+        cfg = base_cfg
+        if not cockpit_name:
+            cockpit_name = self.config_name
+        while '.' in cockpit_name:
+            root, cockpit_name = cockpit_name.split('.', 1)
+            cfg[root] = {}
+            cfg = cfg[root]
+        cfg[cockpit_name] = {
+            'layout': deepcopy(grid_layout),
+            'rows': self.rows,
+            'columns': self.columns,
+            'h_spacing': self.h_spacing,
+            'v_spacing': self.v_spacing,
+        }
+        if self.editable:
+            cfg[cockpit_name]['editable'] = True
+            cfg[cockpit_name]['available_widgets'] = list(self.available_widgets.keys())
+        else:
+            cfg[cockpit_name]['editable'] = False
+        for widget in cfg[cockpit_name]['layout']:
+            widget['w_params'] = json.loads(widget['w_params'])
+        toml_doc.update(base_cfg)
+        return HttpResponse(toml_doc.as_string(), content_type='text/plain; charset=utf-8')
+
+    def _get(self, request, *args, **kwargs):
+        return JsonResponse({'tiles contents': 'not implemented yet'})
+
+    def _post(self, request, *args, **kwargs):
+        print('cockpit post...', repr(request.POST['layout']))
+        try:
+            layout = json.loads(request.POST['layout'])
+        except json.JSONDecodeError as exc:
+            return JsonResponse({'error': 'JSONDecodeError', 'exception': str(exc)})
+
+        self.params['user_preferences'][self.user_settings_path] = layout
+        # self.params['user_preferences'][self.user_settings_path]
+        return JsonResponse({'recorded_layout': 'not implemented yet'})
+
+    def _get_context_data(self, **kwargs):
+        # This part is comuted BEFORE applying the parameters->context mapping
+
+        # Since this is a property only used to generate the html/js, no need to compute it in setup()
+        #  (which is called at every instanciation)
+        palette = {}
+        for tile_template_name, tile_template in self.available_tile_templates.items():
+            if tile_template['category'] not in palette:
+                palette[tile_template['category']] = self.categories[tile_template['category']]
+                palette[tile_template['category']]['items'] = {}
+            palette[tile_template['category']]['items'][tile_template_name] = {
+                'label': tile_template['label'],
+                'help_text': tile_template.get('help_text', ''),
+                'w': tile_template.get('w', 1),
+                'h': tile_template.get('h', 1),
+            }
+        self.params['vue_props'] = {
+            'html_id': self.html_id,
+            # 'tile_templates': {k: {} for k, v in self.available_tile_templates.items()},
+            'grid_params': {
+                'row': self.rows,
+                'columns': self.columns,
+                'h_spacing': self.h_spacing,
+                'v_spacing': self.v_spacing,
+                'editable': self.editable,
+                'init_layout': self.initial_layout,
+            },
+            'palette': palette,
+        }
+
+        # Apply parameters->context mapping then return
+        return super()._get_context_data(**kwargs)

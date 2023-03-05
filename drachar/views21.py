@@ -30,7 +30,7 @@ from drachar.models import Previsionnel, ContactLivraison, Dra, Dossier
 from drachar.forms import NouvelleDra, LigneForm
 from smart_view.smart_page import SmartPage
 from smart_view.smart_view import ComputedSmartField
-from smart_view.smart_widget import DemoWidget
+from smart_view.smart_widget import VueCockpit
 from smart_view.views import DoubleSmartViewMixin
 from marche.models import Marche
 
@@ -60,17 +60,57 @@ class DracharView(BiomAidViewMixin, TemplateView):
         return context
 
 
-class DracharHome(DracharView):
+class DracharCockpit(BiomAidViewMixin, TemplateView):
     application = 'drachar'
     name = 'drachar-home'
     title = _("Demandes de Réalisation d'ACHAt Reloaded")
     permissions = '__LOGIN__'
     template_name = 'common/basic_w_vue.html'
 
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+
+        # Since widget can be used even without page rendering (for interactions with their JS part) we instanciate them early
+        self.main_widget = VueCockpit(params=self.view_params, user_settings_path='drachar.cockpit.layout')
+        self.widgets[self.main_widget.html_id] = self.main_widget
+
+    def get(self, request, *args, **kwargs):
+        # Small trick to get toml text response (ready to cut/paste in a config file :-)
+        if 'get_toml' in request.GET:
+            return self.main_widget._get_as_toml(request, request.GET['get_toml'], *args, **kwargs)
+
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['main_widget'] = DemoWidget(params=self.view_params)
-        # context['main_widget'] = VueGridWidget(**self.view_params)
+        context['main_widget'] = self.main_widget
+        return context
+
+
+class DracharHome(DracharView):
+    application = 'drachar'
+    name = 'drachar-home-bak'
+    title = _("Demandes de Réalisation d'ACHAt Reloaded")
+    permissions = '__LOGIN__'
+    template_name = 'common/basic_w_vue.html'
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+
+        # Since widget can be used even without page rendering (for interactions with their JS part) we instanciate them early
+        self.main_widget = VueCockpit(params=self.view_params)
+        self.widgets[self.main_widget.html_id] = self.main_widget
+
+    def get(self, request, *args, **kwargs):
+        # Small trick to get toml text response (ready to cut/paste in a config file :-)
+        if 'get_toml' in request.GET:
+            return self.main_widget._get_as_toml(request, request.GET['get_toml'], *args, **kwargs)
+
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['main_widget'] = self.main_widget
         return context
 
 

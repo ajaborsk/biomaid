@@ -38,7 +38,7 @@ admin.autodiscover()
 
 app_name = 'drachar'
 urlpatterns = [
-    path('home/', views21.DracharHome.as_view(), name='home'),
+    path('home/', views21.DracharCockpit.as_view(), name='home'),
     path('mesdossiers/', views21.MesDossiersView.as_view(), name='mesdossiers'),
     path('previsionnel/', views21.PrevisionnelView.as_view(), name='previsionnel-back'),
     # path('nouveaudossier/', views.nouveau_dossier, name='nouveaudossier'),

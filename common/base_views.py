@@ -370,7 +370,7 @@ class BiomAidViewMixin(UserPassesTestMixin, metaclass=BiomAidViewMixinMetaclass)
     def post(self, request, *args, **kwargs):
         if 'widget_id' in request.POST:
             if request.POST['widget_id'] in self.widgets:
-                return self.widgets[request.POST['widget_id']]._get(request, *args, **kwargs)
+                return self.widgets[request.POST['widget_id']]._post(request, *args, **kwargs)
             else:
                 warn(
                     "POST with widget_id='{}' but there is no widget with that id in this view...".format(request.POST['widget_id'])
@@ -380,6 +380,9 @@ class BiomAidViewMixin(UserPassesTestMixin, metaclass=BiomAidViewMixinMetaclass)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # The main widget !
+        context['main_widget'] = self.main_widget
 
         # Gestion éventuelle du préfixe d'RUL
         context['url_prefix'] = self.url_prefix

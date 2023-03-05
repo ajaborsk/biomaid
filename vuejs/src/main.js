@@ -3,5 +3,4 @@ import App from './App.vue'
 
 import './assets/main.css'
 
-let Popo = createApp(App);
-
+let Popo = createApp(App)

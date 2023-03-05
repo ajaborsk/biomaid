@@ -5,4 +5,3 @@ import { createApp } from 'vue'
 //import './assets/main.css'
 
 win.createApp = createApp
-
