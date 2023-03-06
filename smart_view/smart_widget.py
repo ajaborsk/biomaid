@@ -798,7 +798,6 @@ class VueCockpit(VueWidget):
             self.initial_layout = self.params['user_preferences'][self.user_settings_path]
         except KeyError:
             pass
-        print('initial layout', repr(self.initial_layout))
 
     def _get_as_toml(self, request, cockpit_name, *args, **kwargs):
         toml_doc = tomlkit.TOMLDocument()
@@ -835,7 +834,14 @@ class VueCockpit(VueWidget):
         return HttpResponse(toml_doc.as_string(), content_type='text/plain; charset=utf-8')
 
     def _get(self, request, *args, **kwargs):
-        return JsonResponse({'tiles contents': 'not implemented yet'})
+        """Get the tiles contents"""
+        try:
+            tiles = json.loads(request.GET['layout'])
+        except json.JSONDecodeError as exc:
+            return JsonResponse({'error': 'JSON decode error', 'exception': str(exc)})
+        print('get:', repr(tiles))
+        tiles_contents = {tile['i']: {'html': '<b>Computed text</b>'} for tile in tiles}
+        return JsonResponse({'tiles': tiles_contents})
 
     def _post(self, request, *args, **kwargs):
         print('cockpit post...', repr(request.POST['layout']))

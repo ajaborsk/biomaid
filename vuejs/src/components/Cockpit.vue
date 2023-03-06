@@ -11,6 +11,7 @@ import ContextMenu from 'primevue/contextmenu'
 const Button = primevue.button
 const Dialog = primevue.dialog
 const Tooltip = primevue.tooltip
+const InputText = primevue.inputtext
 
 // Directive to get tooltips
 const vTooltip = Tooltip
@@ -26,6 +27,9 @@ const props = defineProps({
 
 const currentInstance = getCurrentInstance()
 const gridData = reactive({ layout: props.grid_params.init_layout })
+
+const tileFormStructure = ref([{ test1: 'popo1' }])
+const tileFormIsOpen = ref(false)
 
 const editable = ref(true)
 
@@ -62,7 +66,6 @@ const unlocked = ref(false)
 // Used to know if the user has added, moved, resized or removed tiles (= grid items).
 // if so, the layout will be sent to the server (for storage)
 const touched = ref(false)
-const grid_item_form_open = ref(false)
 
 // ref to the palette (splitter) panel component
 // const palettePanel = ref(null)
@@ -113,10 +116,26 @@ function layoutUpdated() {
 
 function refresh_all() {
   const params = new URLSearchParams()
+  let layout = []
   params.append('widget_id', props.html_id)
-  params.append('layout', JSON.stringify(gridData.layout))
+  for (var i = 0; i < gridData.layout.length; i++) {
+    let tile = gridData.layout[i]
+    layout.push({
+      i: tile.i,
+      w_class: tile.w_class,
+      w_params: tile.w_params
+    })
+  }
+  params.append('layout', JSON.stringify(layout))
   axios.get('.', { params }).then((response) => {
     console.log(response.data)
+    for (var i = 0; i < gridData.layout.length; i++) {
+      let tile = gridData.layout[i]
+      if (response.data.tiles.hasOwnProperty(tile.i)) {
+        console.log('i=', tile.i, 'html=', response.data.tiles[tile.i].html)
+        tile.content = response.data.tiles[tile.i].html
+      }
+    }
   })
 }
 
@@ -125,8 +144,54 @@ function layoutReady() {
   // load widgets contents from server
   refresh_all()
 }
+
 function editItem(i) {
   //...
+  console.log('Editing tile properties...', i)
+
+  let index = gridData.layout.findIndex((item) => item.i === i)
+  let tileData = gridData.layout[index]
+
+  tileData.editing = true
+  // Build the form from tile template:
+  tileFormStructure.value = {
+    i: i,
+    index: index,
+    form: [
+      { id: 'title', label: 'Titre', type: 'string', value: tileData.title },
+      { label: 'popo suivant 2 ', type: 'string', value: 'pi' }
+    ]
+  }
+
+  // Open the dialog form
+  tileFormIsOpen.value = true
+}
+
+function editItemOk() {
+  // Save the data in the tile properties
+  // ...
+  console.log('Saving !')
+  let tileData = gridData.layout[tileFormStructure.value.index]
+  for (var i = 0; i < tileFormStructure.value.form.length; i++) {
+    let parameter = tileFormStructure.value.form[i]
+    console.log('  Value:', parameter.label, parameter.value)
+    if (parameter.id === 'title') {
+      tileData.title = parameter.value
+    }
+  }
+  tileData.editing = false
+
+  touched.value = true
+
+  // Close the dialog form
+  tileFormIsOpen.value = false
+}
+
+function editItemCancel() {
+  let tileData = gridData.layout[tileFormStructure.value.index]
+  tileData.editing = false
+  // Close the dialog form
+  tileFormIsOpen.value = false
 }
 
 function modifiedItem(event) {
@@ -164,21 +229,6 @@ function saveLayout() {
   }
   touched.value = false
   refresh_all()
-}
-
-function toggleLock() {
-  unlocked.value = !unlocked.value
-  if (!unlocked.value && touched.value) {
-    console.log('really updated')
-    // Store layout on server:
-    //...
-    console.log(csrftoken)
-    touched.value = false
-    refresh_all()
-  } else {
-    // force resize palette panel
-    // palettePanel.value.size = 5
-  }
 }
 
 function removeItem(val) {
@@ -294,10 +344,6 @@ function dragend(e) {
       let el = gridItemRefs.value[index]
       console.log(index, el)
     })
-    //try {
-    //gridItemRefs.value[gridlayout.value.layout.length].$refs.item.style.display = 'block'
-    // el.$.attrs.style.display = 'block'
-    //} catch {}
   }
 }
 </script>
@@ -311,6 +357,7 @@ function dragend(e) {
     "
   >
     <div class="cockpit-palette" v-show="unlocked">
+      <div>Palette</div>
       <Accordion :activeIndex="0">
         <AccordionTab v-for="category in palette">
           <template #header>
@@ -327,6 +374,7 @@ function dragend(e) {
             unselectable="on"
             :w_class="tmpl"
             w_params='{"toto":10}'
+            v-tooltip="item.help_text"
           >
             <div>
               {{ item.label }}
@@ -377,7 +425,7 @@ function dragend(e) {
           :w_params="item.w_params"
           :drag-allow-from="'.title'"
           :key="item.i"
-          :class="{ 'add-border': item.title }"
+          :class="{ 'add-border': item.title, editing: item.editing }"
           :style="{ display: 'block' }"
           @moved="modifiedItem"
           @resized="modifiedItem"
@@ -426,37 +474,59 @@ function dragend(e) {
           pouvez la déplacer en cliquant sur le titre)
         </p>
       </Dialog>
-      <div v-if="grid_item_form_open" class="dialog-background">
-        <Dialog>
-          <div class="dialog-title"></div>
-          <form class="dialog-form">
-            <fieldset>
-              <legend>Modification du Widget :</legend>
-              <label>Titre</label><input v-model="edit_widget_title" />
-              <template v-for="entry in form">
-                <label>{{ entry.label }}</label>
-                <input v-if="entry.type == 'int'" v-model.lazy="entry.value" type="number" />
-                <input
-                  v-else-if="entry.type == 'boolean'"
-                  v-model.lazy="entry.value"
-                  type="checkbox"
-                />
-                <input v-else-if="entry.type == 'color'" v-model.lazy="entry.value" type="color" />
-                <select v-else-if="entry.type == 'choice'" v-model.lazy="entry.value">
-                  <option v-for="choice in entry.choices" :value="choice[0]">
-                    {{ choice[1] }}
-                  </option>
-                </select>
-                <input v-else="" v-model.lazy="entry.value" />
-              </template>
-            </fieldset>
-          </form>
-          <div class="form-buttons-box">
-            <button class="dialog-button" @click="itemEditOk(edit_item)">Ok</button>
-            <button class="dialog-button" @click="itemEditCancel(edit_item)">Annuler</button>
-          </div>
-        </Dialog>
-      </div>
+      <Dialog
+        ref="tileForm"
+        v-model:visible="tileFormIsOpen"
+        header="Test formulaire"
+        modal="true"
+        @after-hide="editItemCancel"
+      >
+        <div v-for="formItem in tileFormStructure.form">
+          <label>{{ formItem.label }}</label>
+          <InputText v-if="formItem.type == 'string'" type="text" v-model="formItem.value" />
+        </div>
+        <div>
+          <Button
+            icon="pi pi-times"
+            class="p-button-raised p-button-rounded p-button-lg"
+            @click="editItemCancel"
+          />
+          <Button
+            icon="pi pi-check"
+            class="p-button-raised p-button-rounded p-button-lg"
+            @click="editItemOk"
+          />
+        </div>
+      </Dialog>
+      <Dialog>
+        <div class="dialog-title"></div>
+        <form class="dialog-form">
+          <fieldset>
+            <legend>Modification du Widget :</legend>
+            <label>Titre</label><input v-model="edit_widget_title" />
+            <template v-for="entry in form">
+              <label>{{ entry.label }}</label>
+              <input v-if="entry.type == 'int'" v-model.lazy="entry.value" type="number" />
+              <input
+                v-else-if="entry.type == 'boolean'"
+                v-model.lazy="entry.value"
+                type="checkbox"
+              />
+              <input v-else-if="entry.type == 'color'" v-model.lazy="entry.value" type="color" />
+              <select v-else-if="entry.type == 'choice'" v-model.lazy="entry.value">
+                <option v-for="choice in entry.choices" :value="choice[0]">
+                  {{ choice[1] }}
+                </option>
+              </select>
+              <input v-else="" v-model.lazy="entry.value" />
+            </template>
+          </fieldset>
+        </form>
+        <div class="form-buttons-box">
+          <button class="dialog-button" @click="itemEditOk(edit_item)">Ok</button>
+          <button class="dialog-button" @click="itemEditCancel(edit_item)">Annuler</button>
+        </div>
+      </Dialog>
     </div>
   </div>
 </template>
@@ -472,7 +542,8 @@ function dragend(e) {
   height: 100%;
   width: 240px;
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  border: #ddd 1px solid;
 }
 
 .p-accordion .p-accordion-content {
@@ -519,7 +590,7 @@ function dragend(e) {
   box-sizing: border-box;
 }
 
-.vue-grid-item:not(.vue-grid-placeholder) {
+.vue-grid-item:not(.vue-grid-placeholder):not(.editing) {
   background: #fff;
 }
 
@@ -530,11 +601,15 @@ function dragend(e) {
 }
 */
 
-.vue-grid-item .resizing {
+.vue-grid-item.editing {
+  background-color: lightpink;
+}
+
+.vue-grid-item.resizing {
   opacity: 0.9;
 }
 
-.vue-grid-item .static {
+.vue-grid-item.static {
   background: #aaa;
 }
 

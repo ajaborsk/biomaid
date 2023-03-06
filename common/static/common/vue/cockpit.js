@@ -13,7 +13,8 @@
   height: 100%;
   width: 240px;
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  border: #ddd 1px solid;
 }
 .p-accordion .p-accordion-content {
   display: flex;
@@ -52,7 +53,7 @@
 .vue-resizable {
   box-sizing: border-box;
 }
-.vue-grid-item:not(.vue-grid-placeholder) {
+.vue-grid-item:not(.vue-grid-placeholder):not(.editing) {
   background: #fff;
 }
 
@@ -62,10 +63,13 @@
     border-radius: 5px;
 }
 */
-.vue-grid-item .resizing {
+.vue-grid-item.editing {
+  background-color: lightpink;
+}
+.vue-grid-item.resizing {
   opacity: 0.9;
 }
-.vue-grid-item .static {
+.vue-grid-item.static {
   background: #aaa;
 }
 .vue-grid-item .frame {
@@ -7119,38 +7123,35 @@
   const Cockpit_vue_vue_type_style_index_0_lang = "";
   const _hoisted_1 = { style: { "height": "100%", "display": "grid", "grid-auto-flow": "column", "grid-auto-columns": "auto minmax(0, 1fr)" } };
   const _hoisted_2 = { class: "cockpit-palette" };
-  const _hoisted_3 = { style: { "width": "100%" } };
-  const _hoisted_4 = ["w_class"];
-  const _hoisted_5 = { style: { "display": "flex", "justify-content": "space-evenly", "padding": "12px" } };
-  const _hoisted_6 = ["innerHTML"];
-  const _hoisted_7 = { class: "frame-overlay" };
-  const _hoisted_8 = {
+  const _hoisted_3 = /* @__PURE__ */ vue.createElementVNode("div", null, "Palette", -1);
+  const _hoisted_4 = { style: { "width": "100%" } };
+  const _hoisted_5 = ["w_class"];
+  const _hoisted_6 = { style: { "display": "flex", "justify-content": "space-evenly", "padding": "12px" } };
+  const _hoisted_7 = ["innerHTML"];
+  const _hoisted_8 = { class: "frame-overlay" };
+  const _hoisted_9 = {
     key: 0,
     class: "title"
   };
-  const _hoisted_9 = {
+  const _hoisted_10 = {
     key: 1,
     class: "remove"
   };
-  const _hoisted_10 = ["onClick"];
   const _hoisted_11 = ["onClick"];
-  const _hoisted_12 = ["innerHTML"];
-  const _hoisted_13 = /* @__PURE__ */ vue.createElementVNode("ul", null, [
+  const _hoisted_12 = ["onClick"];
+  const _hoisted_13 = ["innerHTML"];
+  const _hoisted_14 = /* @__PURE__ */ vue.createElementVNode("ul", null, [
     /* @__PURE__ */ vue.createElementVNode("li", null, "Ajouter une tuile"),
     /* @__PURE__ */ vue.createElementVNode("li", null, "Supprimer une tuile"),
     /* @__PURE__ */ vue.createElementVNode("li", null, "Déplacer une tuile"),
     /* @__PURE__ */ vue.createElementVNode("li", null, "Changer la taille d'une tuile")
   ], -1);
-  const _hoisted_14 = /* @__PURE__ */ vue.createElementVNode("p", null, [
+  const _hoisted_15 = /* @__PURE__ */ vue.createElementVNode("p", null, [
     /* @__PURE__ */ vue.createElementVNode("b", null, "Note :"),
     /* @__PURE__ */ vue.createTextVNode(" Vous pouvez garder cette aide ouverte et continuer à travailler"),
     /* @__PURE__ */ vue.createElementVNode("br"),
     /* @__PURE__ */ vue.createTextVNode("(vous pouvez la déplacer en cliquant sur le titre) ")
   ], -1);
-  const _hoisted_15 = {
-    key: 0,
-    class: "dialog-background"
-  };
   const _hoisted_16 = /* @__PURE__ */ vue.createElementVNode("div", { class: "dialog-title" }, null, -1);
   const _hoisted_17 = { class: "dialog-form" };
   const _hoisted_18 = /* @__PURE__ */ vue.createElementVNode("legend", null, "Modification du Widget :", -1);
@@ -7177,9 +7178,12 @@
       const Button = primevue2.button;
       const Dialog = primevue2.dialog;
       const Tooltip = primevue2.tooltip;
+      const InputText = primevue2.inputtext;
       const vTooltip = Tooltip;
       const currentInstance = vue.getCurrentInstance();
       const gridData = vue.reactive({ layout: props.grid_params.init_layout });
+      const tileFormStructure = vue.ref([{ test1: "popo1" }]);
+      const tileFormIsOpen = vue.ref(false);
       const editable = vue.ref(true);
       const gridLayout = vue.ref(null);
       const gridItemRefs = vue.ref([]);
@@ -7204,7 +7208,6 @@
       ]);
       const unlocked = vue.ref(false);
       const touched = vue.ref(false);
-      const grid_item_form_open = vue.ref(false);
       let mouseXY = { x: null, y: null };
       let DragPos = { x: null, y: null, w: 1, h: 1, i: null, w_class: null, w_params: null };
       function getCookie(name) {
@@ -7239,10 +7242,26 @@
       }
       function refresh_all() {
         const params = new URLSearchParams();
+        let layout = [];
         params.append("widget_id", props.html_id);
-        params.append("layout", JSON.stringify(gridData.layout));
+        for (var i = 0; i < gridData.layout.length; i++) {
+          let tile = gridData.layout[i];
+          layout.push({
+            i: tile.i,
+            w_class: tile.w_class,
+            w_params: tile.w_params
+          });
+        }
+        params.append("layout", JSON.stringify(layout));
         axios2.get(".", { params }).then((response) => {
           console.log(response.data);
+          for (var i2 = 0; i2 < gridData.layout.length; i2++) {
+            let tile = gridData.layout[i2];
+            if (response.data.tiles.hasOwnProperty(tile.i)) {
+              console.log("i=", tile.i, "html=", response.data.tiles[tile.i].html);
+              tile.content = response.data.tiles[tile.i].html;
+            }
+          }
         });
       }
       function layoutReady() {
@@ -7250,6 +7269,38 @@
         refresh_all();
       }
       function editItem(i) {
+        console.log("Editing tile properties...", i);
+        let index = gridData.layout.findIndex((item) => item.i === i);
+        let tileData = gridData.layout[index];
+        tileData.editing = true;
+        tileFormStructure.value = {
+          i,
+          index,
+          form: [
+            { id: "title", label: "Titre", type: "string", value: tileData.title },
+            { label: "popo suivant 2 ", type: "string", value: "pi" }
+          ]
+        };
+        tileFormIsOpen.value = true;
+      }
+      function editItemOk() {
+        console.log("Saving !");
+        let tileData = gridData.layout[tileFormStructure.value.index];
+        for (var i = 0; i < tileFormStructure.value.form.length; i++) {
+          let parameter = tileFormStructure.value.form[i];
+          console.log("  Value:", parameter.label, parameter.value);
+          if (parameter.id === "title") {
+            tileData.title = parameter.value;
+          }
+        }
+        tileData.editing = false;
+        touched.value = true;
+        tileFormIsOpen.value = false;
+      }
+      function editItemCancel() {
+        let tileData = gridData.layout[tileFormStructure.value.index];
+        tileData.editing = false;
+        tileFormIsOpen.value = false;
       }
       function modifiedItem(event) {
         touched.value = true;
@@ -7368,12 +7419,13 @@
       return (_ctx, _cache) => {
         return vue.openBlock(), vue.createElementBlock("div", _hoisted_1, [
           vue.withDirectives(vue.createElementVNode("div", _hoisted_2, [
+            _hoisted_3,
             vue.createVNode(vue.unref(script$4), { activeIndex: 0 }, {
               default: vue.withCtx(() => [
                 (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(__props.palette, (category) => {
                   return vue.openBlock(), vue.createBlock(vue.unref(script$3), null, {
                     header: vue.withCtx(() => [
-                      vue.withDirectives((vue.openBlock(), vue.createElementBlock("div", _hoisted_3, [
+                      vue.withDirectives((vue.openBlock(), vue.createElementBlock("div", _hoisted_4, [
                         vue.createTextVNode(vue.toDisplayString(category.label), 1)
                       ])), [
                         [vue.unref(vTooltip), category.help_text]
@@ -7381,7 +7433,7 @@
                     ]),
                     default: vue.withCtx(() => [
                       (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(category.items, (item, tmpl) => {
-                        return vue.openBlock(), vue.createElementBlock("div", {
+                        return vue.withDirectives((vue.openBlock(), vue.createElementBlock("div", {
                           onDrag: drag,
                           onDragend: dragend,
                           class: "droppable-element palette-item",
@@ -7391,7 +7443,9 @@
                           w_params: '{"toto":10}'
                         }, [
                           vue.createElementVNode("div", null, vue.toDisplayString(item.label), 1)
-                        ], 40, _hoisted_4);
+                        ], 40, _hoisted_5)), [
+                          [vue.unref(vTooltip), item.help_text]
+                        ]);
                       }), 256))
                     ]),
                     _: 2
@@ -7400,7 +7454,7 @@
               ]),
               _: 1
             }),
-            vue.createElementVNode("div", _hoisted_5, [
+            vue.createElementVNode("div", _hoisted_6, [
               vue.createVNode(vue.unref(Button), {
                 icon: "pi pi-question",
                 class: "p-button-raised p-button-rounded p-button-lg",
@@ -7422,7 +7476,7 @@
           vue.createElementVNode("div", {
             id: "grid-container",
             class: "grid-container",
-            onClick: _cache[5] || (_cache[5] = (...args) => _ctx.layoutClick && _ctx.layoutClick(...args))
+            onClick: _cache[6] || (_cache[6] = (...args) => _ctx.layoutClick && _ctx.layoutClick(...args))
           }, [
             vue.createVNode(vue.unref(sa), {
               ref_key: "gridLayout",
@@ -7457,7 +7511,7 @@
                     w_params: item.w_params,
                     "drag-allow-from": ".title",
                     key: item.i,
-                    class: vue.normalizeClass({ "add-border": item.title }),
+                    class: vue.normalizeClass({ "add-border": item.title, editing: item.editing }),
                     style: { display: "block" },
                     onMoved: modifiedItem,
                     onResized: modifiedItem
@@ -7474,24 +7528,24 @@
                           key: 0,
                           class: vue.normalizeClass(["content", { "with-title": item.title.length }]),
                           innerHTML: item.content
-                        }, null, 10, _hoisted_6)) : vue.createCommentVNode("", true),
-                        vue.createElementVNode("div", _hoisted_7, [
-                          item.title.length | unlocked.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_8, vue.toDisplayString(item.title), 1)) : vue.createCommentVNode("", true),
-                          unlocked.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_9, [
+                        }, null, 10, _hoisted_7)) : vue.createCommentVNode("", true),
+                        vue.createElementVNode("div", _hoisted_8, [
+                          item.title.length | unlocked.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_9, vue.toDisplayString(item.title), 1)) : vue.createCommentVNode("", true),
+                          unlocked.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_10, [
                             vue.createElementVNode("i", {
                               class: "pi pi-pencil",
                               onClick: ($event) => editItem(item.i)
-                            }, null, 8, _hoisted_10),
+                            }, null, 8, _hoisted_11),
                             vue.createElementVNode("i", {
                               class: "pi pi-trash",
                               onClick: ($event) => removeItem(item.i)
-                            }, null, 8, _hoisted_11)
+                            }, null, 8, _hoisted_12)
                           ])) : vue.createCommentVNode("", true),
                           item.title.length ? (vue.openBlock(), vue.createElementBlock("div", {
                             key: 2,
                             class: "window",
                             innerHTML: item.content
-                          }, null, 8, _hoisted_12)) : vue.createCommentVNode("", true)
+                          }, null, 8, _hoisted_13)) : vue.createCommentVNode("", true)
                         ])
                       ], 2)
                     ]),
@@ -7515,105 +7569,138 @@
             }, {
               default: vue.withCtx(() => [
                 vue.createTextVNode(" Hello ! "),
-                _hoisted_13,
-                _hoisted_14
+                _hoisted_14,
+                _hoisted_15
               ]),
               _: 1
             }, 8, ["visible"]),
-            grid_item_form_open.value ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_15, [
-              vue.createVNode(vue.unref(Dialog), null, {
-                default: vue.withCtx(() => [
-                  _hoisted_16,
-                  vue.createElementVNode("form", _hoisted_17, [
-                    vue.createElementVNode("fieldset", null, [
-                      _hoisted_18,
-                      _hoisted_19,
-                      vue.withDirectives(vue.createElementVNode("input", {
-                        "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => _ctx.edit_widget_title = $event)
-                      }, null, 512), [
-                        [vue.vModelText, _ctx.edit_widget_title]
-                      ]),
-                      (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.form, (entry) => {
-                        return vue.openBlock(), vue.createElementBlock(vue.Fragment, null, [
-                          vue.createElementVNode("label", null, vue.toDisplayString(entry.label), 1),
-                          entry.type == "int" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
-                            key: 0,
-                            "onUpdate:modelValue": ($event) => entry.value = $event,
-                            type: "number"
-                          }, null, 8, _hoisted_20)), [
-                            [
-                              vue.vModelText,
-                              entry.value,
-                              void 0,
-                              { lazy: true }
-                            ]
-                          ]) : entry.type == "boolean" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
-                            key: 1,
-                            "onUpdate:modelValue": ($event) => entry.value = $event,
-                            type: "checkbox"
-                          }, null, 8, _hoisted_21)), [
-                            [
-                              vue.vModelCheckbox,
-                              entry.value,
-                              void 0,
-                              { lazy: true }
-                            ]
-                          ]) : entry.type == "color" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
-                            key: 2,
-                            "onUpdate:modelValue": ($event) => entry.value = $event,
-                            type: "color"
-                          }, null, 8, _hoisted_22)), [
-                            [
-                              vue.vModelText,
-                              entry.value,
-                              void 0,
-                              { lazy: true }
-                            ]
-                          ]) : entry.type == "choice" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("select", {
-                            key: 3,
-                            "onUpdate:modelValue": ($event) => entry.value = $event
-                          }, [
-                            (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(entry.choices, (choice) => {
-                              return vue.openBlock(), vue.createElementBlock("option", {
-                                value: choice[0]
-                              }, vue.toDisplayString(choice[1]), 9, _hoisted_24);
-                            }), 256))
-                          ], 8, _hoisted_23)), [
-                            [
-                              vue.vModelSelect,
-                              entry.value,
-                              void 0,
-                              { lazy: true }
-                            ]
-                          ]) : vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
-                            key: 4,
-                            "onUpdate:modelValue": ($event) => entry.value = $event
-                          }, null, 8, _hoisted_25)), [
-                            [
-                              vue.vModelText,
-                              entry.value,
-                              void 0,
-                              { lazy: true }
-                            ]
-                          ])
-                        ], 64);
-                      }), 256))
-                    ])
-                  ]),
-                  vue.createElementVNode("div", _hoisted_26, [
-                    vue.createElementVNode("button", {
-                      class: "dialog-button",
-                      onClick: _cache[3] || (_cache[3] = ($event) => _ctx.itemEditOk(_ctx.edit_item))
-                    }, "Ok"),
-                    vue.createElementVNode("button", {
-                      class: "dialog-button",
-                      onClick: _cache[4] || (_cache[4] = ($event) => _ctx.itemEditCancel(_ctx.edit_item))
-                    }, "Annuler")
+            vue.createVNode(vue.unref(Dialog), {
+              ref: "tileForm",
+              visible: tileFormIsOpen.value,
+              "onUpdate:visible": _cache[2] || (_cache[2] = ($event) => tileFormIsOpen.value = $event),
+              header: "Test formulaire",
+              modal: "true",
+              onAfterHide: editItemCancel
+            }, {
+              default: vue.withCtx(() => [
+                (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(tileFormStructure.value.form, (formItem) => {
+                  return vue.openBlock(), vue.createElementBlock("div", null, [
+                    vue.createElementVNode("label", null, vue.toDisplayString(formItem.label), 1),
+                    formItem.type == "string" ? (vue.openBlock(), vue.createBlock(vue.unref(InputText), {
+                      key: 0,
+                      type: "text",
+                      modelValue: formItem.value,
+                      "onUpdate:modelValue": ($event) => formItem.value = $event
+                    }, null, 8, ["modelValue", "onUpdate:modelValue"])) : vue.createCommentVNode("", true)
+                  ]);
+                }), 256)),
+                vue.createElementVNode("div", null, [
+                  vue.createVNode(vue.unref(Button), {
+                    icon: "pi pi-times",
+                    class: "p-button-raised p-button-rounded p-button-lg",
+                    onClick: editItemCancel
+                  }),
+                  vue.createVNode(vue.unref(Button), {
+                    icon: "pi pi-check",
+                    class: "p-button-raised p-button-rounded p-button-lg",
+                    onClick: editItemOk
+                  })
+                ])
+              ]),
+              _: 1
+            }, 8, ["visible"]),
+            vue.createVNode(vue.unref(Dialog), null, {
+              default: vue.withCtx(() => [
+                _hoisted_16,
+                vue.createElementVNode("form", _hoisted_17, [
+                  vue.createElementVNode("fieldset", null, [
+                    _hoisted_18,
+                    _hoisted_19,
+                    vue.withDirectives(vue.createElementVNode("input", {
+                      "onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => _ctx.edit_widget_title = $event)
+                    }, null, 512), [
+                      [vue.vModelText, _ctx.edit_widget_title]
+                    ]),
+                    (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.form, (entry) => {
+                      return vue.openBlock(), vue.createElementBlock(vue.Fragment, null, [
+                        vue.createElementVNode("label", null, vue.toDisplayString(entry.label), 1),
+                        entry.type == "int" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
+                          key: 0,
+                          "onUpdate:modelValue": ($event) => entry.value = $event,
+                          type: "number"
+                        }, null, 8, _hoisted_20)), [
+                          [
+                            vue.vModelText,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ]) : entry.type == "boolean" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
+                          key: 1,
+                          "onUpdate:modelValue": ($event) => entry.value = $event,
+                          type: "checkbox"
+                        }, null, 8, _hoisted_21)), [
+                          [
+                            vue.vModelCheckbox,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ]) : entry.type == "color" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
+                          key: 2,
+                          "onUpdate:modelValue": ($event) => entry.value = $event,
+                          type: "color"
+                        }, null, 8, _hoisted_22)), [
+                          [
+                            vue.vModelText,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ]) : entry.type == "choice" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("select", {
+                          key: 3,
+                          "onUpdate:modelValue": ($event) => entry.value = $event
+                        }, [
+                          (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(entry.choices, (choice) => {
+                            return vue.openBlock(), vue.createElementBlock("option", {
+                              value: choice[0]
+                            }, vue.toDisplayString(choice[1]), 9, _hoisted_24);
+                          }), 256))
+                        ], 8, _hoisted_23)), [
+                          [
+                            vue.vModelSelect,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ]) : vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
+                          key: 4,
+                          "onUpdate:modelValue": ($event) => entry.value = $event
+                        }, null, 8, _hoisted_25)), [
+                          [
+                            vue.vModelText,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ])
+                      ], 64);
+                    }), 256))
                   ])
                 ]),
-                _: 1
-              })
-            ])) : vue.createCommentVNode("", true)
+                vue.createElementVNode("div", _hoisted_26, [
+                  vue.createElementVNode("button", {
+                    class: "dialog-button",
+                    onClick: _cache[4] || (_cache[4] = ($event) => _ctx.itemEditOk(_ctx.edit_item))
+                  }, "Ok"),
+                  vue.createElementVNode("button", {
+                    class: "dialog-button",
+                    onClick: _cache[5] || (_cache[5] = ($event) => _ctx.itemEditCancel(_ctx.edit_item))
+                  }, "Annuler")
+                ])
+              ]),
+              _: 1
+            })
           ])
         ]);
       };
