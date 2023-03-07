@@ -223,7 +223,7 @@ class Vue2GridWidget(Vue2Widget):
             'h': 2,
             'show_title': True,
             'title': 'Simple text widget',
-            'w_class': 'simple_text',
+            'tile_class': 'simple_text',
             'w_params': '{"text":"Simple text"}',
         },
         {
@@ -234,7 +234,7 @@ class Vue2GridWidget(Vue2Widget):
             'h': 2,
             'show_title': False,
             'title': 'Yes2',
-            'w_class': 'simple_light',
+            'tile_class': 'simple_light',
             'w_params': '{"color":"green"}',
         },
         {
@@ -245,10 +245,20 @@ class Vue2GridWidget(Vue2Widget):
             'h': 3,
             'show_title': True,
             'title': 'Yes3',
-            'w_class': 'light_and_text',
+            'tile_class': 'light_and_text',
             'w_params': '{"text":"Alerte !","color":"red"}',
         },
-        {'i': 3, 'x': 4, 'y': 1, 'w': 1, 'h': 4, 'show_title': False, 'title': 'Yes4', 'w_class': 'a_repartir', 'w_params': '{}'},
+        {
+            'i': 3,
+            'x': 4,
+            'y': 1,
+            'w': 1,
+            'h': 4,
+            'show_title': False,
+            'title': 'Yes4',
+            'tile_class': 'a_repartir',
+            'w_params': '{}',
+        },
     ]
     template_name = 'smart_view/smart_widget_vue_grid.html'
     available_widgets = {
@@ -315,9 +325,9 @@ class Vue2GridWidget(Vue2Widget):
         layout = json.loads(request.GET['layout'])
         r_layout = {}
         for widget in layout:
-            if widget.get('w_class') in self.available_widgets:
+            if widget.get('tile_class') in self.available_widgets:
                 params = json.loads(widget.get('w_params'))
-                w = self.available_widgets[widget.get('w_class')](
+                w = self.available_widgets[widget.get('tile_class')](
                     html_id=self.html_id + '-' + str(widget.get('i')), params=dict(self.params, **params)
                 )
                 r_layout[widget['i']] = {'html': w._as_html(html_only=True)}
@@ -388,7 +398,7 @@ class Vue2GridWidget(Vue2Widget):
 
                 available_widgets.append(
                     {
-                        'w_class': k,
+                        'tile_class': k,
                         'label': label,
                         'help_text': help_text,
                         'm_params': manual_params,
@@ -404,7 +414,7 @@ class Vue2GridWidget(Vue2Widget):
             'init_layout': grid_layout,
             'settings_url': reverse('common:api_user_settings', kwargs={'url_prefix': 'portal-config'}),
             'available_widgets': available_widgets,
-            'widget_defs': {w['w_class']: w for w in available_widgets},
+            'widget_defs': {w['tile_class']: w for w in available_widgets},
         }
         return context
 

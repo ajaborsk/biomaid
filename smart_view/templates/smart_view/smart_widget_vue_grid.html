@@ -3,7 +3,7 @@
 <script>
   let grid_params = {{ grid_params | to_json }};
   let mouseXY = {"x": null, "y": null};
-  let DragPos = {"x": null, "y": null, "w": 1, "h": 1, "i": null, "w_class": null, "w_params": null};
+  let DragPos = {"x": null, "y": null, "w": 1, "h": 1, "i": null, "tile_class": null, "w_params": null};
     var app = new Vue({
       el: '#{{ html_id }}',
       data() {
@@ -91,7 +91,7 @@
                     DragPos.i = String(index);
                     DragPos.x = this.layout[index].x;
                     DragPos.y = this.layout[index].y;
-                    DragPos.w_class = e.target.attributes.w_class.value;
+                    DragPos.tile_class = e.target.attributes.tile_class.value;
                     DragPos.w_params = e.target.attributes.w_params.value;
                 }
                 if (mouseInGrid === false) {
@@ -117,7 +117,7 @@
                     h: 2,
                     i: DragPos.i,
                     title: "Dropped",
-                    w_class: DragPos.w_class,
+                    tile_class: DragPos.tile_class,
                     w_params: DragPos.w_params,
                 });
                 this.$refs.gridlayout.dragEvent('dragend', DragPos.i, DragPos.x,DragPos.y,1,1);
@@ -141,7 +141,7 @@
                       i: widget.i,
                       show_title: widget.show_title,
                       title: widget.title,
-                      'w_class': widget.w_class,
+                      'tile_class': widget.tile_class,
                       'w_params': widget.w_params
                   });
               }
@@ -164,7 +164,7 @@
                     layout.push({
                         i: widget.i,
                         title: widget.title,
-                        'w_class': widget.w_class,
+                        'tile_class': widget.tile_class,
                         'w_params': widget.w_params
                     });
                 }
@@ -191,11 +191,11 @@
           openMenu: function() {
               this.menu_open = true;
           },
-          addItem: function(w_class) {
+          addItem: function(tile_class) {
               this.layout.push({
                   'i': this.index,
                   'title': "",
-                  'w_class': w_class,
+                  'tile_class': tile_class,
                   'w_params': '{}',
                   'w': 2,
                   'h': 2,
@@ -225,7 +225,7 @@
               const index = this.layout.map(item => item.i).indexOf(val);
               this.edit_item = val;
               this.edit_widget_title = this.layout[index].title;
-              this.form = grid_params.widget_defs[this.layout[index].w_class].m_params;
+              this.form = grid_params.widget_defs[this.layout[index].tile_class].m_params;
               params = JSON.parse(this.layout[index].w_params);
               for (var attr in this.form) {
                   this.form[attr].value = params[attr];
@@ -242,7 +242,7 @@
       },
       template: `{% verbatim %}<div class="cockpit-container">
                   <div v-if="unlocked" class="cockpit-palette">Palette
-                    <div @drag="drag" @dragend="dragend" class="droppable-element palette-item" draggable="true" unselectable="on" w_class="simple_text" w_params="{&quot;toto&quot;:10}">
+                    <div @drag="drag" @dragend="dragend" class="droppable-element palette-item" draggable="true" unselectable="on" tile_class="simple_text" w_params="{&quot;toto&quot;:10}">
                         Droppable Element (Drag me!)
                     </div>
                   </div>
@@ -268,7 +268,7 @@
                      :w="item.w"
                      :h="item.h"
                      :i="item.i"
-                     :w_class="item.w_class"
+                     :tile_class="item.tile_class"
                      :w_params="item.w_params"
                      :drag-allow-from="'.title'"
                      :key="item.i"
@@ -288,7 +288,7 @@
              <i v-if="unlocked" class="fa-solid fa-lock-open" @click="toggleLock"></i>
              <i v-if="!unlocked" style="color:#ccc" class="fa-solid fa-lock" @click="toggleLock"></i>
              <i v-if="unlocked" class="fa-solid fa-plus grid-menu-entry" @click="openMenu"></i>
-             <div v-if="menu_open" class="grid-menu"><span>Type de widget</span><ul class="grid-menu"><li class="grid-menu-entry" v-for="entry in entries" @click="addItem(entry.w_class)">{{ entry.label }}</li></ul></div>
+             <div v-if="menu_open" class="grid-menu"><span>Type de widget</span><ul class="grid-menu"><li class="grid-menu-entry" v-for="entry in entries" @click="addItem(entry.tile_class)">{{ entry.label }}</li></ul></div>
           </div>
           </grid-layout>
           <div v-if="grid_item_form_open" class="dialog-background">

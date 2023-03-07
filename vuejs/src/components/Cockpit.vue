@@ -12,6 +12,7 @@ const Button = primevue.button
 const Dialog = primevue.dialog
 const Tooltip = primevue.tooltip
 const InputText = primevue.inputtext
+const InputNumber = primevue.inputnumber
 
 // Directive to get tooltips
 const vTooltip = Tooltip
@@ -71,7 +72,7 @@ const touched = ref(false)
 // const palettePanel = ref(null)
 
 let mouseXY = { x: null, y: null }
-let DragPos = { x: null, y: null, w: 1, h: 1, i: null, w_class: null, w_params: null }
+let DragPos = { x: null, y: null, w: 1, h: 1, i: null, tile_class: null, tile_category: null }
 
 // This function should be shared among all vue widget...
 function getCookie(name) {
@@ -122,7 +123,7 @@ function refresh_all() {
     let tile = gridData.layout[i]
     layout.push({
       i: tile.i,
-      w_class: tile.w_class,
+      tile_class: tile.tile_class,
       w_params: tile.w_params
     })
   }
@@ -151,16 +152,27 @@ function editItem(i) {
 
   let index = gridData.layout.findIndex((item) => item.i === i)
   let tileData = gridData.layout[index]
+  let w_params = JSON.parse(tileData.w_params)
+  let form = [{ id: 'title', label: 'Titre', type: 'string', value: tileData.title }]
+  // Compute form from palette tile template
+  for (const [prop_id, prop_value] of Object.entries(
+    props.palette[tileData.tile_category].items[tileData.tile_class].properties
+  )) {
+    form.push({
+      id: prop_id,
+      label: prop_value.label,
+      help_text: prop_value.help_text,
+      type: prop_value.type,
+      value: w_params[prop_id]
+    })
+  }
 
   tileData.editing = true
   // Build the form from tile template:
   tileFormStructure.value = {
     i: i,
     index: index,
-    form: [
-      { id: 'title', label: 'Titre', type: 'string', value: tileData.title },
-      { label: 'popo suivant 2 ', type: 'string', value: 'pi' }
-    ]
+    form: form
   }
 
   // Open the dialog form
@@ -172,13 +184,19 @@ function editItemOk() {
   // ...
   console.log('Saving !')
   let tileData = gridData.layout[tileFormStructure.value.index]
+  let templateProperties =
+    props.palette[tileData.tile_category].items[tileData.tile_class].properties
+  let w_params = {}
   for (var i = 0; i < tileFormStructure.value.form.length; i++) {
     let parameter = tileFormStructure.value.form[i]
     console.log('  Value:', parameter.label, parameter.value)
     if (parameter.id === 'title') {
       tileData.title = parameter.value
+    } else if (templateProperties.hasOwnProperty(parameter.id)) {
+      w_params[parameter.id] = parameter.value
     }
   }
+  tileData.w_params = JSON.stringify(w_params)
   tileData.editing = false
 
   touched.value = true
@@ -237,6 +255,7 @@ function removeItem(val) {
 }
 
 function drag(e) {
+  console.log(e)
   // Get the grid boundaries
   let parentRect = document.getElementById('grid-container').getBoundingClientRect()
 
@@ -293,8 +312,8 @@ function drag(e) {
       DragPos.i = next_id
       DragPos.x = gridData.layout[index].x
       DragPos.y = gridData.layout[index].y
-      DragPos.w_class = e.target.attributes.w_class.value
-      DragPos.w_params = e.target.attributes.w_params.value
+      DragPos.tile_category = e.target.attributes.tile_category.value
+      DragPos.tile_class = e.target.attributes.tile_class.value
     }
     if (mouseInGrid === false) {
       gridLayout.value.dragEvent('dragend', '__drop__', new_pos.x, new_pos.y, 1, 3)
@@ -323,26 +342,38 @@ function dragend(e) {
   if (mouseInGrid === true) {
     gridLayout.value.dragEvent('dragend', '__drop__', DragPos.x, DragPos.y, 1, 3)
     gridData.layout = gridData.layout.filter((obj) => obj.i !== '__drop__')
-    gridData.layout = [
-      ...gridData.layout,
-      reactive({
-        x: DragPos.x,
-        y: DragPos.y,
-        w: 3,
-        h: 2,
-        i: DragPos.i,
-        static: false,
-        title: 'Dropped !',
-        w_class: DragPos.w_class,
-        w_params: DragPos.w_params
-      })
-    ]
+
+    // Compute default properties from palette tile template
+    let defaults = {}
+    for (const [prop_id, prop_value] of Object.entries(
+      props.palette[DragPos.tile_category].items[DragPos.tile_class].properties
+    )) {
+      defaults[prop_id] = prop_value.default
+    }
+
+    gridData.layout[gridData.layout.length] = reactive({
+      x: DragPos.x,
+      y: DragPos.y,
+      w: 3,
+      h: 2,
+      i: DragPos.i,
+      static: false,
+      moved: false,
+      title: 'Dropped (' + DragPos.tile_class + ') !',
+      tile_class: DragPos.tile_class,
+      tile_category: DragPos.tile_category,
+      w_params: JSON.stringify(defaults)
+    })
+    //gridData.layout.set(gridData.layout.length, reactive({ popo: 12 }))
+    // Wait for the DOM since we modified the layout
+    currentInstance?.proxy?.$forceUpdate()
     nextTick(() => {
-      currentInstance?.proxy?.$forceUpdate()
       gridLayout.value.dragEvent('dragend', DragPos.i, DragPos.x, DragPos.y, 1, 3)
       let index = gridData.layout.findIndex((item) => item.i === DragPos.i)
       let el = gridItemRefs.value[index]
-      console.log(index, el)
+      //console.log('element:', index, el)
+      //console.log('gridData:', gridData.layout[index])
+      editItem(DragPos.i)
     })
   }
 }
@@ -359,21 +390,22 @@ function dragend(e) {
     <div class="cockpit-palette" v-show="unlocked">
       <div>Palette</div>
       <Accordion :activeIndex="0">
-        <AccordionTab v-for="category in palette">
+        <AccordionTab v-for="(category, category_id) in palette">
           <template #header>
             <div style="width: 100%" v-tooltip="category.help_text">
               {{ category.label }}
             </div>
           </template>
           <div
-            v-for="(item, tmpl) in category.items"
+            v-for="(item, tmpl_name) in category.items"
             @drag="drag"
             @dragend="dragend"
             class="droppable-element palette-item"
             draggable="true"
             unselectable="on"
-            :w_class="tmpl"
-            w_params='{"toto":10}'
+            :tile_category="category_id"
+            :tile_class="tmpl_name"
+            :default_params="item.default_params"
             v-tooltip="item.help_text"
           >
             <div>
@@ -405,6 +437,7 @@ function dragend(e) {
         :is-draggable="unlocked"
         :is-resizable="unlocked"
         :is-mirrored="false"
+        :restore-on-drag="true"
         :prevent-collision="true"
         :vertical-compact="false"
         v-bind:margin="[grid_params.h_spacing, grid_params.v_spacing]"
@@ -421,7 +454,7 @@ function dragend(e) {
           :w="item.w"
           :h="item.h"
           :i="item.i"
-          :w_class="item.w_class"
+          :tile_class="item.tile_class"
           :w_params="item.w_params"
           :drag-allow-from="'.title'"
           :key="item.i"
@@ -477,13 +510,14 @@ function dragend(e) {
       <Dialog
         ref="tileForm"
         v-model:visible="tileFormIsOpen"
-        header="Test formulaire"
-        modal="true"
+        header="Propriétés"
+        :modal="true"
         @after-hide="editItemCancel"
       >
         <div v-for="formItem in tileFormStructure.form">
           <label>{{ formItem.label }}</label>
           <InputText v-if="formItem.type == 'string'" type="text" v-model="formItem.value" />
+          <InputNumber v-if="formItem.type == 'integer'" v-model="formItem.value" />
         </div>
         <div>
           <Button
@@ -581,6 +615,7 @@ function dragend(e) {
 
 .vue-grid-item {
   touch-action: none;
+  transition: none;
   /* display: grid;* */
   /* grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: max-content auto; */

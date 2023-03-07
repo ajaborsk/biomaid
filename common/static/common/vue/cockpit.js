@@ -46,6 +46,7 @@
 }
 .vue-grid-item {
   touch-action: none;
+  transition: none;
   /* display: grid;* */
   /* grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: max-content auto; */
@@ -7125,7 +7126,7 @@
   const _hoisted_2 = { class: "cockpit-palette" };
   const _hoisted_3 = /* @__PURE__ */ vue.createElementVNode("div", null, "Palette", -1);
   const _hoisted_4 = { style: { "width": "100%" } };
-  const _hoisted_5 = ["w_class"];
+  const _hoisted_5 = ["tile_category", "tile_class", "default_params"];
   const _hoisted_6 = { style: { "display": "flex", "justify-content": "space-evenly", "padding": "12px" } };
   const _hoisted_7 = ["innerHTML"];
   const _hoisted_8 = { class: "frame-overlay" };
@@ -7179,6 +7180,7 @@
       const Dialog = primevue2.dialog;
       const Tooltip = primevue2.tooltip;
       const InputText = primevue2.inputtext;
+      const InputNumber = primevue2.inputnumber;
       const vTooltip = Tooltip;
       const currentInstance = vue.getCurrentInstance();
       const gridData = vue.reactive({ layout: props.grid_params.init_layout });
@@ -7209,7 +7211,7 @@
       const unlocked = vue.ref(false);
       const touched = vue.ref(false);
       let mouseXY = { x: null, y: null };
-      let DragPos = { x: null, y: null, w: 1, h: 1, i: null, w_class: null, w_params: null };
+      let DragPos = { x: null, y: null, w: 1, h: 1, i: null, tile_class: null, tile_category: null };
       function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
@@ -7248,7 +7250,7 @@
           let tile = gridData.layout[i];
           layout.push({
             i: tile.i,
-            w_class: tile.w_class,
+            tile_class: tile.tile_class,
             w_params: tile.w_params
           });
         }
@@ -7272,27 +7274,42 @@
         console.log("Editing tile properties...", i);
         let index = gridData.layout.findIndex((item) => item.i === i);
         let tileData = gridData.layout[index];
+        let w_params = JSON.parse(tileData.w_params);
+        let form = [{ id: "title", label: "Titre", type: "string", value: tileData.title }];
+        for (const [prop_id, prop_value] of Object.entries(
+          props.palette[tileData.tile_category].items[tileData.tile_class].properties
+        )) {
+          form.push({
+            id: prop_id,
+            label: prop_value.label,
+            help_text: prop_value.help_text,
+            type: prop_value.type,
+            value: w_params[prop_id]
+          });
+        }
         tileData.editing = true;
         tileFormStructure.value = {
           i,
           index,
-          form: [
-            { id: "title", label: "Titre", type: "string", value: tileData.title },
-            { label: "popo suivant 2 ", type: "string", value: "pi" }
-          ]
+          form
         };
         tileFormIsOpen.value = true;
       }
       function editItemOk() {
         console.log("Saving !");
         let tileData = gridData.layout[tileFormStructure.value.index];
+        let templateProperties = props.palette[tileData.tile_category].items[tileData.tile_class].properties;
+        let w_params = {};
         for (var i = 0; i < tileFormStructure.value.form.length; i++) {
           let parameter = tileFormStructure.value.form[i];
           console.log("  Value:", parameter.label, parameter.value);
           if (parameter.id === "title") {
             tileData.title = parameter.value;
+          } else if (templateProperties.hasOwnProperty(parameter.id)) {
+            w_params[parameter.id] = parameter.value;
           }
         }
+        tileData.w_params = JSON.stringify(w_params);
         tileData.editing = false;
         touched.value = true;
         tileFormIsOpen.value = false;
@@ -7335,6 +7352,7 @@
         gridData.layout.splice(index, 1);
       }
       function drag(e) {
+        console.log(e);
         let parentRect = document.getElementById("grid-container").getBoundingClientRect();
         let mouseInGrid = false;
         if (mouseXY.x > parentRect.left && mouseXY.x < parentRect.right && mouseXY.y > parentRect.top && mouseXY.y < parentRect.bottom) {
@@ -7373,8 +7391,8 @@
             DragPos.i = next_id;
             DragPos.x = gridData.layout[index].x;
             DragPos.y = gridData.layout[index].y;
-            DragPos.w_class = e.target.attributes.w_class.value;
-            DragPos.w_params = e.target.attributes.w_params.value;
+            DragPos.tile_category = e.target.attributes.tile_category.value;
+            DragPos.tile_class = e.target.attributes.tile_class.value;
           }
           if (mouseInGrid === false) {
             gridLayout.value.dragEvent("dragend", "__drop__", new_pos.x, new_pos.y, 1, 3);
@@ -7383,6 +7401,7 @@
         }
       }
       function dragend(e) {
+        var _a;
         touched.value = true;
         let parentRect = document.getElementById("grid-container").getBoundingClientRect();
         let mouseInGrid = false;
@@ -7392,27 +7411,31 @@
         if (mouseInGrid === true) {
           gridLayout.value.dragEvent("dragend", "__drop__", DragPos.x, DragPos.y, 1, 3);
           gridData.layout = gridData.layout.filter((obj) => obj.i !== "__drop__");
-          gridData.layout = [
-            ...gridData.layout,
-            vue.reactive({
-              x: DragPos.x,
-              y: DragPos.y,
-              w: 3,
-              h: 2,
-              i: DragPos.i,
-              static: false,
-              title: "Dropped !",
-              w_class: DragPos.w_class,
-              w_params: DragPos.w_params
-            })
-          ];
+          let defaults = {};
+          for (const [prop_id, prop_value] of Object.entries(
+            props.palette[DragPos.tile_category].items[DragPos.tile_class].properties
+          )) {
+            defaults[prop_id] = prop_value.default;
+          }
+          gridData.layout[gridData.layout.length] = vue.reactive({
+            x: DragPos.x,
+            y: DragPos.y,
+            w: 3,
+            h: 2,
+            i: DragPos.i,
+            static: false,
+            moved: false,
+            title: "Dropped (" + DragPos.tile_class + ") !",
+            tile_class: DragPos.tile_class,
+            tile_category: DragPos.tile_category,
+            w_params: JSON.stringify(defaults)
+          });
+          (_a = currentInstance == null ? void 0 : currentInstance.proxy) == null ? void 0 : _a.$forceUpdate();
           vue.nextTick(() => {
-            var _a;
-            (_a = currentInstance == null ? void 0 : currentInstance.proxy) == null ? void 0 : _a.$forceUpdate();
             gridLayout.value.dragEvent("dragend", DragPos.i, DragPos.x, DragPos.y, 1, 3);
             let index = gridData.layout.findIndex((item) => item.i === DragPos.i);
-            let el = gridItemRefs.value[index];
-            console.log(index, el);
+            gridItemRefs.value[index];
+            editItem(DragPos.i);
           });
         }
       }
@@ -7422,7 +7445,7 @@
             _hoisted_3,
             vue.createVNode(vue.unref(script$4), { activeIndex: 0 }, {
               default: vue.withCtx(() => [
-                (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(__props.palette, (category) => {
+                (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(__props.palette, (category, category_id) => {
                   return vue.openBlock(), vue.createBlock(vue.unref(script$3), null, {
                     header: vue.withCtx(() => [
                       vue.withDirectives((vue.openBlock(), vue.createElementBlock("div", _hoisted_4, [
@@ -7432,15 +7455,16 @@
                       ])
                     ]),
                     default: vue.withCtx(() => [
-                      (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(category.items, (item, tmpl) => {
+                      (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(category.items, (item, tmpl_name) => {
                         return vue.withDirectives((vue.openBlock(), vue.createElementBlock("div", {
                           onDrag: drag,
                           onDragend: dragend,
                           class: "droppable-element palette-item",
                           draggable: "true",
                           unselectable: "on",
-                          w_class: tmpl,
-                          w_params: '{"toto":10}'
+                          tile_category: category_id,
+                          tile_class: tmpl_name,
+                          default_params: item.default_params
                         }, [
                           vue.createElementVNode("div", null, vue.toDisplayString(item.label), 1)
                         ], 40, _hoisted_5)), [
@@ -7488,6 +7512,7 @@
               "is-draggable": unlocked.value,
               "is-resizable": unlocked.value,
               "is-mirrored": false,
+              "restore-on-drag": true,
               "prevent-collision": true,
               "vertical-compact": false,
               margin: [__props.grid_params.h_spacing, __props.grid_params.v_spacing],
@@ -7507,7 +7532,7 @@
                     w: item.w,
                     h: item.h,
                     i: item.i,
-                    w_class: item.w_class,
+                    tile_class: item.tile_class,
                     w_params: item.w_params,
                     "drag-allow-from": ".title",
                     key: item.i,
@@ -7550,7 +7575,7 @@
                       ], 2)
                     ]),
                     _: 2
-                  }, 1032, ["x", "y", "w", "h", "i", "w_class", "w_params", "drag-allow-from", "class"]);
+                  }, 1032, ["x", "y", "w", "h", "i", "tile_class", "w_params", "drag-allow-from", "class"]);
                 }), 128)),
                 vue.createVNode(vue.unref(script), {
                   ref_key: "contextMenu",
@@ -7578,8 +7603,8 @@
               ref: "tileForm",
               visible: tileFormIsOpen.value,
               "onUpdate:visible": _cache[2] || (_cache[2] = ($event) => tileFormIsOpen.value = $event),
-              header: "Test formulaire",
-              modal: "true",
+              header: "Propriétés",
+              modal: true,
               onAfterHide: editItemCancel
             }, {
               default: vue.withCtx(() => [
@@ -7589,6 +7614,11 @@
                     formItem.type == "string" ? (vue.openBlock(), vue.createBlock(vue.unref(InputText), {
                       key: 0,
                       type: "text",
+                      modelValue: formItem.value,
+                      "onUpdate:modelValue": ($event) => formItem.value = $event
+                    }, null, 8, ["modelValue", "onUpdate:modelValue"])) : vue.createCommentVNode("", true),
+                    formItem.type == "integer" ? (vue.openBlock(), vue.createBlock(vue.unref(InputNumber), {
+                      key: 1,
                       modelValue: formItem.value,
                       "onUpdate:modelValue": ($event) => formItem.value = $event
                     }, null, 8, ["modelValue", "onUpdate:modelValue"])) : vue.createCommentVNode("", true)

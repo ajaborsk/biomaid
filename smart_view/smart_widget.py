@@ -720,6 +720,20 @@ class VueCockpit(VueWidget):
             'w': 3,
             'h': 1,
             'class': SimpleTextWidget,
+            'properties': {
+                'text': {
+                    'type': 'string',
+                    'label': _("Texte"),
+                    'help_string': _("Aide sur ce champ"),
+                    'default': _("Texte"),
+                },
+                'font_size': {
+                    'type': 'integer',
+                    'label': _("Taille"),
+                    'default': 12,
+                },
+            },
+            'default_params': json.dumps({'text': "Oui, c'est sûr !"}),
         },
         'my_alerts': {
             'category': 'common',
@@ -869,6 +883,7 @@ class VueCockpit(VueWidget):
                 'help_text': tile_template.get('help_text', ''),
                 'w': tile_template.get('w', 1),
                 'h': tile_template.get('h', 1),
+                'properties': tile_template.get('properties', "{}"),
             }
         self.params['vue_props'] = {
             'html_id': self.html_id,
