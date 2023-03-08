@@ -17,6 +17,7 @@ templates_old/
 media/
 fixtures/production/
 *.bz2
+node_modules/
 
 # Developpement/Production
 settings/production.py
