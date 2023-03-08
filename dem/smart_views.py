@@ -2970,6 +2970,7 @@ class DemandeEqptSmartView(DemandeSmartView):
         columns = (
             'code',
             'num_dmd',
+            'date',
             'nature',
             'calendrier',
             'campagne_redirect',
@@ -3061,6 +3062,7 @@ class DemandeEqptSmartView(DemandeSmartView):
         )
         selectable_columns = (
             # 'num_dmd',
+            'date',
             'campagne_redirect',
             'date_premiere_demande',
             'pole_nom',
@@ -3110,6 +3112,10 @@ class DemandeEqptSmartView(DemandeSmartView):
         settings = {
             'code': {
                 # 'frozen': True,
+            },
+            'date': {
+                'title': _("Date demande"),
+                'datetime_format': "%d/%m/%Y",
             },
             'redacteur': {
                 'hidden': True,
@@ -3210,7 +3216,7 @@ class DemandeEqptSmartView(DemandeSmartView):
         form_layout = """
         # d'équipement ou de logiciel {{ instance.code }}
             <redacteur> <discipline_dmd>
-            <calendrier> <nature>
+            <calendrier> <date> <nature>
             # Le demandeur
                 <referent> <redacteur_view>
                 <uf> <pole_view>
