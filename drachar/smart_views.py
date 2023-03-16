@@ -421,6 +421,16 @@ class PrevisionnelSmartView(SmartView):
                 'type': 'select',
                 'choices': filter_choices_from_column_values(Previsionnel, 'programme__discipline__nom'),
             },
+            'campaign': {
+                'label': _("Campagne"),
+                'type': 'select',
+                'choices': filter_choices_from_column_values(
+                    Previsionnel,
+                    'num_dmd__calendrier__code',
+                    label_expr=Concat(F('num_dmd__calendrier__code'), Value(' - '), F('num_dmd__calendrier__nom')),
+                    order_by='num_dmd__calendrier__code',
+                ),
+            },
             'programme': {
                 'label': _("Programme"),
                 'type': 'select',
