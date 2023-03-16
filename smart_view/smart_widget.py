@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import colorsys
+from distutils.log import warn
 import json
 import logging
 import re
@@ -163,19 +164,19 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
         # print(f"   after/__factorized_count {cls.__factorized_count}")
         return type(cls.__name__ + str(cls.__factorized_count), (cls,), attrs)
 
-    PARAMS_ADD = ('template_string', 'template_name')
+    PARAMS_ADD: tuple[str] = ('template_string', 'template_name')
 
-    template_string = ""
-    template_name = None
-    _template_mapping = {
+    template_string: str | None = ""
+    template_name: str | None = None
+    _template_mapping: dict = {
         'html_id': lambda self, kwargs: self.html_id,
     }
 
-    def __init__(self, html_id=None, params=None, parent=None, mode='render'):
+    def __init__(self, html_id: str | None = None, params: dict | None = None, parent=None, mode: str = 'render') -> None:
         self._mode = mode
         self._parent = parent
-        self.params = params or {}
-        self.html_id = html_id or re.sub(r'(?<!^)(?=[A-Z])', '_', self.__class__.__name__).lower()
+        self.params: dict = params or {}
+        self.html_id: str = html_id or re.sub(r'(?<!^)(?=[A-Z])', '_', self.__class__.__name__).lower()
         self.template = None
 
         # Used only for direct instanciate-then-setup instanciation.
@@ -235,7 +236,7 @@ class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
 
 class ContainerWidget(HtmlWidget):
     PARAMS_ADD = ('base_children',)
-    base_children = tuple()
+    base_children: tuple = None
 
     @property
     def children(self):
@@ -298,20 +299,20 @@ class SimpleValueWidget(GridWidget):
 
 
 class TableWidget(GridWidget):
-    column_titles = []
-    row_titles = []
-    cells = [[]]
+    column_titles: list = []
+    row_titles: list = []
+    cells: list = [[]]
 
 
 class SimpleTextWidget(HtmlWidget):
-    template_string = (
+    template_string: str = (
         '<div id="{{ html_id }}" style="'
         'text-align:{{ text_align }};background-color:{{ background_color }};font-size:{{ font_size }}px;display:flex;'
         'flex-direction:column;width:100%;height:100%;justify-content:space-evenly;'
         '"><div style="color:{{ text_color }}">{{ text | safe}}</div></div>'
     )
     PARAMS_ADD = ('text_align', 'font_size', 'text_color')
-    _template_mapping_add = {
+    _template_mapping_add: dict = {
         'text': 'text',
         'text_align': 'text_align',
         'background_color': 'background_color',
@@ -319,10 +320,10 @@ class SimpleTextWidget(HtmlWidget):
         'font_size': 'font_size',
     }
 
-    label = _("Texte libre")
-    help_text = _("Simple texte statique")
+    label: str = _("Texte libre")
+    help_text: str = _("Simple texte statique")
     manual_params = {
-        'text': {'label': 'Texte', 'default': ''},
+        'text': {'label': 'Texte', 'type': 'str', 'default': ''},
         'font_size': {'label': 'Taille du texte', 'type': 'int', 'default': 16},
         'text_align': {
             'label': 'Alignement horizontal',
@@ -691,6 +692,11 @@ class DemoWidget(VueWidget):
     _vue_widget_name = 'demo_widget'
 
 
+class DataTextWidget(SimpleTextWidget):
+    def _prepare(self):
+        self.params['text'] = str(self.params['data'])
+
+
 class VueCockpit(VueWidget):
     class Media:
         js = [
@@ -710,16 +716,21 @@ class VueCockpit(VueWidget):
         'dem': {'label': _("Demandes"), 'help_text': _("Tuiles du module de gestion des demandes")},
         'drachar': {'label': _("DraCHAr"), 'help_text': _("Tuiles du module de suivi plan d'équipement")},
     }
+    widgets_library = {
+        'simple_text': SimpleTextWidget,
+        'data_text': DataTextWidget,
+    }
 
     # Later, these templates could be defined in each module (ie Django application) as alarms, views, models, etc.
-    available_tile_templates: dict = {
+    tiles_library: dict = {
         'simple_text': {
             'category': 'generic',
             'label': _("Texte"),
             'help_text': _("Widget qui affiche un texte fixe"),
             'w': 3,
             'h': 1,
-            'class': SimpleTextWidget,
+            'w_classes': ['simple_text'],
+            # 'class': SimpleTextWidget,
             'properties': {
                 'text': {
                     'type': 'string',
@@ -733,47 +744,57 @@ class VueCockpit(VueWidget):
                     'default': 12,
                 },
             },
-            'default_params': json.dumps({'text': "Oui, c'est sûr !"}),
+            # 'default_params': json.dumps({'text': "Oui, c'est sûr !"}),
         },
         'my_alerts': {
             'category': 'common',
             'label': _("Mes alertes"),
-            'class': MyAlertsWidget,
+            'help_text': _("Nombre d'alertes à mon intention"),
+            'datasource': 'user_alerts',
+            # 'class': MyAlertsWidget,
+            'w_classes': ['data_text'],
         },
         'demo_pie_chart': {
             'category': 'demo',
             'label': _("Camenbert"),
             'class': DemoPieChartWidget,
+            'w_classes': ['simple_text'],
         },
         'simple_light': {
             'category': 'demo',
             'label': _("Voyant coloré"),
             'class': SimpleLightWidget,
+            'w_classes': ['simple_text'],
         },
         'light_and_text': {
             'category': 'demo',
             'label': _("Texte et voyant"),
             'class': LightAndTextWidget,
+            'w_classes': ['simple_text'],
         },
         'a_repartir': {
             'category': 'dem',
             'label': _("Demandes à répartir"),
             'class': RepartirWidget,
+            'w_classes': ['simple_text'],
         },
         'simple_scalar': {
             'category': 'demo',
             'label': _("Valeur numérique"),
             'class': SimpleScalarWidget,
+            'w_classes': ['simple_text'],
         },
         'nb_previsionnel_par_expert': {
             'category': 'drachar',
             'label': _("Prévisionnel par expert (qté)"),
             'class': PrevisionnelParExpertWidget,
+            'w_classes': ['simple_text'],
         },
         'montant_previsionnel_par_expert': {
             'category': 'drachar',
             'label': _("Prévisionnel par expert (€)"),
             'class': MontantPrevisionnelParExpertWidget,
+            'w_classes': ['simple_text'],
         },
     }
 
@@ -798,8 +819,8 @@ class VueCockpit(VueWidget):
             self.contents = {'layout': self.default_grid_layout}
 
         self.editable = self.contents.get('editable', True)
-        self.columns = self.contents.get('columns', 16)
-        self.rows = self.contents.get('rows', 32)
+        self.columns = self.contents.get('columns', 32)
+        self.rows = self.contents.get('rows', 24)
         self.v_spacing = self.contents.get('v_spacing', 12)
         self.h_spacing = self.contents.get('h_spacing', 12)
         self.initial_layout = []
@@ -807,11 +828,12 @@ class VueCockpit(VueWidget):
         super().__init__(*args, **kwargs)
 
     def _setup(self, **params):
+        print("Cockpit setup()...")
         super()._setup(**params)
         try:
             self.initial_layout = self.params['user_preferences'][self.user_settings_path]
         except KeyError:
-            pass
+            print("No layout cockpit user defined")
 
     def _get_as_toml(self, request, cockpit_name, *args, **kwargs):
         toml_doc = tomlkit.TOMLDocument()
@@ -853,8 +875,36 @@ class VueCockpit(VueWidget):
             tiles = json.loads(request.GET['layout'])
         except json.JSONDecodeError as exc:
             return JsonResponse({'error': 'JSON decode error', 'exception': str(exc)})
-        print('get:', repr(tiles))
-        tiles_contents = {tile['i']: {'html': '<b>Computed text</b>'} for tile in tiles}
+
+        # print('get:', repr(tiles))
+        tiles_contents = {}
+        for tile in tiles:
+            w_params = tile.get('w_props')
+            tile_class = self.tiles_library.get(tile.get('tile_class'), {})
+
+            data = None
+            # print(f"{tile_class=}")
+            if data_source := tile_class.get('datasource'):
+                try:
+                    data = get_data(data_source, all_params=self.params)
+                    print("get_data result:", data_source, data)
+                except ValueError as e:
+                    # print("data '{}' not found for cockpit widget {}".format(data_source, tile['i']))
+                    warn(
+                        "data '{}' not found for cockpit '{}' widget '{}' : '{}'".format(
+                            data_source, self.user_settings_path, tile['i'], str(e)
+                        )
+                    )
+            # print(f"{tile['i']=}: {data=}")
+            widget_class = self.widgets_library.get(tile.get('w_class'))
+            if widget_class:
+                tile_widget = widget_class(
+                    self.html_id + '-tile-' + str(tile['i']), dict(self.params, **w_params, **{'data': data})
+                )
+                # print('rendering tile:', repr(self.params.keys()), repr(tile))
+                tiles_contents[tile['i']] = {'html': str(tile_widget)}
+            else:
+                warn(_("w_class '{}' not in widget library !").format(tile.get('w_class')))
         return JsonResponse({'tiles': tiles_contents})
 
     def _post(self, request, *args, **kwargs):
@@ -866,30 +916,42 @@ class VueCockpit(VueWidget):
 
         self.params['user_preferences'][self.user_settings_path] = layout
         # self.params['user_preferences'][self.user_settings_path]
-        return JsonResponse({'recorded_layout': 'not implemented yet'})
+        return JsonResponse({'recorded_layout': self.user_settings_path})
 
-    def _get_context_data(self, **kwargs):
+    def _prepare(self):
+        print("Cockpit prepare()...")
         # This part is comuted BEFORE applying the parameters->context mapping
 
-        # Since this is a property only used to generate the html/js, no need to compute it in setup()
+        # Since this is a property only used to generate the html/js, no need to compute it in _setup()
         #  (which is called at every instanciation)
         palette = {}
-        for tile_template_name, tile_template in self.available_tile_templates.items():
-            if tile_template['category'] not in palette:
-                palette[tile_template['category']] = self.categories[tile_template['category']]
-                palette[tile_template['category']]['items'] = {}
-            palette[tile_template['category']]['items'][tile_template_name] = {
-                'label': tile_template['label'],
-                'help_text': tile_template.get('help_text', ''),
-                'w': tile_template.get('w', 1),
-                'h': tile_template.get('h', 1),
-                'properties': tile_template.get('properties', "{}"),
-            }
+        cockpit_widgets_library = {}
+        if self.editable:
+            for tile_template_name, tile_template in self.tiles_library.items():
+                if tile_template['category'] not in palette:
+                    palette[tile_template['category']] = self.categories[tile_template['category']]
+                    palette[tile_template['category']]['items'] = {}
+                palette[tile_template['category']]['items'][tile_template_name] = {
+                    'label': tile_template['label'],
+                    'help_text': tile_template.get('help_text', ''),
+                    'w': tile_template.get('w', 1),
+                    'h': tile_template.get('h', 1),
+                    'datasource': tile_template.get('datasource'),
+                    'w_classes': tile_template.get('w_classes'),
+                    'properties': tile_template.get('properties', "{}"),
+                }
+                for widget_name in tile_template.get('w_classes', []):
+                    if widget_name in self.widgets_library:
+                        widget_class = self.widgets_library[widget_name]
+                        cockpit_widgets_library[widget_name] = {'properties': widget_class.manual_params}
+                        print("widget", widget_name, cockpit_widgets_library[widget_name])
+
+        print(f"{cockpit_widgets_library=}")
         self.params['vue_props'] = {
             'html_id': self.html_id,
             # 'tile_templates': {k: {} for k, v in self.available_tile_templates.items()},
             'grid_params': {
-                'row': self.rows,
+                'rows': self.rows,
                 'columns': self.columns,
                 'h_spacing': self.h_spacing,
                 'v_spacing': self.v_spacing,
@@ -897,7 +959,10 @@ class VueCockpit(VueWidget):
                 'init_layout': self.initial_layout,
             },
             'palette': palette,
+            'widgets_library': cockpit_widgets_library,
         }
 
-        # Apply parameters->context mapping then return
-        return super()._get_context_data(**kwargs)
+    # def _get_context_data(self, **kwargs):
+
+    #     # Apply parameters->context mapping then return
+    #     return super()._get_context_data(**kwargs)

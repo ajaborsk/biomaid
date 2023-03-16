@@ -143,5 +143,17 @@ def get_data(code: str, parameters=None, all_params=None):
             return processor['function'](*args)
 
         pass
+    elif code in apps.get_app_config('analytics').data_processors:
+        print(f"{apps.get_app_config('analytics').data_processors.keys()=}")
+        processor = apps.get_app_config('analytics').data_processors[code]
+
+        args = []
+        for parameter_name in processor['parameters']:
+            if parameter_name in all_params:
+                args.append(all_params[parameter_name])
+
+        return processor['function'](*args)
     else:
-        raise ValueError(_("Analytic data with '{code}' is not registred in the database.").format(code=code))
+        raise ValueError(
+            _("Analytic data with '{code}' is registred nor in engines registry nor in the database.").format(code=code)
+        )

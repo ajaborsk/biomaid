@@ -40,9 +40,14 @@
   width: 100%;
   height: 100%;
   flex: auto;
+  position: relative;
 }
 .vue-grid-layout {
   background: none;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
 }
 .vue-grid-item {
   touch-action: none;
@@ -167,8 +172,7 @@
   height: 20px;
   top: 0;
   left: 0;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><circle cx='5' cy='5' r='5' fill='#999999'/></svg>")
-    no-repeat bottom right;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><circle cx='5' cy='5' r='5' fill='#999999'/></svg>") no-repeat bottom right;
   padding: 0 8px 8px 0;
   background-origin: content-box;
   box-sizing: border-box;
@@ -7141,29 +7145,38 @@
   const _hoisted_11 = ["onClick"];
   const _hoisted_12 = ["onClick"];
   const _hoisted_13 = ["innerHTML"];
-  const _hoisted_14 = /* @__PURE__ */ vue.createElementVNode("ul", null, [
+  const _hoisted_14 = ["x1", "x2"];
+  const _hoisted_15 = ["y1", "y2"];
+  const _hoisted_16 = /* @__PURE__ */ vue.createElementVNode("ul", null, [
     /* @__PURE__ */ vue.createElementVNode("li", null, "Ajouter une tuile"),
     /* @__PURE__ */ vue.createElementVNode("li", null, "Supprimer une tuile"),
     /* @__PURE__ */ vue.createElementVNode("li", null, "Déplacer une tuile"),
     /* @__PURE__ */ vue.createElementVNode("li", null, "Changer la taille d'une tuile")
   ], -1);
-  const _hoisted_15 = /* @__PURE__ */ vue.createElementVNode("p", null, [
+  const _hoisted_17 = /* @__PURE__ */ vue.createElementVNode("p", null, [
     /* @__PURE__ */ vue.createElementVNode("b", null, "Note :"),
     /* @__PURE__ */ vue.createTextVNode(" Vous pouvez garder cette aide ouverte et continuer à travailler"),
     /* @__PURE__ */ vue.createElementVNode("br"),
     /* @__PURE__ */ vue.createTextVNode("(vous pouvez la déplacer en cliquant sur le titre) ")
   ], -1);
-  const _hoisted_16 = /* @__PURE__ */ vue.createElementVNode("div", { class: "dialog-title" }, null, -1);
-  const _hoisted_17 = { class: "dialog-form" };
-  const _hoisted_18 = /* @__PURE__ */ vue.createElementVNode("legend", null, "Modification du Widget :", -1);
-  const _hoisted_19 = /* @__PURE__ */ vue.createElementVNode("label", null, "Titre", -1);
-  const _hoisted_20 = ["onUpdate:modelValue"];
-  const _hoisted_21 = ["onUpdate:modelValue"];
-  const _hoisted_22 = ["onUpdate:modelValue"];
+  const _hoisted_18 = { style: { "border": "2px solid grey" } };
+  const _hoisted_19 = /* @__PURE__ */ vue.createElementVNode("div", { class: "dialog-title" }, null, -1);
+  const _hoisted_20 = { class: "dialog-form" };
+  const _hoisted_21 = /* @__PURE__ */ vue.createElementVNode("legend", null, "Modification du Widget :", -1);
+  const _hoisted_22 = /* @__PURE__ */ vue.createElementVNode("label", null, "Titre", -1);
   const _hoisted_23 = ["onUpdate:modelValue"];
-  const _hoisted_24 = ["value"];
+  const _hoisted_24 = ["onUpdate:modelValue"];
   const _hoisted_25 = ["onUpdate:modelValue"];
-  const _hoisted_26 = { class: "form-buttons-box" };
+  const _hoisted_26 = ["onUpdate:modelValue"];
+  const _hoisted_27 = ["value"];
+  const _hoisted_28 = ["onUpdate:modelValue"];
+  const _hoisted_29 = ["onUpdate:modelValue"];
+  const _hoisted_30 = ["onUpdate:modelValue"];
+  const _hoisted_31 = ["onUpdate:modelValue"];
+  const _hoisted_32 = ["onUpdate:modelValue"];
+  const _hoisted_33 = ["value"];
+  const _hoisted_34 = ["onUpdate:modelValue"];
+  const _hoisted_35 = { class: "form-buttons-box" };
   const _sfc_main = {
     __name: "Cockpit",
     props: {
@@ -7172,7 +7185,8 @@
         type: Object,
         required: true
       },
-      palette: { type: Object, required: true }
+      palette: { type: Object, required: true },
+      widgets_library: { type: Object, required: true }
     },
     setup(__props) {
       const props = __props;
@@ -7189,6 +7203,8 @@
       const editable = vue.ref(true);
       const gridLayout = vue.ref(null);
       const gridItemRefs = vue.ref([]);
+      const gridBackground = vue.ref(null);
+      const gridHeight = vue.ref(200);
       const showHelpDialog = vue.ref(false);
       const contextMenu = vue.ref();
       const contextMenuItems = vue.ref([
@@ -7208,6 +7224,7 @@
           }
         }
       ]);
+      let gridStep = 1e4;
       const unlocked = vue.ref(false);
       const touched = vue.ref(false);
       let mouseXY = { x: null, y: null };
@@ -7238,9 +7255,18 @@
           },
           false
         );
+        gridLayout.value.$el.addEventListener("resize", gridResized);
       });
       function layoutUpdated() {
-        console.log("layout updated");
+        console.log("layout updated", gridLayout.value.$el.clientHeight);
+        vue.nextTick(() => {
+          console.log("layout updated 2", gridLayout.value.$el.clientHeight);
+          gridHeight.value = gridLayout.value.$el.clientHeight;
+        });
+      }
+      function gridResized(ev) {
+        console.log("grid resized", ev);
+        gridHeight.value = gridLayout.value.$el.clientHeight;
       }
       function refresh_all() {
         const params = new URLSearchParams();
@@ -7251,7 +7277,10 @@
           layout.push({
             i: tile.i,
             tile_class: tile.tile_class,
-            w_params: tile.w_params
+            w_class: tile.w_class,
+            datasource: tile.datasource,
+            d_props: tile.props.data,
+            w_props: tile.props.widget
           });
         }
         params.append("layout", JSON.stringify(layout));
@@ -7267,49 +7296,88 @@
         });
       }
       function layoutReady() {
-        console.log("layout ready");
+        console.log("layout ready", gridLayout.value.$el.clientHeight);
+        gridStep = 1e5 / props.grid_params.columns;
         refresh_all();
       }
       function editItem(i) {
         console.log("Editing tile properties...", i);
         let index = gridData.layout.findIndex((item) => item.i === i);
         let tileData = gridData.layout[index];
-        let w_params = JSON.parse(tileData.w_params);
-        let form = [{ id: "title", label: "Titre", type: "string", value: tileData.title }];
+        let tileForm = [{ id: "title", label: "Titre", type: "str", value: tileData.title }, {
+          id: "datasource",
+          type: "hidden",
+          value: props.palette[tileData.tile_category].items[tileData.tile_class].datasource
+        }];
+        if (props.palette[tileData.tile_category].items[tileData.tile_class].w_classes.length > 1) {
+          tileForm.push({
+            id: "w_class",
+            label: "Widget",
+            type: "choice",
+            choices: props.palette[tileData.tile_category].items[tileData.tile_class].w_classes,
+            value: props.palette[tileData.tile_category].items[tileData.tile_class].w_classes[0]
+          });
+        } else {
+          tileForm.push({
+            id: "w_class",
+            type: "hidden",
+            value: props.palette[tileData.tile_category].items[tileData.tile_class].w_classes[0]
+          });
+        }
+        console.log(
+          props.widgets_library[props.palette[tileData.tile_category].items[tileData.tile_class].w_classes[0]]
+        );
+        let w_form = [];
         for (const [prop_id, prop_value] of Object.entries(
-          props.palette[tileData.tile_category].items[tileData.tile_class].properties
+          props.widgets_library[props.palette[tileData.tile_category].items[tileData.tile_class].w_classes[0]].properties
         )) {
-          form.push({
+          w_form.push({
             id: prop_id,
             label: prop_value.label,
             help_text: prop_value.help_text,
             type: prop_value.type,
-            value: w_params[prop_id]
+            value: tileData.props["widget"][prop_id]
           });
+          console.log("Adding w_field", prop_id, prop_value, tileData.props["widget"][prop_id]);
         }
         tileData.editing = true;
         tileFormStructure.value = {
           i,
           index,
-          form
+          label: props.palette[tileData.tile_category].items[tileData.tile_class].label + " (id=" + i + ")",
+          help_text: props.palette[tileData.tile_category].items[tileData.tile_class].help_text,
+          //form: form,
+          fieldsets: [
+            { id: "tile", label: "Tuile", fields: tileForm },
+            { id: "data", label: "Source de données", fields: [] },
+            { id: "widget", label: "Représentation", fields: w_form }
+          ]
+          //w_form: w_form
         };
         tileFormIsOpen.value = true;
       }
       function editItemOk() {
-        console.log("Saving !");
+        console.log("Saving tile properties !");
         let tileData = gridData.layout[tileFormStructure.value.index];
-        let templateProperties = props.palette[tileData.tile_category].items[tileData.tile_class].properties;
-        let w_params = {};
-        for (var i = 0; i < tileFormStructure.value.form.length; i++) {
-          let parameter = tileFormStructure.value.form[i];
-          console.log("  Value:", parameter.label, parameter.value);
-          if (parameter.id === "title") {
-            tileData.title = parameter.value;
-          } else if (templateProperties.hasOwnProperty(parameter.id)) {
-            w_params[parameter.id] = parameter.value;
+        props.palette[tileData.tile_category].items[tileData.tile_class].properties;
+        let tileProps = {};
+        for (var i = 0; i < tileFormStructure.value.fieldsets.length; i++) {
+          let fieldset = tileFormStructure.value.fieldsets[i];
+          if (fieldset.id != "tile") {
+            tileProps[fieldset.id] = {};
+          }
+          for (var j = 0; j < fieldset.fields.length; j++) {
+            let field = fieldset.fields[j];
+            console.log("  Value:", field.label, field.value);
+            if (fieldset.id == "tile") {
+              tileData[field.id] = field.value;
+            } else {
+              tileProps[fieldset.id][field.id] = field.value;
+            }
           }
         }
-        tileData.w_params = JSON.stringify(w_params);
+        tileData.props = tileProps;
+        console.log("set props =", tileData.props);
         tileData.editing = false;
         touched.value = true;
         tileFormIsOpen.value = false;
@@ -7411,11 +7479,11 @@
         if (mouseInGrid === true) {
           gridLayout.value.dragEvent("dragend", "__drop__", DragPos.x, DragPos.y, 1, 3);
           gridData.layout = gridData.layout.filter((obj) => obj.i !== "__drop__");
-          let defaults = {};
+          let defaults = { data: {}, widget: {} };
           for (const [prop_id, prop_value] of Object.entries(
-            props.palette[DragPos.tile_category].items[DragPos.tile_class].properties
+            props.widgets_library[props.palette[DragPos.tile_category].items[DragPos.tile_class].w_classes[0]].properties
           )) {
-            defaults[prop_id] = prop_value.default;
+            defaults.widget[prop_id] = prop_value.default;
           }
           gridData.layout[gridData.layout.length] = vue.reactive({
             x: DragPos.x,
@@ -7428,13 +7496,14 @@
             title: "Dropped (" + DragPos.tile_class + ") !",
             tile_class: DragPos.tile_class,
             tile_category: DragPos.tile_category,
-            w_params: JSON.stringify(defaults)
+            props: defaults
           });
           (_a = currentInstance == null ? void 0 : currentInstance.proxy) == null ? void 0 : _a.$forceUpdate();
           vue.nextTick(() => {
             gridLayout.value.dragEvent("dragend", DragPos.i, DragPos.x, DragPos.y, 1, 3);
             let index = gridData.layout.findIndex((item) => item.i === DragPos.i);
             gridItemRefs.value[index];
+            console.log("gridData:", gridData.layout[index]);
             editItem(DragPos.i);
           });
         }
@@ -7519,7 +7588,8 @@
               "use-css-transforms": true,
               onLayoutUpdated: layoutUpdated,
               onLayoutReady: layoutReady,
-              onContextmenu: openContextMenu
+              onContextmenu: openContextMenu,
+              onResize: gridResized
             }, {
               default: vue.withCtx(() => [
                 (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(gridData.layout, (item, index) => {
@@ -7585,6 +7655,35 @@
               ]),
               _: 1
             }, 8, ["layout", "col-num", "row-height", "is-draggable", "is-resizable", "margin"]),
+            vue.withDirectives((vue.openBlock(), vue.createElementBlock("svg", {
+              ref: gridBackground.value,
+              style: { width: "100%", height: "1024px" },
+              viewBox: "0 0 100000 1024",
+              preserveAspectRatio: "none"
+            }, [
+              (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(Array(props.grid_params.columns + 1).keys(), (x) => {
+                return vue.openBlock(), vue.createElementBlock("line", {
+                  x1: x * vue.unref(gridStep),
+                  x2: x * vue.unref(gridStep),
+                  y1: "0",
+                  y2: "1024",
+                  stroke: "#eee",
+                  "stroke-width": "0.1%"
+                }, null, 8, _hoisted_14);
+              }), 256)),
+              (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(Array(props.grid_params.rows + 1).keys(), (y) => {
+                return vue.openBlock(), vue.createElementBlock("line", {
+                  x1: "0",
+                  x2: "100000",
+                  y1: y * 36,
+                  y2: y * 36,
+                  stroke: "#eee",
+                  "stroke-width": "1px"
+                }, null, 8, _hoisted_15);
+              }), 256))
+            ], 512)), [
+              [vue.vShow, unlocked.value]
+            ]),
             vue.createVNode(vue.unref(Dialog), {
               ref: "helpDialog",
               header: "Utilisation de l'éditeur de cockpit",
@@ -7594,8 +7693,8 @@
             }, {
               default: vue.withCtx(() => [
                 vue.createTextVNode(" Hello ! "),
-                _hoisted_14,
-                _hoisted_15
+                _hoisted_16,
+                _hoisted_17
               ]),
               _: 1
             }, 8, ["visible"]),
@@ -7603,25 +7702,32 @@
               ref: "tileForm",
               visible: tileFormIsOpen.value,
               "onUpdate:visible": _cache[2] || (_cache[2] = ($event) => tileFormIsOpen.value = $event),
-              header: "Propriétés",
+              header: tileFormStructure.value.label,
               modal: true,
               onAfterHide: editItemCancel
             }, {
               default: vue.withCtx(() => [
-                (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(tileFormStructure.value.form, (formItem) => {
-                  return vue.openBlock(), vue.createElementBlock("div", null, [
-                    vue.createElementVNode("label", null, vue.toDisplayString(formItem.label), 1),
-                    formItem.type == "string" ? (vue.openBlock(), vue.createBlock(vue.unref(InputText), {
-                      key: 0,
-                      type: "text",
-                      modelValue: formItem.value,
-                      "onUpdate:modelValue": ($event) => formItem.value = $event
-                    }, null, 8, ["modelValue", "onUpdate:modelValue"])) : vue.createCommentVNode("", true),
-                    formItem.type == "integer" ? (vue.openBlock(), vue.createBlock(vue.unref(InputNumber), {
-                      key: 1,
-                      modelValue: formItem.value,
-                      "onUpdate:modelValue": ($event) => formItem.value = $event
-                    }, null, 8, ["modelValue", "onUpdate:modelValue"])) : vue.createCommentVNode("", true)
+                vue.createElementVNode("span", null, vue.toDisplayString(tileFormStructure.value.help_text), 1),
+                (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(tileFormStructure.value.fieldsets, (fieldset) => {
+                  return vue.openBlock(), vue.createElementBlock("div", _hoisted_18, [
+                    vue.createElementVNode("span", null, vue.toDisplayString(fieldset.name) + ": " + vue.toDisplayString(fieldset.label), 1),
+                    vue.createElementVNode("span", null, vue.toDisplayString(fieldset.help_text), 1),
+                    (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(fieldset.fields, (field) => {
+                      return vue.openBlock(), vue.createElementBlock("div", null, [
+                        vue.createElementVNode("label", null, vue.toDisplayString(field.label), 1),
+                        field.type == "str" ? (vue.openBlock(), vue.createBlock(vue.unref(InputText), {
+                          key: 0,
+                          type: "text",
+                          modelValue: field.value,
+                          "onUpdate:modelValue": ($event) => field.value = $event
+                        }, null, 8, ["modelValue", "onUpdate:modelValue"])) : vue.createCommentVNode("", true),
+                        field.type == "int" ? (vue.openBlock(), vue.createBlock(vue.unref(InputNumber), {
+                          key: 1,
+                          modelValue: field.value,
+                          "onUpdate:modelValue": ($event) => field.value = $event
+                        }, null, 8, ["modelValue", "onUpdate:modelValue"])) : vue.createCommentVNode("", true)
+                      ]);
+                    }), 256))
                   ]);
                 }), 256)),
                 vue.createElementVNode("div", null, [
@@ -7638,14 +7744,14 @@
                 ])
               ]),
               _: 1
-            }, 8, ["visible"]),
+            }, 8, ["visible", "header"]),
             vue.createVNode(vue.unref(Dialog), null, {
               default: vue.withCtx(() => [
-                _hoisted_16,
-                vue.createElementVNode("form", _hoisted_17, [
+                _hoisted_19,
+                vue.createElementVNode("form", _hoisted_20, [
                   vue.createElementVNode("fieldset", null, [
-                    _hoisted_18,
-                    _hoisted_19,
+                    _hoisted_21,
+                    _hoisted_22,
                     vue.withDirectives(vue.createElementVNode("input", {
                       "onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => _ctx.edit_widget_title = $event)
                     }, null, 512), [
@@ -7658,7 +7764,7 @@
                           key: 0,
                           "onUpdate:modelValue": ($event) => entry.value = $event,
                           type: "number"
-                        }, null, 8, _hoisted_20)), [
+                        }, null, 8, _hoisted_23)), [
                           [
                             vue.vModelText,
                             entry.value,
@@ -7669,7 +7775,7 @@
                           key: 1,
                           "onUpdate:modelValue": ($event) => entry.value = $event,
                           type: "checkbox"
-                        }, null, 8, _hoisted_21)), [
+                        }, null, 8, _hoisted_24)), [
                           [
                             vue.vModelCheckbox,
                             entry.value,
@@ -7680,7 +7786,7 @@
                           key: 2,
                           "onUpdate:modelValue": ($event) => entry.value = $event,
                           type: "color"
-                        }, null, 8, _hoisted_22)), [
+                        }, null, 8, _hoisted_25)), [
                           [
                             vue.vModelText,
                             entry.value,
@@ -7694,9 +7800,9 @@
                           (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(entry.choices, (choice) => {
                             return vue.openBlock(), vue.createElementBlock("option", {
                               value: choice[0]
-                            }, vue.toDisplayString(choice[1]), 9, _hoisted_24);
+                            }, vue.toDisplayString(choice[1]), 9, _hoisted_27);
                           }), 256))
-                        ], 8, _hoisted_23)), [
+                        ], 8, _hoisted_26)), [
                           [
                             vue.vModelSelect,
                             entry.value,
@@ -7706,7 +7812,72 @@
                         ]) : vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
                           key: 4,
                           "onUpdate:modelValue": ($event) => entry.value = $event
-                        }, null, 8, _hoisted_25)), [
+                        }, null, 8, _hoisted_28)), [
+                          [
+                            vue.vModelText,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ])
+                      ], 64);
+                    }), 256)),
+                    (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(_ctx.w_form, (entry) => {
+                      return vue.openBlock(), vue.createElementBlock(vue.Fragment, null, [
+                        vue.createElementVNode("label", null, vue.toDisplayString(entry.label), 1),
+                        entry.type == "int" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
+                          key: 0,
+                          "onUpdate:modelValue": ($event) => entry.value = $event,
+                          type: "number"
+                        }, null, 8, _hoisted_29)), [
+                          [
+                            vue.vModelText,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ]) : entry.type == "boolean" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
+                          key: 1,
+                          "onUpdate:modelValue": ($event) => entry.value = $event,
+                          type: "checkbox"
+                        }, null, 8, _hoisted_30)), [
+                          [
+                            vue.vModelCheckbox,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ]) : entry.type == "color" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
+                          key: 2,
+                          "onUpdate:modelValue": ($event) => entry.value = $event,
+                          type: "color"
+                        }, null, 8, _hoisted_31)), [
+                          [
+                            vue.vModelText,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ]) : entry.type == "choice" ? vue.withDirectives((vue.openBlock(), vue.createElementBlock("select", {
+                          key: 3,
+                          "onUpdate:modelValue": ($event) => entry.value = $event
+                        }, [
+                          (vue.openBlock(true), vue.createElementBlock(vue.Fragment, null, vue.renderList(entry.choices, (choice) => {
+                            return vue.openBlock(), vue.createElementBlock("option", {
+                              value: choice[0]
+                            }, vue.toDisplayString(choice[1]), 9, _hoisted_33);
+                          }), 256))
+                        ], 8, _hoisted_32)), [
+                          [
+                            vue.vModelSelect,
+                            entry.value,
+                            void 0,
+                            { lazy: true }
+                          ]
+                        ]) : vue.withDirectives((vue.openBlock(), vue.createElementBlock("input", {
+                          key: 4,
+                          "onUpdate:modelValue": ($event) => entry.value = $event
+                        }, null, 8, _hoisted_34)), [
                           [
                             vue.vModelText,
                             entry.value,
@@ -7718,7 +7889,7 @@
                     }), 256))
                   ])
                 ]),
-                vue.createElementVNode("div", _hoisted_26, [
+                vue.createElementVNode("div", _hoisted_35, [
                   vue.createElementVNode("button", {
                     class: "dialog-button",
                     onClick: _cache[4] || (_cache[4] = ($event) => _ctx.itemEditOk(_ctx.edit_item))

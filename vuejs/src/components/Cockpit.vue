@@ -23,7 +23,8 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  palette: { type: Object, required: true }
+  palette: { type: Object, required: true },
+  widgets_library: { type: Object, required: true }
 })
 
 const currentInstance = getCurrentInstance()
@@ -41,6 +42,8 @@ const gridLayout = ref(null)
 const gridItemRefs = ref([])
 
 // Some elements...
+const gridBackground = ref(null)
+const gridHeight = ref(200)
 const showHelpDialog = ref(false)
 const contextMenu = ref()
 const contextMenuItems = ref([
@@ -60,6 +63,7 @@ const contextMenuItems = ref([
     }
   }
 ])
+let gridStep = 10000 // in 100000th
 
 // When the cockpit is unlocked, the user can add, move, resize and remove tiles (= grid items).
 const unlocked = ref(false)
@@ -108,11 +112,23 @@ onMounted(() => {
     },
     false
   )
+  gridLayout.value.$el.addEventListener('resize', gridResized)
 })
 
 function layoutUpdated() {
   //...
-  console.log('layout updated')
+  console.log('layout updated', gridLayout.value.$el.clientHeight)
+
+  nextTick(() => {
+    console.log('layout updated 2', gridLayout.value.$el.clientHeight)
+    gridHeight.value = gridLayout.value.$el.clientHeight
+  })
+}
+
+function gridResized(ev) {
+  //...
+  console.log('grid resized', ev)
+  gridHeight.value = gridLayout.value.$el.clientHeight
 }
 
 function refresh_all() {
@@ -124,7 +140,10 @@ function refresh_all() {
     layout.push({
       i: tile.i,
       tile_class: tile.tile_class,
-      w_params: tile.w_params
+      w_class: tile.w_class,
+      datasource: tile.datasource,
+      d_props: tile.props.data,
+      w_props: tile.props.widget,
     })
   }
   params.append('layout', JSON.stringify(layout))
@@ -141,7 +160,10 @@ function refresh_all() {
 }
 
 function layoutReady() {
-  console.log('layout ready')
+  console.log('layout ready', gridLayout.value.$el.clientHeight)
+  gridStep = 100000 / props.grid_params.columns
+
+  // gridHeight.value = gridLayout.value.$el.clientHeight
   // load widgets contents from server
   refresh_all()
 }
@@ -152,27 +174,78 @@ function editItem(i) {
 
   let index = gridData.layout.findIndex((item) => item.i === i)
   let tileData = gridData.layout[index]
-  let w_params = JSON.parse(tileData.w_params)
-  let form = [{ id: 'title', label: 'Titre', type: 'string', value: tileData.title }]
+  //let w_params = JSON.parse(tileData.w_params)
+  let tileForm = [{ id: 'title', label: 'Titre', type: 'str', value: tileData.title }, {
+    id: 'datasource',
+    type: 'hidden',
+    value: props.palette[tileData.tile_category].items[tileData.tile_class].datasource
+  }]
+
+  if (props.palette[tileData.tile_category].items[tileData.tile_class].w_classes.length > 1) {
+    tileForm.push({
+      id: 'w_class',
+      label: 'Widget',
+      type: 'choice',
+      choices: props.palette[tileData.tile_category].items[tileData.tile_class].w_classes,
+      value: props.palette[tileData.tile_category].items[tileData.tile_class].w_classes[0]
+    })
+  } else {
+    tileForm.push({
+      id: 'w_class',
+      type: 'hidden',
+      value: props.palette[tileData.tile_category].items[tileData.tile_class].w_classes[0]
+    })
+  }
   // Compute form from palette tile template
+  // for (const [prop_id, prop_value] of Object.entries(
+  //   props.palette[tileData.tile_category].items[tileData.tile_class].properties
+  // )) {
+  //   form.push({
+  //     id: prop_id,
+  //     label: prop_value.label,
+  //     help_text: prop_value.help_text,
+  //     type: prop_value.type,
+  //     value: w_params[prop_id]
+  //   })
+  // }
+
+  console.log(
+    props.widgets_library[
+    props.palette[tileData.tile_category].items[tileData.tile_class].w_classes[0]
+    ]
+  )
+  let w_form = []
+
   for (const [prop_id, prop_value] of Object.entries(
-    props.palette[tileData.tile_category].items[tileData.tile_class].properties
+    props.widgets_library[
+      props.palette[tileData.tile_category].items[tileData.tile_class].w_classes[0]
+    ].properties
   )) {
-    form.push({
+    w_form.push({
       id: prop_id,
       label: prop_value.label,
       help_text: prop_value.help_text,
       type: prop_value.type,
-      value: w_params[prop_id]
+      value: tileData.props['widget'][prop_id]
     })
+    console.log('Adding w_field', prop_id, prop_value, tileData.props['widget'][prop_id])
   }
 
   tileData.editing = true
-  // Build the form from tile template:
+  // Build the whole form from tile template:
   tileFormStructure.value = {
     i: i,
     index: index,
-    form: form
+    label:
+      props.palette[tileData.tile_category].items[tileData.tile_class].label + ' (id=' + i + ')',
+    help_text: props.palette[tileData.tile_category].items[tileData.tile_class].help_text,
+    //form: form,
+    fieldsets: [
+      { id: 'tile', label: 'Tuile', fields: tileForm },
+      { id: 'data', label: 'Source de données', fields: [] },
+      { id: 'widget', label: 'Représentation', fields: w_form }
+    ]
+    //w_form: w_form
   }
 
   // Open the dialog form
@@ -180,23 +253,32 @@ function editItem(i) {
 }
 
 function editItemOk() {
-  // Save the data in the tile properties
-  // ...
-  console.log('Saving !')
+  // Save the form data in the tile properties (internal structure)
+  console.log('Saving tile properties !')
   let tileData = gridData.layout[tileFormStructure.value.index]
   let templateProperties =
     props.palette[tileData.tile_category].items[tileData.tile_class].properties
   let w_params = {}
-  for (var i = 0; i < tileFormStructure.value.form.length; i++) {
-    let parameter = tileFormStructure.value.form[i]
-    console.log('  Value:', parameter.label, parameter.value)
-    if (parameter.id === 'title') {
-      tileData.title = parameter.value
-    } else if (templateProperties.hasOwnProperty(parameter.id)) {
-      w_params[parameter.id] = parameter.value
+  let tileProps = {}
+  for (var i = 0; i < tileFormStructure.value.fieldsets.length; i++) {
+    let fieldset = tileFormStructure.value.fieldsets[i]
+    if (fieldset.id != 'tile') {
+      tileProps[fieldset.id] = {}
+    }
+    for (var j = 0; j < fieldset.fields.length; j++) {
+      let field = fieldset.fields[j]
+      console.log('  Value:', field.label, field.value)
+      if (fieldset.id == 'tile') {
+        // tile properties are used by the component, so it's directly on the tile data root
+        tileData[field.id] = field.value
+      } else {
+        tileProps[fieldset.id][field.id] = field.value
+      }
     }
   }
-  tileData.w_params = JSON.stringify(w_params)
+  //tileData.w_params = JSON.stringify(w_params)
+  tileData.props = tileProps
+  console.log("set props =", tileData.props)
   tileData.editing = false
 
   touched.value = true
@@ -344,11 +426,13 @@ function dragend(e) {
     gridData.layout = gridData.layout.filter((obj) => obj.i !== '__drop__')
 
     // Compute default properties from palette tile template
-    let defaults = {}
+    let defaults = { data: {}, widget: {} }
     for (const [prop_id, prop_value] of Object.entries(
-      props.palette[DragPos.tile_category].items[DragPos.tile_class].properties
+      props.widgets_library[
+        props.palette[DragPos.tile_category].items[DragPos.tile_class].w_classes[0]
+      ].properties
     )) {
-      defaults[prop_id] = prop_value.default
+      defaults.widget[prop_id] = prop_value.default
     }
 
     gridData.layout[gridData.layout.length] = reactive({
@@ -362,7 +446,7 @@ function dragend(e) {
       title: 'Dropped (' + DragPos.tile_class + ') !',
       tile_class: DragPos.tile_class,
       tile_category: DragPos.tile_category,
-      w_params: JSON.stringify(defaults)
+      props: defaults
     })
     //gridData.layout.set(gridData.layout.length, reactive({ popo: 12 }))
     // Wait for the DOM since we modified the layout
@@ -372,21 +456,19 @@ function dragend(e) {
       let index = gridData.layout.findIndex((item) => item.i === DragPos.i)
       let el = gridItemRefs.value[index]
       //console.log('element:', index, el)
-      //console.log('gridData:', gridData.layout[index])
+      console.log('gridData:', gridData.layout[index])
       editItem(DragPos.i)
     })
   }
 }
 </script>
 <template>
-  <div
-    style="
-      height: 100%;
-      display: grid;
-      grid-auto-flow: column;
-      grid-auto-columns: auto minmax(0, 1fr);
-    "
-  >
+  <div style="
+                  height: 100%;
+                  display: grid;
+                  grid-auto-flow: column;
+                  grid-auto-columns: auto minmax(0, 1fr);
+                ">
     <div class="cockpit-palette" v-show="unlocked">
       <div>Palette</div>
       <Accordion :activeIndex="0">
@@ -396,18 +478,9 @@ function dragend(e) {
               {{ category.label }}
             </div>
           </template>
-          <div
-            v-for="(item, tmpl_name) in category.items"
-            @drag="drag"
-            @dragend="dragend"
-            class="droppable-element palette-item"
-            draggable="true"
-            unselectable="on"
-            :tile_category="category_id"
-            :tile_class="tmpl_name"
-            :default_params="item.default_params"
-            v-tooltip="item.help_text"
-          >
+          <div v-for="(item, tmpl_name) in category.items" @drag="drag" @dragend="dragend"
+            class="droppable-element palette-item" draggable="true" unselectable="on" :tile_category="category_id"
+            :tile_class="tmpl_name" :default_params="item.default_params" v-tooltip="item.help_text">
             <div>
               {{ item.label }}
             </div>
@@ -415,68 +488,28 @@ function dragend(e) {
         </AccordionTab>
       </Accordion>
       <div style="display: flex; justify-content: space-evenly; padding: 12px">
-        <Button
-          icon="pi pi-question"
-          class="p-button-raised p-button-rounded p-button-lg"
-          @click="openHelpDialog"
-        />
+        <Button icon="pi pi-question" class="p-button-raised p-button-rounded p-button-lg" @click="openHelpDialog" />
         <Button icon="pi pi-times" class="p-button-raised p-button-rounded p-button-lg" />
-        <Button
-          icon="pi pi-check"
-          class="p-button-raised p-button-rounded p-button-lg"
-          @click="saveLayout"
-        />
+        <Button icon="pi pi-check" class="p-button-raised p-button-rounded p-button-lg" @click="saveLayout" />
       </div>
     </div>
     <div id="grid-container" class="grid-container" @click="layoutClick">
-      <GridLayout
-        ref="gridLayout"
-        v-model:layout="gridData.layout"
-        v-bind:col-num="grid_params.columns"
-        v-bind:row-height="grid_params.rows"
-        :is-draggable="unlocked"
-        :is-resizable="unlocked"
-        :is-mirrored="false"
-        :restore-on-drag="true"
-        :prevent-collision="true"
-        :vertical-compact="false"
-        v-bind:margin="[grid_params.h_spacing, grid_params.v_spacing]"
-        :use-css-transforms="true"
-        @layout-updated="layoutUpdated"
-        @layout-ready="layoutReady"
-        @contextmenu="openContextMenu"
-      >
-        <GridItem
-          v-for="(item, index) in gridData.layout"
-          ref="gridItemRefs"
-          :x="item.x"
-          :y="item.y"
-          :w="item.w"
-          :h="item.h"
-          :i="item.i"
-          :tile_class="item.tile_class"
-          :w_params="item.w_params"
-          :drag-allow-from="'.title'"
-          :key="item.i"
-          :class="{ 'add-border': item.title, editing: item.editing }"
-          :style="{ display: 'block' }"
-          @moved="modifiedItem"
-          @resized="modifiedItem"
-        >
-          <div
-            class="frame"
-            :class="{
-              'with-title': item.title.length,
-              unlocked: unlocked,
-              'without-title': !item.title.length
-            }"
-          >
-            <div
-              class="content"
-              :class="{ 'with-title': item.title.length }"
-              v-if="!item.title.length"
-              v-html="item.content"
-            ></div>
+      <GridLayout ref="gridLayout" v-model:layout="gridData.layout" v-bind:col-num="grid_params.columns"
+        v-bind:row-height="grid_params.rows" :is-draggable="unlocked" :is-resizable="unlocked" :is-mirrored="false"
+        :restore-on-drag="true" :prevent-collision="true" :vertical-compact="false"
+        v-bind:margin="[grid_params.h_spacing, grid_params.v_spacing]" :use-css-transforms="true"
+        @layout-updated="layoutUpdated" @layout-ready="layoutReady" @contextmenu="openContextMenu" @resize="gridResized">
+        <GridItem v-for="(item, index) in gridData.layout" ref="gridItemRefs" :x="item.x" :y="item.y" :w="item.w"
+          :h="item.h" :i="item.i" :tile_class="item.tile_class" :w_params="item.w_params" :drag-allow-from="'.title'"
+          :key="item.i" :class="{ 'add-border': item.title, editing: item.editing }" :style="{ display: 'block' }"
+          @moved="modifiedItem" @resized="modifiedItem">
+          <div class="frame" :class="{
+                          'with-title': item.title.length,
+                          unlocked: unlocked,
+                          'without-title': !item.title.length
+                        }">
+            <div class="content" :class="{ 'with-title': item.title.length }" v-if="!item.title.length"
+              v-html="item.content"></div>
             <div class="frame-overlay">
               <div class="title" v-if="item.title.length | unlocked">{{ item.title }}</div>
               <div class="remove" v-if="unlocked">
@@ -489,12 +522,14 @@ function dragend(e) {
         </GridItem>
         <ContextMenu ref="contextMenu" :model="contextMenuItems" />
       </GridLayout>
-      <Dialog
-        ref="helpDialog"
-        header="Utilisation de l'éditeur de cockpit"
-        footer=""
-        v-model:visible="showHelpDialog"
-      >
+      <svg v-show="unlocked" :ref="gridBackground" :style="{ width: '100%', height: '1024px' }" viewBox="0 0 100000 1024"
+        preserveAspectRatio="none">
+        <line v-for="x in Array(props.grid_params.columns + 1).keys()" :x1="x * gridStep" :x2="x * gridStep" y1="0"
+          y2="1024" stroke="#eee" stroke-width="0.1%" />
+        <line v-for="y in Array(props.grid_params.rows + 1).keys()" x1="0" x2="100000" :y1="y * 36" :y2="y * 36"
+          stroke="#eee" stroke-width="1px" />
+      </svg>
+      <Dialog ref="helpDialog" header="Utilisation de l'éditeur de cockpit" footer="" v-model:visible="showHelpDialog">
         Hello !
         <ul>
           <li>Ajouter une tuile</li>
@@ -507,29 +542,21 @@ function dragend(e) {
           pouvez la déplacer en cliquant sur le titre)
         </p>
       </Dialog>
-      <Dialog
-        ref="tileForm"
-        v-model:visible="tileFormIsOpen"
-        header="Propriétés"
-        :modal="true"
-        @after-hide="editItemCancel"
-      >
-        <div v-for="formItem in tileFormStructure.form">
-          <label>{{ formItem.label }}</label>
-          <InputText v-if="formItem.type == 'string'" type="text" v-model="formItem.value" />
-          <InputNumber v-if="formItem.type == 'integer'" v-model="formItem.value" />
+      <Dialog ref="tileForm" v-model:visible="tileFormIsOpen" :header="tileFormStructure.label" :modal="true"
+        @after-hide="editItemCancel">
+        <span>{{ tileFormStructure.help_text }}</span>
+        <div v-for="fieldset in tileFormStructure.fieldsets" style="border: 2px solid grey">
+          <span>{{ fieldset.name }}: {{ fieldset.label }}</span>
+          <span>{{ fieldset.help_text }}</span>
+          <div v-for="field in fieldset.fields">
+            <label>{{ field.label }}</label>
+            <InputText v-if="field.type == 'str'" type="text" v-model="field.value" />
+            <InputNumber v-if="field.type == 'int'" v-model="field.value" />
+          </div>
         </div>
         <div>
-          <Button
-            icon="pi pi-times"
-            class="p-button-raised p-button-rounded p-button-lg"
-            @click="editItemCancel"
-          />
-          <Button
-            icon="pi pi-check"
-            class="p-button-raised p-button-rounded p-button-lg"
-            @click="editItemOk"
-          />
+          <Button icon="pi pi-times" class="p-button-raised p-button-rounded p-button-lg" @click="editItemCancel" />
+          <Button icon="pi pi-check" class="p-button-raised p-button-rounded p-button-lg" @click="editItemOk" />
         </div>
       </Dialog>
       <Dialog>
@@ -541,11 +568,19 @@ function dragend(e) {
             <template v-for="entry in form">
               <label>{{ entry.label }}</label>
               <input v-if="entry.type == 'int'" v-model.lazy="entry.value" type="number" />
-              <input
-                v-else-if="entry.type == 'boolean'"
-                v-model.lazy="entry.value"
-                type="checkbox"
-              />
+              <input v-else-if="entry.type == 'boolean'" v-model.lazy="entry.value" type="checkbox" />
+              <input v-else-if="entry.type == 'color'" v-model.lazy="entry.value" type="color" />
+              <select v-else-if="entry.type == 'choice'" v-model.lazy="entry.value">
+                <option v-for="choice in entry.choices" :value="choice[0]">
+                  {{ choice[1] }}
+                </option>
+              </select>
+              <input v-else="" v-model.lazy="entry.value" />
+            </template>
+            <template v-for="entry in w_form">
+              <label>{{ entry.label }}</label>
+              <input v-if="entry.type == 'int'" v-model.lazy="entry.value" type="number" />
+              <input v-else-if="entry.type == 'boolean'" v-model.lazy="entry.value" type="checkbox" />
               <input v-else-if="entry.type == 'color'" v-model.lazy="entry.value" type="color" />
               <select v-else-if="entry.type == 'choice'" v-model.lazy="entry.value">
                 <option v-for="choice in entry.choices" :value="choice[0]">
@@ -607,10 +642,15 @@ function dragend(e) {
   width: 100%;
   height: 100%;
   flex: auto;
+  position: relative;
 }
 
 .vue-grid-layout {
   background: none;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
 }
 
 .vue-grid-item {
@@ -760,8 +800,7 @@ function dragend(e) {
   height: 20px;
   top: 0;
   left: 0;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><circle cx='5' cy='5' r='5' fill='#999999'/></svg>")
-    no-repeat bottom right;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><circle cx='5' cy='5' r='5' fill='#999999'/></svg>") no-repeat bottom right;
   padding: 0 8px 8px 0;
   background-origin: content-box;
   box-sizing: border-box;
