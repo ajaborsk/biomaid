@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 from django.contrib.admin import ModelAdmin
 
-from analytics.models import Data, DataSource
+from analytics.models import Data, DbDataSource
 
 
 class DataSourceAdmin(ModelAdmin):
@@ -35,5 +35,5 @@ class DataAdmin(ModelAdmin):
     list_filter = ('source',)
 
 
-admin.site.register(DataSource, DataSourceAdmin)
+admin.site.register(DbDataSource, DataSourceAdmin)
 admin.site.register(Data, DataAdmin)

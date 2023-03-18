@@ -11,7 +11,7 @@ from django.db.models import (
 from django.utils.translation import gettext as _
 
 
-class DataSource(Model):
+class DbDataSource(Model):
     class Meta:
         constraints = [UniqueConstraint(name='data_source_code_is_unique', fields=['code'])]
 
@@ -65,7 +65,7 @@ class Data(Model):
     class Meta:
         pass
 
-    source = ForeignKey(DataSource, on_delete=PROTECT)
+    source = ForeignKey(DbDataSource, on_delete=PROTECT)
     parameters = JSONField(
         null=True,
         blank=True,

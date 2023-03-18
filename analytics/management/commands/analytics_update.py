@@ -23,7 +23,7 @@ from django.utils.translation import gettext_lazy as _
 
 from common import config
 from analytics.data import get_data_timestamp
-from analytics.models import DataSource
+from analytics.models import DbDataSource
 
 ITERATION_LIMIT = 1000
 
@@ -48,18 +48,18 @@ class Command(BaseCommand):
                 _("Available datasources :\n{}").format(
                     ''.join(
                         '    ' + str(k) + '\n'
-                        for k in DataSource.objects.filter(
+                        for k in DbDataSource.objects.filter(
                             Q(cloture__isnull=True) | Q(cloture__gt=now(), auto__isnull=False)
                         ).values_list('code', flat=True)
                     )
                 )
             )
         if asked_datasources:
-            qs = DataSource.objects.filter(
+            qs = DbDataSource.objects.filter(
                 Q(cloture__isnull=True) | Q(cloture__gt=now()), code__in=asked_datasources, auto__isnull=False
             )
         else:
-            qs = DataSource.objects.filter(Q(cloture__isnull=True) | Q(cloture__gt=now()), auto__isnull=False)
+            qs = DbDataSource.objects.filter(Q(cloture__isnull=True) | Q(cloture__gt=now()), auto__isnull=False)
 
         datasources = {}
         todo = set()

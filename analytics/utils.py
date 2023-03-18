@@ -10,7 +10,7 @@ def set_datasource_in_migration(
     processor: None | str = None,
 ) -> bool:
 
-    datasource_model = apps.get_model('analytics', 'DataSource')
+    datasource_model = apps.get_model('analytics', 'DbDataSource')
 
     # return False
     datasource, created = datasource_model.objects.get_or_create(code=code)

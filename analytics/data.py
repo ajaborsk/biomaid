@@ -22,7 +22,7 @@ from django.apps import apps
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
-from analytics.models import Data, DataSource
+from analytics.models import Data, DbDataSource
 
 
 def register_data_processor(*args, **kwargs) -> bool:
@@ -105,9 +105,9 @@ def put_data(source, data, timestamp=None, parameters=None, link=None, context=N
 
 def get_last_data(code: str, parameters=None):
     if parameters is not None:
-        qs = DataSource.objects.filter(code=code)
+        qs = DbDataSource.objects.filter(code=code)
     else:
-        qs = DataSource.objects.filter(code=code)
+        qs = DbDataSource.objects.filter(code=code)
     if qs.exists():
         dqs = Data.objects.filter(source=qs[0].pk, parameters=parameters).order_by('-timestamp')
         if dqs.exists():
@@ -122,7 +122,7 @@ def get_data(code: str, parameters=None, all_params=None):
     """code is the datasource code, parameters"""
     all_params = all_params or {}
     data = None
-    qs = DataSource.objects.filter(code=code)
+    qs = DbDataSource.objects.filter(code=code)
     if qs.exists():
         data_source = qs[0]
         # Is there a last data with this parameters ?

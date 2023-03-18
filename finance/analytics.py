@@ -31,7 +31,7 @@ from analytics.anomaly import (
     print_anomalies,
 )
 from analytics.match import RecordMatcher
-from analytics.models import DataSource
+from analytics.models import DbDataSource
 from finance.apps import get_intv_from_order, no_interv_re
 from smart_view.smart_expression import find_magh2_order
 
@@ -577,7 +577,7 @@ class AllCmdChecker(AnomalySubCheckerMixin, AnomalyChecker):
         return [({'gest': key[0], 'level': key[1]}, value) for key, value in aggregates.items()]
 
     def __init__(self, data, **kwargs):
-        data_source, ds_created = DataSource.objects.get_or_create(
+        data_source, ds_created = DbDataSource.objects.get_or_create(
             code='nb-orders-flaws',
             defaults=dict(
                 label=_("Nombre de commandes présentant un problème"),
