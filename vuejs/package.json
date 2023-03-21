@@ -1,20 +1,27 @@
 {
-  "name": " vuejs",
-  "version": "0.0.0",
+  "name": "vuejs",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build-watch": "vite build -w",
+    "build": "npm run install && vite build",
+    "build-watch": "npm run install && vite build -w",
+    "install-vue": "cp -f node_modules/vue/dist/vue.global.* node_modules/vue-router/dist/vue-router.global.* ../common/static/common/js/",
+    "install-primevue-dev": "cp -f node_modules/primevue/core/core.js ../common/static/common/js/primevue-core.js",
+    "install-primevue-prod": "cp -f node_modules/primevue/core/core.min.js ../common/static/common/js/primevue-core.min.js",
+    "install-primevue-css": "cp -Rf node_modules/primevue/resources/*.css node_modules/primevue/resources/themes/saga-blue/*.css node_modules/primeflex/*.css node_modules/primeflex/themes/saga-blue.css node_modules/primeicons/*.css node_modules/primeicons/fonts ../common/static/common/css/",
+    "install": "npm run install-vue && npm run install-primevue-dev && npm run install-primevue-prod && npm run install-primevue-css",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "primeflex": "^3.3.0",
     "primeicons": "^6.0.1",
     "primevue": "^3.23.0",
     "terser": "^5.16.5",
     "vue": "^3.2.47",
+    "vue-router": "^4.1.6",
     "vue3-grid-layout-next": "^1.0.5"
   },
   "devDependencies": {
