@@ -34,8 +34,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'biom_aid'
-copyright = '2020-2021, Brice Nord, Romuald Kliglich, Alexandre Jaborska, Philomène Mazand'
-author = 'Brice Nord, Romuald Kliglich, Alexandre Jaborska, Philomène Mazand'
+copyright = '2020-2021, Brice Nord, Romuald Kliglich, Alexandre Jaborska'
+author = 'Brice Nord, Romuald Kliglich, Alexandre Jaborska'
 
 
 # -- General configuration ---------------------------------------------------
@@ -56,7 +56,8 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     # 'autoapi.sphinx',
     # 'autoapi.extension',
-    'sphinxcontrib.inkscapeconverter',
+    # 'sphinxcontrib.inkscapeconverter',
+    'sphinxcontrib.rsvgconverter',
 ]
 
 # Temporary settings, only for core developpers
