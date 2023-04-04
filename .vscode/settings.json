@@ -4,5 +4,16 @@
     "restructuredtext.preview.name": "docutils",
     "editor.tabCompletion": "on",
     "diffEditor.codeLens": true,
-    "esbonio.sphinx.confDir": ""
+    "esbonio.sphinx.confDir": "",
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "BiomAid",
+            "database": "dem_db",
+            "username": "db_user"
+        }
+    ]
 }

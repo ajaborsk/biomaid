@@ -20,7 +20,7 @@ import json
 import logging
 import re
 from abc import ABCMeta, ABC
-from copy import deepcopy
+from copy import deepcopy, copy
 
 from django.urls import reverse
 import tomlkit
@@ -31,10 +31,12 @@ from django.forms.widgets import MediaDefiningClass, Media
 from django.http import HttpResponse, JsonResponse
 from django.template import Context, Engine
 from django.utils.translation import gettext as _
-from analytics.data import get_data
+from django.utils.timezone import localtime
+from analytics.data import DataSource, get_data
 
 from common.base_views import BiomAidViewMixinMetaclass
 from common.models import Alert, Discipline
+from common import config
 
 
 def media_property(cls):
@@ -110,6 +112,7 @@ class HtmlMediaDefiningClass(MediaDefiningClass, ABCMeta):
 
     def __new__(mcs, name, bases, attrs):
         params_set = set()
+        # properties = {}
         _template_mapping = dict()
         if len(bases) == 1:
             for base_dict in list(b.__dict__ for b in reversed(bases[0].__mro__)) + [attrs]:
@@ -124,26 +127,49 @@ class HtmlMediaDefiningClass(MediaDefiningClass, ABCMeta):
                 if '_template_mapping_del' in base_dict:
                     for k in base_dict['_template_mapping_del']:
                         del _template_mapping[k]
+                # if '_properties' in base_dict:
+                #    properties = base_dict['_properties']
+                # if '_properties__del' in base_dict:
+                #    for prop in base_dict['_properties__del']:
+                #        del properties[prop]
+                # if '_properties__add' in base_dict:
+                #    properties.update(base_dict['_properties__add'])
 
+            # attrs['_properties'] = properties
             # print(f"params_set: {params_set}")
             attrs['PARAMS'] = deepcopy(params_set)
             # print(f"{name}._template_mapping: {_template_mapping}")
             attrs['_template_mapping'] = deepcopy(_template_mapping)
 
-            new_class = super().__new__(mcs, name, bases, attrs)
+        new_class = super().__new__(mcs, name, bases, attrs)
 
-            if "media" not in attrs:
-                new_class.media = media_property(new_class)
+        properties = {}
+        for base_dict in (base.__dict__ for base in reversed(new_class.__mro__)):
+            if '_properties' in base_dict:
+                properties = copy(base_dict['_properties'])
+            else:
+                if '_properties__add' in base_dict:
+                    properties.update(base_dict['_properties__add'])
+                if '_properties__del' in base_dict:
+                    for prop in base_dict['_properties__del']:
+                        del properties[prop]
+        assert isinstance(properties, dict)
+        new_class._properties = properties
 
-            # Do not check this (but this should be done for some HtmlWidgets... :-( )
-            # if name != 'HtmlWidget' and new_class.template_string is None and new_class.template_name is None:
-            #     raise RuntimeError(
-            #         _("Widget Class {} must have either a template_string or a template_name attribute").format(name)
-            #     )
+        if "media" not in attrs:
+            new_class.media = media_property(new_class)
 
-            return new_class
-        else:
-            NotImplementedError("Multiple heritance non implemented yet for WidgetPage")
+        # Do not check this (but this should be done for some HtmlWidgets... :-( )
+        # if name != 'HtmlWidget' and new_class.template_string is None and new_class.template_name is None:
+        #     raise RuntimeError(
+        #         _("Widget Class {} must have either a template_string or a template_name attribute").format(name)
+        #     )
+
+        return new_class
+
+
+#        else:
+#            NotImplementedError("Multiple heritance non implemented yet for WidgetPage")
 
 
 class HtmlWidget(ABC, metaclass=HtmlMediaDefiningClass):
@@ -320,9 +346,9 @@ class SimpleTextWidget(HtmlWidget):
         'font_size': 'font_size',
     }
 
-    label: str = _("Texte libre")
-    help_text: str = _("Simple texte statique")
-    manual_params = {
+    _label: str = _("Texte libre")
+    _help_text: str = _("Simple texte statique")
+    _properties = {
         'text': {'label': 'Texte', 'type': 'str', 'default': ''},
         'font_size': {'label': 'Taille du texte', 'type': 'int', 'default': 16},
         'text_align': {
@@ -347,7 +373,7 @@ class SimpleTextWidget(HtmlWidget):
         self.params['text_align'] = str(self.params.get('text_align', self.default_align))
         self.params['font_size'] = str(self.params.get('font_size', self.default_size))
         self.params['background_color'] = str(
-            self.params.get('background_color', self.manual_params.get('background_color', {}).get('default'))
+            self.params.get('background_color', self._properties.get('background_color', {}).get('default'))
         )
         self.params['text_color'] = str(self.params.get('text_color', self.default_color))
 
@@ -357,6 +383,33 @@ class SimpleTextWidget(HtmlWidget):
     # context['text_align'] = self.params['text_align']
     # context['font_size'] = self.params['font_size']
     # return context
+
+
+class DataWidgetMixin:
+    _properties__add = {'datasource': {'label': _("Nom de la source de données"), 'type': 'str'}}
+
+    def _setup(self, **params):
+        if isinstance(self.params.get('datasource'), DataSource):
+            self.params['data'] = self.params['datasource'].get_data(**params)
+        else:
+            self.params['data'] = None
+        super()._setup(**params)
+
+
+class DataTextWidget(DataWidgetMixin, SimpleTextWidget):
+    _properties__del = ('text',)
+
+    def _prepare(self):
+        super()._prepare()
+        self.params['text'] = str(self.params['data'])
+
+
+class DatetimeWidget(SimpleTextWidget):
+    _properties__del = ('text',)
+
+    def _prepare(self):
+        super()._prepare()
+        self.params['text'] = str(localtime().strftime('%c %Z'))
 
 
 class AltairWidget(HtmlWidget):
@@ -554,9 +607,9 @@ class SimpleScalarWidget(HtmlWidget):
         'scalar': 'scalar',
     }
 
-    label = _("Donnée simple")
-    help_text = _("Donnée unique (nombre)")
-    manual_params = {
+    _label = _("Donnée simple")
+    _help_text = _("Donnée unique (nombre)")
+    _properties = {
         'font_size': {'label': 'Taille du texte', 'type': 'int'},
         'text_color': {'label': "Couleur du texte", 'type': 'color'},
         'prefix': {'label': "Préfixe", 'type': 'string'},
@@ -573,15 +626,13 @@ class SimpleScalarWidget(HtmlWidget):
 class PrevisionnelParExpertWidget(AltairWidget):
     label = _("Nb prévisionnels par expert")
 
-    @staticmethod
-    def manual_params(params):
-        return {
-            'discipline': {
-                'label': "Discipline",
-                'type': 'choice',
-                'choices': list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
-            },
-        }
+    _properties = {
+        'discipline': {
+            'label': "Discipline",
+            'type': 'choice',
+            'choices': lambda view_params: list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
+        },
+    }
 
     def _setup(self, **params):
         super()._setup(**params)
@@ -608,15 +659,13 @@ class PrevisionnelParExpertWidget(AltairWidget):
 class MontantPrevisionnelParExpertWidget(AltairWidget):
     label = _("Montant prévisionnel par expert")
 
-    @staticmethod
-    def manual_params(params):
-        return {
-            'discipline': {
-                'label': "Discipline",
-                'type': 'choice',
-                'choices': list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
-            },
-        }
+    _properties = {
+        'discipline': {
+            'label': "Discipline",
+            'type': 'choice',
+            'choices': lambda view_params: list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
+        },
+    }
 
     def _setup(self, **params):
         super()._setup(**params)
@@ -648,23 +697,44 @@ class Vue2Widget(HtmlWidget):
 class VueWidget(HtmlWidget):
     @property
     def media(self):
-        return Media(
-            js=[
-                'https://unpkg.com/vue@3/dist/vue.global.js',
-                'https://unpkg.com/vue-router@4/dist/vue-router.global.js',
-                'https://unpkg.com/primevue@^3/core/core.min.js',
-                'smart_view/js/axios-0.27.2.min.js',
-                'common/vue/{}.js'.format(self._vue_widget_name),
-            ],
-            css={
-                'all': [
-                    "https://unpkg.com/primevue@^3/resources/themes/saga-blue/theme.css",
-                    "https://unpkg.com/primevue@^3/resources/primevue.min.css",
-                    "https://unpkg.com/primeflex@^3/primeflex.min.css",
-                    "https://unpkg.com/primeicons/primeicons.css",
-                ]
-            },
-        )
+        if config.settings.DEBUG:
+            return Media(
+                # --------- Development settings ----------
+                js=[
+                    'common/js/vue.global.js',
+                    'common/js/vue-router.global.js',
+                    'common/js/primevue-core.js',
+                    'smart_view/js/axios-0.27.2.min.js',
+                    'common/vue/{}.js'.format(self._vue_widget_name),
+                ],
+                css={
+                    'all': [
+                        "common/css/theme.css",
+                        "common/css/primevue.min.css",
+                        "common/css/primeflex.min.css",
+                        "common/css/primeicons.css",
+                    ]
+                },
+            )
+        else:
+            return Media(
+                # --------- Production settings ----------
+                js=[
+                    'common/js/vue.global.prod.js',
+                    'common/js/vue-router.global.prod.js',
+                    'common/js/core.min.js',  # This is primevue... Should be renamed...
+                    'smart_view/js/axios-0.27.2.min.js',
+                    'common/vue/{}.js'.format(self._vue_widget_name),
+                ],
+                css={
+                    'all': [
+                        "common/css/theme.css",
+                        "common/css/primevue.min.css",
+                        "common/css/primeflex.min.css",
+                        "common/css/primeicons.css",
+                    ]
+                },
+            )
 
     _template_mapping_add = {
         'vue_widget_name': 'vue_widget_name',
@@ -685,16 +755,23 @@ class VueWidget(HtmlWidget):
         super()._setup(**params)
         self.params['vue_widget_name'] = self._vue_widget_name
         self.params['vue_opts'] = {'ripple': True}
-        # self.params['vue_props'] = {'msg': "I did it !", 'html_id': self.params['html_id']}
 
 
 class DemoWidget(VueWidget):
     _vue_widget_name = 'demo_widget'
 
 
-class DataTextWidget(SimpleTextWidget):
-    def _prepare(self):
-        self.params['text'] = str(self.params['data'])
+# class DataWidgetMixin:
+#     def _prepare(self):
+#         print("mixin ...")
+
+
+# class DataTextWidget(SimpleTextWidget):
+#     def _prepare(self):
+#         self.params['text'] = str(self.params['data'])
+#         print("DataTextWidget _prepare before")
+#         # super()._prepare()
+#         print("DataTextWidget _prepare after")
 
 
 class VueCockpit(VueWidget):
@@ -719,6 +796,7 @@ class VueCockpit(VueWidget):
     widgets_library = {
         'simple_text': SimpleTextWidget,
         'data_text': DataTextWidget,
+        'datetime_text': DatetimeWidget,
     }
 
     # Later, these templates could be defined in each module (ie Django application) as alarms, views, models, etc.
@@ -731,19 +809,19 @@ class VueCockpit(VueWidget):
             'h': 1,
             'w_classes': ['simple_text'],
             # 'class': SimpleTextWidget,
-            'properties': {
-                'text': {
-                    'type': 'string',
-                    'label': _("Texte"),
-                    'help_string': _("Aide sur ce champ"),
-                    'default': _("Texte"),
-                },
-                'font_size': {
-                    'type': 'integer',
-                    'label': _("Taille"),
-                    'default': 12,
-                },
-            },
+            # 'properties': {
+            #     'text': {
+            #         'type': 'string',
+            #         'label': _("Texte"),
+            #         'help_string': _("Aide sur ce champ"),
+            #         'default': _("Texte"),
+            #     },
+            #     'font_size': {
+            #         'type': 'integer',
+            #         'label': _("Taille"),
+            #         'default': 12,
+            #     },
+            # },
             # 'default_params': json.dumps({'text': "Oui, c'est sûr !"}),
         },
         'my_alerts': {
@@ -753,6 +831,12 @@ class VueCockpit(VueWidget):
             'datasource': 'user_alerts',
             # 'class': MyAlertsWidget,
             'w_classes': ['data_text'],
+        },
+        'datetime': {
+            'category': 'common',
+            'label': _("Timestamp"),
+            'help_text': _("Heure de la dernière mise à jour du cockpit"),
+            'w_classes': ['datetime_text'],
         },
         'demo_pie_chart': {
             'category': 'demo',
@@ -920,7 +1004,7 @@ class VueCockpit(VueWidget):
 
     def _prepare(self):
         print("Cockpit prepare()...")
-        # This part is comuted BEFORE applying the parameters->context mapping
+        # This part is computed BEFORE applying the parameters->context mapping
 
         # Since this is a property only used to generate the html/js, no need to compute it in _setup()
         #  (which is called at every instanciation)
@@ -943,7 +1027,7 @@ class VueCockpit(VueWidget):
                 for widget_name in tile_template.get('w_classes', []):
                     if widget_name in self.widgets_library:
                         widget_class = self.widgets_library[widget_name]
-                        cockpit_widgets_library[widget_name] = {'properties': widget_class.manual_params}
+                        cockpit_widgets_library[widget_name] = {'properties': widget_class._properties}
                         print("widget", widget_name, cockpit_widgets_library[widget_name])
 
         print(f"{cockpit_widgets_library=}")

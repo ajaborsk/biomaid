@@ -7,6 +7,8 @@ import { GridLayout, GridItem } from 'vue3-grid-layout-next'
 import Accordion from 'primevue/accordion'
 import AccordionTab from 'primevue/accordiontab'
 import ContextMenu from 'primevue/contextmenu'
+import TabView from 'primevue/tabview';
+import TabPanel from 'primevue/tabpanel';
 
 const Button = primevue.button
 const Dialog = primevue.dialog
@@ -221,14 +223,16 @@ function editItem(i) {
       props.palette[tileData.tile_category].items[tileData.tile_class].w_classes[0]
     ].properties
   )) {
-    w_form.push({
-      id: prop_id,
-      label: prop_value.label,
-      help_text: prop_value.help_text,
-      type: prop_value.type,
-      value: tileData.props['widget'][prop_id]
-    })
-    console.log('Adding w_field', prop_id, prop_value, tileData.props['widget'][prop_id])
+    if (prop_id != 'datasource') {
+      w_form.push({
+        id: prop_id,
+        label: prop_value.label,
+        help_text: prop_value.help_text,
+        type: prop_value.type,
+        value: tileData.props['widget'][prop_id]
+      })
+      console.log('Adding w_field', prop_id, prop_value, tileData.props['widget'][prop_id])
+    }
   }
 
   tileData.editing = true
@@ -545,15 +549,26 @@ function dragend(e) {
       <Dialog ref="tileForm" v-model:visible="tileFormIsOpen" :header="tileFormStructure.label" :modal="true"
         @after-hide="editItemCancel">
         <span>{{ tileFormStructure.help_text }}</span>
-        <div v-for="fieldset in tileFormStructure.fieldsets" style="border: 2px solid grey">
-          <span>{{ fieldset.name }}: {{ fieldset.label }}</span>
+        <TabView class="form-panel">
+        <TabPanel v-for="fieldset in tileFormStructure.fieldsets" :header="fieldset.label" style="border: 2px solid grey">
           <span>{{ fieldset.help_text }}</span>
-          <div v-for="field in fieldset.fields">
-            <label>{{ field.label }}</label>
-            <InputText v-if="field.type == 'str'" type="text" v-model="field.value" />
-            <InputNumber v-if="field.type == 'int'" v-model="field.value" />
+          <div class="tile-form-fieldset">
+          <template v-if="fieldset.fields.length" v-for="field in fieldset.fields">
+            <label v-if="field.label">{{ field.label }}</label>
+            <input v-if="field.type == 'hidden'" v-model.lazy="field.value" type="hidden" />
+            <input v-else-if="field.type == 'int'" v-model.lazy="field.value" type="number" />
+              <input v-else-if="field.type == 'boolean'" v-model.lazy="field.value" type="checkbox" />
+              <input v-else-if="field.type == 'color'" v-model.lazy="field.value" type="color" />
+              <select v-else-if="field.type == 'choice'" v-model.lazy="field.value">
+                <option v-for="choice in field.choices" :value="choice[0]">
+                  {{ choice[1] }}
+                </option>
+              </select>
+              <input v-else="" v-model.lazy="field.value" />
+            </template>
+            <span v-else>Il n'y a aucune propriété modifiable.</span>
           </div>
-        </div>
+        </TabPanel></TabView>
         <div>
           <Button icon="pi pi-times" class="p-button-raised p-button-rounded p-button-lg" @click="editItemCancel" />
           <Button icon="pi pi-check" class="p-button-raised p-button-rounded p-button-lg" @click="editItemOk" />
@@ -636,6 +651,30 @@ function dragend(e) {
   border: solid 1px #ddd;
   background-color: #fafafa;
   padding: 10px;
+}
+
+.form-panel {
+  height:400px;
+}
+
+.tile-form-fieldset {
+  display: grid;
+  grid-gap: 10px;
+  align-items: center;
+  width:400px;
+}
+
+.tile-form-fieldset label {
+  grid-column: 1;
+  text-align:right;
+}
+
+.tile-form-fieldset input {
+  grid-column: 2;
+}
+
+.tile-form-fieldset select {
+  grid-column: 2;
 }
 
 .grid-container {

@@ -11,10 +11,18 @@ class AnalyticsConfig(AppConfig):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.data_processors = {}
+        self.data_sources = {}
 
     def register_data_processor(self, name: str, f: CodeType) -> bool:
         if name not in self.data_processors:
             self.data_processors[name] = {'function': f, 'parameters': inspect.signature(f).parameters}
+            return True
+        else:
+            return False
+
+    def register_data_source(self, name: str, f: CodeType) -> bool:
+        if name not in self.data_source:
+            self.data_sources[name] = {'function': f, 'parameters': inspect.signature(f).parameters}
             return True
         else:
             return False

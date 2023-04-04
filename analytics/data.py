@@ -29,6 +29,10 @@ def register_data_processor(*args, **kwargs) -> bool:
     return apps.get_app_config('analytics').register_data_processor(*args, **kwargs)
 
 
+def register_data_source(*args, **kwargs) -> bool:
+    return apps.get_app_config('analytics').register_data_source(*args, **kwargs)
+
+
 # def set_datasource(
 #     code: str,
 #     label: None | str = None,
@@ -157,3 +161,21 @@ def get_data(code: str, parameters=None, all_params=None):
         raise ValueError(
             _("Analytic data with '{code}' is registred nor in engines registry nor in the database.").format(code=code)
         )
+
+
+class DataSource:
+    """A DataSource is a class that :
+    - can get data (form engine, data storage, etc.)
+    - handle data source properties :
+        - data format
+        - name
+        - help text
+        - parameters
+        - stored/computed... cached...
+        - dependencies
+
+    A instance can be build programmatically (using, for instance, inheritage) or fetched from the database for dynamic datasources
+    """
+
+    def get_data(self, **params):
+        return None
