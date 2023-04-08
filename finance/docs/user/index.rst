@@ -1,0 +1,6 @@
+==================
+Gestion financière
+==================
+
+.. toctree::
+    assets
