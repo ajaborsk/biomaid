@@ -9,8 +9,14 @@
 #  General Public License for more details.
 #  You should have received a copy of the GNU General Public License
 #  along with this program. If not, see <http://www.gnu.org/licenses/>.
+from copy import copy
+from math import fabs
+from os import path
+import pickle
 import re
 from typing import Any
+
+from xlsxwriter import Workbook
 
 from assetplusconnect.models import BEq1996, BFt1996, EnCours, Docliste
 from django.apps import apps
@@ -32,12 +38,16 @@ from analytics.anomaly import (
 )
 from analytics.match import RecordMatcher
 from analytics.models import DataSource
+from common.utils import DataWorksheet
 from finance.apps import get_intv_from_order, no_interv_re
 from smart_view.smart_expression import find_magh2_order
 
 from dem.models import Demande
 
 serial_re = re.compile(r'(\S*)\s*\(.*\)\s*')
+inv_re_list = [
+    re.compile(s) for s in (r'\b(\d\d\d\d-\d\d\d\d\d)\b', r'\b(\d\d\d\d-\d\d\d\d\d)-\d\d\b', r'\b(\d\d\d\d.\d\d.\d\d\d)/\d+\b')
+]
 
 
 def order_row_on_work_order(order_row: Any):
@@ -944,31 +954,375 @@ def dem_financial_assess(*args, **kwargs):
     DemAllAnalyser(Demande).check(verbosity=verbosity)
 
 
+class ImmoMatchOkChecker(AnomalyChecker):
+    """Add links informations if the asset (immo) can be found in (maintenance) inventory"""
+
+    code = '100'
+    level = 1
+    message = 'Correspondance trouvée : {id} - {name}, UF {uf}, Montant {amount}, MeS {mes}'
+
+    def check(self, verbosity=1):
+        idx, idx2, orders_idx, immo = self.data
+        if immo.fiche in idx2:
+            ids = []
+            for id in (
+                idx2[immo.fiche]['main']
+                + idx2[immo.fiche]['internal']
+                + idx2[immo.fiche]['manual']
+                + idx2[immo.fiche]['comment']
+                + idx2[immo.fiche]['sameorder']
+            ):
+                if id not in ids:
+                    self.add(
+                        id=id,
+                        name=idx[id]['nom'],
+                        uf=idx[id]['n_uf'],
+                        amount=str(idx[id]['prix']) + ' €',
+                        mes=str(idx[id]['mes1']),
+                        data={
+                            'eqpt': {
+                                'prix': float(idx[id]['prix']) if idx[id]['prix'] != '' else None,
+                            },
+                            'idx2': idx2[immo.fiche],
+                        },
+                    )
+                    idx[id]['link'] = immo.fiche
+                ids.append(id)
+            if immo.commande in orders_idx:
+                for id in orders_idx[immo.commande]:
+                    if id not in ids:
+                        self.add(
+                            id=id,
+                            name=idx[id]['nom'],
+                            uf=idx[id]['n_uf'],
+                            amount=str(idx[id]['prix']) + ' €',
+                            mes=str(idx[id]['mes1']),
+                            data={
+                                'eqpt': {
+                                    'prix': float(idx[id]['prix']) if idx[id]['prix'] != '' else None,
+                                },
+                                'idx2': idx2[immo.fiche],
+                            },
+                        )
+                        idx[id]['link'] = immo.fiche
+                    ids.append(id)
+
+        return super().check(verbosity)
+
+
+class ImmoMatchNoOkChecker(AnomalyChecker):
+    """Add an anomaly if the Asset (immo) cannot be found in the (maintenance) inventory"""
+
+    code = '300'
+    level = 3
+    message = 'Correspondance non trouvée'
+
+    def check(self, verbosity=1):
+        if self.data[3].fiche not in self.data[1]:
+            self.add()
+        return super().check(verbosity)
+
+
+class ImmoAmountChecker(AnomalyChecker):
+    """Check amount more than 1% diff raise an anomaly"""
+
+    code = '201'
+    level = 2
+    message = 'Montant total trop différent {amount_immo} != {amount_total}'
+
+    def check(self, verbosity=1):
+        idx, idx2, orders_idx, immo, matches = self.data
+        amount_immo = float(immo.actif_uf_df2)
+        amount_total = 0
+        for anomaly in matches:
+            try:
+                amount_total += float(anomaly['data']['eqpt']['prix'])  # / 0.9605  # This coef is only since ####
+            except (ValueError, TypeError):
+                pass
+        if len(matches) and fabs(amount_immo - amount_total) > amount_immo * 0.01:
+            self.add(amount_total=amount_total, amount_immo=amount_immo)
+        return super().check(verbosity)
+
+
+class ImmoUfChecker(AnomalyChecker):
+    """Check for UF anomaly"""
+
+    code = '202'
+    level = 2
+    message = 'UF différente {amount_immo} != {amount_total}'
+
+    def check(self, verbosity=1):
+        idx, idx2, orders_idx, immo, matches = self.data
+        return super().check(verbosity)
+
+
+class ImmoCommissioningChecker(AnomalyChecker):
+    """Check for Commissioning anomaly
+    fr: (Date de mise en service)"""
+
+    code = '203'
+    level = 2
+    message = 'Date de mise en service trop différente {amount_immo} != {amount_total}'
+
+    def check(self, verbosity=1):
+        idx, idx2, orders_idx, immo, matches = self.data
+        return super().check(verbosity)
+
+
+class ImmoReformChecker(AnomalyChecker):
+    """Check for Commissioning anomaly
+    fr: (Date de mise en service)"""
+
+    code = '301'
+    level = 3
+    message = 'Equipement réformé dans l\'inventaire technique {amount_immo} != {amount_total}'
+
+    def check(self, verbosity=1):
+        idx, idx2, orders_idx, immo, matches = self.data
+        return super().check(verbosity)
+
+
 class ImmoAnalyser(RecordAnomalyChecker):
-    code = '123'
+    """data = (inv_idx_as_dict, inv_idx2_as_dict, immo_as_row)"""
+
+    code = '999'
     level = 1
     message = 'test'
 
     def __init__(self, data):
-        super().__init__(data, storage=JsonAnomaliesStorage(data[1], 'analyse'))
+        super().__init__(data, storage=JsonAnomaliesStorage(data[3], 'analyse'))
 
     def check(self, verbosity=1):
-        # print(f"      ImmoAnalyse... {self.data[1].code=}")
-        # for prev in self.data[1].previsionnel_set.all():
-        #     PrevAnalyser(prev).check(verbosity=verbosity)
-        self.add(data={'argl': 'ok'})
+        if verbosity >= 3:
+            print(_("  Analyse de la fiche {} :").format(self.data[1].code))
+        matches = ImmoMatchOkChecker(data=self.data).check(verbosity=verbosity).anomalies
+        self.append(matches)
+        self.append(ImmoMatchNoOkChecker(data=self.data).check(verbosity=verbosity).anomalies)
+        # self.append(
+        #     ImmoAmountChecker(data=(self.data[0], self.data[1], self.data[2], self.data[3], matches))
+        #     .check(verbosity=verbosity)
+        #     .anomalies
+        # )
 
 
 class ImmoAllAnalyser(AnomalyChecker):
     def check(self, verbosity=1):
-        # print(f"    ImmoAllAnalyser... {self.data=}")
-        qs = self.data.objects.filter()
-        for demande in qs:
-            # ImmoAnalyser(data=(self.data, demande)).check(verbosity=verbosity)
-            pass
+        print(f"    ImmoAllAnalyser... {self.data=}")
+
+        # Cache filenames
+        inv_cache_fn = 'B_EQ1996.cache.pickle'
+        idx_cache_fn = 'B_EQ1996_idx.cache.pickle'
+        idx2_cache_fn = 'B_EQ1996_idx2.cache.pickle'
+        orders_idx_cache_fn = 'B_EQ1996_orders_idx.cache.pickle'
+
+        # Step 2 : Get inventory (main) index from cache or compute it
+        print("2 - Getting computed inventory index...")
+        if path.exists(idx_cache_fn) and path.exists(orders_idx_cache_fn):
+            with open(idx_cache_fn, "rb") as f:
+                inv_idx = pickle.load(f)
+            with open(orders_idx_cache_fn, "rb") as f:
+                orders_idx = pickle.load(f)
+            print("  2.0 - Got computed inventory index from cache")
+        else:
+            # Step 2.1 : Get inventory from cache or from Asset+ Database
+            print("  2.1 - Getting inventory...")
+            if path.exists(inv_cache_fn):
+                with open(inv_cache_fn, "rb") as f:
+                    inv = pickle.load(f)
+                print("    2.1.0 - Got inventory from cache")
+            else:
+                qs = BEq1996.objects.using('gmao').all().values()
+                qs._fetch_all()
+                inv = list(qs)
+                with open(inv_cache_fn, "wb") as f:
+                    pickle.dump(inv, f)
+                print("    2.1.1 - Got inventory from database then stored it to cache")
+
+            print(f"{len(inv)=}")
+            inv_idx = {}
+            orders_idx = {}
+            for eqpt in inv:
+                inv_idx[eqpt['n_imma']] = eqpt
+                n_order = eqpt['n_order'].upper().strip().replace(' ', '')
+                if len(n_order) == 8:
+                    if n_order not in orders_idx:
+                        orders_idx[n_order] = []
+                    orders_idx[n_order].append(eqpt['n_imma'])
+            with open(idx_cache_fn, "wb") as f:
+                pickle.dump(inv_idx, f)
+            with open(orders_idx_cache_fn, "wb") as f:
+                pickle.dump(orders_idx, f)
+            print("  2.2 - Computed inventory index and stored to cache")
+        print(f"{len(inv_idx)=}")
+
+        # Step 3 : Get inventory (rich) index from cache or compute it
+        cc = 0
+        c_err = 0
+        if path.exists(idx2_cache_fn):
+            with open(idx2_cache_fn, "rb") as f:
+                inv_idx2 = pickle.load(f)
+            print("3 - Got rich inventory index")
+        else:
+            inv_idx2 = {}
+            for n_imma, eqpt in inv_idx.items():
+                # 3.1 - Calculer le code immo à partir du numéro d'intventaire (si possible)
+                if len(n_imma) >= 10 and n_imma[0:4].isdigit() and n_imma[4] == '-' and n_imma[5:10].isdigit():
+                    n_immo = n_imma[0:10]
+                    if n_immo not in inv_idx2:
+                        inv_idx2[n_immo] = copy({'main': [], 'internal': [], 'manual': [], 'comment': [], 'sameorder': []})
+                    inv_idx2[n_immo]['main'].append(n_imma)
+                    cc += 1
+                elif (
+                    len(n_imma) >= 12
+                    and n_imma[0:4].isdigit()
+                    and n_imma[4] == '.'
+                    and n_imma[5:7].isdigit()
+                    and n_imma[7] == '.'
+                    and n_imma[8:11].isdigit()
+                ):
+                    n_immo = n_imma[0:4] + '-' + n_imma[5:7] + n_imma[8:11]
+                    if n_immo not in inv_idx2:
+                        inv_idx2[n_immo] = copy({'main': [], 'internal': [], 'manual': [], 'comment': [], 'sameorder': []})
+                    inv_idx2[n_immo]['main'].append(n_imma)
+                    cc += 1
+                else:
+                    # print(f"3.1 - Unable to compute n_immo for {n_imma}")
+                    c_err += 1
+                    eqpt['analyse'] = {'anomalies': [{'label': 'Numéro d\'inventaire non conforme !'}]}
+
+                # 3.2 - Numéro interne
+                if (
+                    len(eqpt['number_in_site']) >= 10
+                    and eqpt['number_in_site'][0:4].isdigit()
+                    and eqpt['number_in_site'][4] == '-'
+                    and eqpt['number_in_site'][5:10].isdigit()
+                ):
+                    n_immo = eqpt['number_in_site'][0:10]
+                    if n_immo not in inv_idx2:
+                        inv_idx2[n_immo] = copy({'main': [], 'internal': [], 'manual': [], 'comment': [], 'sameorder': []})
+                    inv_idx2[n_immo]['internal'].append(n_imma)
+                elif (
+                    len(eqpt['number_in_site']) >= 12
+                    and eqpt['number_in_site'][0:4].isdigit()
+                    and eqpt['number_in_site'][4] == '.'
+                    and eqpt['number_in_site'][5:7].isdigit()
+                    and eqpt['number_in_site'][7] == '.'
+                    and eqpt['number_in_site'][8:11].isdigit()
+                ):
+                    n_immo = eqpt['number_in_site'][0:4] + '-' + eqpt['number_in_site'][5:7] + eqpt['number_in_site'][8:11]
+                    if n_immo not in inv_idx2:
+                        inv_idx2[n_immo] = copy({'main': [], 'internal': [], 'manual': [], 'comment': [], 'sameorder': []})
+                    inv_idx2[n_immo]['internal'].append(n_imma)
+
+                # 3.3 - Numéro "code immobilisation" dans les champs libres
+                # TODO...
+                if (
+                    len(eqpt['filler_eco_3']) >= 10
+                    and eqpt['filler_eco_3'][0:4].isdigit()
+                    and eqpt['filler_eco_3'][4] == '-'
+                    and eqpt['filler_eco_3'][5:10].isdigit()
+                ):
+                    n_immo = eqpt['filler_eco_3'][0:10]
+                    if n_immo not in inv_idx2:
+                        inv_idx2[n_immo] = copy({'main': [], 'internal': [], 'manual': [], 'comment': [], 'sameorder': []})
+                    inv_idx2[n_immo]['manual'].append(n_imma)
+                elif (
+                    len(eqpt['filler_eco_3']) >= 12
+                    and eqpt['filler_eco_3'][0:4].isdigit()
+                    and eqpt['filler_eco_3'][4] == '.'
+                    and eqpt['filler_eco_3'][5:7].isdigit()
+                    and eqpt['filler_eco_3'][7] == '.'
+                    and eqpt['filler_eco_3'][8:11].isdigit()
+                ):
+                    n_immo = eqpt['filler_eco_3'][0:4] + '-' + eqpt['filler_eco_3'][5:7] + eqpt['filler_eco_3'][8:11]
+                    if n_immo not in inv_idx2:
+                        inv_idx2[n_immo] = copy({'main': [], 'internal': [], 'manual': [], 'comment': [], 'sameorder': []})
+                    inv_idx2[n_immo]['manual'].append(n_imma)
+
+                # 3.2 - Numéro qui ressemble dans les commentaires
+                for regexp in inv_re_list:
+                    if found := regexp.findall(eqpt['nom2']):
+                        # print(f"Found inv in comment: {found} {eqpt['nom2']}")
+                        for n_immo in found:
+                            if n_immo not in inv_idx2:
+                                inv_idx2[n_immo] = copy({'main': [], 'internal': [], 'manual': [], 'comment': [], 'sameorder': []})
+                            inv_idx2[n_immo]['comment'].append(n_imma)
+
+                # 3.2 - Premier numéro de la fiche d'inventaire du premier équipement de la commande
+                # TODO...
+
+            with open(idx2_cache_fn, "wb") as f:
+                pickle.dump(inv_idx2, f)
+            print("3 - Computed rich inventory index and stored to cache")
+        print(f"nb_immo={len(inv_idx2)}, nb eqpts={cc}, nb err={c_err}")
+
+        try:
+            immo_model = apps.get_model('extable.ExtImmobilisation')
+        except LookupError:
+            immo_model = None
+        if immo_model:
+            immo_found = 0
+            immo_not_found = 0
+            actif_found = 0
+            actif_not_found = 0
+            for immo in immo_model.objects.all():
+                ImmoAnalyser((inv_idx, inv_idx2, orders_idx, immo)).check(verbosity=verbosity)
+                if immo.fiche in inv_idx2:
+                    immo_found += 1
+                    actif_found += immo.actif_uf_df2
+                else:
+                    immo_not_found += 1
+                    actif_not_found += immo.actif_uf_df2
+                    if verbosity >= 3:
+                        print(immo.fiche, immo.fiche in inv_idx2, immo.actif_uf_df2)
+            print(f"{immo_found=}, {actif_found=}, {immo_not_found=}, {actif_not_found=}")
+        else:
+            print("Error, cannot find Assets table")
+
+        wb = Workbook(now().strftime('%Y-%m-%d') + ' - asset_vs_madrid.xlsx', {'remove_timezone': True})
+        wd = DataWorksheet(
+            wb,
+            _("Feuille"),
+            {
+                'code': {},
+                'nom': {},
+                'prix': {},
+                'commande': {'title': 'N° Commande'},
+                'classe': {'title': 'Classe'},
+                'compte': {'title': 'Compte'},
+                'mes': {'title': 'Mise en service'},
+                'reforme': {'title': 'Réforme'},
+                'link': {'title': 'Lien Madrid'},
+            },
+            None,
+        )
+        wd.prepare()
+        for n_imma in sorted(inv_idx.keys()):
+            eqpt = inv_idx[n_imma]
+            # print(f"{eqpt=}")
+            if (
+                len(eqpt['date_refor']) < 5
+                and eqpt['prix'] != ''
+                and (eqpt['filler_eco_2'] == 'C2' or eqpt['fk_budget_nu_compte'].startswith('H2') or float(eqpt['prix']) >= 1000)
+            ):
+                record = {
+                    'code': n_imma,
+                    'nom': eqpt['nom'],
+                    'prix': eqpt['prix'],
+                    'commande': eqpt['n_order'],
+                    'classe': eqpt['filler_eco_2'],
+                    'compte': eqpt['fk_budget_nu_compte'],
+                    'mes': eqpt['mes1'],
+                    'reforme': eqpt['date_refor'],
+                    'link': eqpt.get('link', 'ø'),
+                }
+                wd.put_row(record)
+        wd.finalize()
+        wb.close()
+
         return super().check(verbosity=verbosity)
 
 
 def immo_financial_assess(*args, **kwargs):
     verbosity = kwargs.get('verbosity') or 0
-    ImmoAllAnalyser(Demande).check(verbosity=verbosity)
+    ImmoAllAnalyser().check(verbosity=verbosity)

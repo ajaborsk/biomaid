@@ -447,7 +447,7 @@ class HtmlSmartFormat(SmartFormat):
         return settings
 
 
-class AnalyseSmartFormat(SmartFormat):
+class AnalysisSmartFormat(SmartFormat):
     class Media:
         js = ("smart_view/js/smart-view-analysis.js",)
         css = {
@@ -506,7 +506,7 @@ apps.get_app_config('smart_view').register_formats(
         'conditional_money': ConditionnalMoneySmartFormat,
         'boolean': BooleanSmartFormat,
         'html': HtmlSmartFormat,
-        'analyse': AnalyseSmartFormat,
+        'analysis': AnalysisSmartFormat,
         'subviews': SubviewsSmartFormat,
         'tools': ToolsSmartFormat,
     }
