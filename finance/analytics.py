@@ -990,8 +990,9 @@ class ImmoMatchOkChecker(AnomalyChecker):
                 ids.append(id)
             if immo.commande in orders_idx:
                 for id in orders_idx[immo.commande]:
-                    if id not in ids:
+                    if False and id not in ids and immo.no_uf_df == idx[id]['n_uf']:
                         self.add(
+                            level=3,
                             id=id,
                             name=idx[id]['nom'],
                             uf=idx[id]['n_uf'],
@@ -1005,7 +1006,7 @@ class ImmoMatchOkChecker(AnomalyChecker):
                             },
                         )
                         idx[id]['link'] = immo.fiche
-                    ids.append(id)
+                        ids.append(id)
 
         return super().check(verbosity)
 
@@ -1019,7 +1020,7 @@ class ImmoMatchNoOkChecker(AnomalyChecker):
 
     def check(self, verbosity=1):
         if self.data[3].fiche not in self.data[1]:
-            self.add()
+            self.add(weight=self.data[3].actif_uf_df2)
         return super().check(verbosity)
 
 
@@ -1285,6 +1286,7 @@ class ImmoAllAnalyser(AnomalyChecker):
             _("Feuille"),
             {
                 'code': {},
+                'v_fonc': {'title': 'Voc.'},
                 'nom': {},
                 'prix': {},
                 'commande': {'title': 'N° Commande'},
@@ -1307,6 +1309,7 @@ class ImmoAllAnalyser(AnomalyChecker):
             ):
                 record = {
                     'code': n_imma,
+                    'v_fonc': eqpt['v_fonc'],
                     'nom': eqpt['nom'],
                     'prix': eqpt['prix'],
                     'commande': eqpt['n_order'],
