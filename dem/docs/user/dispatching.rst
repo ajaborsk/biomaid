@@ -37,9 +37,10 @@ L'interface n'est disponible que pour les utilisateurs ayant le rôle de "dispat
 L'accès se fait :
 
 - en sélectionnant l'application "Gestion des demandes de matériel" dans le menu de sélection du
-portail (bouton avec les trois trais horizontaux en haut à gauche).
+  portail (bouton avec les trois trais horizontaux en haut à gauche).
 - Puis en choisissant dans le cockpit qui s'affiche le lien vers la répartion pour la campagne à répartir (lien "pour moi").
 - Alternativement, il existe un menu déroulant qui permet d'accéder aussi à la répartion pour les différentes campagnes.
+
 
 Réorientation vers une autre campagne
 -------------------------------------
