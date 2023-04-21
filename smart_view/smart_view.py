@@ -798,7 +798,7 @@ class SmartViewMetaclass(MediaDefiningClass):
                                     {
                                         'label': _("-- Indéfini --"),
                                         'value': '{{{}__isnull:true}}'.format(mf['fieldname']),
-                                    }
+                                    },
                                 ]
                                 if add_null
                                 else []
@@ -843,7 +843,7 @@ class SmartViewMetaclass(MediaDefiningClass):
                                         {
                                             'label': _("-- Indéfini --"),
                                             'value': '{"' + mf["fieldname"] + '__isnull":true}',
-                                        }
+                                        },
                                     ]
                                     if add_null
                                     else []
@@ -872,7 +872,7 @@ class SmartViewMetaclass(MediaDefiningClass):
                                         {
                                             'label': _("-- Indéfini --"),
                                             'value': '{"' + mf["fieldname"] + '__isnull":true}',
-                                        }
+                                        },
                                     ]
                                     if add_null
                                     else []
@@ -898,7 +898,7 @@ class SmartViewMetaclass(MediaDefiningClass):
                                 {
                                     "label": _("-- Indéfini --"),
                                     "value": json.dumps({mfilter["fieldname"] + "__isnull": True}),
-                                }
+                                },
                             ]
                     else:
                         raise AttributeError(
@@ -1877,6 +1877,14 @@ class SmartView(metaclass=SmartViewMetaclass):
         def conditional_to_excel(value):
             return next((item for item in json.loads(value)['fields'] if item is not None), None)
 
+        def analysis_to_excel(value):
+            # analysis = json.loads(value)
+            analysis = value or {}
+            if 'anomalies' in analysis and isinstance(analysis['anomalies'], list):
+                return '\n'.join([str(anomaly['level']) + ' - ' + anomaly['message'] for anomaly in analysis['anomalies']])
+            else:
+                return 'ø'
+
         user_prefs = UserSettings(view_params['user'])[self._meta['appname']]['tabulator-' + self._prefix]
         columns = []
         formats = {}
@@ -1916,75 +1924,14 @@ class SmartView(metaclass=SmartViewMetaclass):
                     lookup = dict(lookup)
                     lookup.update({None: None})
                     converters[column['field']] = partial(choice_to_excel, lookup)
-
-        # columns = [
-        #     f for f in user_prefs['columns'] if not (getattr(self, f).get("hidden")
-        #       or isinstance(getattr(self, f), ToolsSmartField))
-        # ]
+                elif smart_field.get('format') == 'analysis':
+                    converters[column['field']] = analysis_to_excel
 
         response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response["Content-Disposition"] = "attachment; filename={}".format(export.get("filename", "file"))
         wb = Workbook(response, {'remove_timezone': True})
         wd = DataWorksheet(wb, _("Feuille"), formats, converters)
         wd.prepare().put_query_set(queryset).finalize()
-
-        # ws = wb.add_worksheet()
-        #
-        # # Calcule les styles (au sens Excel 2003+) des différentes colonnes
-        # header_formats = {}
-        # formats = {}
-        # choices = {}
-        # for col in columns:
-        #
-        #     # Récupère le format de la colonne / du champ
-        #     col_format = getattr(self, col).get('format', 'xlsx', default=None)
-        #
-        #     # Format de la colonne
-        #     formats[col] = wb.add_format({'text_wrap': True, 'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
-        #     if col_format == 'money':
-        #         formats[col].set_num_format('# ##0,00 €')
-        #     elif col_format == 'datetime':
-        #         formats[col].set_num_format('dd-mm-yyyy')
-        #     elif col_format == 'boolean':
-        #         pass
-        #
-        #     # Styles du titre de la colonne
-        #     header_formats[col] = wb.add_format({'bg_color': '#CCEEFF'})
-        #
-        #     col_choices = getattr(self, col).get('choices', 'xlsx', default=None)
-        #     if callable(col_choices):
-        #         col_choices = dict(col_choices(view_params))
-        #     choices[col] = col_choices
-        #
-        # current_row_idx = 0
-        #
-        # current_col_idx = 0
-        # for col in columns:
-        #     ws.write(
-        #         current_row_idx, current_col_idx, getattr(self, col).get("title", "xlsx", default=str(col)), header_formats[col]
-        #     )
-        #
-        #     # Largeur de la colonne
-        #     # ws.column_dimensions[get_column_letter(current_col_idx)].width = (
-        #     #    getattr(self, col).get("width", "xlsx", default=100) // 6
-        #     # )
-        #
-        #     current_col_idx += 1
-        # current_row_idx += 1
-        #
-        # data_rows = queryset.values(*columns)
-        # for data_row in data_rows:
-        #     current_col_idx = 0
-        #     for col in columns:
-        #         if choices[col] is None:
-        #             cell_value = data_row[col]
-        #         else:
-        #             cell_value = choices[col].get(data_row[col], choices[col].get(str(data_row[col]), _("-- indéfini --")))
-        #         ws.write(current_row_idx, current_col_idx, cell_value, formats[col])
-        #         current_col_idx += 1
-        #     current_row_idx += 1
-        #
-        # ws.autofilter(0, 0, current_row_idx - 1, len(columns) - 1)
 
         wb.close()
 

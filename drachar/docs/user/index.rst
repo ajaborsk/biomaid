@@ -1,0 +1,5 @@
+Suivi du plan d'équipement
+==========================
+
+.. note:: 
+    Partie restant à rédiger...
