@@ -23,6 +23,7 @@ from django.contrib.contenttypes.models import ContentType
 
 class GenericComment(models.Model):
 
+    # If not null, the comment of wich it's a reply
     reply = models.ForeignKey(
         'generic_comment.GenericComment',
         null=True,
@@ -30,15 +31,33 @@ class GenericComment(models.Model):
         on_delete=models.PROTECT,
     )
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("Rédacteur"))
+    # The comment recipient (optional, can be NULL)
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        verbose_name=_("Destinataire"),
+        null=True,
+        blank=True,
+        related_name='recipient_comments',
+    )
+
+    # If a comment is private, it's only visible to the recipient
+    private = models.BooleanField(verbose_name=_("Privé"), default=False)
+
+    # The comment author
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, verbose_name=_("Rédacteur"))
+
+    # ? Unused
     comment_type = models.CharField(max_length=256, null=True, blank=True)
+
+    # The comment (text ; no HTML for now)
     comment_text = models.TextField()
 
     creation_timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("date de création"))
     modification_timestamp = models.DateTimeField(auto_now=True, verbose_name=_("date de modification"))
     desactivated_timestamp = models.DateTimeField(null=True, blank=True)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.CharField(max_length=256)
     content_object = GenericForeignKey('content_type', 'object_id')
 
