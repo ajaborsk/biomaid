@@ -357,7 +357,11 @@ class ProgrammeSmartView(SmartView):
                 'label': _("Actif"),
                 'fieldname': 'cloture',
                 'type': 'select',
-                'choices': [{'label': _("Tous"), 'value': '{}'}],
+                'choices': [
+                    {'label': _("Tous"), 'value': '{}'},
+                    {'label': _("Ouverts"), 'value': '{"cloture__isnull":true}'},
+                    {'label': _("Fermés"), 'value': '{"cloture__isnull":false}'},
+                ],
             },
         }
         menu_left = ({'label': 'Ajouter un programme', 'url_name': 'common:programme-create'},)
