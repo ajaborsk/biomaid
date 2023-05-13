@@ -16,6 +16,7 @@
 #
 import os.path
 import subprocess
+from functools import reduce
 
 from django.apps import apps
 from django.core.management.base import BaseCommand
@@ -59,7 +60,11 @@ class Command(BaseCommand):
                             ...
 
         # Build the documentation
-        subprocess.run(['make', 'html'], cwd='docs')
+
+        # TODO: Get tags from configuration files
+        sphinx_opts = reduce(lambda x, y: x + y, [['-t', tag] for tag in ['tag1', 'tag2', 'tag_n']], [])
+
+        subprocess.run(['SPHINXOPTS="' + ' '.join(sphinx_opts) + '"'] + ['make', 'html'], cwd='docs', shell=True)
         subprocess.run(['make', 'latexpdf'], cwd='docs')
 
         # Install html & pdf manual in /static
