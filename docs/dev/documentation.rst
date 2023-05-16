@@ -8,6 +8,15 @@ La commande Django `make_docs`, à lancer à chaque mise à jour, regénère aut
 la documentation au format HTML et sous forme de documents PDF à partir des
 applications (modules) installés.
 
+.. admonition:: Le saviez-vous ?
+
+    Le principe fondamental est de pouvoir générer une documentation complète et adaptée à chaque instance de BiomAid.
+
+    Il s'agit en particulier de créer une documentation :
+
+    - Avec toute la documentation des modules installés et seulement des modules installés
+    - Avec toutes les spécificités locales d'utilisation du logiciel (comme les règles d'utilisation de certains champs ou les processus locaux)
+
 La documentation principale se trouve dans le dossier `docs/` à la racine du projet.
 Elle est composée de 5 documents différents :
 
@@ -55,3 +64,33 @@ que nécessaire.
 .. warning::
     Même si cela peut être tentant, il faut absolument éviter d'intégrer dans cette partie de la
     documentation des mots de passe ou d'autres données confidentielles !
+
+Documentation conditionnelle
+----------------------------
+
+Grâce à l'utilisation de `tag` (cf. `documentation de Sphinx sur la directive *only* <https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-only>`_), 
+il est possible d'insérer dans la documentation des parties qui ne seront affichées/créée que si certaines conditions sont vraies.
+
+Applications Django / Modules BiomAid
++++++++++++++++++++++++++++++++++++++
+
+En plus des tags générés automatiquement par Sphinx (format et moteur), la commande `make_docs` 
+va créer un tag pour chaque module (app) actif dans l'application BiomAid. Chacun de ces tags est composé du préfixe `djangoapp_` et 
+du nom de l'application complet, avec les éventuels '.' remplacés par des '_'. Ainsi, si l'application `dem` est active, le tag `djangoapp_dem` sera vrai
+et si l'application `django.contrib.contenttypes` est active, le tag `djangoapp_django_contrib_contenttypes` sera vrai.
+
+Options
++++++++
+
+Il est aussi possible d'ajouter des tags dans les fichiers de configuration TOML pour documenter certaines
+fonctionnalités optionnelles. On peut penser par exemple à l'utilisation (ou non) de certaines interfaces vers 
+magh2 et/ou Asset+ et/ou autre chose...
+
+Les tags d'option sont définis à partir des entrées de configuration dans le dictionnaire `options`. Par exemple, si un des fichiers de configuration comporte
+une section `options`:
+
+    [options]
+
+    magh2_orders = true
+
+Cela définira le tag `option_magh2_orders` pour la génération de la documentation.

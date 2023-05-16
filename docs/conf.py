@@ -33,7 +33,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'biom_aid'
+project = 'BiomAid'
 copyright = '2020-2021, Brice Nord, Romuald Kliglich, Alexandre Jaborska'
 author = 'Brice Nord, Romuald Kliglich, Alexandre Jaborska'
 
@@ -56,6 +56,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     # 'autoapi.sphinx',
     # 'autoapi.extension',
+    ## Use only one of these two
     # 'sphinxcontrib.inkscapeconverter',
     'sphinxcontrib.rsvgconverter',
 ]
