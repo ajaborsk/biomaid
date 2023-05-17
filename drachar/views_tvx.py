@@ -327,5 +327,6 @@ class PrevisionnelTvxView(DoubleSmartViewMixin, DracharView):
     main_smart_view_class = PrevisionnelTvxSmartView21
     name = 'previsionnel-tvx'
     main_field_name = 'num_dmd'
+    managed_field_name = 'num_dmd'
     field_smart_view_class = SingleDemandeTvxSmartView
     title = _("Suivi exécution des travaux")
