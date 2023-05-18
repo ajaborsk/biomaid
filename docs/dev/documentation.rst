@@ -1,16 +1,16 @@
 Documentation du projet
 =======================
 
-BIOM_AID utilise `Sphinx <https://www.sphinx-doc.org/en/master/#>`_  comme générateur de documentation et le module
+|project| utilise `Sphinx <https://www.sphinx-doc.org/en/master/#>`_  comme générateur de documentation et le module
 `autoapi` pour générer automatiquement la documentation des API.
 
-La commande Django `make_docs`, à lancer à chaque mise à jour, regénère automatiquement toute
+La commande Django `make_docs` (`python manage.py make_docs`), à lancer à chaque mise à jour, regénère automatiquement toute
 la documentation au format HTML et sous forme de documents PDF à partir des
 applications (modules) installés.
 
 .. admonition:: Le saviez-vous ?
 
-    Le principe fondamental est de pouvoir générer une documentation complète et adaptée à chaque instance de BiomAid.
+    Le principe fondamental est de pouvoir générer une documentation complète et adaptée à chaque instance de |project|.
 
     Il s'agit en particulier de créer une documentation :
 
@@ -21,7 +21,7 @@ La documentation principale se trouve dans le dossier `docs/` à la racine du pr
 Elle est composée de 5 documents différents :
 
 *  **user** : Document destiné aux utilisateurs du portail
-*  **internals** : Document qui explique le fonctionnement interne de BIOM_AID et des différentes applications. Il peut
+*  **internals** : Document qui explique le fonctionnement interne de |project| et des différentes applications. Il peut
    être utilisé par les développeurs, les administrateurs ou même les utilisateurs avancés.
 *  **admin** : Document destiné au responsable du portail (le référent du logiciel,
    qui peut modifier la configuration globale)
@@ -40,7 +40,7 @@ Par exemple, dans l'application `dem`, il y a un répertoire `docs` qui contient
 Ce dossier (et la documentation qu'il contient) sera ajouté au document global **internals**
 par la commande `make_docs`.
 
-.. note::
+.. todo::
     Il faudrait un exemple plus clair ici !
 
 Documentation locale
@@ -65,17 +65,20 @@ que nécessaire.
     Même si cela peut être tentant, il faut absolument éviter d'intégrer dans cette partie de la
     documentation des mots de passe ou d'autres données confidentielles !
 
+.. todo::
+    Il faudrait un exemple plus clair ici !
+
 Documentation conditionnelle
 ----------------------------
 
 Grâce à l'utilisation de `tag` (cf. `documentation de Sphinx sur la directive *only* <https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#directive-only>`_), 
 il est possible d'insérer dans la documentation des parties qui ne seront affichées/créée que si certaines conditions sont vraies.
 
-Applications Django / Modules BiomAid
-+++++++++++++++++++++++++++++++++++++
+Applications Django / Modules |project|
++++++++++++++++++++++++++++++++++++++++
 
 En plus des tags générés automatiquement par Sphinx (format et moteur), la commande `make_docs` 
-va créer un tag pour chaque module (app) actif dans l'application BiomAid. Chacun de ces tags est composé du préfixe `djangoapp_` et 
+va créer un tag pour chaque module (app) actif dans l'application |project|. Chacun de ces tags est composé du préfixe `djangoapp_` et 
 du nom de l'application complet, avec les éventuels '.' remplacés par des '_'. Ainsi, si l'application `dem` est active, le tag `djangoapp_dem` sera vrai
 et si l'application `django.contrib.contenttypes` est active, le tag `djangoapp_django_contrib_contenttypes` sera vrai.
 
@@ -89,8 +92,30 @@ magh2 et/ou Asset+ et/ou autre chose...
 Les tags d'option sont définis à partir des entrées de configuration dans le dictionnaire `options`. Par exemple, si un des fichiers de configuration comporte
 une section `options`:
 
-    [options]
+.. sourcecode:: toml
 
+    [options]
     magh2_orders = true
 
 Cela définira le tag `option_magh2_orders` pour la génération de la documentation.
+
+.. sourcecode:: rest
+
+    .. only:: option_magh2_orders
+
+        Paragraphe conditionnel
+        -----------------------
+
+        Visible seulement si le tag 'option_magh2_orders' est vrai
+
+        .. note::
+
+            On peut mettre des directives dans une section conditionnelle aussi
+
+    .. only:: not option_magh2_orders
+
+        Paragraphe conditionnel
+        -----------------------
+
+        Visible seulement si le tag 'option_magh2_orders' est faux
+

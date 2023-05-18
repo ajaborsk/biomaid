@@ -48,4 +48,4 @@ avec les comportements suivants :
 
 
 .. note::
-  Dans la version 0.12.2 (au 18 décembre 2022), cette spécification n'est pas encore mise en oeuvre partout dans BiomAid.
+  Dans la version 0.12.2 (au 18 décembre 2022), cette spécification n'est pas encore mise en oeuvre partout dans |project|.

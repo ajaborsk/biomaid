@@ -61,7 +61,7 @@ class Command(BaseCommand):
 
         # Build the documentation
 
-        # TODO: Get tags from configuration files to allow conditional documentation parts
+        # Get tags from configuration files to allow conditional documentation parts
         # Use ..only:: directive to use it
         tags = ['django_app_' + appname.replace('.', '_') for appname in config.settings.INSTALLED_APPS] + [
             'option_' + option for option in config.get('options', {}).keys() if option
@@ -69,7 +69,7 @@ class Command(BaseCommand):
 
         sphinx_opts = reduce(lambda x, y: x + y, [['-t', tag] for tag in tags], [])
 
-        print(f"{sphinx_opts=}")
+        subprocess.run(['make', 'clean'], cwd='docs')
 
         # We have to use shell=True here since we use shell variable to pass tag names to make & sphinx-build
         subprocess.run('SPHINXOPTS="' + ' '.join(sphinx_opts) + '" make html', cwd='docs', shell=True)
