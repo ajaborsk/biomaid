@@ -65,8 +65,58 @@ que nécessaire.
     Même si cela peut être tentant, il faut absolument éviter d'intégrer dans cette partie de la
     documentation des mots de passe ou d'autres données confidentielles !
 
-.. todo::
-    Il faudrait un exemple plus clair ici !
+Dans le fichier principal (ici `documentation.rst`), il faut donc intégrer à la fin de chaque paragraphe un point d'insertion :
+
+.. code-block:: rest
+    :caption: Exemple de point d'insertion dans le fichier de documentation principal `documentation.rst`, à la fin du paragraphe identifié `paragraph` (extrait du fichier `documentation.rst`)
+
+    Paragraphe
+    ----------
+
+    Documentation relatif au paragraphe etc.
+
+    .. include:: doc_local/documentation.rst
+        :start-after: .. _paragraph:
+        :end-before: .. _
+
+Dans le fichier local, il faut créer un fichier nommé aussi `documentation.rst`, dans lequel on retrouve toutes les sections à insérer :
+
+.. code-block:: rest
+    :caption: Exemple de texte à insérer dans le fichier de documentation local `documentation.rst`, à la fin du paragraphe identifié `paragraph` (extrait du fichier `local/documentation.rst`)
+
+    .. _paragraph:
+
+        .. admonition:: Pour le cas de notre instance de BiomAid:
+
+            Ici, on fait comme cela...
+
+    .. _next_paragraph:
+        ...
+
+Le lien entre `local/` et `doc_local/` est fait automatiquement par la commande Django `make_docs`.
+
+La documentation générée sera identique à celle qui aurait été générée si le texte de `documentation.rst` avait été :
+
+.. code-block:: rest
+    :caption:  Fichier de documentation `documentation.rst`, paragraphe `paragraph`, code généré
+
+    Paragraphe
+    ----------
+
+    Documentation relatif au paragraphe etc.
+
+    .. admonition:: Pour le cas de notre instance de BiomAid:
+
+        Ici, on fait comme cela...
+
+Chaque fichier de documentation locale doit impérativement se terminer par une pseudo directive
+
+.. code-block:: rest
+    :caption: texte à insérer à la fin de chaque fichier de documentation locale, pour délimiter la dernière section à insérer (extrait du fichier `doc_local/documentation.rst`)
+
+    .. _end-of-file:
+
+
 
 Documentation conditionnelle
 ----------------------------
