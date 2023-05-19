@@ -23,12 +23,16 @@ si la demande est validée telle que.
 En fait, si la demande est arbitrable et s'il n'y a pas de montant d'arbitrage ou d'expert désigné, la seule option possible est de refuser 
 la demande...
 
-.. warning:: 
-    Sur la version 0.12, en avril 2023, on peut essayer de valider une demande (de façon définitive) sans montant d'arbitrage ou sans expert. 
-    C'est un **défault** / **bug** important car 
-    dans ce cas, la demande ne peut pas être transférée dans le plan d'équipement et elle disparaît pourtant
-    des demandes en cours... La seule solution est de demander à un administrateur de la "dé-valider" en passant par
-    l'interface d'administration de Django :-( ...
+.. note:: 
+    Les demandes validées définitivement mais pour lesquelles une opération n'a pas (encore) été créée dans le plan d'équipement correspondant
+    apparaissent toujours dans la vue d'arbitrage. C'est intentionnel de façon à permettre de les corriger en cas d'erreur. Cela peut se produire dans 
+    deux cas seulement:
+
+    - Soit la demande n'est pas complètement conforme, c'est à dire qu'il manque une enveloppe et/ou un référent et le script ne peut pas 
+      créer l'opération correspondante
+    - Soit il ne s'est pas écoulé un délai suffisant : Une demande n'est transférée par le script que si elle a été validée depuis plus de 30 minutes. Comme le script 
+      est normalement lancé toutes les 15 minutes, cela signifie qu'il faut entre 30 et 45 minutes pour qu'une demande bascule vers le plan. **Ce délai est intentionnel**.
+
 
 Si une demande est affectée à un programme actif, qui possède un arbitre, qu'un montant a été déterminé ou validé par l'expert 
 et que ce dernier a donné un avis (dans un sens ou dans l'autre), la demande **doit** être arbitrée. On dit qu'elle est
@@ -42,7 +46,7 @@ L'accès à l'interface d'arbitrage se fait uniquement depuis le portail "Gestio
 Il y a ensuite deux accès possibles, avec un fonctionnement légèrement différent :
 
 - Via le menu "Arbitrage", l'utilisateur a accès à tous les programmes pour lesquels il a les droits d'arbitrage ET 
-  pour lesquels il y a des demandes **arbitrable**. Dans ce cas, la page d'arbitrage qui est ouverte lors du choix du programme
+  pour lesquels il y a des demandes **arbitrables**. Dans ce cas, la page d'arbitrage qui est ouverte lors du choix du programme
   est dédiée au programme en question. Il s'agit d'un filtre "de vue" qui n'est pas modifiable par l'utilisateur (il n'apparaît pas 
   dans la barre des filtres).
 
@@ -52,8 +56,9 @@ Il y a ensuite deux accès possibles, avec un fonctionnement légèrement diffé
   est aussi arbitre dudit programme.
 
 
-.. note:: 
-    A faire : parler de la vue "toutes les demandes en cours", dans laquelle on peut aussi arbitrer.
+.. admonition:: A rédiger
+
+    Parler de la vue "toutes les demandes en cours", dans laquelle on peut aussi arbitrer.
 
 
 Mode "projection"
@@ -74,25 +79,29 @@ L'arbitrage en pratique
 Les commentaires
 ++++++++++++++++
 
-.. note:: 
-    Partie restant à rédiger...
+.. admonition:: A rédiger
+
+    Expliquer le rôle et le fonctionnement des commentaires de l'arbitre (provisoire et définitif)
 
 Les différents arbitrages
 +++++++++++++++++++++++++
 
-.. note:: 
-    Partie restant à rédiger...
+.. admonition:: A rédiger
+
+    Expliquer comment on peut avoir différents types d'arbitrages en fonction du type de la demande (ce qui n'est pas très cohérent... héritage d'une des premières versions)
+    et surtout que chaque arbitrage a une valeur *vraie* ou *fausse*, ce qui détermine si on bascule ou pas la demande vers le plan d'équipement.
 
 Les validations partielles
 ++++++++++++++++++++++++++
 
+.. admonition:: A rédiger
 
-
-.. note:: 
-    Partie restant à rédiger...
+    Expliquer que l'arbitre peut adapter le nombre d'équipements validés et/ou le montant total de l'enveloppe.
 
 Bascule vers le plan d'équipement
 +++++++++++++++++++++++++++++++++
 
-.. note:: 
-    Partie restant à rédiger...
+.. admonition:: A rédiger
+
+    Expliquer le rôle du drapeau "définitif".
+    Après, la bascule est automatique, toutes les 15 minutes normalement.
