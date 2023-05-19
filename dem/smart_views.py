@@ -3734,7 +3734,7 @@ class DemandesRepartitionSmartView(DemandeEqptSmartView):
             " La répartition consiste à affecter à chaque demande un programme, un domaine et un expert."
         )
 
-        def base_filter(self, view_params):  # noqa
+        def base_filter(self, view_params):
             return (
                 [
                     (Q(programme__isnull=True) | Q(domaine__isnull=True) | Q(expert_metier__isnull=True))
