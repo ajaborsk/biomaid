@@ -49,7 +49,7 @@ class DemTvxSmartView(DemandeSmartView):
             # 'state_code',
             # 'discipline_dmd',
             # 'couts_complementaires',
-            'num_dmd',
+            # 'num_dmd',
             'code',
             'date',
             'uf',
@@ -794,7 +794,7 @@ class DemTvxSmartView(DemandeSmartView):
 class DemTvxEnCoursSmartView(DemTvxSmartView):
     class Meta:
         columns__remove = (
-            # 'calendrier',
+            'calendrier',
             'programme',
             # 'tvx_eval_devact',
             # 'tvx_eval_contin',
@@ -956,13 +956,22 @@ class DemTvxEnCoursTechSmartView(DemTvxSmartView):
     class Meta:
         columns__add = ('tools',)
 
-        def base_filter(self, request):
-            return ~Q(tvx_state__endswith='_OTHER')
+        def base_filter(self, view_params: dict):  # NOQA : Unused parameter
+            return ~Q(tvx_state__endswith='_OTHER') & (Q(gel__isnull=True) | Q(gel=False))
+
             # {
             #    'tvx_state__contains': 'TVX',
             # }
 
         user_filters = {
+            'campagne': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'calendrier',
+                    'label': F('calendrier__nom'),
+                    'sort': F('calendrier__code'),
+                },
+            },
             'redacteur': {
                 'type': 'select',
                 'choices': lambda view_params, base_filter_args, base_filter_kwargs, manager: [
@@ -992,6 +1001,37 @@ class DemTvxEnCoursTechSmartView(DemTvxSmartView):
             },
             'tvx_priorite': {
                 'type': 'select',
+            },
+            'demande_contains': {
+                'type': 'contains',
+                'fieldnames': [
+                    'referent',
+                    'contact',
+                    'libelle',
+                    'nom_projet',
+                    'description',
+                    'commentaire_cadre_sup',
+                    'decision_soumission',
+                    'commentaire_biomed',
+                    'commentaire_definitif_commission',
+                    'autre_argumentaire',
+                    'montant_arbitrage',
+                    'localisation',
+                    'tvx_contrainte_lib',
+                    'tvx_contrainte_alib',
+                    'tvx_contrainte_lar',
+                    'tvx_contrainte_autre',
+                    'tvx_contrainte',
+                ],
+                'label': _('Demande contient'),
+            },
+            'avis_cadre_sup': {
+                'type': 'select',
+                'label': _('Avis Cadre Supérier de Pôle'),
+            },
+            'decision_validateur': {
+                'type': 'select',
+                'label': _('Décision Chef de pôle'),
             },
         }
 
