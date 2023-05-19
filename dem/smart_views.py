@@ -3556,7 +3556,8 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
 
         def base_filter(self, view_params):
             return (
-                Q(gel=False),  # Demandes non validées
+                # Demandes non validées OU validées mais sans encore de prévisionnel (phase transitoire)
+                Q(gel=False) | (Q(gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True)),
                 Q(programme__arbitre=view_params['user'].pk),  # Dont je suis l'arbitre
                 ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
             )

@@ -1511,9 +1511,12 @@ class DemTvxValidationSmartView(DemTvxSmartView):
         }
 
         def base_filter(self, view_params):
-            return {
-                'tvx_state': 'TVX_ARB',
-            }
+            return (
+                # Demandes non validées OU validées mais sans encore de prévisionnel (phase transitoire)
+                Q(gel=False) | (Q(gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True)),
+                Q(programme__arbitre=view_params['user'].pk),  # Dont je suis l'arbitre
+                Q(discipline_dmd__code='TX'),  # Uniquement les demandes de travaux
+            )
 
         user_filters__update = {
             'expert_metier': {'type': 'select'},
