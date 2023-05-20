@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 from django.apps import apps
 from django.db import DatabaseError
 from django.utils.translation import gettext as _
@@ -47,10 +49,20 @@ class DatabaseEngine(ExtableEngine):
             )
             return
         else:
+            tz = ZoneInfo(self.schema['parser_opts'].get('timezone', 'UTC'))
             dst_model.objects.all().delete()
+            columns_desc = self.schema['parser_opts'].get('column', {})
             for src_record in qs:
+                values = {}
+                for dst_col, col_desc in columns_desc.items():
+                    v = src_record[col_desc['src_column']]
+                    if col_desc['type'] == 'datetime' and v is not None:
+                        values[dst_col] = v.astimezone(tz)
+                    else:
+                        values[dst_col] = v
+
                 # print(src_record)
-                dst_record = dst_model(**{dst_col: src_record[src_col] for src_col, dst_col in columns.items()})
+                dst_record = dst_model(**values)
                 dst_record.save()
 
         # log(BiomAidCommand.WARNING, _("  Database engine not yet implemented. Ignoring this extable."))
