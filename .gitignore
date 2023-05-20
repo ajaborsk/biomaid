@@ -29,6 +29,7 @@ settings/dem/static/
 __pycache__/
 *.py[cod]
 *$py.class
+*.pickle
 
 # C extensions
 *.so
@@ -54,6 +55,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 *.iso
+*.xlsx
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

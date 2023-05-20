@@ -47,7 +47,8 @@
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "extable_update",
-                "-v3"
+                "-v3",
+                "equipement"
             ],
             "django": true,
             "justMyCode": true
