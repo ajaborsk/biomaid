@@ -744,7 +744,6 @@ class IntvLignesRecordMatcher(RecordMatcher):
 
 
 def orders_flaws_processor(*args, **kwargs):
-
     verbosity = kwargs.get('verbosity') or 0
 
     print(_("Détection des problèmes liés aux commandes..."))
@@ -772,7 +771,8 @@ class PrevAnalyser(RecordAnomalyChecker):
         super().__init__(data, storage=JsonAnomaliesStorage(data, 'analyse'))
 
     def check(self, verbosity=1):
-        # print(f"      DemAnalyse... {self.data[1].code=}")
+        if verbosity >= 3:
+            print(f"    PrevAnalyser: {self.data.num_dmd}")
         dra94_dossier_model = apps.get_model('extable', 'ExtDra94Dossier')
         dra94_ligne_model = apps.get_model('extable', 'ExtDra94Ligne')
         order_row_model = apps.get_model('extable', 'ExtCommande')
@@ -823,6 +823,8 @@ class PrevAnalyser(RecordAnomalyChecker):
         prev_mt_engage_on_uf = 0
         prev_mt_liquide = 0
         prev_mt_liquide_on_uf = 0
+        if verbosity >= 3:
+            print(f"    Commandes: {' '.join(no_commandes)}")
         for no_commande in no_commandes:
             rows_on_uf = 0
             order_rows = order_row_model.objects.filter(commande=no_commande)
@@ -944,8 +946,13 @@ class DemAllAnalyser(AnomalyChecker):
     def check(self, verbosity=1):
         # print(f"    DemAllAnalyser... {self.data=}")
         qs = self.data.objects.filter()
+        total = qs.count()
+        cnt = 0
         for demande in qs:
+            if verbosity >= 3:
+                print(f"  Analyzing demande {demande.code} ({(10000*cnt//total)/100}%)")
             DemAnalyser(data=(self.data, demande)).check(verbosity=verbosity)
+            cnt += 1
         return super().check(verbosity=verbosity)
 
 
@@ -1095,7 +1102,7 @@ class ImmoAnalyser(RecordAnomalyChecker):
 
     def check(self, verbosity=1):
         if verbosity >= 3:
-            print(_("  Analyse de la fiche {} :").format(self.data[1].code))
+            print(_("  Analyse de la fiche {} :").format(self.data[3].code))
         matches = ImmoMatchOkChecker(data=self.data).check(verbosity=verbosity).anomalies
         self.append(matches)
         self.append(ImmoMatchNoOkChecker(data=self.data).check(verbosity=verbosity).anomalies)

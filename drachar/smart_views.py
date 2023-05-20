@@ -14,8 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from decimal import Decimal
 from django.db.models import F, ExpressionWrapper, Value, TextField, Case, When, Q
-from django.db.models.functions import Concat, Extract, Now
+from django.db.models.functions import Concat, Extract, Now, Coalesce, Greatest
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
@@ -240,7 +241,7 @@ class PrevisionnelSmartView(SmartView):
             'date_debut',
             'programme_dra',
             'ligne_dra',
-            'montant_estime',
+            'best_amount',
             'suivi_besoin',
             'suivi_achat',
             'suivi_offre',
@@ -269,7 +270,7 @@ class PrevisionnelSmartView(SmartView):
             'date_debut',
             'programme_dra',
             'ligne_dra',
-            'montant_estime',
+            'best_amount',
             'suivi_besoin',
             'suivi_achat',
             'suivi_offre',
@@ -303,8 +304,8 @@ class PrevisionnelSmartView(SmartView):
                 'max_width': 95,
                 'footer_data': "sum",
             },
-            'montant_estime': {
-                'title': _("Montant estimé"),
+            'best_amount': {
+                'title': _("Meilleur Montant estimé"),
                 'format': 'money',
                 'decimal_symbol': ",",
                 'thousands_separator': " ",
@@ -644,6 +645,23 @@ class PrevisionnelSmartView(SmartView):
             'depends': [
                 'num_dmd',
             ],
+        },
+    )
+    best_amount = (
+        ComputedSmartField,
+        {
+            'title': _("Meilleure estimation"),
+            'verbose_name': _("Meilleure estimation possible de la consommation de crédits du programme"),
+            'data': Case(
+                When(
+                    solder_ligne=False,
+                    then=Greatest(
+                        F('budget'), Coalesce(F('montant_commande'), F('montant_liquide'), F('montant_engage'), Decimal(0.0))
+                    ),
+                ),
+                default=Coalesce(F('montant_commande'), F('montant_liquide'), F('montant_engage'), Decimal(0.0)),
+            ),
+            'depends': ['budget', 'solder_ligne', 'montant_commande', 'montant_engage', 'montant_liquide'],
         },
     )
     roles = (
@@ -993,7 +1011,7 @@ class PrevTvxSmartView(SmartView):
             # 'date_debut',
             # 'programme_dra',
             # 'ligne_dra',
-            'montant_estime',
+            'best_amount',
             'suivi_besoin',
             'suivi_etude',
             'suivi_autorisation',
@@ -1025,7 +1043,7 @@ class PrevTvxSmartView(SmartView):
             # 'date_debut',
             # 'programme_dra',
             # 'ligne_dra',
-            'montant_estime',
+            'best_amount',
             'suivi_besoin',
             'suivi_etude',
             'suivi_autorisation',
@@ -1058,8 +1076,8 @@ class PrevTvxSmartView(SmartView):
                 'max_width': 95,
                 'footer_data': "sum",
             },
-            'montant_estime': {
-                'title': _("Montant estimé"),
+            'best_amount': {
+                'title': _("Meilleur montant estimé"),
                 'format': 'money',
                 'decimal_symbol': ",",
                 'thousands_separator': " ",
