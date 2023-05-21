@@ -776,6 +776,7 @@ class PrevAnalyser(RecordAnomalyChecker):
         dra94_dossier_model = apps.get_model('extable', 'ExtDra94Dossier')
         dra94_ligne_model = apps.get_model('extable', 'ExtDra94Ligne')
         order_row_model = apps.get_model('extable', 'ExtCommande')
+        eqpt_model = apps.get_model('extable', 'ExtEquipement')
 
         analysis: dict = {}
 
@@ -866,7 +867,7 @@ class PrevAnalyser(RecordAnomalyChecker):
         try:
             eqpts = []
             for no_commande in no_commandes:
-                eqpts += list(BEq1996.objects.using('gmao').filter(n_order__contains=no_commande))
+                eqpts += list(eqpt_model.objects.filter(n_order__contains=no_commande))
             # print(eqpts)
             analysis_eqpts = []
             analysis_eqpts_uf = []
@@ -875,38 +876,36 @@ class PrevAnalyser(RecordAnomalyChecker):
             for eqpt in eqpts:
                 analysis_eqpts.append(
                     {
-                        'code': eqpt.n_imma,
-                        'code_uf': eqpt.n_uf,
-                        'mise_en_service': eqpt.mes1,
-                        'prix': float(eqpt.prix),
+                        'code': eqpt.code,
+                        'code_uf': eqpt.uf_code,
+                        'mise_en_service': eqpt.commissioning_date.strftime('%Y-%m-%d') if eqpt.commissioning_date else None,
+                        'prix': float(eqpt.price),
                     }
                 )
-                eqpts_montant += float(eqpt.prix)
-                if eqpt.n_uf == prev_code_uf:
+                eqpts_montant += float(eqpt.price)
+                if eqpt.uf_code == prev_code_uf:
                     analysis_eqpts_uf.append(
                         {
-                            'code': eqpt.n_imma,
-                            'mise_en_service': eqpt.mes1,
-                            'prix': float(eqpt.prix),
+                            'code': eqpt.code,
+                            'mise_en_service': eqpt.commissioning_date.strftime('%Y-%m-%d') if eqpt.commissioning_date else None,
+                            'prix': float(eqpt.price),
                         }
                     )
-                    eqpts_montant_uf += float(eqpt.prix)
+                    eqpts_montant_uf += float(eqpt.price)
             analysis['equipements'] = analysis_eqpts
             analysis['equipements_uf'] = analysis_eqpts_uf
             analysis['equipements_amount'] = eqpts_montant
             analysis['equipements_uf_amount'] = eqpts_montant_uf
 
             # A small hack here, since we don't have (yet) a API to sava data in multiple fields
-            self.data.interface = 'Montant équipements : {equipements_amount:8.2f} €\nMontant engagé : {mt_engage:8.2f} €'.format(
-                **analysis
-            )
             self.data.interface = self.template.render(Context(analysis))
+
             self.data.nombre_commandes = len(analysis['commandes'])
             self.data.nombre_lignes_commandes = sum(cmd['rows_found'] for cmd in analysis['commandes'])
             self.data.nombre_equipements = len(analysis['equipements'])
             self.data.valeur_inventaire = analysis['equipements_amount']
-            self.data.montant_engage = analysis['mt_engage']
-            self.data.montant_liquide = analysis['mt_liquide']
+            self.data.montant_engage = analysis['mt_engage'] if self.data.nombre_lignes_commandes != 0 else None
+            self.data.montant_liquide = analysis['mt_liquide'] if self.data.nombre_lignes_commandes != 0 else None
 
             self.data.save(
                 update_fields=[
@@ -938,6 +937,7 @@ class DemAnalyser(RecordAnomalyChecker):
     def check(self, verbosity=1):
         # print(f"      DemAnalyse... {self.data[1].code=}")
         for prev in self.data[1].previsionnel_set.all():
+            # print(f"      DemAnalyse prev... {prev=}")
             PrevAnalyser(prev).check(verbosity=verbosity)
         self.add(data={'argl': 'ok'})
 
@@ -945,7 +945,7 @@ class DemAnalyser(RecordAnomalyChecker):
 class DemAllAnalyser(AnomalyChecker):
     def check(self, verbosity=1):
         # print(f"    DemAllAnalyser... {self.data=}")
-        qs = self.data.objects.filter()
+        qs = self.data.objects.filter(previsionnel__isnull=False).order_by('prix_unitaire')
         total = qs.count()
         cnt = 0
         for demande in qs:
