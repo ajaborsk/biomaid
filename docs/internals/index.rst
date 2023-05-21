@@ -10,7 +10,8 @@ Introduction
 On peut voir une instance de serveur |project| comme une pile de 4 couches assez indépendantes les unes des autres (même si
 chaque couche dépend nécessairement des couches inférieures, au moins pour leur structure) :
 
-.. image:: stack.*
+.. image:: test.drawio.*
+  :align: center
 
 - Le "système" est le système d'exploitation (ou à l'avenir des containers, des pods voire des kubernetes).
   C'est normalement une machine virtuelle Linux, Ubuntu 20.04, avec tous les packages nécessaires au bon fonctionnement
