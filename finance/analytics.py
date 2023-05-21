@@ -21,7 +21,7 @@ from xlsxwriter import Workbook
 from assetplusconnect.models import BEq1996, BFt1996, EnCours, Docliste
 from django.apps import apps
 from django.db import DatabaseError
-from django.db.models import Case, Count, Sum, Value, When, F
+from django.db.models import Case, Count, Sum, Value, When, F, Q
 from django.template.engine import Engine
 from django.template import Context
 from django.utils.timezone import now
@@ -791,7 +791,12 @@ class PrevAnalyser(RecordAnomalyChecker):
         no_ligne_dra94 = self.data.num_dmd.pk
         code_prog_dra94 = self.data.programme.anteriorite
         if code_prog_dra94:
+            # DRA saisie avec le bon programme et la bonne ligne
             dossiers_dra94 = dra94_dossier_model.objects.filter(programme=code_prog_dra94, ligne=no_ligne_dra94)
+
+            # DRA avec le numéro détecté dans le texte du champ 'commande'
+            # TODO...
+
             analysis['dra'] = []
             for dossier_dra94 in dossiers_dra94:
                 analysis['dra'].append(
@@ -805,8 +810,37 @@ class PrevAnalyser(RecordAnomalyChecker):
                         'date_commande': str(dossier_dra94.date_commande),
                     }
                 )
+
+                # Récupération du numéro de commande dans le champ DRA qui va bien
                 if dossier_dra94.no_commande:
                     no_commandes.add(str(dossier_dra94.no_commande))
+
+                # Recherche du n° de DRA dans le bloc-note de la commande (fallback)
+                mm1 = str(dossier_dra94.numero)[:4] + '/' + str(dossier_dra94.numero)[4:]
+                mm2 = str(dossier_dra94.numero)[:4] + '-' + str(dossier_dra94.numero)[4:]
+                mm3 = str(dossier_dra94.numero)[:4] + '/' + str(int(str(dossier_dra94.numero)[4:]))
+                mm4 = str(dossier_dra94.numero)[:4] + '-' + str(int(str(dossier_dra94.numero)[4:]))
+                no_commandes |= set(
+                    order_row_model.objects.filter(
+                        Q(bloc_note__icontains='DRA BIO ' + mm1)
+                        or Q(bloc_note__icontains='DRABIO ' + mm1)
+                        or Q(bloc_note__icontains='DRA BIO' + mm1)
+                        or Q(bloc_note__icontains='DRABIO' + mm1)
+                        or Q(bloc_note__icontains='DRA BIO ' + mm2)
+                        or Q(bloc_note__icontains='DRABIO ' + mm2)
+                        or Q(bloc_note__icontains='DRA BIO' + mm2)
+                        or Q(bloc_note__icontains='DRABIO' + mm2)
+                        or Q(bloc_note__icontains='DRA BIO ' + mm3)
+                        or Q(bloc_note__icontains='DRABIO ' + mm3)
+                        or Q(bloc_note__icontains='DRA BIO' + mm3)
+                        or Q(bloc_note__icontains='DRABIO' + mm3)
+                        or Q(bloc_note__icontains='DRA BIO ' + mm4)
+                        or Q(bloc_note__icontains='DRABIO ' + mm4)
+                        or Q(bloc_note__icontains='DRA BIO' + mm4)
+                        or Q(bloc_note__icontains='DRABIO' + mm4)
+                    ).values_list('commande', flat=True)
+                )
+
                 lignes_dra94 = dra94_ligne_model.objects.filter(dossier=dossier_dra94)
                 analysis['dra'][-1]['lignes'] = []
                 for ligne in lignes_dra94:
@@ -876,6 +910,7 @@ class PrevAnalyser(RecordAnomalyChecker):
             for eqpt in eqpts:
                 analysis_eqpts.append(
                     {
+                        'order': eqpt.n_order,
                         'code': eqpt.code,
                         'code_uf': eqpt.uf_code,
                         'mise_en_service': eqpt.commissioning_date.strftime('%Y-%m-%d') if eqpt.commissioning_date else None,
@@ -886,6 +921,7 @@ class PrevAnalyser(RecordAnomalyChecker):
                 if eqpt.uf_code == prev_code_uf:
                     analysis_eqpts_uf.append(
                         {
+                            'order': eqpt.n_order,
                             'code': eqpt.code,
                             'mise_en_service': eqpt.commissioning_date.strftime('%Y-%m-%d') if eqpt.commissioning_date else None,
                             'prix': float(eqpt.price),
