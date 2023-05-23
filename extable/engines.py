@@ -80,7 +80,6 @@ class ExtableEngine(ABC):
 
         # Add fields
         for fname, column_sch in schema['columns'].items():
-
             field_class = ExtableEngine.TYPES[column_sch['type']][0]
             args = ExtableEngine.TYPES[column_sch['type']][1]
             if callable(args):
@@ -194,7 +193,10 @@ class ExtableEngine(ABC):
                         _("data value for columns '{}' in table '{}' is not valid: {}").format(column_name, cfg['name'], repr(data))
                     )
 
-            schema['columns'][column_name] = {'type': column_def.get('type', 'string')}
+            schema['columns'][column_name] = {
+                'type': column_def.get('type', 'string'),
+                'optional': column_def.get('optional', False),
+            }
             if schema['columns'][column_name]['type'] == 'foreign_key':
                 schema['columns'][column_name]['foreign_table'] = column_def.get('foreign_table', '__unknown__')
                 schema['columns'][column_name]['foreign_column'] = column_def.get('foreign_column', 'pk')
