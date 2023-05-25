@@ -3988,8 +3988,12 @@ class DemandesEnCoursExpSmartView(DemandeEqptSmartView):
             }
         }
 
-        def base_filter(self, view_params: dict):  # NOQA : Unused parameter
-            return ~Q(calendrier__code__contains='TVX') & (Q(gel__isnull=True) | Q(gel=False))
+        def base_filter(self, view_params):
+            return (
+                # Demandes non validées OU validées mais sans encore de prévisionnel (phase transitoire)
+                Q(gel=False) | (Q(gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True)),
+                ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
+            )
 
 
 class DemandesEnCoursTable(SmartTable):

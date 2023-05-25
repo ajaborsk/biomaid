@@ -1353,6 +1353,23 @@ class PrevTvxSmartView(SmartView):
             ],
         },
     )
+    best_amount = (
+        ComputedSmartField,
+        {
+            'title': _("Meilleure estimation"),
+            'verbose_name': _("Meilleure estimation possible de la consommation de crédits du programme"),
+            'data': Case(
+                When(
+                    solder_ligne=False,
+                    then=Greatest(
+                        F('budget'), Coalesce(F('montant_commande'), F('montant_liquide'), F('montant_engage'), Decimal(0.0))
+                    ),
+                ),
+                default=Coalesce(F('montant_commande'), F('montant_liquide'), F('montant_engage'), Decimal(0.0)),
+            ),
+            'depends': ['budget', 'solder_ligne', 'montant_commande', 'montant_engage', 'montant_liquide'],
+        },
+    )
     roles = (
         ComputedSmartField,
         {

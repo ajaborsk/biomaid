@@ -477,6 +477,7 @@ class Programme(models.Model):
     uf = models.ForeignKey(Uf, null=True, blank=True, on_delete=models.SET_NULL)
     enveloppe = models.DecimalField(max_digits=10, decimal_places=0, null=False, blank=False)  # enveloppe budgetaire prévisionnelle
     limit = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True)  # enveloppe budgetaire limite (bloquante)
+    consumed = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True)  # enveloppe budgetaire consommée
     arbitre = models.ForeignKey(
         config.settings.AUTH_USER_MODEL,
         db_column='arbitre_new',
@@ -541,7 +542,6 @@ class Fournisseur(models.Model):
 
 
 class FournisseurEtablissement:
-
     code: models.CharField = models.CharField(
         max_length=64,
         null=False,
@@ -1041,7 +1041,6 @@ class UserUfRole(models.Model):
 
 
 class LastUpdate(models.Model):
-
     id = models.AutoField(primary_key=True)
     table_in = models.CharField(
         verbose_name=_("Table BIOM_AID"),
