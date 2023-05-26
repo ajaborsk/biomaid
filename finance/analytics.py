@@ -860,12 +860,15 @@ class PrevAnalyser(RecordAnomalyChecker):
         prev_mt_liquide_on_uf = 0
         if verbosity >= 3:
             print(f"    Commandes: {' '.join(no_commandes)}")
+        all_order_rows_closed = True
         for no_commande in no_commandes:
             rows_on_uf = 0
             order_rows = order_row_model.objects.filter(commande=no_commande)
             mt_engage = 0
             mt_liquide = 0
             for row in order_rows:
+                if row.lg_soldee_lc == 'N':
+                    all_order_rows_closed = False
                 # print(row)
                 row_uf = '{:04d}'.format(row.no_uf_uf)
                 mt_engage += row.mt_engage_lc or 0
@@ -896,7 +899,7 @@ class PrevAnalyser(RecordAnomalyChecker):
         analysis['commandes'] = commandes_analysis
         analysis['commandes_sur_uf'] = commandes_on_uf_analysis
         analysis['mt_engage'] = prev_mt_engage
-        analysis['mt_liquide'] = prev_mt_liquide
+        analysis['mt_liquide'] = prev_mt_liquide if all_order_rows_closed else None
 
         try:
             eqpts = []

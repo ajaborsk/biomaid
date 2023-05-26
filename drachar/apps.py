@@ -150,7 +150,7 @@ class DracharConfig(AppConfig):
         # Toutes les lignes du plan associées à de ce programme
         dem_qs = Previsionnel.objects.filter(programme=OuterRef('pk'))
         # Ajoutons les champs calculés utiles (récupération depuis la SmartView)
-        for anno in ['best_amount']:
+        for anno in ['ordered_amount', 'best_amount']:
             dem_qs = dem_qs.annotate(**{anno: getattr(PrevisionnelSmartView, anno).expression})
         # On déclare l'expression finale qui calcule la consommation de l'enveloppe du programme, pour le
         # modèle des demandes
