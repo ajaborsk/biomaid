@@ -473,7 +473,6 @@ class SmartViewMetaclass(MediaDefiningClass):
 
         # Step 4 : Update using Meta class
         if 'Meta' in attrs and isinstance(attrs['Meta'], type):
-
             for attr_name in dir(attrs['Meta']):
                 if attr_name == 'settings':
                     if 'settings' not in _meta:
@@ -748,7 +747,6 @@ class SmartViewMetaclass(MediaDefiningClass):
                                 )
                         mfilter["choices"] = choices
                     elif isinstance(mfilter["choices"], dict):
-
                         # ensure there is a fieldname key
                         mfilter['choices']['fieldname'] = mfilter['choices'].get('fieldname', filtname)
                         mfilter['fieldname'] = mfilter['choices'].get('fieldname', filtname)
@@ -1702,8 +1700,6 @@ class SmartView(metaclass=SmartViewMetaclass):
           parce que c'était des dépendances) et ceux calculés 'au vol' dans le cadre de la SmartView.
         """
         # TODO: Multiple rows update ?
-        # DONE: CRSF checking (via POST Django middleware)
-        # DONE: Dependencies cascade (for database fields)
 
         # 1 - Get state and roles for this row
         # pkf = self._meta.id_field
@@ -1767,7 +1763,6 @@ class SmartView(metaclass=SmartViewMetaclass):
 
             # Vérifie que le champs existe dans la smartview et est bien lié à la base
             if isinstance(getattr(self, name).get('data'), str):
-
                 # Modification effective de l'enregistrement...
 
                 model_fieldname = getattr(self, name).get('data')
@@ -1852,13 +1847,13 @@ class SmartView(metaclass=SmartViewMetaclass):
         queryset = (
             self.get_base_queryset(self._view_params, skip_base_filter=True)
             .filter(**{pkf: updater["where"][pkf]})
-            .values(*smartfields_to_read)
+            .values(*smartfields_to_read, id=F(pkf))
         )
 
         # 5 - Return them OR return the error
         # print('Who:', request.user, row_state, row_roles)
         # print('updater:', updater, "\n")
-        return {"updated": queryset[0], "error": {}}
+        return {"updated": list(queryset)}
 
     def export_xlsx(self, export, queryset, view_params):
         def boolean_to_excel(value):
