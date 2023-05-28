@@ -59,8 +59,12 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
         return schema
 
     def dataframe_to_model(self, df: DataFrame, model: Type[models.Model], log, progress, **kwargs) -> int:
+        """Read pandas DataFrame and records every line as a record in the given (Django) model. Returns the number of rows
+        recorded.
+        """
         n_records = 0
 
+        # Normalize dataframe : normalize types, localize datetime and replace all kinds of NaN with a more pythonic None
         df = DataFrame(df.convert_dtypes())
         for column in df.columns:
             if df[column].dtype == dtype('datetime64[ns]'):
@@ -69,6 +73,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
 
         foreign_tables = {}
         for column, col_def in self.schema['columns'].items():
+            print(f"{col_def=}")
             if col_def['type'] == 'foreign_key':
                 if col_def['foreign_table'] not in foreign_tables:
                     foreign_model = apps.get_model(col_def['foreign_table'])
@@ -80,7 +85,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
             record_dict = {
                 column: (src_record[col_def['src_column']] if not src_record[col_def['src_column']] is pd.NA else None)
                 for column, col_def in self.schema['columns'].items()
-                if 'src_column' in col_def and col_def['src_column'] in df.columns
+                if 'src_column' in col_def and (col_def['src_column'] in df.columns or not col_def.get('optional', False))
             }
 
             computed = {}
@@ -89,12 +94,13 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
                     if 'expr' in column_def:
                         computed[column_name] = column_def['expr'].python_eval(expr_vars=record_dict)
                 except NameError as exc:
-                    log(
-                        BiomAidCommand.WARN,
-                        _("NameError '{}' while evaluating '{}', namespace:{}").format(
-                            str(exc), str(column_def['expr']), repr(record_dict)
-                        ),
-                    )
+                    if not column_def.get('optional', False):
+                        log(
+                            BiomAidCommand.WARN,
+                            _("NameError '{}' while evaluating '{}', namespace:{}").format(
+                                str(exc), str(column_def['expr']), repr(record_dict)
+                            ),
+                        )
             # computed = {
             #     column: col_def['expr'].python_eval(expr_vars=record_dict)
             #     for column, col_def in self.schema['columns'].items()
@@ -103,7 +109,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
             record_dict.update(computed)
 
             for column, col_def in self.schema['columns'].items():
-                if col_def['type'] == 'foreign_key':
+                if col_def['type'] == 'foreign_key' and 'src_column' in col_def and col_def['src_column'] in df.columns:
                     foreign_object_qs = foreign_tables[col_def['foreign_table']]['model'].objects.filter(
                         **{col_def['foreign_column']: foreign_tables[col_def['foreign_table']]['field_type'](record_dict[column])}
                     )

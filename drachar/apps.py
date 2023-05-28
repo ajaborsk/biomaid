@@ -16,15 +16,17 @@
 #
 import json
 from datetime import timedelta
+from decimal import Decimal
 
 from django.apps import AppConfig
 
 # from django.urls import reverse_lazy
-from django.db.models import Count, F, IntegerField, Sum, Value
-from django.db.models.functions import Cast, Concat
+from django.db.models import Count, F, IntegerField, Sum, Value, OuterRef, Subquery
+from django.db.models.functions import Cast, Concat, Coalesce
 from django.utils import timezone
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_save
 
 
 def check_previsionnel_sans_date(name, data):
@@ -140,10 +142,30 @@ class DracharConfig(AppConfig):
 
     def ready(self):
         from django.apps import apps
+        from drachar.models import Previsionnel
+        from drachar.smart_views import PrevisionnelSmartView
+
+        common_config = apps.get_app_config('common')
+        # Calcul de l'expression qui calcule la consommation de l'enveloppe UNIQUEMENT pour le prévisionnel (plan)
+        # Toutes les lignes du plan associées à de ce programme
+        dem_qs = Previsionnel.objects.filter(programme=OuterRef('pk'))
+        # Ajoutons les champs calculés utiles (récupération depuis la SmartView)
+        for anno in ['ordered_amount', 'best_amount']:
+            dem_qs = dem_qs.annotate(**{anno: getattr(PrevisionnelSmartView, anno).expression})
+        # On déclare l'expression finale qui calcule la consommation de l'enveloppe du programme, pour le
+        # modèle des demandes
+        common_config.register_program_consumer(
+            Coalesce(Subquery(dem_qs.values('programme').annotate(sum1=Sum('best_amount')).values('sum1')), Value(Decimal(0.0)))
+        )
+
+        post_save.connect(
+            common_config.program_update,
+            sender=apps.get_model('drachar.previsionnel'),
+            weak=False,
+            dispatch_uid='previsionnel_post_save',
+        )
 
         def previsionnel_par_expert(discipline):
-            from drachar.models import Previsionnel
-
             return (
                 Previsionnel.objects.order_by()
                 .filter(solder_ligne=False, programme__discipline__code=discipline)
@@ -154,8 +176,6 @@ class DracharConfig(AppConfig):
             )
 
         def montant_previsionnel_par_expert(discipline):
-            from drachar.models import Previsionnel
-
             return (
                 Previsionnel.objects.order_by()
                 .filter(solder_ligne=False, programme__discipline__code=discipline)

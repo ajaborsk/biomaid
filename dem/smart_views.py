@@ -3556,7 +3556,8 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
 
         def base_filter(self, view_params):
             return (
-                Q(gel=False),  # Demandes non validées
+                # Demandes non validées OU validées mais sans encore de prévisionnel (phase transitoire)
+                Q(gel=False) | (Q(gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True)),
                 Q(programme__arbitre=view_params['user'].pk),  # Dont je suis l'arbitre
                 ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
             )
@@ -3734,7 +3735,7 @@ class DemandesRepartitionSmartView(DemandeEqptSmartView):
             " La répartition consiste à affecter à chaque demande un programme, un domaine et un expert."
         )
 
-        def base_filter(self, view_params):  # noqa
+        def base_filter(self, view_params):
             return (
                 [
                     (Q(programme__isnull=True) | Q(domaine__isnull=True) | Q(expert_metier__isnull=True))
@@ -3987,8 +3988,12 @@ class DemandesEnCoursExpSmartView(DemandeEqptSmartView):
             }
         }
 
-        def base_filter(self, view_params: dict):  # NOQA : Unused parameter
-            return ~Q(calendrier__code__contains='TVX') & (Q(gel__isnull=True) | Q(gel=False))
+        def base_filter(self, view_params):
+            return (
+                # Demandes non validées OU validées mais sans encore de prévisionnel (phase transitoire)
+                Q(gel=False) | (Q(gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True)),
+                ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
+            )
 
 
 class DemandesEnCoursTable(SmartTable):

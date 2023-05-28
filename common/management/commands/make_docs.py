@@ -16,6 +16,7 @@
 #
 import os.path
 import subprocess
+from functools import reduce
 
 from django.apps import apps
 from django.core.management.base import BaseCommand
@@ -59,8 +60,20 @@ class Command(BaseCommand):
                             ...
 
         # Build the documentation
-        subprocess.run(['make', 'html'], cwd='docs')
-        subprocess.run(['make', 'latexpdf'], cwd='docs')
+
+        # Get tags from configuration files to allow conditional documentation parts
+        # Use ..only:: directive to use it
+        tags = ['django_app_' + appname.replace('.', '_') for appname in config.settings.INSTALLED_APPS] + [
+            'option_' + option for option in config.get('options', {}).keys() if option
+        ]
+
+        sphinx_opts = reduce(lambda x, y: x + y, [['-t', tag] for tag in tags], [])
+
+        subprocess.run(['make', 'clean'], cwd='docs')
+
+        # We have to use shell=True here since we use shell variable to pass tag names to make & sphinx-build
+        subprocess.run('SPHINXOPTS="' + ' '.join(sphinx_opts) + '" make html', cwd='docs', shell=True)
+        subprocess.run('SPHINXOPTS="' + ' '.join(sphinx_opts) + '" make latexpdf', cwd='docs', shell=True)
 
         # Install html & pdf manual in /static
         ...

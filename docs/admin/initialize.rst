@@ -1,7 +1,7 @@
 Première configuration
 ======================
 
-Lors de la création d'une instance de `biom_aid`, certaines opérations
+Lors de la création d'une instance de |project|, certaines opérations
 doivent être menées avant de pouvoir commencer à utiliser le portail :
 
 - Configurer le nom du portail

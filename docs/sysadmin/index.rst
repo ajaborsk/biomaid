@@ -2,7 +2,7 @@
 Guide de l'administrateur système
 =================================
 
-Ce chapitre regroupe toutes les informations nécessaires à l'installation et à la maintenance d'une instance de BIOM_AID
+Ce chapitre regroupe toutes les informations nécessaires à l'installation et à la maintenance d'une instance de |project|
 sur un serveur.
 
 **à compléter...**

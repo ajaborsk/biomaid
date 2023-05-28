@@ -1,5 +1,5 @@
-Tutoriel/Howto : Créer un module BIOM_AID (application django)
-==============================================================
+Tutoriel/Howto : Créer un module |project| (application django)
+================================================================
 
 
 ... à rédiger ...

@@ -306,6 +306,16 @@ class ProgrammeSmartView(SmartView):
                 'symbol_is_after': True,
                 'precision': 0,
             },
+            'consumed': {
+                'title': _("Consommé"),
+                'help_text': _("Enveloppe consommée"),
+                'format': 'money',
+                'decimal_symbol': ',',
+                'thousands_separator': ' ',
+                'currency_symbol': ' €',
+                'symbol_is_after': True,
+                'precision': 0,
+            },
             'anteriorite': {
                 'title': "Code DRAV94",
             },
@@ -339,6 +349,7 @@ class ProgrammeSmartView(SmartView):
             'limit',
             'distribue',
             'previsionnel_total',
+            'consumed',
             'arbitre',
             'discipline',
             'description',
@@ -357,7 +368,11 @@ class ProgrammeSmartView(SmartView):
                 'label': _("Actif"),
                 'fieldname': 'cloture',
                 'type': 'select',
-                'choices': [{'label': _("Tous"), 'value': '{}'}],
+                'choices': [
+                    {'label': _("Tous"), 'value': '{}'},
+                    {'label': _("Ouverts"), 'value': '{"cloture__isnull":true}'},
+                    {'label': _("Fermés"), 'value': '{"cloture__isnull":false}'},
+                ],
             },
         }
         menu_left = ({'label': 'Ajouter un programme', 'url_name': 'common:programme-create'},)

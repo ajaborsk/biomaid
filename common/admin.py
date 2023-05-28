@@ -151,6 +151,7 @@ class ProgrammeAdmin(admin.ModelAdmin):
         'discipline',
         'description',
         'enveloppe',
+        'consumed',
     )
     search_fields = (
         'nom',

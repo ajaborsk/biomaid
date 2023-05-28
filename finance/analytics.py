@@ -21,7 +21,7 @@ from xlsxwriter import Workbook
 from assetplusconnect.models import BEq1996, BFt1996, EnCours, Docliste
 from django.apps import apps
 from django.db import DatabaseError
-from django.db.models import Case, Count, Sum, Value, When, F
+from django.db.models import Case, Count, Sum, Value, When, F, Q
 from django.template.engine import Engine
 from django.template import Context
 from django.utils.timezone import now
@@ -744,7 +744,6 @@ class IntvLignesRecordMatcher(RecordMatcher):
 
 
 def orders_flaws_processor(*args, **kwargs):
-
     verbosity = kwargs.get('verbosity') or 0
 
     print(_("Détection des problèmes liés aux commandes..."))
@@ -772,10 +771,12 @@ class PrevAnalyser(RecordAnomalyChecker):
         super().__init__(data, storage=JsonAnomaliesStorage(data, 'analyse'))
 
     def check(self, verbosity=1):
-        # print(f"      DemAnalyse... {self.data[1].code=}")
+        if verbosity >= 3:
+            print(f"    PrevAnalyser: {self.data.num_dmd}")
         dra94_dossier_model = apps.get_model('extable', 'ExtDra94Dossier')
         dra94_ligne_model = apps.get_model('extable', 'ExtDra94Ligne')
         order_row_model = apps.get_model('extable', 'ExtCommande')
+        eqpt_model = apps.get_model('extable', 'ExtEquipement')
 
         analysis: dict = {}
 
@@ -790,7 +791,12 @@ class PrevAnalyser(RecordAnomalyChecker):
         no_ligne_dra94 = self.data.num_dmd.pk
         code_prog_dra94 = self.data.programme.anteriorite
         if code_prog_dra94:
+            # DRA saisie avec le bon programme et la bonne ligne
             dossiers_dra94 = dra94_dossier_model.objects.filter(programme=code_prog_dra94, ligne=no_ligne_dra94)
+
+            # DRA avec le numéro détecté dans le texte du champ 'commande'
+            # TODO...
+
             analysis['dra'] = []
             for dossier_dra94 in dossiers_dra94:
                 analysis['dra'].append(
@@ -804,8 +810,37 @@ class PrevAnalyser(RecordAnomalyChecker):
                         'date_commande': str(dossier_dra94.date_commande),
                     }
                 )
+
+                # Récupération du numéro de commande dans le champ DRA qui va bien
                 if dossier_dra94.no_commande:
                     no_commandes.add(str(dossier_dra94.no_commande))
+
+                # Recherche du n° de DRA dans le bloc-note de la commande (fallback)
+                mm1 = str(dossier_dra94.numero)[:4] + '/' + str(dossier_dra94.numero)[4:]
+                mm2 = str(dossier_dra94.numero)[:4] + '-' + str(dossier_dra94.numero)[4:]
+                mm3 = str(dossier_dra94.numero)[:4] + '/' + str(int(str(dossier_dra94.numero)[4:]))
+                mm4 = str(dossier_dra94.numero)[:4] + '-' + str(int(str(dossier_dra94.numero)[4:]))
+                no_commandes |= set(
+                    order_row_model.objects.filter(
+                        Q(bloc_note__icontains='DRA BIO ' + mm1)
+                        or Q(bloc_note__icontains='DRABIO ' + mm1)
+                        or Q(bloc_note__icontains='DRA BIO' + mm1)
+                        or Q(bloc_note__icontains='DRABIO' + mm1)
+                        or Q(bloc_note__icontains='DRA BIO ' + mm2)
+                        or Q(bloc_note__icontains='DRABIO ' + mm2)
+                        or Q(bloc_note__icontains='DRA BIO' + mm2)
+                        or Q(bloc_note__icontains='DRABIO' + mm2)
+                        or Q(bloc_note__icontains='DRA BIO ' + mm3)
+                        or Q(bloc_note__icontains='DRABIO ' + mm3)
+                        or Q(bloc_note__icontains='DRA BIO' + mm3)
+                        or Q(bloc_note__icontains='DRABIO' + mm3)
+                        or Q(bloc_note__icontains='DRA BIO ' + mm4)
+                        or Q(bloc_note__icontains='DRABIO ' + mm4)
+                        or Q(bloc_note__icontains='DRA BIO' + mm4)
+                        or Q(bloc_note__icontains='DRABIO' + mm4)
+                    ).values_list('commande', flat=True)
+                )
+
                 lignes_dra94 = dra94_ligne_model.objects.filter(dossier=dossier_dra94)
                 analysis['dra'][-1]['lignes'] = []
                 for ligne in lignes_dra94:
@@ -823,12 +858,17 @@ class PrevAnalyser(RecordAnomalyChecker):
         prev_mt_engage_on_uf = 0
         prev_mt_liquide = 0
         prev_mt_liquide_on_uf = 0
+        if verbosity >= 3:
+            print(f"    Commandes: {' '.join(no_commandes)}")
+        all_order_rows_closed = True
         for no_commande in no_commandes:
             rows_on_uf = 0
             order_rows = order_row_model.objects.filter(commande=no_commande)
             mt_engage = 0
             mt_liquide = 0
             for row in order_rows:
+                if row.lg_soldee_lc == 'N':
+                    all_order_rows_closed = False
                 # print(row)
                 row_uf = '{:04d}'.format(row.no_uf_uf)
                 mt_engage += row.mt_engage_lc or 0
@@ -859,12 +899,12 @@ class PrevAnalyser(RecordAnomalyChecker):
         analysis['commandes'] = commandes_analysis
         analysis['commandes_sur_uf'] = commandes_on_uf_analysis
         analysis['mt_engage'] = prev_mt_engage
-        analysis['mt_liquide'] = prev_mt_liquide
+        analysis['mt_liquide'] = prev_mt_liquide if all_order_rows_closed else None
 
         try:
             eqpts = []
             for no_commande in no_commandes:
-                eqpts += list(BEq1996.objects.using('gmao').filter(n_order__contains=no_commande))
+                eqpts += list(eqpt_model.objects.filter(n_order__contains=no_commande))
             # print(eqpts)
             analysis_eqpts = []
             analysis_eqpts_uf = []
@@ -873,38 +913,38 @@ class PrevAnalyser(RecordAnomalyChecker):
             for eqpt in eqpts:
                 analysis_eqpts.append(
                     {
-                        'code': eqpt.n_imma,
-                        'code_uf': eqpt.n_uf,
-                        'mise_en_service': eqpt.mes1,
-                        'prix': float(eqpt.prix),
+                        'order': eqpt.n_order,
+                        'code': eqpt.code,
+                        'code_uf': eqpt.uf_code,
+                        'mise_en_service': eqpt.commissioning_date.strftime('%Y-%m-%d') if eqpt.commissioning_date else None,
+                        'prix': float(eqpt.price),
                     }
                 )
-                eqpts_montant += float(eqpt.prix)
-                if eqpt.n_uf == prev_code_uf:
+                eqpts_montant += float(eqpt.price)
+                if eqpt.uf_code == prev_code_uf:
                     analysis_eqpts_uf.append(
                         {
-                            'code': eqpt.n_imma,
-                            'mise_en_service': eqpt.mes1,
-                            'prix': float(eqpt.prix),
+                            'order': eqpt.n_order,
+                            'code': eqpt.code,
+                            'mise_en_service': eqpt.commissioning_date.strftime('%Y-%m-%d') if eqpt.commissioning_date else None,
+                            'prix': float(eqpt.price),
                         }
                     )
-                    eqpts_montant_uf += float(eqpt.prix)
+                    eqpts_montant_uf += float(eqpt.price)
             analysis['equipements'] = analysis_eqpts
             analysis['equipements_uf'] = analysis_eqpts_uf
             analysis['equipements_amount'] = eqpts_montant
             analysis['equipements_uf_amount'] = eqpts_montant_uf
 
             # A small hack here, since we don't have (yet) a API to sava data in multiple fields
-            self.data.interface = 'Montant équipements : {equipements_amount:8.2f} €\nMontant engagé : {mt_engage:8.2f} €'.format(
-                **analysis
-            )
             self.data.interface = self.template.render(Context(analysis))
+
             self.data.nombre_commandes = len(analysis['commandes'])
             self.data.nombre_lignes_commandes = sum(cmd['rows_found'] for cmd in analysis['commandes'])
             self.data.nombre_equipements = len(analysis['equipements'])
             self.data.valeur_inventaire = analysis['equipements_amount']
-            self.data.montant_engage = analysis['mt_engage']
-            self.data.montant_liquide = analysis['mt_liquide']
+            self.data.montant_engage = analysis['mt_engage'] if self.data.nombre_lignes_commandes != 0 else None
+            self.data.montant_liquide = analysis['mt_liquide'] if self.data.nombre_lignes_commandes != 0 else None
 
             self.data.save(
                 update_fields=[
@@ -936,6 +976,7 @@ class DemAnalyser(RecordAnomalyChecker):
     def check(self, verbosity=1):
         # print(f"      DemAnalyse... {self.data[1].code=}")
         for prev in self.data[1].previsionnel_set.all():
+            # print(f"      DemAnalyse prev... {prev=}")
             PrevAnalyser(prev).check(verbosity=verbosity)
         self.add(data={'argl': 'ok'})
 
@@ -943,9 +984,14 @@ class DemAnalyser(RecordAnomalyChecker):
 class DemAllAnalyser(AnomalyChecker):
     def check(self, verbosity=1):
         # print(f"    DemAllAnalyser... {self.data=}")
-        qs = self.data.objects.filter()
+        qs = self.data.objects.filter(previsionnel__isnull=False).order_by('prix_unitaire')
+        total = qs.count()
+        cnt = 0
         for demande in qs:
+            if verbosity >= 3:
+                print(f"  Analyzing demande {demande.code} ({(10000*cnt//total)/100}%)")
             DemAnalyser(data=(self.data, demande)).check(verbosity=verbosity)
+            cnt += 1
         return super().check(verbosity=verbosity)
 
 
@@ -1095,7 +1141,7 @@ class ImmoAnalyser(RecordAnomalyChecker):
 
     def check(self, verbosity=1):
         if verbosity >= 3:
-            print(_("  Analyse de la fiche {} :").format(self.data[1].code))
+            print(_("  Analyse de la fiche {} :").format(self.data[3].code))
         matches = ImmoMatchOkChecker(data=self.data).check(verbosity=verbosity).anomalies
         self.append(matches)
         self.append(ImmoMatchNoOkChecker(data=self.data).check(verbosity=verbosity).anomalies)

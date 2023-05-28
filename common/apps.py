@@ -15,16 +15,18 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import datetime
+from functools import reduce
 import json
 import logging
 import time
 from copy import deepcopy
+from typing import Any
 from warnings import warn
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Fieldset, Div, Button
 from django.apps import AppConfig, apps
-from django.db.models import Q
+from django.db.models import Q, Value
 from django.db.models import Lookup
 from django.db.models.fields import Field
 from django.forms import Form
@@ -405,6 +407,10 @@ class CommonConfig(AppConfig):
     configs = {}
     user_settings_categories = {}
 
+    def __init__(self, app_name: str, app_module: Any | None) -> None:
+        super().__init__(app_name, app_module)
+        self.program_consumers = []
+
     def ready(self):
         # Cette méthode est lancée une fois que Django est initialisé (ce qui permet d'utiliser toutes les fonctionnalités)
         #  mais une seule fois au lancement de Django
@@ -516,6 +522,19 @@ class CommonConfig(AppConfig):
 
         apps.get_app_config('analytics').register_data_processor('user_alerts', user_alerts)
         apps.get_app_config('analytics').register_data_processor('user_counter', user_counter)
+
+    def register_program_consumer(self, expression):
+        self.program_consumers.append(expression)
+        self.program_consumers_expr = reduce(lambda a, b: a + b, self.program_consumers, Value(0))
+        # print(f"registred {self.program_consumers_expr=}")
+
+    def program_update(self, sender, **kwargs):
+        from common.models import Programme
+
+        program = kwargs['instance'].programme
+        if program:
+            # print(f"Program update fired ! {sender=} {program=}")
+            Programme.objects.filter(pk=program.pk).update(consumed=self.program_consumers_expr)
 
     # def server_ready(self):
     #     # Setup analytics (if needed)

@@ -9,7 +9,7 @@ Installation
 Prérequis
 ---------
 
-Le serveur BIOM_AID fonctionne sur la base d'un serveur Web Django (donc en python) avec une base de données.
+Le serveur |project| fonctionne sur la base d'un serveur Web Django (donc en python) avec une base de données.
 
 Techniquement, il y a assez peu de contraintes qui limitent le choix du système d'exploitation,
 le serveur WEB frontend (reverse proxy) et du SGBD.
