@@ -2073,7 +2073,7 @@ class DemandeSmartView(SmartView):
                 'width': 200,
             },
             'montant_unitaire_expert_metier': {
-                'title': _("Montant expert TMP TMP"),
+                'title': _("PU indiqué par l'expert"),
                 'table.hidden': True,
             },
             'arbitrage_commission': {

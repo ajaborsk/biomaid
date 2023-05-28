@@ -1724,21 +1724,24 @@ class SmartView(metaclass=SmartViewMetaclass):
 
         # 2 - Check writing permission for theses columns
         perms = self._meta['permissions']
+        # --> perms is now the whole permissions dict
 
         if not perms.get("write", False):
             return {"error": {"message": _("Cet enregistrement ne peut pas être modifié")}}
         perms = perms.get("write", False)
+        # --> perms is now the write permissions dict (still depends on state and role)
 
         if not perms.get(row_state, False):
             return {"error": {"message": _("Cet enregistrement ne peut pas être modifié dans cet état")}}
         perms = perms.get(row_state, False)
+        # --> perms is now the write and state permissions dict (still depends on role)
 
-        allowed = False
+        allowed_fields = set()
         for role in row_roles:
             if perms.get(role, False):
-                allowed = perms.get(role, False)
-                break
-        if not allowed:
+                # At least this very role is allowed to modufy this record ; let's continue
+                allowed_fields = allowed_fields.union({fieldname for fieldname, allowed in perms.get(role, {}).items() if allowed})
+        if not allowed_fields:
             return {"error": {"message": _("Vos droits ne permettent pas de modifier cet enregistrement")}}
 
         # 3 - Update the row(s)
@@ -1752,7 +1755,17 @@ class SmartView(metaclass=SmartViewMetaclass):
         smartfields_to_read = []
 
         for name, value in updater["set"].items():
-            # print("  AJA> update:", name, dir(getattr(self, name)))
+            # print("  AJA> update:", name, value, allowed_fields, getattr(self, name).get('title', 'table.html'))
+
+            if name not in allowed_fields:
+                return {
+                    "error": {
+                        "message": _("Vos droits ne permettent pas de modifier le champ '{}' de cet enregistrement").format(
+                            getattr(self, name).get('title', 'table.html')
+                        )
+                    }
+                }
+
             if name in self._meta['data_fields']:
                 smartfields_to_read.append(name)
             if hasattr(getattr(self, name), "alters"):
@@ -1834,7 +1847,7 @@ class SmartView(metaclass=SmartViewMetaclass):
             else:
                 # Si on arrive ici, c'est que le champ à modifier n'est pas un champ d'enregistrement
                 smart_field = getattr(self, name)
-                smart_field.update_instance(request, record, name, updater, allowed=allowed)
+                smart_field.update_instance(request, record, name, updater, allowed=bool(name in allowed_fields))
 
         try:
             record.save(update_fields=fields_to_save)
