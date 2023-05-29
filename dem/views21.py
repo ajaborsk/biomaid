@@ -187,9 +187,9 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
                                     'value': {'calendrier': campagne.pk},
                                 },
                                 {
-                                    'name': 'avis_biomed', 
+                                    'name': 'avis_biomed',
                                     'value': {'avis_biomed__isnull': False},
-                                }
+                                },
                             ]
                         )
                     ),

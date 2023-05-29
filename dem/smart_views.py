@@ -2130,6 +2130,21 @@ class DemandeSmartView(SmartView):
             'gel': {
                 'title': _("Définitif"),
                 'width': 40,
+                # If this very row/record consume too much amount of the 'programme", others rows may not be
+                # 'validable' anymore
+                #  --- This is a temporary and manual implementation (eventually, should cascade from a 'programme' dependency on every rows
+                # with the same 'programme') ---
+                'alter_rows': [
+                    {
+                        # Every row with the same 'programme' field value
+                        'same_field': 'programme',
+                        # Will have its field 'dyn_state' changed
+                        'fields': [
+                            'dyn_state',
+                            'tmp_available',
+                        ],
+                    },
+                ],
             },
         }
 
@@ -2759,6 +2774,14 @@ class DemandeSmartView(SmartView):
             ),
         },
     )
+    tmp_available = (
+        ComputedSmartField,
+        {
+            'title': "Dispo",
+            'data': F('programme__limit') - F('programme__consumed'),
+            'depends': ['programme', 'gel'],
+        },
+    )
     documents_sf = (
         DocumentsSmartField,
         {
@@ -3056,6 +3079,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'montant_valide_conditional',
             'montant_final',
             'montant_consomme',
+            'tmp_available',
             'dyn_state',
             'gel',
             'tools',

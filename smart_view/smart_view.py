@@ -1856,17 +1856,38 @@ class SmartView(metaclass=SmartViewMetaclass):
         except ValueError as err:
             return {"error": {"message": str(err)}}
 
-        # 4 - Get _all_ updated rows/fields (updated field AND altered ones)
-        queryset = (
+        qs_list = []
+        # 4.1 - Get _all_ updated fields in this row/record (updated field AND altered ones)
+        record_queryset = (
             self.get_base_queryset(self._view_params, skip_base_filter=True)
             .filter(**{pkf: updater["where"][pkf]})
             .values(*smartfields_to_read, _row_id=F(pkf))
         )
+        qs_list.append(record_queryset)
 
-        # 5 - Return them OR return the error
-        # print('Who:', request.user, row_state, row_roles)
-        # print('updater:', updater, "\n")
-        return {"updated": list(queryset)}
+        # 4.2 - Get _all_ updated fields in other rows/records
+        for sf in smartfields_to_read:
+            for other_rows_desc in getattr(self, sf).get('alter_rows', '', []):
+                # same_field_value = (
+                #     self.get_base_queryset(self._view_params, skip_base_filter=True)
+                #     .filter(pk=updater['where'][pkf])
+                #     .values_list(other_rows_desc['same_field'])[0]
+                # )
+                # print(f"{sf=}, {other_rows_desc=}, {same_field_value=}")
+                qs_list.append(
+                    self.get_base_queryset(self._view_params, skip_base_filter=False)
+                    .filter(
+                        **{
+                            other_rows_desc['same_field']: self.get_base_queryset(self._view_params, skip_base_filter=True)
+                            .filter(pk=updater['where'][pkf])
+                            .values_list(other_rows_desc['same_field'])[0]
+                        }
+                    )
+                    .values(*other_rows_desc['fields'], _row_id=F(pkf))
+                )
+
+        # 5 - Return them
+        return {"updated": reduce(lambda a, b: a + list(b), qs_list, [])}
 
     def export_xlsx(self, export, queryset, view_params):
         def boolean_to_excel(value):

@@ -525,7 +525,7 @@ class SmartView {
                 } else {
                     for (const updatedRow of data.updated) {
                         let update = {};
-                        let id = 0;
+                        let id = -1;
                         //update[self.options.id_field] = cell.getData()[self.options.id_field];
                         for (let fieldname in updatedRow) {
                             if (fieldname == '_row_id') {
@@ -535,7 +535,12 @@ class SmartView {
                                     update[fieldname] = updatedRow[fieldname];
                                 }
                         }
-                        this.getTable().getRow(id).update(update);
+                        let row = this.getTable().getRow(id);
+                        // Avoid updating row which id is not in the table
+                        if (row) {
+                            row.update(update);
+                        }
+
                         //console.debug("id", id, "update", update);
                         //this.getRow().reformat();
                     }
