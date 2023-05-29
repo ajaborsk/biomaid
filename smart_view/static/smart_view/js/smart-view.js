@@ -524,12 +524,12 @@ class SmartView {
                     alert("La cellule ne peut pas être mise à jour.\n\nErreur : " + data.error.message);
                 } else {
                     for (const updatedRow of data.updated) {
-                        var update = {};
+                        let update = {};
                         let id = 0;
                         //update[self.options.id_field] = cell.getData()[self.options.id_field];
-                        for (var fieldname in updatedRow) {
-                            if (fieldname == 'id') {
-                                id = updatedRow.id
+                        for (let fieldname in updatedRow) {
+                            if (fieldname == '_row_id') {
+                                id = updatedRow._row_id
                             } else
                                 if (updatedRow.hasOwnProperty(fieldname)) {
                                     update[fieldname] = updatedRow[fieldname];

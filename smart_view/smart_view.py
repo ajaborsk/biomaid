@@ -1860,7 +1860,7 @@ class SmartView(metaclass=SmartViewMetaclass):
         queryset = (
             self.get_base_queryset(self._view_params, skip_base_filter=True)
             .filter(**{pkf: updater["where"][pkf]})
-            .values(*smartfields_to_read, id=F(pkf))
+            .values(*smartfields_to_read, _row_id=F(pkf))
         )
 
         # 5 - Return them OR return the error
