@@ -3,8 +3,6 @@ from typing import Callable
 import pytest
 from playwright.sync_api import Page, expect
 
-# from dem.models import Demande
-
 
 # Even with an incorrect url scheme, it should works (lead to a error page, not a 500 server error)
 @pytest.mark.parametrize(
@@ -42,3 +40,25 @@ def test_example(biomaid_page: Callable) -> None:
     page: Page = biomaid_page('dem:home')
     expect(page.get_by_role('main')).to_be_visible()
     expect(page.locator('#main-dialog .dialog .dialog-message')).not_to_contain_text('ne permettent pas de vous connecter')
+
+
+@pytest.mark.django_db
+@pytest.fixture
+def logged(live_server, page: Page, username='deboziel', password='yQ6FfiKypa7h8Hc'):
+    page.goto(live_server.url)
+
+    expect(page.get_by_role('main')).to_be_visible()
+
+    page.get_by_label("Nom d’utilisateur :").fill(username)
+    page.locator("input[name=\"password\"]").fill(password)
+    page.get_by_role("button", name="Se connecter").click()
+
+    expect(page.get_by_role('main')).to_be_visible()
+
+    return page
+
+
+@pytest.mark.parametrize('username', ['enbaveyv', 'deboziel', 'cekilesy', 'couranth', 'tomiela', 'timettvi'])
+def test_login(biomaid_page: Callable, username) -> None:
+    page: Page = biomaid_page('dem:home', username=username, password='yQ6FfiKypa7h8Hc')
+    expect(page.get_by_role('main')).to_be_visible()
