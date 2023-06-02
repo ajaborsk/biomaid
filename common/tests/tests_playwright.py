@@ -1,6 +1,7 @@
 from typing import Callable
 
 import pytest
+import time_machine
 from playwright.sync_api import Page, expect
 
 
@@ -58,7 +59,36 @@ def logged(live_server, page: Page, username='deboziel', password='yQ6FfiKypa7h8
     return page
 
 
-@pytest.mark.parametrize('username', ['enbaveyv', 'deboziel', 'cekilesy', 'couranth', 'tomiela', 'timettvi'])
+@pytest.mark.parametrize(
+    'username',
+    [
+        'enbaveyv',
+        'deboziel',
+        'cekilesy',
+        'couranth',
+        'tomiela',
+        'timettvi',
+    ],
+)
 def test_login(biomaid_page: Callable, username) -> None:
     page: Page = biomaid_page('dem:home', username=username, password='yQ6FfiKypa7h8Hc')
     expect(page.get_by_role('main')).to_be_visible()
+
+
+@time_machine.travel("2020-08-15 09:00 +0000")
+def test_saisie(biomaid_page: Callable) -> None:
+    page: Page = biomaid_page('dem:home', username='couranth', password='yQ6FfiKypa7h8Hc')
+    page.get_by_text("Nouvelle demande").click()
+    page.get_by_role("link", name="Campagne de test").click()
+    page.get_by_label("Unité Fonctionnelle").click()
+    page.get_by_label("Unité Fonctionnelle").fill("0003")
+    page.get_by_label("Unité Fonctionnelle").press("Tab")
+    page.get_by_text("0003 - Orthopédie Est").click()
+    page.get_by_label("Matériel demandé").click()
+    page.get_by_label("Matériel demandé").fill("Matériel nécessaire")
+    page.get_by_label("Quantité").click()
+    page.get_by_label("Quantité").fill("6")
+    page.get_by_label("Prix unitaire (TTC)").click()
+    page.get_by_label("Prix unitaire (TTC)").fill("300")
+    page.get_by_role("button", name="Enregistrer et ajouter un autre élément").click()
+    page.get_by_role("button", name="C'est noté").click()

@@ -145,7 +145,10 @@ class Cli(Cmd):
     def help_users(self):
         print(
             "Listes des utilisateurs enregistrés :\n{users}".format(
-                users=''.join(" - '" + user + "' : " + desc['name'] + "\n" for user, desc in self.registred_users.items())
+                users=''.join(
+                    " - '" + user + "' : " + desc['name'] + ", " + desc['description'] + "\n"
+                    for user, desc in self.registred_users.items()
+                )
             )
         )
 
