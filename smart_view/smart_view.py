@@ -900,7 +900,7 @@ class SmartViewMetaclass(MediaDefiningClass):
                             ]
                     else:
                         raise AttributeError(
-                            _("No choices given and no way to create one for filter '{}' ").format(mfilter["name"])
+                            _("No choices given and no way to create one for filter '{}' ").format(mfilter["fieldname"])
                         )
                     mfilter["choices"] = choices
             elif mfilter["type"] == "contains":
