@@ -47,14 +47,48 @@ Cette base comporte :
 La structure
 ++++++++++++
 
+Cette base comporte :
+    - 2 établissements
+    - 3 Pôles
+    - X Services
+
+
 Les utilisateurs
 ++++++++++++++++
+
+Cette base comporte :
+    - 11 utilisateurs :
+        - `root`, mot de passe `introuvable`, qui est le super-utilisateur (n'a pas de droits DRAV2)
+        - Ella de Bozieux, `deboziel` mot de passe `yQ6FfiKypa7h8Hc`, directrice adjointe
+        - Sylvie Cekilépamor, `cekilesy` mot de passe `yQ6FfiKypa7h8Hc`, chef du pôle AAAA - Chirurgie
+        - Yvon Enbaver, `enbaveyv` mot de passe `yQ6FfiKypa7h8Hc`, Cadre supérieur du pôle AAAA - Chirurgie
+        - Théo Courant, `couranth` mot de passe `yQ6FfiKypa7h8Hc`, Cadre du service de Chirurgie
+        - Lana Tomie `tomiela` mot de passe `yQ6FfiKypa7h8Hc`, acheteur/expert
+        - Vincent Timettre `timettvi` mot de passe `yQ6FfiKypa7h8Hc`, expert en perfusion
+        - Harry Staukrate `arbitre_biomed` mot de passe `yQ6FfiKypa7h8Hc`, arbitre biomédical
+        - Jean Bonbeure `bonbeuje` mot de passe `yQ6FfiKypa7h8Hc`, conducteur de travaux
+        - Lorie Zonlointin `zonloilo` mot de passe `yQ6FfiKypa7h8Hc`, ingénieur travaux
+        - Paul Igonne `igonnepa` mot de passe `yQ6FfiKypa7h8Hc`, arbitre travaux
 
 Les demandes pré-rentrés
 ++++++++++++++++++++++++
 
+Cette base comporte :
+    - 1 Discipline : BI (Biomédical)
+    - 1 Domaine : 324 (Perfusion...)
+    - 2 Programmes :
+        - BIO-00-PE : Programme biomédical courant, enveloppe de 1M€
+        - TVX-00-PC : Programme travaux courants, enveloppe de 250k€
+    - 4 Demandes :
+        - 1 : Demande simple (uniquement les champs obligatoires)
+        - 2 : Demande complète (sauf documents et coûts complémentaires)
+        - 3 : Demande non validée par le chef de pôle
+        - 4 : Demande validée par le chef de pôle
+
 Les opérations pré-rentrées
 +++++++++++++++++++++++++++
+
+Aucune...
 
 pytest
 ======
@@ -69,14 +103,20 @@ Le voyage dans le temps
     A compléter : expliquer pourquoi le voyage dans le temps est nécessaire et comment l'utiliser
     pour faire des tests
 
+Les tests paramétriques
+=======================
+
+.. note:: 
+    A compléter : expliquer comment on peut faire une série de tests avec une seule fonction de test
+
 Playwright
 ==========
 
 .. note:: 
-    A compléter, indiquer comment la bibliothèse est utilisée dans BiomAid
+    A compléter, indiquer comment la bibliothèque est utilisée dans BiomAid
 
 La classe BiomAidPage
 +++++++++++++++++++++
 
 .. note:: 
-    A compléter : donner les méthodes utiles (logging, locator pour les SmartViews, goto_name)
+    A compléter : donner les méthodes utiles (connexion, locator pour les SmartViews, goto_name)

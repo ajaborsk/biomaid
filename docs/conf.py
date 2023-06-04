@@ -33,7 +33,8 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'BiomAid'
+# project = 'BiomAid'
+project = 'Géqip'
 copyright = '2020-2021, Brice Nord, Romuald Kliglich, Alexandre Jaborska'
 author = 'Brice Nord, Romuald Kliglich, Alexandre Jaborska'
 
@@ -104,7 +105,12 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_book_theme'
-html_style = 'css/biomaid_doc.css'
+html_theme_options = {
+    'repository_url': "https://bitbucket.org/ajaborsk/biomaid/src/main/docs/",
+    'use_repository_button': True,
+}
+html_logo = "BiomAid-logo.png"
+# html_style = 'css/biomaid_doc.css'
 globaltoc_depth = 1
 
 
