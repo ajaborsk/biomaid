@@ -1,8 +1,10 @@
 from typing import Callable
 
 import pytest
-import time_machine
 from playwright.sync_api import Page, expect
+
+# Wait for 10s instead of the 30s default
+# expect.set_options(timeout=10_000)
 
 
 # Even with an incorrect url scheme, it should works (lead to a error page, not a 500 server error)
@@ -75,20 +77,24 @@ def test_login(biomaid_page: Callable, username) -> None:
     expect(page.get_by_role('main')).to_be_visible()
 
 
-@time_machine.travel("2020-08-15 09:00 +0000")
-def test_saisie(biomaid_page: Callable) -> None:
-    page: Page = biomaid_page('dem:home', username='couranth', password='yQ6FfiKypa7h8Hc')
-    page.get_by_text("Nouvelle demande").click()
-    page.get_by_role("link", name="Campagne de test").click()
-    page.get_by_label("Unité Fonctionnelle").click()
-    page.get_by_label("Unité Fonctionnelle").fill("0003")
-    page.get_by_label("Unité Fonctionnelle").press("Tab")
-    page.get_by_text("0003 - Orthopédie Est").click()
-    page.get_by_label("Matériel demandé").click()
-    page.get_by_label("Matériel demandé").fill("Matériel nécessaire")
-    page.get_by_label("Quantité").click()
-    page.get_by_label("Quantité").fill("6")
-    page.get_by_label("Prix unitaire (TTC)").click()
-    page.get_by_label("Prix unitaire (TTC)").fill("300")
-    page.get_by_role("button", name="Enregistrer et ajouter un autre élément").click()
+def test_new_role_ok(biomaid_page: Callable) -> None:
+    page: Page = biomaid_page('dem:home', username='root', password='introuvable')
+    assert "Outils du Manager" in page.locator('.app-tile').inner_text()
+    page.get_by_role("listitem").filter(
+        has_text="Outils du Manager Gestion des demandes de matériel Demandes Réalisation ACHAts ("
+    ).click()
+    page.get_by_role("link", name="Outils du Manager").click()
+    page.get_by_role("link", name="Gestion des rôles").click()
+    page.get_by_role("link", name="Ajouter une fiche").click()
+    page.get_by_label("Utilisateur").click()
+    page.get_by_label("Utilisateur").fill("ig")
+    page.get_by_role("option", name="Paul Igonne (igonnepa)").click()
+    page.get_by_role("combobox", name="Rôle").select_option("EXP")
+    page.get_by_role("combobox", name="Etablissement").select_option("2")
+    page.get_by_role("button", name="Ajouter et retour à la liste").click()
     page.get_by_role("button", name="C'est noté").click()
+
+
+def test_new_role_nook(biomaid_page: Callable) -> None:
+    page: Page = biomaid_page('dem:home', username='deboziel', password='yQ6FfiKypa7h8Hc')
+    assert "Outils du Manager" not in page.locator('.app-tile').inner_text()
