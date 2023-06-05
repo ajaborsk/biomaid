@@ -5,7 +5,9 @@ from cmd import Cmd
 from subprocess import run, Popen, STDOUT, DEVNULL, PIPE
 from signal import SIGINT
 import os
+import code
 
+# import readline  # optional, will allow Up/Down/History in the console
 from playwright.sync_api import sync_playwright
 
 
@@ -57,19 +59,19 @@ class Cli(Cmd):
         self.args = args
         super().__init__()
         self.registred_users = {
-            'tomiela': {
-                'name': "Lana Tomie",
-                'description': "Experte métier sur l'UF 1001 (USLD), dispatcheuse campagne équipements TEST",
-                'password': 'yQ6FfiKypa7h8Hc',
-            },
             'root': {
                 'name': "Super utilisateur",
                 'description': "Super utilisateur",
                 'password': 'introuvable',
             },
+            'tomiela': {
+                'name': "Lana Tomie",
+                'description': "Experte métier sur l'UF 1001 (USLD), dispatcheuse campagne équipements TEST",
+                'password': 'yQ6FfiKypa7h8Hc',
+            },
             'enbaveyv': {
                 'name': "Yvon Enbaver",
-                'description': "",
+                'description': "Cadre supérieur de pôle sur l'UF 0003",
                 'password': 'yQ6FfiKypa7h8Hc',
             },
             'deboziel': {
@@ -117,7 +119,32 @@ class Cli(Cmd):
         if self.server:
             print("Do something with ready server...")
 
-    def do_long_help(self, line):
+    def browser_launch(self, username=None, shell=False):
+        with sync_playwright() as p:
+            # Make sure to run headed.
+            browser = p.chromium.launch(headless=False)
+
+            # Setup context however you like.
+            context = browser.new_context()  # Pass any options
+            # context.route('**/*', lambda route: route.continue_())
+
+            # Pause the page, and start recording manually.
+            page = context.new_page()
+            page.goto("http://localhost:8123/")
+            if username is not None:
+                user = self.registred_users[username]
+                page.get_by_label("Nom d’utilisateur :").fill(username)
+                page.get_by_label("Nom d’utilisateur :").press("Tab")
+                page.locator("#id_password").fill(user['password'])
+                page.get_by_role("button", name="Se connecter").click()
+            page.pause()
+            if shell:
+                variables = globals().copy()
+                variables.update(locals())
+                shell = code.InteractiveConsole(variables)
+                shell.interact()
+
+    def do_lh(self, line):
         "Tada !"
         if 'help' in line:
             print(f"{line=}")
@@ -142,7 +169,7 @@ class Cli(Cmd):
         print("Done.")
         self.server.send_signal(SIGINT)
 
-    def help_users(self):
+    def help_u(self):
         print(
             "Listes des utilisateurs enregistrés :\n{users}".format(
                 users=''.join(
@@ -152,36 +179,39 @@ class Cli(Cmd):
             )
         )
 
-    def do_browse_as(self, line):
+    def do_b(self, line):
         "Open a browser, connect as a registred user then wait"
         if line in self.registred_users:
-            user = self.registred_users[line]
-            with sync_playwright() as p:
-                # Make sure to run headed.
-                browser = p.chromium.launch(headless=False)
-
-                # Setup context however you like.
-                context = browser.new_context()  # Pass any options
-                # context.route('**/*', lambda route: route.continue_())
-
-                # Pause the page, and start recording manually.
-                page = context.new_page()
-                page.goto("http://localhost:8123/")
-                page.get_by_label("Nom d’utilisateur :").fill(line)
-                page.get_by_label("Nom d’utilisateur :").press("Tab")
-                page.locator("#id_password").fill(user['password'])
-                page.get_by_role("button", name="Se connecter").click()
-                page.pause()
+            self.browser_launch(username=line or None)
         else:
+            print(f"Utilisateur inconnu : '{line}'")
             print(
-                "Utilisateur inconnu : '{line}'. Liste des utilisateurs enregistrés :\n{users}".format(
-                    line=line,
-                    users=''.join(" - '" + user + "' : " + desc['name'] + "\n" for user, desc in self.registred_users.items()),
+                "Listes des utilisateurs enregistrés :\n{users}".format(
+                    users=''.join(
+                        " - '" + user + "' : " + desc['name'] + ", " + desc['description'] + "\n"
+                        for user, desc in self.registred_users.items()
+                    )
                 )
             )
         return False
 
-    def do_save_db(self, line):
+    def do_bs(self, line):
+        "Open a browser, connect as a registred user then open a python shell"
+        if line in self.registred_users:
+            self.browser_launch(username=line or None, shell=True)
+        else:
+            print(f"Utilisateur inconnu : '{line}'")
+            print(
+                "Listes des utilisateurs enregistrés :\n{users}".format(
+                    users=''.join(
+                        " - '" + user + "' : " + desc['name'] + ", " + desc['description'] + "\n"
+                        for user, desc in self.registred_users.items()
+                    )
+                )
+            )
+        return False
+
+    def do_s(self, line):
         "Save the tests database into backup.json.bz2"
         run(['python', 'manage.py', 'backup'])
 
@@ -189,7 +219,7 @@ class Cli(Cmd):
         "Terminate the CLI"
         return True
 
-    def do_quit(self, line):
+    def do_q(self, line):
         "Terminate the CLI"
         return True
 
