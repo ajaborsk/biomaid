@@ -109,11 +109,7 @@ html_theme_options = {
     'repository_url': "https://bitbucket.org/ajaborsk/biomaid/src/main/docs/",
     'use_repository_button': True,
 }
-<<<<<<< HEAD
 html_logo = "BiomAid-glowing-logo.png"
-=======
-html_logo = "BiomAid-logo.png"
->>>>>>> dyn_state_deploy
 # html_style = 'css/biomaid_doc.css'
 globaltoc_depth = 1
 
