@@ -208,7 +208,53 @@ def test_new_request_minimal_after(biomaid_page: Callable, user, uf_code, failur
     assert False  # Should never get there !
 
 
-def test_full_dispatch_ok(biomaid_page: Callable) -> None:
+def test_modify_request_in_table(biomaid_page: Callable) -> None:
+    # Open main page, logged as a requester
+    page: Page = biomaid_page('dem:home', username='couranth', password='yQ6FfiKypa7h8Hc')
+
+    # Go to the main page of 'dem' portal
+    page.goto_name('dem:home', portal='geqip')
+
+    # Go to current requests page
+    page.get_by_role("link", name="Demandes à approuver").click()
+
+    # Locate the SmartView table cell with 'cause'
+    loc = page.table_locator('demandes_a_approuver_table-smart-view-table', 'code', 'DEM-2021-00000', 'cause')
+    loc.click()
+
+    # unfinished test
+    assert False, "Unfinished test"
+
+
+def test_modify_request_in_form(biomaid_page: Callable) -> None:
+    # Open main page, logged as a requester
+    page: Page = biomaid_page('dem:home', username='couranth', password='yQ6FfiKypa7h8Hc')
+
+    # Go to the main page of 'dem' portal
+    page.goto_name('dem:home', portal='geqip')
+
+    # Go to current requests page
+    page.get_by_role("link", name="Demandes à approuver").click()
+
+    # Locate the SmartView table cell with 'cause'
+    loc = page.table_tool_locator('demandes_a_approuver_table-smart-view-table', 'code', 'DEM-2021-00000', 'fa-edit')
+    loc.click()
+
+    # unfinished test
+    assert False, "Unfinished test"
+
+
+def test_reroute_request_to_other_campaign(biomaid_page: Callable) -> None:
+    # unfinished test
+    assert False, "Unfinished test"
+
+
+def test_reroute_request_to_virtual_campaign(biomaid_page: Callable) -> None:
+    # unfinished test
+    assert False, "Unfinished test"
+
+
+def test_full_dispatch_in_table_ok(biomaid_page: Callable) -> None:
     # Check the value stored in the database
     dem = Demande.objects.filter(code='DEM-2021-00000').get()
     assert dem.programme is None
@@ -218,7 +264,7 @@ def test_full_dispatch_ok(biomaid_page: Callable) -> None:
     # Open main page, logged as a dispatcher
     page: Page = biomaid_page('dem:home', username='tomiela', password='yQ6FfiKypa7h8Hc')
 
-    # Got to the main page of 'dem' portal
+    # Go to the main page of 'dem' portal
     page.goto_name('dem:cockpit', portal='dem')
 
     # Choose the menu entry
@@ -266,3 +312,129 @@ def test_full_dispatch_ok(biomaid_page: Callable) -> None:
     assert dem.programme.code == 'BIO-00-PE'
     assert dem.domaine.code == '324'
     assert dem.expert_metier.username == 'bonbeuje'
+
+
+def test_dispatch_in_table_expert_only(biomaid_page: Callable) -> None:
+    # Check the value stored in the database
+    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    assert dem.programme is None
+    assert dem.domaine is None
+    assert dem.expert_metier is None
+
+    # Open main page, logged as a dispatcher
+    page: Page = biomaid_page('dem:home', username='tomiela', password='yQ6FfiKypa7h8Hc')
+
+    # Go to the main page of 'dem' portal
+    page.goto_name('dem:cockpit', portal='dem')
+
+    # Choose the menu entry
+    page.get_by_text("Répartition").click()
+    page.get_by_role("link", name="Campagne de test").click()
+
+    # Locate the SmartView table cell with 'expert_metier'
+    loc = page.table_locator('repartition_table-smart-view-table', 'code', 'DEM-2021-00000', 'expert_metier')
+
+    # Fill the cell with a value (choosen in the dropdown menu)
+    loc.click()
+    loc.locator("input[type=\"text\"]").press(" ")
+    page.locator(".tabulator-edit-list-item").filter(has_text=re.compile(r"^Jean Bonbeure$")).click()
+
+    # Check if value is displayed
+    loc.filter(has_text="bonbeuje").wait_for()
+    assert loc.filter(has_text="bonbeuje").count() == 1
+
+    # Locate the SmartView table cell with 'programme'
+    loc = page.table_locator('repartition_table-smart-view-table', 'code', 'DEM-2021-00000', 'programme')
+
+    # Fill the cell with a value (choosen in the dropdown menu)
+    loc.click()
+    loc.locator("input[type=\"text\"]").press(" ")
+    page.locator(".tabulator-edit-list-item").filter(has_text=re.compile(r"^Programme courant biomédical$")).click()
+
+    # Check if value is displayed
+    loc.filter(has_text="Programme courant biomédical").wait_for()
+    assert loc.filter(has_text="Programme courant biomédical").count() == 1
+
+    # Locate the SmartView table cell with 'domaine'
+    loc = page.table_locator('repartition_table-smart-view-table', 'code', 'DEM-2021-00000', 'domaine')
+
+    # Fill the cell with a value (choosen in the dropdown menu)
+    loc.click()
+    loc.locator("input[type=\"text\"]").press(" ")
+    page.locator(".tabulator-edit-list-item").filter(has_text=re.compile(r"^324 - Perfusion / Nutrition / Transfusion$")).click()
+
+    # Check if value is displayed
+    loc.filter(has_text="324 - Perfusion / Nutrition / Transfusion").wait_for()
+    assert loc.filter(has_text="324 - Perfusion / Nutrition / Transfusion").count() == 1
+
+    # Check the values stored in the database
+    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    assert dem.programme.code == 'BIO-00-PE'
+    assert dem.domaine.code == '324'
+    assert dem.expert_metier.username == 'bonbeuje'
+
+    # unfinished test
+    assert False, "Unfinished test"
+
+
+def test_dispatch_in_table_program_only(biomaid_page: Callable) -> None:
+    # Check the value stored in the database
+    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    assert dem.programme is None
+    assert dem.domaine is None
+    assert dem.expert_metier is None
+
+    # Open main page, logged as a dispatcher
+    page: Page = biomaid_page('dem:home', username='tomiela', password='yQ6FfiKypa7h8Hc')
+
+    # Go to the main page of 'dem' portal
+    page.goto_name('dem:cockpit', portal='dem')
+
+    # Choose the menu entry
+    page.get_by_text("Répartition").click()
+    page.get_by_role("link", name="Campagne de test").click()
+
+    # Locate the SmartView table cell with 'expert_metier'
+    loc = page.table_locator('repartition_table-smart-view-table', 'code', 'DEM-2021-00000', 'expert_metier')
+
+    # Fill the cell with a value (choosen in the dropdown menu)
+    loc.click()
+    loc.locator("input[type=\"text\"]").press(" ")
+    page.locator(".tabulator-edit-list-item").filter(has_text=re.compile(r"^Jean Bonbeure$")).click()
+
+    # Check if value is displayed
+    loc.filter(has_text="bonbeuje").wait_for()
+    assert loc.filter(has_text="bonbeuje").count() == 1
+
+    # Locate the SmartView table cell with 'programme'
+    loc = page.table_locator('repartition_table-smart-view-table', 'code', 'DEM-2021-00000', 'programme')
+
+    # Fill the cell with a value (choosen in the dropdown menu)
+    loc.click()
+    loc.locator("input[type=\"text\"]").press(" ")
+    page.locator(".tabulator-edit-list-item").filter(has_text=re.compile(r"^Programme courant biomédical$")).click()
+
+    # Check if value is displayed
+    loc.filter(has_text="Programme courant biomédical").wait_for()
+    assert loc.filter(has_text="Programme courant biomédical").count() == 1
+
+    # Locate the SmartView table cell with 'domaine'
+    loc = page.table_locator('repartition_table-smart-view-table', 'code', 'DEM-2021-00000', 'domaine')
+
+    # Fill the cell with a value (choosen in the dropdown menu)
+    loc.click()
+    loc.locator("input[type=\"text\"]").press(" ")
+    page.locator(".tabulator-edit-list-item").filter(has_text=re.compile(r"^324 - Perfusion / Nutrition / Transfusion$")).click()
+
+    # Check if value is displayed
+    loc.filter(has_text="324 - Perfusion / Nutrition / Transfusion").wait_for()
+    assert loc.filter(has_text="324 - Perfusion / Nutrition / Transfusion").count() == 1
+
+    # Check the values stored in the database
+    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    assert dem.programme.code == 'BIO-00-PE'
+    assert dem.domaine.code == '324'
+    assert dem.expert_metier.username == 'bonbeuje'
+
+    # unfinished test
+    assert False, "Unfinished test"

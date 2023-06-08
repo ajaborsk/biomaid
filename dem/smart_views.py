@@ -1834,6 +1834,17 @@ class DemandeSmartView(SmartView):
                         'domaine': True,
                         'expert_metier': True,
                     },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
                 },
                 'AAP_AREP_AEXP': {
                     'ADM': {
@@ -1860,6 +1871,17 @@ class DemandeSmartView(SmartView):
                         'domaine': True,
                         'expert_metier': True,
                     },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
                 },
                 'AAP_AARB': {
                     'ADM': {
@@ -1885,6 +1907,11 @@ class DemandeSmartView(SmartView):
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
                     },
                 },
                 'AREP': {
@@ -1920,6 +1947,9 @@ class DemandeSmartView(SmartView):
                     },
                     'EXP': {
                         'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
                         'montant_unitaire_expert_metier': True,
                         'montant_total_expert_metier': False,
                         'commentaire_biomed': True,

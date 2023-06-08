@@ -58,6 +58,20 @@ class BiomaidPage:
         loc.scroll_into_view_if_needed()
         return loc
 
+    def table_tool_locator(self, table_id, id_column, id_value, iconname):
+        loc = (
+            self.page.locator('#' + table_id)
+            .locator('.tabulator-row')
+            .filter(
+                has=self.page.locator('[tabulator-field="' + id_column + '"]').get_by_text(  # .get_by_role('gridcell')
+                    str(id_value), exact=True
+                )
+            )
+            .locator('i.' + iconname)
+        )
+        loc.scroll_into_view_if_needed()
+        return loc
+
     def __getattr__(self, __name: str) -> Any:
         return getattr(self.page, __name)
 
