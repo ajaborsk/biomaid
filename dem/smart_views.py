@@ -1710,6 +1710,285 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                 },
+                # These are states for dyn_state fields
+                'AAP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                },
+                'AAP_AREP': {
+                    'OWN': {
+                        'state_code': True,
+                        "referent": True,
+                        "uf": True,
+                        "priorite": True,
+                        "cause": True,
+                        "libelle": True,
+                        "nom_projet": True,
+                        "contact": True,
+                        "dect_contact": True,
+                        "date_premiere_demande": True,
+                        "materiel_existant": True,
+                        'it_caracteristiques_minimales': True,
+                        'it_a_installer': True,
+                        'tmp_int_year': True,
+                        'tmp_int_remain': True,
+                        'arg_interet_medical': True,
+                        'arg_commentaire_im': True,
+                        'arg_oblig_reglementaire': True,
+                        'arg_commentaire_or': True,
+                        'arg_recommandations': True,
+                        'arg_commentaire_r': True,
+                        'arg_projet_chu_pole': True,
+                        'arg_commentaire_pcp': True,
+                        'arg_confort_patient': True,
+                        'arg_commentaire_cp': True,
+                        'arg_confort_perso_ergo': True,
+                        'arg_commentaire_pe': True,
+                        'arg_notoriete': True,
+                        'arg_commentaire_n': True,
+                        'arg_innovation_recherche': True,
+                        'arg_commentaire_ir': True,
+                        'arg_gain_financier': True,
+                        'arg_commentaire_gf': True,
+                        'arg_mutualisation': True,
+                        'arg_commentaire_m': True,
+                        "autre_argumentaire": True,
+                        "consommables_eventuel": True,
+                        "impact_travaux": True,
+                        "impact_informatique": True,
+                        "quantite": True,
+                        "prix_unitaire": True,
+                        'montant': True,
+                        "description": True,
+                        "localisation": True,
+                    },
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                },
+                'AAP_AEXP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                },
+                'AAP_AREP_AEXP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                },
+                'AAP_AARB': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                },
+                'AREP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                },
+                'AREP_AEXP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                },
+                'ANNULE': {
+                    'ADM': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                    'ARB': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                },
+                'REFUSE': {
+                    'ADM': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                    'ARB': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                },
+                'A_BASCULER': {
+                    'ADM': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                    'ARB': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                },
+                'VALIDE': {},
+                'TRAITE': {},
             },
         }
 
@@ -1782,7 +2061,7 @@ class DemandeSmartView(SmartView):
             'state_code': {
                 'title': _("Etat (debug)"),
                 'hidden': not (hasattr(config.settings, 'SMARTVIEW_DEBUG') and config.settings.SMARTVIEW_DEBUG),
-                'special': 'state',
+                # 'special': 'state',
                 'depends': [
                     'avis_cadre_sup',
                     'decision_validateur',
@@ -2073,7 +2352,7 @@ class DemandeSmartView(SmartView):
                 'width': 200,
             },
             'montant_unitaire_expert_metier': {
-                'title': _("Montant expert TMP TMP"),
+                'title': _("PU indiqué par l'expert"),
                 'table.hidden': True,
             },
             'arbitrage_commission': {
@@ -2130,6 +2409,22 @@ class DemandeSmartView(SmartView):
             'gel': {
                 'title': _("Définitif"),
                 'width': 40,
+                # If this very row/record consume too much amount of the 'programme", others rows may not be
+                # 'validable' anymore
+                #  --- This is a temporary and manual implementation (eventually, should cascade from a 'programme' dependency on every rows
+                # with the same 'programme') ---
+                'alter_rows': [
+                    {
+                        # Every row with the same 'programme' field value
+                        'same_field': 'programme',
+                        # Will have its field 'dyn_state' changed
+                        'fields': [
+                            'state_code',
+                            'dyn_state',
+                            'tmp_available',
+                        ],
+                    },
+                ],
             },
         }
 
@@ -2759,6 +3054,16 @@ class DemandeSmartView(SmartView):
             ),
         },
     )
+    tmp_available = (
+        ComputedSmartField,
+        {
+            'title': "Dispo",
+            'data': F('programme__limit') - F('programme__consumed'),
+            # Since the 'gel' field modification will trigger a program.consumed field recomputation,
+            # we add here the 'gel' field as a dependency
+            'depends': ['programme', 'gel'],
+        },
+    )
     documents_sf = (
         DocumentsSmartField,
         {
@@ -2858,8 +3163,9 @@ class DemandeSmartView(SmartView):
         ComputedSmartField,
         {
             'hidden': not config.settings.DEBUG,
+            'special': 'state',
             'title': _("Etat dyn."),
-            'help_text': _("Etat calculé dynamiquement à partir des valuers des champs de chaque demande."),
+            'help_text': _("Etat calculé dynamiquement à partir des valeurs des champs de chaque demande."),
             'data': lambda view_params: Case(
                 When(
                     gel=True,
@@ -2906,7 +3212,14 @@ class DemandeSmartView(SmartView):
                                             programme__arbitre__isnull=True,
                                             then=Value("AAP"),
                                         ),
-                                        default=Value("AAP_AARB"),
+                                        default=Case(
+                                            When(
+                                                arbitrage_commission__valeur=True,
+                                                enveloppe_finale__gt=F('tmp_available'),
+                                                then=Value('AAP_BLK'),
+                                            ),
+                                            default=Value("AAP_AARB"),
+                                        ),
                                     ),
                                 ),
                             ),
@@ -2920,7 +3233,14 @@ class DemandeSmartView(SmartView):
                                         programme__arbitre__isnull=True,
                                         then=Value("WAIT"),
                                     ),
-                                    default=Value("AARB"),
+                                    default=Case(
+                                        When(
+                                            arbitrage_commission__valeur=True,
+                                            enveloppe_finale__gt=F('tmp_available'),
+                                            then=Value('BLK'),
+                                        ),
+                                        default=Value("AARB"),
+                                    ),
                                 ),
                             ),
                         ),
@@ -2954,6 +3274,8 @@ class DemandeSmartView(SmartView):
             ),
             'depends': [
                 'gel',
+                'tmp_available',
+                'enveloppe_finale',
                 'programme',
                 'decision_validateur',
                 'expert_metier',
@@ -3056,6 +3378,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'montant_valide_conditional',
             'montant_final',
             'montant_consomme',
+            'tmp_available',
             'dyn_state',
             'gel',
             'tools',

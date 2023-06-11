@@ -5,7 +5,7 @@
   DOES NOT WORK...
 */
 Tabulator.extendModule("keybindings", "actions", {
-    "selectUpRow": function() {
+    "selectUpRow": function () {
         'use strict';
         console.log("up !");
         var rows = this.table.getSelectedRows();
@@ -13,7 +13,7 @@ Tabulator.extendModule("keybindings", "actions", {
             console.log("up !");
         }
     },
-    "selectDownRow": function() {
+    "selectDownRow": function () {
         'use strict';
         console.log("down !");
         var rows = this.table.getSelectedRows();
@@ -21,7 +21,7 @@ Tabulator.extendModule("keybindings", "actions", {
 });
 
 Tabulator.extendModule("mutator", "mutators", {
-    json: function(value, data, type, params, component) {
+    json: function (value, data, type, params, component) {
         //value - original value of the cell
         //data - the data for the row
         //type - the type of mutation occurring  (data|edit)
@@ -65,7 +65,7 @@ class SmartView {
 
         // Function used to store Tabulator persistence data : columns widths & column sort
         // Uses self.update_setiings to avoid bouncing (Tabulator triggers a lot of 'write' events on initialization)
-        this.tabulator_options.persistenceWriterFunc = function(id, type, data) {
+        this.tabulator_options.persistenceWriterFunc = function (id, type, data) {
             //id - tables persistence id
             //type - type of data being persisted ("sort", "filters", "group", "page" or "columns")
             //data - array or object of data
@@ -79,7 +79,7 @@ class SmartView {
         // This information is provided at page initialization (via template) since there is no need to get this data
         // while the page is already displayed AND this is very difficult to handle
         //   (synchronous/classical function should wait for AJAX response...)
-        this.tabulator_options.persistenceReaderFunc = function(id, type) {
+        this.tabulator_options.persistenceReaderFunc = function (id, type) {
             //id - tables persistence id
             //type - type of data being persisted ("sort", "filters", "group", "page" or "columns")
 
@@ -150,23 +150,23 @@ class SmartView {
         for (var i = 0; i < this.tabulator_options.columns.length; i++) {
             //this.tabulator_options.columns[i].editor = "textarea"; // TODO
             //this.tabulator_options.columns[i].editorParams =  {  }; // TODO
-            this.tabulator_options.columns[i].editable = function(cell) {
+            this.tabulator_options.columns[i].editable = function (cell) {
                 return self.is_editable(cell, this);
             };
-            this.tabulator_options.columns[i].cellEdited = function(cell) {
+            this.tabulator_options.columns[i].cellEdited = function (cell) {
                 return self.cell_edited(cell, this);
             };
         }
 
         if ('fieldname' in this.row_styler) {
-            this.tabulator_options.rowFormatter = function(row, tabulator = this) {
+            this.tabulator_options.rowFormatter = function (row, tabulator = this) {
                 self.row_formatter(row, tabulator, self.row_styler.fieldname, self.row_styler.styles);
             };
         }
 
         if (this.options.row_tooltip) {
             //this.tabulator_options.tooltipGenerationMode = 'hover';
-            this.tabulator_options.tooltips = function(cell, tabulator = this) {
+            this.tabulator_options.tooltips = function (cell, tabulator = this) {
                 return self.options.tooltip_formatter(cell.getData());
             };
         }
@@ -176,27 +176,27 @@ class SmartView {
         this.tabulator = new Tabulator(`#${this.prefix}-smart-view-table`, this.tabulator_options);
         this.tabulator.smart_view = this;
 
-        this.tabulator.on('cellClick', function(event, cell) {
+        this.tabulator.on('cellClick', function (event, cell) {
             return self.cell_click(event, cell, this);
         });
 
         // L'utilisation d'une fonction intermediaire permettra de récupérer self comme l'objet SmartView
         // 'this' sera l'appelant, c'est à dire le Tabulator (dont le constructeur ne sera pas terminé et donc
         // qui ne sera pas encore référencé par l'objet SmartView)
-        this.tabulator.on('tableBuilt', function(tabulator = this) {
+        this.tabulator.on('tableBuilt', function (tabulator = this) {
             // Prepare 'columns selector'
             self.columns_selector_prepare(tabulator);
         });
 
         // Select the first row (=set as current row) of table on render complete (only if there is not one yet) :
         if (smart_view_options.current_row_manager) {
-            this.tabulator.on('dataLoaded', function(data) {
+            this.tabulator.on('dataLoaded', function (data) {
                 if (self.records_count_element) {
                     self.records_count_element.innerText = data.length;
                 }
             });
             //console.log("Row manager is active !");
-            this.tabulator.on('renderComplete', function() {
+            this.tabulator.on('renderComplete', function () {
                 var row_position = 0;
                 if ((this.getDataCount()) && (self.current_row === null)) {
                     if (self.options.fragment) {
@@ -210,7 +210,7 @@ class SmartView {
                 }
             });
             // Avoid unselect a row by clicking on it :
-            this.tabulator.on('rowClick', function(event, row) {
+            this.tabulator.on('rowClick', function (event, row) {
                 //console.debug("RowClick", row, typeof row.getIndex, self.current_row, row.getTable().getSelectedRows());
                 if ((typeof row.getIndex === 'undefined') || (row.getTable().getSelectedRows().length === 0)) {
                     // this click deselected the only selected row => reselect it !
@@ -220,7 +220,7 @@ class SmartView {
                 }
             });
             // local method called when selection (=current row) change :
-            this.tabulator.on('rowSelected', function(row) {
+            this.tabulator.on('rowSelected', function (row) {
                 if (typeof row.getIndex === 'function') {
                     self.current_row = row;
                     return self.row_selected(self, row, this);
@@ -228,13 +228,13 @@ class SmartView {
             });
 
         } else {
-            this.tabulator.on('renderComplete', function() {
+            this.tabulator.on('renderComplete', function () {
                 if ((this.getDataCount()) && (self.options.fragment)) {
                     console.debug("Data loaded :", this, self, self.records_count_element, self.options.fragment);
                     self.destination_row = this.getRow(self.options.fragment);
                     console.debug("R: ", this, self.options.fragment, self.destination_row);
                     if (self.destination_row) {
-                        this.scrollToRow(self.destination_row, 'center', true).then(function() {
+                        this.scrollToRow(self.destination_row, 'center', true).then(function () {
                             // Faire ici un truc pour mettre en évidence la ligne vers laquelle on vient de centrer le tableau !!
                             // Une animation peut-être ?
                         });
@@ -244,7 +244,7 @@ class SmartView {
             });
             if (self.options.form_fields.length > 0) {
                 // console.log("simple form mode for :", self);
-                this.tabulator.on('dataLoaded', function(data) {
+                this.tabulator.on('dataLoaded', function (data) {
                     if (data.length === 1) {
                         // console.log("Updating simple form for :", self, data[0]);
                         self.form_update(self, data[0]);
@@ -255,7 +255,7 @@ class SmartView {
         }
 
 
-        $(`#${this.prefix}-smart-view-menu-bar .views-buttons-box .icon-button`).click(function(event) {
+        $(`#${this.prefix}-smart-view-menu-bar .views-buttons-box .icon-button`).click(function (event) {
             console.log("click on view:", this.dataset.view, self);
             self.show_view(this.dataset.view, this);
         });
@@ -271,12 +271,12 @@ class SmartView {
         for (let i = 0; i < this.filters.length; i++) {
             let filter = this.filters[i];
 
-            filter.addEventListener('change', function(event) {
+            filter.addEventListener('change', function (event) {
                 self.filters_apply(event, self);
             });
         }
 
-        $(`#${this.prefix}-smart-view-filters-box .smart-view-filter-box i`).css("cursor", "pointer").click(function(event) {
+        $(`#${this.prefix}-smart-view-filters-box .smart-view-filter-box i`).css("cursor", "pointer").click(function (event) {
             // console.debug("del filter click !!", self, $(this).parent().attr('data-field'));
 
             var field_name = $(this).parent().attr('data-field');
@@ -311,7 +311,7 @@ class SmartView {
             });
         } else {
             let self = this;
-            this.tabulator.on("tableBuilt", function() {
+            this.tabulator.on("tableBuilt", function () {
                 self.filters_apply(null, self)
             });
         }
@@ -333,16 +333,16 @@ class SmartView {
                 // End of timeOut reached => send a POST AJAX request to store pending settings into user's preferences
                 $.ajax(
                     self.options.settings_url, {
-                        method: 'POST',
-                        context: self,
-                        headers: {
-                            'X-CSRFToken': csrftoken
-                        },
-                        data: {
-                            settings: JSON.stringify(self.settings_to_update)
-                        }
+                    method: 'POST',
+                    context: self,
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    data: {
+                        settings: JSON.stringify(self.settings_to_update)
                     }
-                ).done(function() {
+                }
+                ).done(function () {
                     // Success => reset locally stored / pending settings
                     self.settings_to_update = {};
                 });
@@ -385,13 +385,13 @@ class SmartView {
                         null: true,
                         true: false,
                         false: null
-                    } [cell.getValue()]);
+                    }[cell.getValue()]);
                 } else {
                     cell.setValue({
                         null: true,
                         true: false,
                         false: true
-                    } [cell.getValue()]);
+                    }[cell.getValue()]);
                 }
             }
             // cell_edited() est appelé automatiquement, ce qui entraîne la mise à jour de la base !
@@ -438,7 +438,8 @@ class SmartView {
         // console.debug("Row selected :", row.getPosition(true));
         if (self.current_record_element) {
             self.current_record_element.innerText = 1 + row.getPosition(true);
-        }    }
+        }
+    }
 
     is_editable(cell, tabulator) {
         var fieldname;
@@ -469,13 +470,13 @@ class SmartView {
         //console.log("p_level:", p_level);
         if (p_level.write) {
             p_level = p_level.write;
-        }        else {
+        } else {
             return false;
         }
         //console.log("p_level:", p_level);
         if (p_level[state]) {
             p_level = p_level[state];
-        }        else {
+        } else {
             return false;
         }
         //console.log("p_level:", p_level);
@@ -518,24 +519,36 @@ class SmartView {
                 update: JSON.stringify(record)
             }
         }).done(
-            function(data) {
-                if (data.updated) {
-                    var update = {};
-                    //update[self.options.id_field] = cell.getData()[self.options.id_field];
-                    for (var fieldname in data.updated) {
-                        if (data.updated.hasOwnProperty(fieldname)) {
-                            update[fieldname] = data.updated[fieldname];
-                        }
-                    }
-                    this.getRow().update(update);
-                    //this.getRow().reformat();
-                } else if (data.error) {
+            function (data) {
+                if (data.error) {
                     alert("La cellule ne peut pas être mise à jour.\n\nErreur : " + data.error.message);
+                } else {
+                    for (const updatedRow of data.updated) {
+                        let update = {};
+                        let id = -1;
+                        //update[self.options.id_field] = cell.getData()[self.options.id_field];
+                        for (let fieldname in updatedRow) {
+                            if (fieldname == '_row_id') {
+                                id = updatedRow._row_id
+                            } else
+                                if (updatedRow.hasOwnProperty(fieldname)) {
+                                    update[fieldname] = updatedRow[fieldname];
+                                }
+                        }
+                        let row = this.getTable().getRow(id);
+                        // Avoid updating row which id is not in the table
+                        if (row) {
+                            row.update(update);
+                        }
+
+                        //console.debug("id", id, "update", update);
+                        //this.getRow().reformat();
+                    }
                 }
                 document.getElementsByTagName('html')[0].classList.remove("busy");
             }
         ).fail(
-            function(data) {
+            function (data) {
                 document.getElementsByTagName('html')[0].classList.remove("busy");
                 alert("La cellule ne peut pas être mise à jour.\n\nErreur renvoyée par le serveur.");
             }
@@ -570,14 +583,14 @@ class SmartView {
                 var definition = col.getDefinition();
                 var id = self.options.appname + '.' + 'tabulator-' + prefix + '.show-column.' + cb.name;
                 if (self.options.user_settings && self.options.user_settings['show-column'] && self.options.user_settings[
-                        'show-column'][cb.name] === false) {
+                    'show-column'][cb.name] === false) {
                     cb.checked = false;
                 } else {
                     cb.checked = true;
                 }
 
                 // L'utilisation de .onchange() évite d'enregistrer plusieurs fois la callback
-                cb.onchange = function(event) {
+                cb.onchange = function (event) {
                     var cb = event.target;
                     show_column_update(cb);
                 };
@@ -641,7 +654,7 @@ class SmartView {
         var filters_kw = base_filter;
         var filters_full = {};
 
-        smartview.filters.each(function(filter) {
+        smartview.filters.each(function (filter) {
             var filter_box = $(
                 `#${smartview.prefix}-smart-view-filters-box .smart-view-filter-box[data-field="${this.attributes['name'].value}"]`
             );
@@ -656,7 +669,7 @@ class SmartView {
 
                     filter_box.find('.filter-text').html(filter_label + ' : <b>' + $(
                         `#${smartview.prefix}-smart-view-filters select[name="` + this.attributes['name']
-                        .value + '"] option[value=\'' + filter_value + '\']').html() + '</b>');
+                            .value + '"] option[value=\'' + filter_value + '\']').html() + '</b>');
                     filter_box.show();
                 } else {
                     filter_box.hide();
@@ -713,7 +726,7 @@ class SmartView {
 
     export_url(smartview, id) {
         let filters_kw = {};
-        smartview.filters.each(function(filter) {
+        smartview.filters.each(function (filter) {
             let filter_value = smartview.filter_value(smartview, $(this));
             console.debug('f=', filter_value);
             filter_value = JSON.parse(filter_value);
@@ -728,13 +741,13 @@ class SmartView {
 
         if (p_level['delete']) {
             p_level = p_level['delete'];
-        }        else {
+        } else {
             return;
         }
         var state = cell.getRow().getData()[self.options.state_field];
         if (p_level[state]) {
             p_level = p_level[state];
-        }        else {
+        } else {
             return;
         }
         var roles = cell.getRow().getData()[self.options.roles_field];
@@ -801,5 +814,5 @@ class SmartView {
         }
     }
 
-    if_null_calc(value, data, calcParams) {}
+    if_null_calc(value, data, calcParams) { }
 }

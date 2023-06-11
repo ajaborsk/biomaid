@@ -87,7 +87,7 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.11"
+python = ">=3.10,<3.12"
 cx-Oracle = "8.3.0"
 Django = "^4.0"
 django-extensions = "^3.1.0"
@@ -120,10 +120,10 @@ python-ldap = [
 ]
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "^7.0.0"}
 pysftp = "^0.2.9"
+sphinx-book-theme = "^1.0.1"
 
 [tool.poetry.group.doc.dependencies]
 sphinx = "^5.0.0"
-sphinx-sizzle-theme = "^0.1.1"
 sphinx-autoapi = "^1.8.4"
 sphinxcontrib-svg2pdfconverter = "^1.1.1"
 

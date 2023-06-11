@@ -473,7 +473,6 @@ class SmartViewMetaclass(MediaDefiningClass):
 
         # Step 4 : Update using Meta class
         if 'Meta' in attrs and isinstance(attrs['Meta'], type):
-
             for attr_name in dir(attrs['Meta']):
                 if attr_name == 'settings':
                     if 'settings' not in _meta:
@@ -748,7 +747,6 @@ class SmartViewMetaclass(MediaDefiningClass):
                                 )
                         mfilter["choices"] = choices
                     elif isinstance(mfilter["choices"], dict):
-
                         # ensure there is a fieldname key
                         mfilter['choices']['fieldname'] = mfilter['choices'].get('fieldname', filtname)
                         mfilter['fieldname'] = mfilter['choices'].get('fieldname', filtname)
@@ -902,7 +900,7 @@ class SmartViewMetaclass(MediaDefiningClass):
                             ]
                     else:
                         raise AttributeError(
-                            _("No choices given and no way to create one for filter '{}' ").format(mfilter["name"])
+                            _("No choices given and no way to create one for filter '{}' ").format(mfilter["fieldname"])
                         )
                     mfilter["choices"] = choices
             elif mfilter["type"] == "contains":
@@ -1702,8 +1700,6 @@ class SmartView(metaclass=SmartViewMetaclass):
           parce que c'était des dépendances) et ceux calculés 'au vol' dans le cadre de la SmartView.
         """
         # TODO: Multiple rows update ?
-        # DONE: CRSF checking (via POST Django middleware)
-        # DONE: Dependencies cascade (for database fields)
 
         # 1 - Get state and roles for this row
         # pkf = self._meta.id_field
@@ -1728,21 +1724,24 @@ class SmartView(metaclass=SmartViewMetaclass):
 
         # 2 - Check writing permission for theses columns
         perms = self._meta['permissions']
+        # --> perms is now the whole permissions dict
 
         if not perms.get("write", False):
             return {"error": {"message": _("Cet enregistrement ne peut pas être modifié")}}
         perms = perms.get("write", False)
+        # --> perms is now the write permissions dict (still depends on state and role)
 
         if not perms.get(row_state, False):
             return {"error": {"message": _("Cet enregistrement ne peut pas être modifié dans cet état")}}
         perms = perms.get(row_state, False)
+        # --> perms is now the write and state permissions dict (still depends on role)
 
-        allowed = False
+        allowed_fields = set()
         for role in row_roles:
             if perms.get(role, False):
-                allowed = perms.get(role, False)
-                break
-        if not allowed:
+                # At least this very role is allowed to modufy this record ; let's continue
+                allowed_fields = allowed_fields.union({fieldname for fieldname, allowed in perms.get(role, {}).items() if allowed})
+        if not allowed_fields:
             return {"error": {"message": _("Vos droits ne permettent pas de modifier cet enregistrement")}}
 
         # 3 - Update the row(s)
@@ -1756,7 +1755,17 @@ class SmartView(metaclass=SmartViewMetaclass):
         smartfields_to_read = []
 
         for name, value in updater["set"].items():
-            # print("  AJA> update:", name, dir(getattr(self, name)))
+            # print("  AJA> update:", name, value, allowed_fields, getattr(self, name).get('title', 'table.html'))
+
+            if name not in allowed_fields:
+                return {
+                    "error": {
+                        "message": _("Vos droits ne permettent pas de modifier le champ '{}' de cet enregistrement").format(
+                            getattr(self, name).get('title', 'table.html')
+                        )
+                    }
+                }
+
             if name in self._meta['data_fields']:
                 smartfields_to_read.append(name)
             if hasattr(getattr(self, name), "alters"):
@@ -1767,7 +1776,6 @@ class SmartView(metaclass=SmartViewMetaclass):
 
             # Vérifie que le champs existe dans la smartview et est bien lié à la base
             if isinstance(getattr(self, name).get('data'), str):
-
                 # Modification effective de l'enregistrement...
 
                 model_fieldname = getattr(self, name).get('data')
@@ -1839,7 +1847,7 @@ class SmartView(metaclass=SmartViewMetaclass):
             else:
                 # Si on arrive ici, c'est que le champ à modifier n'est pas un champ d'enregistrement
                 smart_field = getattr(self, name)
-                smart_field.update_instance(request, record, name, updater, allowed=allowed)
+                smart_field.update_instance(request, record, name, updater, allowed=bool(name in allowed_fields))
 
         try:
             record.save(update_fields=fields_to_save)
@@ -1848,17 +1856,38 @@ class SmartView(metaclass=SmartViewMetaclass):
         except ValueError as err:
             return {"error": {"message": str(err)}}
 
-        # 4 - Get _all_ updated rows/fields (updated field AND altered ones)
-        queryset = (
+        qs_list = []
+        # 4.1 - Get _all_ updated fields in this row/record (updated field AND altered ones)
+        record_queryset = (
             self.get_base_queryset(self._view_params, skip_base_filter=True)
             .filter(**{pkf: updater["where"][pkf]})
-            .values(*smartfields_to_read)
+            .values(*smartfields_to_read, _row_id=F(pkf))
         )
+        qs_list.append(record_queryset)
 
-        # 5 - Return them OR return the error
-        # print('Who:', request.user, row_state, row_roles)
-        # print('updater:', updater, "\n")
-        return {"updated": queryset[0], "error": {}}
+        # 4.2 - Get _all_ updated fields in other rows/records
+        for sf in smartfields_to_read:
+            for other_rows_desc in getattr(self, sf).get('alter_rows', '', []):
+                # same_field_value = (
+                #     self.get_base_queryset(self._view_params, skip_base_filter=True)
+                #     .filter(pk=updater['where'][pkf])
+                #     .values_list(other_rows_desc['same_field'])[0]
+                # )
+                # print(f"{sf=}, {other_rows_desc=}, {same_field_value=}")
+                qs_list.append(
+                    self.get_base_queryset(self._view_params, skip_base_filter=False)
+                    .filter(
+                        **{
+                            other_rows_desc['same_field']: self.get_base_queryset(self._view_params, skip_base_filter=True)
+                            .filter(pk=updater['where'][pkf])
+                            .values_list(other_rows_desc['same_field'])[0]
+                        }
+                    )
+                    .values(*other_rows_desc['fields'], _row_id=F(pkf))
+                )
+
+        # 5 - Return them
+        return {"updated": reduce(lambda a, b: a + list(b), qs_list, [])}
 
     def export_xlsx(self, export, queryset, view_params):
         def boolean_to_excel(value):

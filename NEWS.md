@@ -1,5 +1,34 @@
 # Nouveautés
 
+## Version 0.13 (9 juin 2023) :
+
+### Nouveautés
+- [X] Ajout de fonctions analytics pour le suivi financier des plans d'équipement
+- [X] Début d'implémentation du suivi financier précis en temps réel
+- [X] Première fonction analyse pour les immobilisations
+- [X] Possibilité de définir (par l'administrateur) des arbitres et des dispatcheurs "adjoints"
+
+### Documentation
+- [X] Changement du thème Sphinx (passage à 'book')
+- [X] Nombreuses pages rédigées et/ou complétées:
+   - documentation sur la documentation
+   - dem:dispatch
+   - dem:arbitration
+   - ...
+
+### Corrections bugs :
+
+- [X] Corrections des problèmes multiples avec le workflow des travaux
+
+### Sous le capot :
+
+- [X] Bascule de la gestion des fichiers DRA94 sur extable
+- [X] Création d'une commande de backup
+- [X] Utilisation d'extable pour l'inventaire Asset+
+- [X] Meilleure gestion du délai pour les bascules automatiques sur les plans d'équipement
+- [X] Mise à jour des dépendances et passage à Django 4.2
+- [X] Avancées sur la migration des tests vers Playwright
+
 ## Version 0.12.2 (22 novembre 2022) :
 
 ### Nouveautés

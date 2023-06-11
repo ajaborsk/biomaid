@@ -308,8 +308,6 @@ class DemConfig(AppConfig):
             )
         )
 
-        print(f"{common_config=}")
-
         post_save.connect(
             common_config.program_update,
             sender=apps.get_model('dem.demande'),

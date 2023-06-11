@@ -1349,7 +1349,7 @@ class ImmoAllAnalyser(AnomalyChecker):
             eqpt = inv_idx[n_imma]
             # print(f"{eqpt=}")
             if (
-                len(eqpt['date_refor']) < 5
+                eqpt['date_refor'] is None
                 and eqpt['prix'] != ''
                 and (eqpt['filler_eco_2'] == 'C2' or eqpt['fk_budget_nu_compte'].startswith('H2') or float(eqpt['prix']) >= 1000)
             ):

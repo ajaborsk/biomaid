@@ -14,27 +14,46 @@ Mises à jour
 Informer les utilisateurs
 =========================
 
-Ou au moins choisir un créneau de très faible utilistion de l'instance
+Ou au moins choisir un créneau de très faible utilisation de l'instance
 
 Arrêter l'instance
 ==================
 
+Cela se fait par l'arrêt du service gunicorn via supervisor
 
 Activer l'environnement virtuel adéquat
 =======================================
+
+Aller dans le dossier de l'instance et lancer la commande :
+
+    poetry shell
 
 Faire une sauvegarde des données
 ================================
 
 - Les données de la base
-- Les fichiers ``media``
-- La configuration locale (dossier ``/locale``)
+  
+à partir de la version 0.13 :
+
+::
+
+    > python manage.py backup 
+
+Versions antérieures à 0.13 :
 
 Si ``the_file_name`` est le nom de la sauvegarde :
 
 ::
 
-    > python manage.py dumpdata -a --natural-foreign -e assetplusconnect -e admin.Logentry -e contenttypes -e sessions -e auth.Permission -o ~/the_file_name.json
+    > python manage.py dumpdata -a --natural-foreign -e assetplusconnect -e extable -e admin.Logentry -e contenttypes -e sessions -e auth.Permission -o ~/the_file_name.json.bz2
+
+- Les fichiers ``media``
+
+Uniquement si c'est nécessaire
+
+- La configuration locale (dossier ``/locale``)
+
+Uniquement si c'est nécessaire
 
 .. note::
 
@@ -51,6 +70,16 @@ Si #.#.# est le nom du tag de la version à installer (0.8.1 par exemple) :
 ::
 
 > git checkout #.#.#
+
+
+Faire la mise à jour des dépendances
+====================================
+
+::
+
+> poetry install --no-root -E ldap
+
+
 
 Lancer les migrations
 =====================

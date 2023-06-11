@@ -310,7 +310,11 @@ except ModuleNotFoundError:
 
 # This will import specific settings for production, testing environment, development...
 try:
-    # New module name
-    from instance_settings import *  # noqa F403,F401
+    if os.getenv('MKTEST') is None:
+        # New module name
+        from instance_settings import *  # noqa F403,F401
+    else:
+        # New module name
+        from mktest_instance_settings import *  # noqa F403,F401
 except ModuleNotFoundError:
     print("No site/environment configuration found.")
