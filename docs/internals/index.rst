@@ -37,6 +37,7 @@ Les applications BiomAid
    :caption: Contenu :
 
    doc_common/index
+   doc_analytics/index
    doc_dem/index
    doc_smart_view/index
    doc_finance/index

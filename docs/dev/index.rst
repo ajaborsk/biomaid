@@ -12,6 +12,7 @@ pour leur usage propre.
     testing.rst
     create-module.rst
     doc_smart_view/smart_widget.rst
+    new-version.rst
 
 
 **à compléter...**

@@ -16,17 +16,31 @@ Informer les utilisateurs
 
 Ou au moins choisir un créneau de très faible utilisation de l'instance
 
+.. include:: doc_local/updates.rst
+    :start-after: .. _users_inform_before:
+    :end-before: .. _
+
 Arrêter l'instance
 ==================
 
-Cela se fait par l'arrêt du service gunicorn via supervisor
+Cela se fait par l'arrêt du service ``gunicorn`` via ``supervisor``
+
+::
+
+    > sudo service supervisor stop
+
+.. include:: doc_local/updates.rst
+    :start-after: .. _instance_stop:
+    :end-before: .. _
 
 Activer l'environnement virtuel adéquat
 =======================================
 
 Aller dans le dossier de l'instance et lancer la commande :
 
-    poetry shell
+::
+
+    > poetry shell
 
 Faire une sauvegarde des données
 ================================
@@ -51,7 +65,7 @@ Si ``the_file_name`` est le nom de la sauvegarde :
 
 Uniquement si c'est nécessaire
 
-- La configuration locale (dossier ``/locale``)
+- La configuration locale (dossier ``/local``)
 
 Uniquement si c'est nécessaire
 
@@ -62,14 +76,38 @@ Uniquement si c'est nécessaire
     de chacun. D'autant plus que pour ``/media``, le volume de données peut être très important. Dans tous les cas,
     pour ce dossier, il est conseillé un système de sauvegarde différentiel ou incrémentiel.
 
-Installer le nouveau code
-=========================
+.. include:: doc_local/updates.rst
+    :start-after: .. _backup:
+    :end-before: .. _
+
+Installer le nouveau code BiomAid
+=================================
 
 Si #.#.# est le nom du tag de la version à installer (0.8.1 par exemple) :
 
 ::
 
 > git checkout #.#.#
+
+
+Installer le nouveau code local
+===============================
+
+Cela peut ne pas être nécessaire, mais il est fréquent que de nouvelles fonctionnalités nécessitent 
+des configurations ou paramétrages locaux pour fonctionner parfaitement.
+
+Les modalités dépendent de la stratégie locale (dépôt en ligne, simple dossier, etc.)
+
+Typiquement, cela se fait en allant dans le dossier sur lequel pointe ``local/`` et en tapant la commande :
+
+::
+
+    > git pull
+
+.. include:: doc_local/updates.rst
+    :start-after: .. _local_dir_update:
+    :end-before: .. _
+
 
 
 Faire la mise à jour des dépendances
@@ -79,7 +117,9 @@ Faire la mise à jour des dépendances
 
 > poetry install --no-root -E ldap
 
-
+.. include:: doc_local/updates.rst
+    :start-after: .. _code_install:
+    :end-before: .. _
 
 Lancer les migrations
 =====================
@@ -95,8 +135,27 @@ Installer les fichiers statiques
 
 > python manage.py collectstatic
 
+
+Adapter éventuellement le ``instance_settings.py``
+==================================================
+
+Selon la mise à jour (ce n'est pas toujours utile)
+
+Il peut aussi être utile d'ajuster le ``instance_config.toml`` 
+
 Relancer l'instance
 ===================
+
+Les modalités dépendent de la stratégie locale mais cela implique généralement de lancer le démon
+qui gère ``gunicorn`` :
+
+::
+
+    > sudo service supervisor start
+
+.. include:: doc_local/updates.rst
+    :start-after: .. _instance_launch:
+    :end-before: .. _
 
 Informer les utilisateurs
 =========================
@@ -107,4 +166,8 @@ Informer les utilisateurs
 .. todo::
     - Sans doute faire une information différente suivant le type d'utilisateur (ses rôles) ?
     - Intégrer cela à l'interface (box d'info à la connexion) ?
+
+.. include:: doc_local/updates.rst
+    :start-after: .. _users_inform_after:
+    :end-before: .. _
 
