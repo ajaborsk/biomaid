@@ -16,7 +16,7 @@
 #
 from django.db.models import Q
 
-from common.models import UserUfRole
+from common.models import UserUfRole, Uf
 from common import config
 from dem.models import Campagne
 
@@ -29,6 +29,20 @@ def roles_demandes_possibles(user):
     return UserUfRole.objects.filter(
         user=user,
         role_code__in=config.settings.DEM_DEMANDE_CREATION_ROLES,
+    )
+
+
+def uf_possible_requests(user):
+    """returns a queryset of Uf for which a user can make a request"""
+    tmp_scope = roles_demandes_possibles(user)
+    return Uf.objects.filter(
+        Q(pk__in=tmp_scope.values('uf'))
+        | Q(service__in=tmp_scope.values('service'))
+        | Q(centre_responsabilite__in=tmp_scope.values('centre_responsabilite'))
+        | Q(pole__in=tmp_scope.values('pole'))
+        | Q(site__in=tmp_scope.values('site'))
+        | Q(etablissement__in=tmp_scope.values('etablissement')),
+        cloture__isnull=True,
     )
 
 

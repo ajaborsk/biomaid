@@ -73,7 +73,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
 
         foreign_tables = {}
         for column, col_def in self.schema['columns'].items():
-            print(f"{col_def=}")
+            # print(f"{col_def=}")
             if col_def['type'] == 'foreign_key':
                 if col_def['foreign_table'] not in foreign_tables:
                     foreign_model = apps.get_model(col_def['foreign_table'])

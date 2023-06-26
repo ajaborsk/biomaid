@@ -47,6 +47,7 @@ class Configuration(dict):
         configs = []
         for fn in ['local/config.toml'] + glob('local/config.d/*.toml'):
             try:
+                # print(f"reading {fn}...")
                 configs.append(dict(TOMLFile(os.path.join(settings.BASE_DIR, fn)).read()))
             except ParseError as exc:
                 logger.warning("Unable to parse TOML file '{}': {}".format(fn, exc))

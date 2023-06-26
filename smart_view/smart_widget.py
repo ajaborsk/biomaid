@@ -32,7 +32,9 @@ from django.http import HttpResponse, JsonResponse
 from django.template import Context, Engine
 from django.utils.translation import gettext as _
 from django.utils.timezone import localtime
-from analytics.data import DataSource, get_data
+
+# from analytics.data import DataSource, get_data
+from analytics.data import DataProxy, get_data
 
 from common.base_views import BiomAidViewMixinMetaclass
 from common.models import Alert, Discipline
@@ -41,7 +43,6 @@ from common import config
 
 def media_property(cls):
     def _media(self):
-
         # print("Container Media...", cls)
         # print(f"  self.Media: {self.Media} {dir(self.Media)}")
 
@@ -82,7 +83,6 @@ def media_property(cls):
 # Useless metaclass (for now), just for tests
 class WidgetPageMetaClass(BiomAidViewMixinMetaclass):
     def __new__(mcs: type, name: str, bases: tuple, attrs: dict):
-
         inherited_attrs = {
             'main_widget': None,
         }
@@ -389,8 +389,8 @@ class DataWidgetMixin:
     _properties__add = {'datasource': {'label': _("Nom de la source de données"), 'type': 'str'}}
 
     def _setup(self, **params):
-        if isinstance(self.params.get('datasource'), DataSource):
-            self.params['data'] = self.params['datasource'].get_data(**params)
+        if isinstance(self.params.get('data'), DataProxy):
+            self.params['data'] = self.params['data'].data
         else:
             self.params['data'] = None
         super()._setup(**params)
@@ -476,7 +476,6 @@ class BasicChartWidget(AltairWidget):
 
 class BarChartWidget(AltairWidget):
     def _prepare(self):
-
         qs = self.params.get('qs')
         category = self.params.get('category')
         x = self.params.get('x')
@@ -499,7 +498,6 @@ class DemoPieChartWidget(AltairWidget):
     label = _("Démo Camenbert")
 
     def _prepare(self):
-
         qs = [{'category': k, 'value': v} for k, v in {'a': 4, 'b': 6, 'c': 10, 'd': 3, 'e': 7, 'f': 8}.items()]
         category = 'category:N'
         value = 'value:Q'

@@ -20,7 +20,7 @@
 
 from django.apps import apps
 from django.utils.timezone import now
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 from analytics.models import Data, DbDataSource
 
@@ -31,54 +31,6 @@ def register_data_processor(*args, **kwargs) -> bool:
 
 def register_data_source(*args, **kwargs) -> bool:
     return apps.get_app_config('analytics').register_data_source(*args, **kwargs)
-
-
-# def set_datasource(
-#     code: str,
-#     label: None | str = None,
-#     parameters: None | dict = None,
-#     auto: None | list = None,
-#     processor: None | str | Callable = None,
-# ) -> bool:
-
-#     raise RuntimeError("Do not use ! Use migration instead.")
-
-#     if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
-#         # Do not try to update AppConfig.ready() datasources if we are in a migration phase
-#         return False
-
-#     # return False
-#     datasource, created = DataSource.objects.get_or_create(code=code)
-#     datasource.label = label or ''
-#     datasource.parameters = parameters or {}
-#     datasource.auto = auto or []
-
-#     # if isinstance(processor, LambdaType):  # does not work ??!!!?
-#     if isinstance(processor, FunctionType) and '<lambda>' in processor.__qualname__:
-#         processor_name_base = processor.__qualname__.replace('.<locals>', '').replace('.<lambda>', '.lambda')
-#         idx = 0
-#         while processor_name_base + '-' + str(idx) in apps.get_app_config('analytics').data_processors:
-#             idx += 1
-#         processor_name = processor_name_base + '_' + str(idx)
-#         # signature = inspect.signature(processor)
-#         register_data_processor(processor_name, processor)
-#     elif isinstance(processor, FunctionType):
-#         processor_name = processor.__qualname__.replace('.<locals>', '')
-#         register_data_processor(processor_name, processor)
-#         # signature = inspect.signature(processor)
-#     elif isinstance(processor, str):
-#         if processor in apps.get_app_config('analytics').data_processors:
-#             raise RuntimeError(_("Unknown processor name: '{}'").format(processor))
-#         else:
-#             processor_name = processor
-#             # signature = inspect.signature(apps.get_app_config('analytics').data_processors[processor]['function'])
-#     else:
-#         raise RuntimeError(_("Unable to get data processor {}: Unknow type").format(repr(processor)))
-#     datasource.processor_name = processor_name
-
-#     datasource.save()
-
-#     return created
 
 
 def get_data_timestamp(code: str, parameters=None):
@@ -122,15 +74,15 @@ def get_last_data(code: str, parameters=None):
         raise ValueError(_("Analytic data with '{code}' is not registred in the database.").format(code=code))
 
 
-def get_data(code: str, parameters=None, all_params=None):
+def get_data(data_id: str, all_params=None, log=None, progress=None, **parameters):
     """code is the datasource code, parameters"""
     all_params = all_params or {}
     data = None
-    qs = DbDataSource.objects.filter(code=code)
+    qs = DbDataSource.objects.filter(code=data_id)
     if qs.exists():
         data_source = qs[0]
         # Is there a last data with this parameters ?
-        last_data = get_last_data(code, parameters)
+        last_data = get_last_data(data_id, parameters)
         if last_data is not None:
             # Is this data still valid (=from the storage policy point of view) ?
             ...
@@ -147,9 +99,8 @@ def get_data(code: str, parameters=None, all_params=None):
             return processor['function'](*args)
 
         pass
-    elif code in apps.get_app_config('analytics').data_processors:
-        print(f"{apps.get_app_config('analytics').data_processors.keys()=}")
-        processor = apps.get_app_config('analytics').data_processors[code]
+    elif data_id in apps.get_app_config('analytics').data_processors:
+        processor = apps.get_app_config('analytics').data_processors[data_id]
 
         args = []
         for parameter_name in processor['parameters']:
@@ -158,24 +109,11 @@ def get_data(code: str, parameters=None, all_params=None):
 
         return processor['function'](*args)
     else:
-        raise ValueError(
-            _("Analytic data with '{code}' is registred nor in engines registry nor in the database.").format(code=code)
-        )
-
-
-class DataSource:
-    """A DataSource is a class that :
-    - can get data (form engine, data storage, etc.)
-    - handle data source properties :
-        - data format
-        - name
-        - help text
-        - parameters
-        - stored/computed... cached...
-        - dependencies
-
-    A instance can be build programmatically (using, for instance, inheritage) or fetched from the database for dynamic datasources
-    """
-
-    def get_data(self, **params):
-        return None
+        data_instance = apps.get_app_config('analytics').get_data_instance(data_id, log=log, progress=progress, **parameters)
+        if not data_instance:
+            raise ValueError(
+                _("Analytic data with '{data_id}' is registred nor in engines registry nor in the database.").format(
+                    data_id=data_id
+                )
+            )
+        return data_instance.value

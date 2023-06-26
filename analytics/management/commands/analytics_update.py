@@ -16,19 +16,19 @@ import sys
 from argparse import ArgumentParser
 
 from django.apps import apps
-from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from common import config
-from analytics.data import get_data_timestamp
+from analytics.data import get_data_timestamp, get_data
 from analytics.models import DbDataSource
+from common.command import BiomAidCommand
 
 ITERATION_LIMIT = 1000
 
 
-class Command(BaseCommand):
+class Command(BiomAidCommand):
     def add_arguments(self, parser: ArgumentParser):
         parser.add_argument(
             'datasources',
@@ -43,6 +43,20 @@ class Command(BaseCommand):
         asked_datasources = options.get('datasources', [])
 
         app_config = apps.get_app_config('analytics')
+        # ============================================================================================================
+        # New (june 2023) analytic handling
+        # ============================================================================================================
+        log, progress = self.get_loggers(**options)
+
+        # Crude stub for now (june 2023)
+        for data_name, data_def in app_config.data_def_registry:
+            # If any king of scheduling is defined
+            if data_def.get('schedule'):
+                # Compute the data but do not use the result (only 'storage' side effect is wanted here)
+                get_data(data_name, log=log, progress=progress)
+
+        # ============================================================================================================
+
         if verbosity > 2:
             self.stdout.write(
                 _("Available datasources :\n{}").format(

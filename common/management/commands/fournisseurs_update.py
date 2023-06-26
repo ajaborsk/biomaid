@@ -22,13 +22,12 @@ from common.models import Fournisseur
 
 class Command(BiomAidCommand):
     def handle(self, *args, **options):
-
         log, progress = self.get_loggers(**options)
         # self.log(self.INFO, "Called from cmdline: " + str(self._called_from_command_line))
         log(self.FINE, "fournisseurs_update :")
 
         # En attendant une version très générique et configurable d'une commande
-        # d'importation et de mise à jour d'Extable mutilples (1 par établissement / logiciel)
+        # d'importation et de mise à jour d'Extable multiples (1 par établissement / logiciel)
         # commençons par une version codée en "dur"
 
         try:

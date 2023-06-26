@@ -41,7 +41,7 @@ class DatabaseEngine(ExtableEngine):
                 ),
             )
             return
-        print(f"Loaded !\n{options=}\n{self.schema['parser_opts']=}\n{database=}\n{src_model=}\n{columns=}")
+        # print(f"Loaded !\n{options=}\n{self.schema['parser_opts']=}\n{database=}\n{src_model=}\n{columns=}")
         if self.schema['parser_opts'].get('key', []):
             log(
                 BiomAidCommand.WARNING,

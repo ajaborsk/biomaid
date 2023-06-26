@@ -45,7 +45,7 @@ from common.db_utils import StringAgg, class_roles_expression, user_choices, use
 from common.models import Discipline, Programme, Uf, UserUfRole
 from dem.apps import DRACHAR_DELAI_DEMANDE_TERMINEE
 from dem.models import Arbitrage, Campagne, Demande, NATURE_CHOICES
-from dem.utils import roles_demandes_possibles, user_campagnes
+from dem.utils import roles_demandes_possibles, uf_possible_requests, user_campagnes
 from document.smart_fields import DocumentsSmartField
 from document.views import all_documents_json_partial
 from smart_view.smart_fields import ComputedSmartField, ConditionnalSmartField, SmartField, ToolsSmartField
@@ -197,20 +197,8 @@ class DemandeSmartView(SmartView):
                 keyword = view_params.get('keyword', '')
                 if keyword:
                     api_filter = Q(nom_complet__icontains=keyword)
-            # if keyword:
-            #     print('Looking for {}'.format(repr(keyword)))
-            tmp_scope = roles_demandes_possibles(view_params['user'])
             return (
-                Uf.objects.filter(
-                    Q(pk__in=tmp_scope.values('uf'))
-                    | Q(service__in=tmp_scope.values('service'))
-                    | Q(centre_responsabilite__in=tmp_scope.values('centre_responsabilite'))
-                    | Q(pole__in=tmp_scope.values('pole'))
-                    | Q(site__in=tmp_scope.values('site'))
-                    | Q(etablissement__in=tmp_scope.values('etablissement')),
-                    cloture__isnull=True,
-                )
-                # .filter(nom__icontains=keyword)
+                uf_possible_requests(view_params['user'])
                 .annotate(
                     str_pk=Cast('pk', output_field=CharField()),
                     nom_complet=Concat('code', Value(' - '), 'nom'),
