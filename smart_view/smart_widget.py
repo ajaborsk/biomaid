@@ -34,7 +34,8 @@ from django.utils.translation import gettext as _
 from django.utils.timezone import localtime
 
 # from analytics.data import DataSource, get_data
-from analytics.data import DataProxy, get_data
+from analytics.data import get_data
+from analytics.apps import DataProxy
 
 from common.base_views import BiomAidViewMixinMetaclass
 from common.models import Alert, Discipline
