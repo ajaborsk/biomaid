@@ -16,12 +16,12 @@
 #
 from decimal import Decimal
 from django.db.models import F, ExpressionWrapper, Value, TextField, Case, When, Q
-from django.db.models.functions import Concat, Extract, Now, Coalesce, Greatest
+from django.db.models.functions import Concat, Coalesce, Greatest
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
 from common.models import Discipline, UserUfRole, Fournisseur
-from common.db_utils import class_roles_expression, filter_choices_from_column_values
+from common.db_utils import AgeDays, class_roles_expression, filter_choices_from_column_values
 from dem.apps import DRACHAR_DELAI_DEMANDE_TERMINEE
 from dem.utils import roles_demandes_possibles
 from smart_view.smart_fields import ConditionnalSmartField, ToolsSmartField
@@ -513,7 +513,7 @@ class PrevisionnelSmartView(SmartView):
         ComputedSmartField,
         {
             'title': _("Age (mois)"),
-            'data': Extract(Now() - F('date_creation'), 'day') / 30,
+            'data': AgeDays('date_creation') / 30,
             'depends': [
                 'date_creation',
             ],
