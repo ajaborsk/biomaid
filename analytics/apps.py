@@ -27,7 +27,7 @@ class Schedule:
 
     def __post_init__(self, cal_expr):
         cal_expr = str(cal_expr)
-        print(f"Analyzing {cal_expr=}...")
+        # print(f"Analyzing {cal_expr=}...")
         if cal_expr and cal_expr != 'never':
             for part in cal_expr.split(' '):
                 # print(f" {part=}")
@@ -112,8 +112,9 @@ class Schedule:
                     warn("Incorrect schedule time format '{}', set to 'never'".format(cal_expr))
                     self.dow = -1
         else:
-            print("  Empty schedule ==> Never")
-        print(repr(self))
+            pass
+            # print("  Empty schedule ==> Never")
+        # print(repr(self))
 
     def __repr__(self):
         if self.dow == -1:
@@ -229,23 +230,44 @@ class CollectNames(NodeVisitor):
 
 
 class AnalyticsEngine:
-    """A engine is a"""
+    """A engine is a..."""
 
     @property
-    def signature(self):
+    def _signature(self):
         return {}
 
     def __init__(self):
         # Last run timestamp
         self._last_run_ts = None
         # Engine ouputs/results
-        self.values = {}
+        self._values = {}
 
-    def log(self, level, message, color=None):
+    def _log(self, level, message, color=None):
         pass
 
     def run(self, verbosity=0, logger=None):
         pass
+
+    def __getattr__(self, __name: str) -> Any:
+        if __name in self._values:
+            self.run()
+            return self._values[__name]
+        else:
+            print(self._values)
+            raise AttributeError(f"AnalyticsEngine {self.__class__} has no attribute '{__name}'.")
+
+
+class ModelRows(AnalyticsEngine):
+    def __init__(self, model_name, filters=None, annotations=None, columns=None):
+        self.filters = filters or {}
+        self.annotations = annotations or {}
+        self.columns = columns or []
+        self.model = apps.get_model(*(model_name.split('.')))
+        super().__init__()
+
+    @property
+    def all(self):
+        return self.model.objects.all()
 
 
 class DataProxy:
@@ -257,6 +279,7 @@ class DataProxy:
     - 'field' ==> storage in a field of the model(types sould be compatibles)
     - 'alert' ==> storage in the alert system
     - ('model' ==> storage in a temporary table ?)
+    - some data (non litteral) aren't storable (a Django QuerySet for instance)
 
     The use of parameters needs a compatible storage system:
     - None
@@ -384,7 +407,7 @@ class AnalyticsConfig(AppConfig):
             data_def['__names'] = names_extractor.names
             data_def['from'] = unparse(tree)
             data_def['__schedule'] = Schedule(data_def.get('schedule', ''))
-            print(f"  from={unparse(tree)}\n  names={data_def['__names']}")
+            # print(f"  from={unparse(tree)}\n  names={data_def['__names']}")
         except KeyError:
             warn("analytics '{}' has no 'from' attribute !".format(data_id))
             raise ValueError
@@ -406,14 +429,14 @@ class AnalyticsConfig(AppConfig):
                 warn("Analytics data has no id ! ({})".fromat(str(dict(data_def))))
                 break
             else:
-                print(f"Data '{data_id}':")
+                # print(f"Data '{data_id}':")
                 try:
                     data_def['def_source'] = 'config'
                     self.register_data_id(data_id, data_def)
                 except ValueError:
                     pass
 
-        if config.settings.DEBUG:
+        if 0 and config.settings.DEBUG:
             print("data defs:")
             for dd, d_def in self.data_def_registry.items():
                 print(f"  {dd}: {dict(d_def)}")
