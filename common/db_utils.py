@@ -27,6 +27,7 @@ from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models import (
+    Func,
     Expression,
     Exists,
     Subquery,
@@ -40,6 +41,7 @@ from django.db.models import (
     ExpressionWrapper,
     CharField,
     Model,
+    IntegerField,
 )
 from django.db.models.functions import Concat, Left, Length, Cast
 from django.db.utils import ProgrammingError
@@ -114,10 +116,26 @@ class SqliteStringAgg(Aggregate):
         return value
 
 
+class SqliteAgeDays(Func):
+    template = "cast(julianday('now') - julianday(%(expressions)s) as integer)"
+
+    def __init__(self, *expressions, output_field=None, **extra):
+        super().__init__(*expressions, output_field=IntegerField(), **extra)
+
+
+class PsqlAgeDays(Func):
+    template = "EXTRACT(DAY FROM (CURRENT_TIMESTAMP - %(expressions)s))"
+
+    def __init__(self, *expressions, output_field=None, **extra):
+        super().__init__(*expressions, output_field=IntegerField(), **extra)
+
+
 if "postgres" in config.settings.DATABASES["default"]["ENGINE"]:
     StringAgg = PsqlStringAgg
+    AgeDays = PsqlAgeDays
 elif "sqlite3" in config.settings.DATABASES["default"]["ENGINE"]:
     StringAgg = SqliteStringAgg
+    AgeDays = SqliteAgeDays
 else:
     raise RuntimeError(_("PostgreSQL and SQLite3 are the only supported database engines"))
 
