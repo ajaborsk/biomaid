@@ -3957,33 +3957,14 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
                 | Q(uf__pole__in=tmp_scope.values('pole'))
                 | Q(uf__site__in=tmp_scope.values('site'))
                 | Q(uf__etablissement__in=tmp_scope.values('etablissement')),
-                Q(state_code__in=['NONVAL_DEF', 'NONVAL_CP_DEF'])
+                Q(gel=True),
+                Q(arbitrage_commission__valeur=False)
                 | Q(
-                    state_code__in=['VALIDE_DEF'],
+                    arbitrage_commission__valeur=True,
                     previsionnel__suivi_mes__startswith='1-',
                     previsionnel__date_modification__lt=timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
                 ),
-                # {
-                #     ':or': [
-                #         {'state_code__in': ['NONVAL_DEF', 'NONVAL_CP_DEF']},
-                #         {
-                #             'state_code__in': ['VALIDE_DEF'],
-                #             'previsionnel__suivi_mes__startswith': '1-',
-                #             'previsionnel__date_modification__lt': timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
-                #         },
-                #     ]
-                # },
             )
-            # return {
-            #     ':or': [
-            #         {'state_code__in': ['NONVAL_DEF', 'NONVAL_CP_DEF']},
-            #         {
-            #             'state_code__in': ['VALIDE_DEF'],
-            #             'previsionnel__suivi_mes__startswith': '1-',
-            #             'previsionnel__date_modification__lt': timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
-            #         },
-            #     ]
-            # }
 
         settings = {
             'state_code': {
