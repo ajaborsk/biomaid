@@ -317,9 +317,10 @@ class DemConfig(AppConfig):
 
         try:
             # Register analytics engines
-            from dem.analytics import DemandesADispatcher
+            from dem.analytics import DemandesADispatcher, DemandesFullStatus
 
             apps.get_app_config('analytics').register_data_engine('DemandesADispatcher', DemandesADispatcher)
+            apps.get_app_config('analytics').register_data_engine('DemandesFullStatus', DemandesFullStatus)
 
             # Register builtin data
             apps.get_app_config('analytics').register_data_id(
@@ -343,7 +344,19 @@ class DemConfig(AppConfig):
                         'campaign': {'default': -1},
                         'requester': {'default': -1},
                     },
-                    'from': 'DemandesADispatcher(user=user,dispatcher=dispatcher,the_campaign=campaign,requester=requester).count',
+                    'from': 'DemandesADispatcher(user=user,dispatcher=dispatcher,the_campaign=campaign,'
+                    'requester=requester).count',
+                },
+            )
+            apps.get_app_config('analytics').register_data_id(
+                'dem_status',
+                {
+                    'parameters': {
+                        'user_id': {'default': -1},
+                        'campaign_id': {'default': -1},
+                        'program_id': {'default': -1},
+                    },
+                    'from': 'DemandesFullStatus(user_id=user_id, campaign_id=campaign_id, program_id=program_id)()',
                 },
             )
         except ImportError:

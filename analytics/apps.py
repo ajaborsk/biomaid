@@ -1,11 +1,11 @@
-from _ast import Attribute
+from _ast import Attribute, Call
 from copy import copy
 from datetime import timedelta
 import inspect
 from types import CodeType
 from typing import Any
 from warnings import warn
-from ast import parse, unparse, NodeVisitor
+from ast import Load, Name, NodeTransformer, fix_missing_locations, keyword, parse, unparse, NodeVisitor
 from dataclasses import dataclass, InitVar
 from django.apps import AppConfig, apps
 from django.utils.timezone import now
@@ -242,18 +242,24 @@ class AnalyticsEngine:
         # Engine ouputs/results
         self._values = {}
 
-    def _log(self, level, message, color=None):
+    def _null_logger(self, level, message, color=None):
         pass
 
-    def run(self, verbosity=0, logger=None):
+    def _null_progress(self, value):
+        pass
+
+    def run(self, logger=_null_logger, progress=_null_progress):
         pass
 
     def __getattr__(self, __name: str) -> Any:
         if __name in self._values:
             self.run()
             return self._values[__name]
+        elif __name == 'values':
+            self.run()
+            return self._values
         else:
-            print(self._values)
+            # print(self._values)
             raise AttributeError(f"AnalyticsEngine {self.__class__} has no attribute '{__name}'.")
 
 
@@ -268,6 +274,19 @@ class ModelRows(AnalyticsEngine):
     @property
     def all(self):
         return self.model.objects.all()
+
+
+class AnalyticsExpressionHelper(NodeTransformer):
+    def __init__(self, *args, engines=None, **kwargs):
+        self.engines = engines or []
+        super().__init__(*args, **kwargs)
+
+    def visit_Call(self, node: Call) -> Any:
+        if isinstance(node.func, Name) and node.func.id in self.engines:
+            print(f"Engine call node: {node.func.id}")
+            print(f"{node.args} // {node.keywords}")
+            node.keywords.append(keyword(arg='logger', value=Name('_TheLogger', ctx=Load())))
+        return super().generic_visit(node)
 
 
 class DataProxy:
@@ -293,7 +312,11 @@ class DataProxy:
             for p, v in definition.get('parameters', {}).items()
             if p in parameters or 'default' in v
         }
-        self.from_expr = definition['from']
+        # parse expression, amend the tree and compile it
+        self.from_expr_tree = compile(
+            fix_missing_locations(AnalyticsExpressionHelper().visit(parse(definition['from'], mode='eval'))), '<string>', 'eval'
+        )
+
         self.values = {}
         # print(f"{self.definition['id']} {parameters}")
 
@@ -323,7 +346,12 @@ class DataProxy:
                         return None
 
             names = copy(apps.get_app_config('analytics').data_engines_cls)
-            v = eval(self.from_expr, names, self.parameters)
+            names.update(
+                {
+                    '_TheLogger': None,  # TODO !!
+                }
+            )
+            v = eval(self.from_expr_tree, names, self.parameters)
         except NameError as exp:
             warn("Error evaluating '{}' data : {}".format(self.definition['id'], str(exp)))
             return None
