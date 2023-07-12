@@ -231,6 +231,7 @@ class ProgrammeSmartView(SmartView):
                         'code': True,
                         'anteriorite': True,
                         'etablissement': True,
+                        'site': True,
                         'pole': True,
                         'uf': True,
                         'nom': True,
@@ -248,6 +249,7 @@ class ProgrammeSmartView(SmartView):
                         'code': True,
                         'anteriorite': True,
                         'etablissement': True,
+                        'site': True,
                         'pole': True,
                         'uf': True,
                         'nom': True,
@@ -340,6 +342,7 @@ class ProgrammeSmartView(SmartView):
             'state_code',
             'calendrier',
             'etablissement',
+            'site',
             'pole',
             'uf',
             'code',
@@ -380,7 +383,8 @@ class ProgrammeSmartView(SmartView):
         #
             # Informations de base
                 <code> <nom>
-                <calendrier> <etablissement>
+                <calendrier> 
+                <etablissement> <site>
                 <pole> <uf>
                 <discipline> <arbitre>
                 <enveloppe> <limit>

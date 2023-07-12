@@ -473,6 +473,7 @@ class Programme(models.Model):
     nom = models.CharField(max_length=64, null=False, blank=False)  # Nom du programme
     description = models.TextField(null=True, blank=True, default=None)  # commentaires si nécessaire
     etablissement = models.ForeignKey(Etablissement, null=True, blank=True, on_delete=models.SET_NULL)
+    site = models.ForeignKey(Site, null=True, blank=True, on_delete=models.SET_NULL)
     pole = models.ForeignKey(Pole, null=True, blank=True, on_delete=models.SET_NULL)
     uf = models.ForeignKey(Uf, null=True, blank=True, on_delete=models.SET_NULL)
     enveloppe = models.DecimalField(max_digits=10, decimal_places=0, null=False, blank=False)  # enveloppe budgetaire prévisionnelle
