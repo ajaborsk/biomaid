@@ -2568,6 +2568,23 @@ class DemandeSmartView(SmartView):
         },
     )
 
+    cr_view = (
+        ComputedSmartField,
+        {
+            'title': 'Centre Resp.',
+            'form.help_text': _("Le centre de responsabilité est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("- Automatique -"),
+            'data': Concat('uf__centre_responsabilite__code', Value(' - '), 'uf__centre_responsabilite__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {
+                    id: name for id, name in Uf.objects.all().values_list('pk', 'centre_responsabilite__nom')
+                },
+            },
+            'depends': ['uf'],
+        },
+    )
+
     pole_view = (
         ComputedSmartField,
         {
@@ -2578,6 +2595,21 @@ class DemandeSmartView(SmartView):
             'form.data': {
                 'source': 'uf',
                 'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'pole__nom')},
+            },
+            'depends': ['uf'],
+        },
+    )
+
+    site_view = (
+        ComputedSmartField,
+        {
+            'title': 'Site',
+            'form.help_text': _("Le site est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("- Automatique -"),
+            'data': Concat('uf__site__code', Value(' - '), 'uf__site__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'site__nom')},
             },
             'depends': ['uf'],
         },
@@ -2645,6 +2677,16 @@ class DemandeSmartView(SmartView):
             'format': 'text',
             'width': 125,
             'data': F('uf__pole__nom'),
+            "depends": [],  # Trick as a workaround
+        },
+    )
+    site_nom = (
+        ComputedSmartField,
+        {
+            'title': _("Site"),
+            'format': 'text',
+            'width': 125,
+            'data': F('uf__site__nom'),
             "depends": [],  # Trick as a workaround
         },
     )
@@ -3295,6 +3337,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'date_premiere_demande',
             'uf',
             'pole_nom',
+            'site_nom',
             'uf_code',
             'uf_nom',
             'priorite',
@@ -3376,6 +3419,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'date',
             'campagne_redirect',
             'date_premiere_demande',
+            'site_nom',
             'pole_nom',
             'uf_code',
             'uf_nom',
@@ -3471,6 +3515,15 @@ class DemandeEqptSmartView(DemandeSmartView):
                     'sort': F('calendrier__code'),
                 },
             },
+            'site': {
+                'label': _("Site"),
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'uf__site',
+                    'label': F('uf__site__nom'),
+                    'sort': F('uf__site__code'),
+                },
+            },
             'pole': {
                 'label': _("Pôle"),
                 'type': 'select',
@@ -3530,8 +3583,9 @@ class DemandeEqptSmartView(DemandeSmartView):
             <calendrier> <date> <nature>
             # Le demandeur
                 <referent> <redacteur_view>
-                <uf> <pole_view>
-                <service_view> <etablissement_view>
+                <uf> <service_view> 
+                <cr_view> <pole_view>
+                <site_view> <etablissement_view>
             # Description du projet
                 <--libelle----> <-cause->
                 <--contact----> <-dect_contact-->
@@ -3918,6 +3972,7 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
 
 
 class DemandesArchiveesSmartView(MesDemandesSmartView):
+    # This is for the requesters (used a another SmartView for experts)
     class Meta:
         help_text = _(
             "Ce tableau reprend toutes les demandes archivées : Les demandes refusées <b>et</b>"
@@ -3945,48 +4000,29 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
                 | Q(uf__pole__in=tmp_scope.values('pole'))
                 | Q(uf__site__in=tmp_scope.values('site'))
                 | Q(uf__etablissement__in=tmp_scope.values('etablissement')),
-                Q(state_code__in=['NONVAL_DEF', 'NONVAL_CP_DEF'])
-                | Q(
-                    state_code__in=['VALIDE_DEF'],
-                    previsionnel__suivi_mes__startswith='1-',
-                    previsionnel__date_modification__lt=timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
+                Q(gel=True),
+                Q(arbitrage_commission__valeur=False)
+                | (
+                    (Q(previsionnel__suivi_mes__startswith='0-') | Q(previsionnel__suivi_mes__startswith='1-'))
+                    & Q(
+                        arbitrage_commission__valeur=True,
+                        previsionnel__solder_ligne=True,
+                        previsionnel__date_estimative_mes__lt=timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
+                    )
                 ),
-                # {
-                #     ':or': [
-                #         {'state_code__in': ['NONVAL_DEF', 'NONVAL_CP_DEF']},
-                #         {
-                #             'state_code__in': ['VALIDE_DEF'],
-                #             'previsionnel__suivi_mes__startswith': '1-',
-                #             'previsionnel__date_modification__lt': timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
-                #         },
-                #     ]
-                # },
             )
-            # return {
-            #     ':or': [
-            #         {'state_code__in': ['NONVAL_DEF', 'NONVAL_CP_DEF']},
-            #         {
-            #             'state_code__in': ['VALIDE_DEF'],
-            #             'previsionnel__suivi_mes__startswith': '1-',
-            #             'previsionnel__date_modification__lt': timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
-            #         },
-            #     ]
-            # }
 
         settings = {
-            'state_code': {
+            'dyn_state': {
                 'title': _("Filtre type de demande"),
             },
         }
 
         row_styler = {
-            'fieldname': 'state_code',
+            'fieldname': 'dyn_state',
             'styles': {
-                ('NONVAL_DEF', 'NONVAL_CP_DEF'): (
-                    "background:#fcc",
-                    "Demande non validée",
-                ),
-                'VALIDE_DEF': ("background:#cfc", "Demande validée et traitée"),
+                'REFUSE': ("background:#fcc", "Demande non validée"),
+                'VALIDE': ("background:#cfc", "Demande validée et traitée"),
             },
         }
         exports = {
@@ -3997,7 +4033,7 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
             }
         }
         user_filters__update = {
-            'state_code': {
+            'dyn_state': {
                 'type': 'select',
                 'choices': '__STYLES__',
                 'position': 'bar',
