@@ -892,7 +892,11 @@ class PrevisionnelUtilisateursSmartView(PrevisionnelSmartView):
                     Q(discipline_dmd__isnull=True)
                     | ~Q(discipline_dmd=Discipline.objects.values_list('pk', flat=True).filter(code='TX')[0])
                     # Uniquement les demandes qui ne sont pas terminées depuis 'longtemps'
-                    & (~Q(suivi_mes__startswith='1-') | Q(date_modification__gte=now() - DRACHAR_DELAI_DEMANDE_TERMINEE))
+                    & (
+                        ~(Q(suivi_mes__startswith='1-') & Q(suivi_mes__startswith='0-'))
+                        | Q(solder_ligne=False)
+                        | Q(date_estimative_mes__gte=now() - DRACHAR_DELAI_DEMANDE_TERMINEE)
+                    )
                 ),
             )
 

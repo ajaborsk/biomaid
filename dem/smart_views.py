@@ -3984,6 +3984,7 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
 
 
 class DemandesArchiveesSmartView(MesDemandesSmartView):
+    # This is for the requesters (used a another SmartView for experts)
     class Meta:
         help_text = _(
             "Ce tableau reprend toutes les demandes archivées : Les demandes refusées <b>et</b>"
@@ -4013,27 +4014,27 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
                 | Q(uf__etablissement__in=tmp_scope.values('etablissement')),
                 Q(gel=True),
                 Q(arbitrage_commission__valeur=False)
-                | Q(
-                    arbitrage_commission__valeur=True,
-                    previsionnel__suivi_mes__startswith='1-',
-                    previsionnel__date_modification__lt=timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
+                | (
+                    (Q(previsionnel__suivi_mes__startswith='0-') | Q(previsionnel__suivi_mes__startswith='1-'))
+                    & Q(
+                        arbitrage_commission__valeur=True,
+                        previsionnel__solder_ligne=True,
+                        previsionnel__date_estimative_mes__lt=timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
+                    )
                 ),
             )
 
         settings = {
-            'state_code': {
+            'dyn_state': {
                 'title': _("Filtre type de demande"),
             },
         }
 
         row_styler = {
-            'fieldname': 'state_code',
+            'fieldname': 'dyn_state',
             'styles': {
-                ('NONVAL_DEF', 'NONVAL_CP_DEF'): (
-                    "background:#fcc",
-                    "Demande non validée",
-                ),
-                'VALIDE_DEF': ("background:#cfc", "Demande validée et traitée"),
+                'REFUSE': ("background:#fcc", "Demande non validée"),
+                'VALIDE': ("background:#cfc", "Demande validée et traitée"),
             },
         }
         exports = {
@@ -4044,7 +4045,7 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
             }
         }
         user_filters__update = {
-            'state_code': {
+            'dyn_state': {
                 'type': 'select',
                 'choices': '__STYLES__',
                 'position': 'bar',
