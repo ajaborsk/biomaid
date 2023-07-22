@@ -27,7 +27,7 @@ from typing import Any, Optional
 from django.apps import apps
 from django.db.models import Value, F, CharField, ExpressionWrapper
 from django.db.models.functions import Coalesce, Cast, Concat
-from django.forms import MediaDefiningClass
+from django.forms import MediaDefiningClass, NullBooleanSelect
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -36,7 +36,6 @@ from django.forms.widgets import (
     DateInput,
     Input,
     Textarea,
-    NullBooleanSelect,
     CheckboxInput,
     Select,
 )

@@ -372,6 +372,7 @@ class SmartView {
         //console.log("cell click:", event, cell, tabulator, this, cell.getColumn());
 
         var col_definition = cell.getColumn().getDefinition();
+        console.debug("cell_click()");
 
         if (col_definition.editor === null) {
 
@@ -380,17 +381,24 @@ class SmartView {
             //console.log("chekbox !:", event, cell, tabulator, this);
             // Si la case est un checkbox et est éditable => changer l'état !
             if (this.is_editable(cell)) {
+                console.debug("cell_click + is_editable");
                 if (col_definition.editorParams.tristate === true) {
+                    console.debug("cell_click + is_editable + tristate", cell.getValue());
                     cell.setValue({
-                        null: true,
+                        null: 1,
                         true: false,
-                        false: null
+                        false: null,
+                        1: 0,
+                        0: null
                     }[cell.getValue()]);
                 } else {
+                    console.debug("cell_click + is_editable + NON tristate", cell.getValue());
                     cell.setValue({
-                        null: true,
+                        null: 1,
                         true: false,
-                        false: true
+                        false: true,
+                        1: 0,
+                        0: 1
                     }[cell.getValue()]);
                 }
             }
@@ -783,14 +791,14 @@ class SmartView {
     }
 
     checkbox_fmt(self, cell, formatterParams, onRendered) {
-        if (cell.getValue() === true) {
-            return "<i class=\"fa-solid fa-check fa-lg\"></i>";
+        if (cell.getValue() === null) {
+            return "<i class=\"fa-regular fa-circle fa-lg\"></i>";
         }
-        else if (cell.getValue() === false) {
+        else if (!cell.getValue()) {
             return "<i class=\"fa-solid fa-xmark fa-lg\"></i>";
         }
         else {
-            return "<i class=\"fa-regular fa-circle fa-lg\"></i>";
+            return "<i class=\"fa-solid fa-check fa-lg\"></i>";
         }
     }
 

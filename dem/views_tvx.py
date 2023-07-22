@@ -1107,10 +1107,20 @@ class DemTvxEnCoursTechSmartView(DemTvxSmartView):
             'avis_cadre_sup': {
                 'type': 'select',
                 'label': _('Avis Cadre Supérier de Pôle'),
+                'choices': {
+                    'fieldname': 'avis_cadre_sup',
+                    'label': F('avis_cadre_sup'),
+                    'sort': F('avis_cadre_sup'),
+                },
             },
             'decision_validateur': {
                 'type': 'select',
                 'label': _('Décision Chef de pôle'),
+                'choices': {
+                    'fieldname': 'decision_validateur',
+                    'label': F('decision_validateur'),
+                    'sort': F('decision_validateur'),
+                },
             },
         }
 

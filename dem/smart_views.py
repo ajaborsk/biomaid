@@ -3515,6 +3515,14 @@ class DemandeEqptSmartView(DemandeSmartView):
             'enveloppe_allouee': {
                 'hidden': True,  # Use montant_valide_conditional instead
             },
+            'avis_cadre_sup': {
+                'format': 'boolean',
+                'tristate': True,
+            },
+            'decision_validateur': {
+                'format': 'boolean',
+                'tristate': True,
+            },
         }
         # Exclusion des demandes de travaux (kind of hack...)
         base_filter = Q(discipline_dmd__isnull=True) | ~Q(discipline_dmd__code='TX')
@@ -3582,11 +3590,21 @@ class DemandeEqptSmartView(DemandeSmartView):
             },
             'avis_cadre_sup': {
                 'type': 'select',
+                'choices': {
+                    'fieldname': 'avis_cadre_sup',
+                    'label': F('avis_cadre_sup'),
+                    'sort': F('avis_cadre_sup'),
+                },
                 'label': _('Avis Cadre Supérier de Pôle'),
             },
             'decision_validateur': {
                 'type': 'select',
-                'label': _('Décision Chef de pôle'),
+                'label': _('Approbation Chef de pôle'),
+                'choices': {
+                    'fieldname': 'decision_validateur',
+                    'label': F('decision_validateur'),
+                    'sort': F('decision_validateur'),
+                },
             },
         }
         form_layout = """
