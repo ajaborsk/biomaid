@@ -125,7 +125,9 @@ class CampagneSmartView(SmartView):
                 'editor': 'dateEditor',
             },
         }
-        form_layout = """
+        form_layout = config.get(
+            'dem.campaign.form_layout',
+            """
         #
             # Campagne
                 <code>  <nom--+-->
@@ -133,7 +135,8 @@ class CampagneSmartView(SmartView):
                 <message-+-+-->
                 <discipline> <natures>  <dispatcher>
                 <debut_recensement> <fin_recensement>
-        """
+        """,
+        )
         user_filters = {
             'discipline': {'type': 'select'},
         }

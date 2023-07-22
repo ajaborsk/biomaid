@@ -119,6 +119,7 @@ from smart_view.layout import (
     SmartLayoutTemplate,
 )
 from smart_view.smart_form import AutocompleteWidget, BaseSmartModelForm, EurosField
+from common import config as main_config
 
 logger = logging.getLogger(__name__)
 
@@ -555,6 +556,21 @@ class SmartViewMetaclass(MediaDefiningClass):
 
         # No update timestamp field
         _meta['update_timestamps'] = []
+
+        # Step 5 : Get config defined settings (and update class ones)
+
+        config_settings = main_config.get(name, {})
+        if config_settings:
+            print(f"{name}:")
+            for k, v in config_settings.items():
+                if k in _meta['fields']:
+                    for src, dest_f in {
+                        'label': lambda v: {'title': v},
+                        'help_text': lambda v: {'help_text': v},
+                    }.items():
+                        if v.get(src) is not None:
+                            _meta['settings'][k][1].update(dest_f(v.get(src)))
+                    print(f"  {k}: {v} {_meta['settings'][k]}")
 
         # Step 6 : Create real SmartField
 
