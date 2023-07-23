@@ -1553,10 +1553,13 @@ class DemTvxAnalyseSmartView(DemTvxSmartView):
 class DemTvxValidationSmartView(DemTvxSmartView):
     class Meta:
         columns__add = ('tools',)
-        columns__remove = ('calendrier',)
+        columns__remove = (
+            'calendrier',
+            'montant_arbitrage',
+        )
         settings = {
             'montant_arbitrage': {
-                'hidden': False,
+                'hidden': True,
                 'title': _("Estimation"),
             },
             'montant_valide_conditional': {
