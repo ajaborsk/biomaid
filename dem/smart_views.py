@@ -1697,7 +1697,7 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                     },
                 },
-                'TVX_VAL': {
+                'TVX_VALIDE': {
                     'ADM': {
                         'gel': True,
                     },
@@ -1705,7 +1705,7 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                 },
-                'TVX_NVAL': {
+                'TVX_REFUSE': {
                     'ADM': {
                         'gel': True,
                     },
