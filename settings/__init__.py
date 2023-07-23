@@ -110,7 +110,7 @@ INSTALLED_APPS = [
     'extable',
     'analytics',
     'smart_view',
-    'local',
+    # 'local',
     'assetplusconnect',
     'common',
     'dem',
