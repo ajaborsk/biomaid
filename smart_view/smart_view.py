@@ -1153,7 +1153,6 @@ class SmartViewMetaclass(MediaDefiningClass):
 
             return objects, subforms
 
-
         _meta['form_layout'] = main_config.get(name + '.form_layout', _meta.get('form_layout'))
         form_layout_definition = _meta['form_layout']
         _meta['form_helper'] = FormHelper()
@@ -1560,6 +1559,9 @@ class SmartView(metaclass=SmartViewMetaclass):
                     filter['choices'] = choices
             return filter
 
+        columns = self.columns_as_def(context='table.tabulator', view_params=self._view_params)
+        columns_visible = [column['field'] for column in columns if not column.get('hidden', False)]
+
         context = {
             'url_prefix': self._view_params['url_prefix'],
             'prefix': self._prefix,
@@ -1570,13 +1572,14 @@ class SmartView(metaclass=SmartViewMetaclass):
             # qui ne les reconnait pas...
             'menu_left': [dict(entry) for entry in self._meta['menu_left']],
             'menu_right': [dict(entry) for entry in self._meta['menu_right']],
-            'columns': self.columns_as_def(context='table.tabulator', view_params=self._view_params),
+            'columns': columns,
             'selectable_columns': [
                 {
                     'id': col_name,
                     'title': getattr(self, col_name).properties.get('title', ""),
                 }
                 for col_name in self._meta['selectable_columns']
+                if col_name in columns_visible
             ],
             # 'user_filters': user_filters,
             'menu_user_filters': {
