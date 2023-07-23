@@ -1153,7 +1153,7 @@ class SmartViewMetaclass(MediaDefiningClass):
 
             return objects, subforms
 
-        form_layout_definition = _meta.get('form_layout')
+        form_layout_definition = main_config.get(name + '.form_layout', _meta.get('form_layout'))
         _meta['form_helper'] = FormHelper()
         _meta['form_helper'].template_pack = 'geqip'
         _meta['form_helper'].form_class = 'smart-view-form'
