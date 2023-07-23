@@ -15,16 +15,20 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import datetime
+from functools import reduce
 import json
 import logging
 import time
 from copy import deepcopy
+from typing import Any
 from warnings import warn
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Fieldset, Div, Button
 from django.apps import AppConfig, apps
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models import Lookup
+from django.db.models.fields import Field
 from django.forms import Form
 from django.urls import reverse
 from django.utils.timezone import now
@@ -36,6 +40,17 @@ from smart_view.layout import SmartLayoutFieldset, SmartLayoutField
 from smart_view.smart_form import BaseSmartForm
 
 logger = logging.getLogger(__name__)
+
+
+@Field.register_lookup
+class Like(Lookup):
+    lookup_name = 'like'
+
+    def as_sql(self, compiler, connection):
+        lhs, lhs_params = self.process_lhs(compiler, connection)
+        rhs, rhs_params = self.process_rhs(compiler, connection)
+        params = lhs_params + rhs_params
+        return '%s LIKE %s' % (lhs, rhs), params
 
 
 def user_settings_level(level_id, categories, user_settings):
@@ -296,6 +311,7 @@ class CommonConfig(AppConfig):
             'main-name': _("Common"),
             'permissions': ('ADM', 'MAN'),
             'home': 'common:manager-home',
+            'home-contents': 'cockpit.common.common',
             'main-menu': (
                 {
                     'label': _("Accueil"),
@@ -312,6 +328,10 @@ class CommonConfig(AppConfig):
                 {
                     'label': _("Programmes"),
                     'url_name': 'common:programme',
+                },
+                {
+                    'label': _("Fournisseurs"),
+                    'url_name': 'common:fournisseur',
                 },
             ),
         },
@@ -386,6 +406,10 @@ class CommonConfig(AppConfig):
     portals = {}
     configs = {}
     user_settings_categories = {}
+
+    def __init__(self, app_name: str, app_module: Any | None) -> None:
+        super().__init__(app_name, app_module)
+        self.program_consumers = []
 
     def ready(self):
         # Cette méthode est lancée une fois que Django est initialisé (ce qui permet d'utiliser toutes les fonctionnalités)
@@ -485,21 +509,39 @@ class CommonConfig(AppConfig):
         # Initialize universal config object
         config._initialize()
 
-        # Setup analytics (if needed)
-        from analytics import data
-        from common.models import Alert, User
-
+        # Register analytics processors
         def user_alerts(user):
+            from common.models import Alert
+
             return Alert.objects.filter(destinataire=user, cloture__isnull=True).count()
 
         def user_counter():
+            from common.models import User
+
             return User.objects.filter(last_login__gt=now() - datetime.timedelta(days=7), is_active=True).count()
 
-        data.set_datasource(
-            'common.users-count', processor=lambda: User.objects.filter(last_login__isnull=False, is_active=True).count()
-        )
-        data.set_datasource('common.users-count-lastweek', processor=user_counter)
-        data.set_datasource('common.user-active-alerts', processor=user_alerts)
+        apps.get_app_config('analytics').register_data_processor('user_alerts', user_alerts)
+        apps.get_app_config('analytics').register_data_processor('user_counter', user_counter)
 
-    def server_ready(self):
-        pass
+    def register_program_consumer(self, expression):
+        self.program_consumers.append(expression)
+        self.program_consumers_expr = reduce(lambda a, b: a + b, self.program_consumers, Value(0))
+        # print(f"registred {self.program_consumers_expr=}")
+
+    def program_update(self, sender, **kwargs):
+        from common.models import Programme
+
+        program = kwargs['instance'].programme
+        if program:
+            # print(f"Program update fired ! {sender=} {program=}")
+            Programme.objects.filter(pk=program.pk).update(consumed=self.program_consumers_expr)
+
+    # def server_ready(self):
+    #     # Setup analytics (if needed)
+    #     from analytics import data
+
+    #     data.set_datasource(
+    #         'common.users-count', processor=lambda: User.objects.filter(last_login__isnull=False, is_active=True).count()
+    #     )
+    #     data.set_datasource('common.users-count-lastweek', processor='user_counter')
+    #     data.set_datasource('common.user-active-alerts', processor='user_alerts')

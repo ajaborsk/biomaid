@@ -33,9 +33,10 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'biom_aid'
-copyright = '2020-2021, Brice Nord, Romuald Kliglich, Alexandre Jaborska, Philomène Mazand'
-author = 'Brice Nord, Romuald Kliglich, Alexandre Jaborska, Philomène Mazand'
+project = 'BiomAid'
+# project = 'Géqip'
+copyright = '2020-2021, Brice Nord, Romuald Kliglich, Alexandre Jaborska'
+author = 'Brice Nord, Romuald Kliglich, Alexandre Jaborska'
 
 
 # -- General configuration ---------------------------------------------------
@@ -56,7 +57,9 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     # 'autoapi.sphinx',
     # 'autoapi.extension',
-    'sphinxcontrib.inkscapeconverter',
+    ## Use only one of these two
+    # 'sphinxcontrib.inkscapeconverter',
+    'sphinxcontrib.rsvgconverter',
 ]
 
 # Temporary settings, only for core developpers
@@ -101,8 +104,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sizzle'
-html_style = 'css/biomaid_doc.css'
+html_theme = 'sphinx_book_theme'
+html_theme_options = {
+    'repository_url': "https://bitbucket.org/ajaborsk/biomaid/src/main/docs/",
+    'use_repository_button': True,
+}
+html_logo = "BiomAid-glowing-logo.png"
+# html_style = 'css/biomaid_doc.css'
 globaltoc_depth = 1
 
 
@@ -117,7 +125,7 @@ latex_documents = [
     (
         'index',
         project + '.tex',
-        "Documentation complète BIOM\\_AID",
+        "Documentation complète BiomAid",
         author.replace(',', ' \\and'),
         'manual',
         False,
@@ -125,7 +133,7 @@ latex_documents = [
     (
         'user/index',
         project + '-user.tex',
-        "Documentation Utilisateur BIOM\\_AID",
+        "Documentation Utilisateur BiomAid",
         author.replace(',', ' \\and'),
         'manual',
         False,
@@ -133,7 +141,7 @@ latex_documents = [
     (
         'internals/index',
         project + '-internals.tex',
-        "Documentation : fonctionnement interne BIOM\\_AID",
+        "Documentation : fonctionnement interne BiomAid",
         author.replace(',', ' \\and'),
         'manual',
         False,
@@ -141,7 +149,7 @@ latex_documents = [
     (
         'sysadmin/index',
         project + '-sysadmin.tex',
-        "Documentation Administrateur Système BIOM\\_AID",
+        "Documentation Administrateur Système BiomAid",
         author.replace(',', ' \\and'),
         'manual',
         False,
@@ -149,7 +157,7 @@ latex_documents = [
     (
         'admin/index',
         project + '-admin.tex',
-        "Documentation Administrateur Application BIOM\\_AID",
+        "Documentation Administrateur Application BiomAid",
         author.replace(',', ' \\and'),
         'manual',
         False,
@@ -157,13 +165,90 @@ latex_documents = [
     (
         'dev/index',
         project + '-dev.tex',
-        "Documentation Développeur BIOM\\_AID",
+        "Documentation Développeur BiomAid",
         author.replace(',', ' \\and'),
         'manual',
         False,
     ),
 ]
 
+biomaid_maketitle = r'''
+  % \let\sphinxrestorepageanchorsetting\relax
+  % \ifHy@pageanchor\def\sphinxrestorepageanchorsetting{\Hy@pageanchortrue}\fi
+  % \hypersetup{pageanchor=false}% avoid duplicate destination warnings
+  \begin{titlepage}%
+    \let\footnotesize\small
+    \let\footnoterule\relax
+    \noindent\rule{\textwidth}{1pt}\par
+      \begingroup % for PDF information dictionary
+       \def\endgraf{ }\def\and{\& }%
+       \pdfstringdefDisableCommands{\def\\{, }}% overwrite hyperref setup
+       \hypersetup{pdfauthor={\@author}, pdftitle={\@title}}%
+      \endgroup
+    \begin{flushright}%
+      \sphinxlogo
+      \py@HeaderFamily
+      {\Huge \@title \par}
+      {\itshape\LARGE \py@release\releaseinfo \par}
+      \vfill
+      {\LARGE
+        \begin{tabular}[t]{c}
+          \@author
+        \end{tabular}\kern-\tabcolsep
+        \par}
+      \vfill\vfill
+      {\large
+       \@date \par
+       \vfill
+       \py@authoraddress \par
+      }%
+    \end{flushright}%\par
+    \@thanks
+  \end{titlepage}
+  \setcounter{footnote}{0}%
+  \let\thanks\relax\let\maketitle\relax
+  %\gdef\@thanks{}\gdef\@author{}\gdef\@title{}
+  \clearpage
+  \ifdefined\sphinxbackoftitlepage\sphinxbackoftitlepage\fi
+  \if@openright\cleardoublepage\else\clearpage\fi
+  % \sphinxrestorepageanchorsetting
+'''
+
+biomaid_maketitle = r"""
+\makeatletter
+  \begin{titlepage}%
+      \begingroup % for PDF information dictionary
+       \def\endgraf{ }\def\and{\& }%
+       \pdfstringdefDisableCommands{\def\\{, }}% overwrite hyperref setup
+       \hypersetup{pdfauthor={\@author}, pdftitle={\@title}}%
+      \endgroup
+      \noindent\includegraphics[width=20em]{../../BiomAid-logo.pdf}
+      \vfill
+        {\Huge \@title \par}
+      {\itshape\LARGE \py@release\releaseinfo \par}
+
+      \vfill
+    {\large
+      \@date \par
+      \vfill
+      \py@authoraddress \par
+    }%
+  \end{titlepage}
+  \setcounter{footnote}{0}%
+  \let\thanks\relax\let\maketitle\relax
+  \clearpage
+  \ifdefined\sphinxbackoftitlepage\sphinxbackoftitlepage\fi
+  \if@openright\cleardoublepage\else\clearpage\fi
+"""
+
+
 latex_elements = {
+    'papersize': 'a4paper',
     'maxlistdepth': '10',
+    # Avoid blank pages
+    'extraclassoptions': 'openany,oneside',
+    # customize title page
+    'maketitle': biomaid_maketitle,
 }
+
+rst_epilog = f'.. |project| replace:: {project}'

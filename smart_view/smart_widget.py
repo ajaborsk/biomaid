@@ -297,7 +297,7 @@ class TableWidget(GridWidget):
 class SimpleTextWidget(HtmlWidget):
     template_string = (
         '<div id="{{ html_id }}" style="'
-        'text-align:{{ text_align }};font-size:{{ font_size }}px;display:flex;'
+        'text-align:{{ text_align }};background-color:{{ background_color }};font-size:{{ font_size }}px;display:flex;'
         'flex-direction:column;width:100%;height:100%;justify-content:space-evenly;'
         '"><div style="color:{{ text_color }}">{{ text | safe}}</div></div>'
     )
@@ -305,6 +305,7 @@ class SimpleTextWidget(HtmlWidget):
     _template_mapping_add = {
         'text': 'text',
         'text_align': 'text_align',
+        'background_color': 'background_color',
         'text_color': 'text_color',
         'font_size': 'font_size',
     }
@@ -312,10 +313,17 @@ class SimpleTextWidget(HtmlWidget):
     label = _("Texte libre")
     help_text = _("Simple texte statique")
     manual_params = {
-        'text': {'label': 'Texte'},
-        'font_size': {'label': 'Taille du texte', 'type': 'int'},
-        'flag': {'label': "Drapeau", 'type': 'boolean'},
-        'text_color': {'label': "Couleur du texte", 'type': 'color'},
+        'text': {'label': 'Texte', 'default': ''},
+        'font_size': {'label': 'Taille du texte', 'type': 'int', 'default': 16},
+        'text_align': {
+            'label': 'Alignement horizontal',
+            'type': 'choice',
+            'choices': [('left', 'Gauche'), ('center', 'Centre'), ('right', 'Droite')],
+            'default': 'center',
+        },
+        'flag': {'label': "Drapeau", 'type': 'boolean', 'default': False},
+        'background_color': {'label': "Couleur du fond", 'type': 'color', 'default': '#fff'},
+        'text_color': {'label': "Couleur du texte", 'type': 'color', 'default': '#000'},
     }
 
     default_text = ''
@@ -328,6 +336,9 @@ class SimpleTextWidget(HtmlWidget):
         self.params['text'] = self.params.get('text', self.default_text)
         self.params['text_align'] = str(self.params.get('text_align', self.default_align))
         self.params['font_size'] = str(self.params.get('font_size', self.default_size))
+        self.params['background_color'] = str(
+            self.params.get('background_color', self.manual_params.get('background_color', {}).get('default'))
+        )
         self.params['text_color'] = str(self.params.get('text_color', self.default_color))
 
     # def _get_context_data(self, **kwargs):
@@ -345,7 +356,11 @@ class AltairWidget(HtmlWidget):
             'smart_view/js/vega-lite@4.min.js',
             'smart_view/js/vega-embed@6.min.js',
         ]
-        css = {'all': 'smart_view/css/vega-widget.css'}
+        css = {
+            'all': [
+                'smart_view/css/vega-widget.css',
+            ],
+        }
 
     # height = 500
     template_name = 'smart_view/smart_widget_altair.html'

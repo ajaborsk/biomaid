@@ -14,16 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from decimal import Decimal
 from django.db.models import F, ExpressionWrapper, Value, TextField, Case, When, Q
-from django.db.models.functions import Concat, Extract, Now
+from django.db.models.functions import Concat, Coalesce, Greatest
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
 from common.models import Discipline, UserUfRole, Fournisseur
-from common.db_utils import class_roles_expression, filter_choices_from_column_values
+from common.db_utils import AgeDays, class_roles_expression, filter_choices_from_column_values
 from dem.apps import DRACHAR_DELAI_DEMANDE_TERMINEE
 from dem.utils import roles_demandes_possibles
-from smart_view.smart_fields import ToolsSmartField
+from smart_view.smart_fields import ConditionnalSmartField, ToolsSmartField
 from smart_view.smart_view import SmartView, ComputedSmartField
 from .models import Previsionnel, Dossier, LigneCommande, Dra
 
@@ -240,13 +241,15 @@ class PrevisionnelSmartView(SmartView):
             'date_debut',
             'programme_dra',
             'ligne_dra',
-            'montant_estime',
+            'best_amount',
             'suivi_besoin',
             'suivi_achat',
             'suivi_offre',
             'suivi_appro',
             'suivi_mes',
             'montant_commande',
+            'ordered_amount',
+            'amount_conditional',
             'solder_ligne',
             'commentaire_public',
             'date_estimative_mes',
@@ -269,14 +272,14 @@ class PrevisionnelSmartView(SmartView):
             'date_debut',
             'programme_dra',
             'ligne_dra',
-            'montant_estime',
+            'best_amount',
             'suivi_besoin',
             'suivi_achat',
             'suivi_offre',
             'suivi_appro',
             'suivi_mes',
+            'amount_conditional',
             'solder_ligne',
-            'montant_commande',
             'commentaire_public',
             'date_estimative_mes',
             'commentaire',
@@ -303,8 +306,8 @@ class PrevisionnelSmartView(SmartView):
                 'max_width': 95,
                 'footer_data': "sum",
             },
-            'montant_estime': {
-                'title': _("Montant estimé"),
+            'best_amount': {
+                'title': _("Meilleur Montant estimé"),
                 'format': 'money',
                 'decimal_symbol': ",",
                 'thousands_separator': " ",
@@ -316,6 +319,7 @@ class PrevisionnelSmartView(SmartView):
             },
             'montant_commande': {
                 'title': _("Montant commandé"),
+                'hidden': True,
                 'format': 'money',
                 'decimal_symbol': ",",
                 'thousands_separator': " ",
@@ -373,6 +377,39 @@ class PrevisionnelSmartView(SmartView):
             'interface': {
                 'format': 'html',
             },
+            'montant_engage': {
+                'title': _("Montant engagé"),
+                'format': 'money',
+                'decimal_symbol': ",",
+                'thousands_separator': " ",
+                'currency_symbol': " €",
+                'symbol_is_after': True,
+                'precision': 0,
+                'max_width': 95,
+                'footer_data': "sum",
+            },
+            'montant_liquide': {
+                'title': _("Montant liquidé"),
+                'format': 'money',
+                'decimal_symbol': ",",
+                'thousands_separator': " ",
+                'currency_symbol': " €",
+                'symbol_is_after': True,
+                'precision': 0,
+                'max_width': 95,
+                'footer_data': "sum",
+            },
+            'valeur_inventaire': {
+                'title': _("Valeur dans l'inventaire"),
+                'format': 'money',
+                'decimal_symbol': ",",
+                'thousands_separator': " ",
+                'currency_symbol': " €",
+                'symbol_is_after': True,
+                'precision': 0,
+                'max_width': 95,
+                'footer_data': "sum",
+            },
         }
         user_filters = {
             'expert': {
@@ -387,6 +424,16 @@ class PrevisionnelSmartView(SmartView):
             'discipline': {
                 'type': 'select',
                 'choices': filter_choices_from_column_values(Previsionnel, 'programme__discipline__nom'),
+            },
+            'campaign': {
+                'label': _("Campagne"),
+                'type': 'select',
+                'choices': filter_choices_from_column_values(
+                    Previsionnel,
+                    'num_dmd__calendrier__code',
+                    label_expr=Concat(F('num_dmd__calendrier__code'), Value(' - '), F('num_dmd__calendrier__nom')),
+                    order_by='num_dmd__calendrier__code',
+                ),
             },
             'programme': {
                 'label': _("Programme"),
@@ -466,7 +513,7 @@ class PrevisionnelSmartView(SmartView):
         ComputedSmartField,
         {
             'title': _("Age (mois)"),
-            'data': Extract(Now() - F('date_creation'), 'day') / 30,
+            'data': AgeDays('date_creation') / 30,
             'depends': [
                 'date_creation',
             ],
@@ -603,6 +650,52 @@ class PrevisionnelSmartView(SmartView):
             ],
         },
     )
+    ordered_amount = (
+        ComputedSmartField,
+        {
+            'title': _("Montant commandé"),
+            'hidden': True,
+            'verbose_name': _("Meilleure estimation possible du montant commandé sur cette ligne"),
+            'data': Coalesce(F('montant_commande'), F('montant_liquide'), F('montant_engage'), Decimal(0.0)),
+            'depends': ['budget', 'solder_ligne', 'montant_commande', 'montant_engage', 'montant_liquide'],
+        },
+    )
+    best_amount = (
+        ComputedSmartField,
+        {
+            'title': _("Meilleure estimation"),
+            'verbose_name': _("Meilleure estimation possible de la consommation de crédits du programme"),
+            'data': Case(
+                When(
+                    solder_ligne=False,
+                    then=Greatest(F('budget'), F('ordered_amount')),
+                ),
+                default=F('ordered_amount'),
+            ),
+            'depends': ['budget', 'solder_ligne', 'montant_commande', 'montant_engage', 'montant_liquide'],
+        },
+    )
+    amount_conditional = (
+        ConditionnalSmartField,
+        {
+            'title': 'Montant commandé',
+            'help_text': _(
+                "Montant effectivement commandé sur la ligne du programme. Calculée automatiquement ou forcée manuellement."
+            ),
+            "format": "conditional_money",
+            "decimal_symbol": ",",
+            "thousands_separator": " ",
+            "currency_symbol": " €",
+            "symbol_is_after": True,
+            "precision": 0,
+            "max_width": 120,
+            'fields': (
+                'montant_commande',
+                'ordered_amount',
+            ),
+        },
+    )
+
     roles = (
         ComputedSmartField,
         {
@@ -624,7 +717,24 @@ class PrevisionnelSmartView(SmartView):
 
 class PrevisionnelSmartView21(PrevisionnelSmartView):
     class Meta:
-        columns__add = ('age_previsionnel',)
+        columns__add = (
+            'age_previsionnel',
+            'nombre_commandes',
+            'nombre_lignes_commandes',
+            'montant_engage',
+            'montant_liquide',
+            'nombre_equipements',
+            'valeur_inventaire',
+        )
+        selectable_columns__add = (
+            'age_previsionnel',
+            'nombre_commandes',
+            'nombre_lignes_commandes',
+            'montant_engage',
+            'montant_liquide',
+            'nombre_equipements',
+            'valeur_inventaire',
+        )
 
         user_filters__update = {
             'domaine': {
@@ -782,7 +892,11 @@ class PrevisionnelUtilisateursSmartView(PrevisionnelSmartView):
                     Q(discipline_dmd__isnull=True)
                     | ~Q(discipline_dmd=Discipline.objects.values_list('pk', flat=True).filter(code='TX')[0])
                     # Uniquement les demandes qui ne sont pas terminées depuis 'longtemps'
-                    & (~Q(suivi_mes__startswith='1-') | Q(date_modification__gte=now() - DRACHAR_DELAI_DEMANDE_TERMINEE))
+                    & (
+                        ~(Q(suivi_mes__startswith='1-') & Q(suivi_mes__startswith='0-'))
+                        | Q(solder_ligne=False)
+                        | Q(date_estimative_mes__gte=now() - DRACHAR_DELAI_DEMANDE_TERMINEE)
+                    )
                 ),
             )
 
@@ -933,7 +1047,7 @@ class PrevTvxSmartView(SmartView):
             # 'date_debut',
             # 'programme_dra',
             # 'ligne_dra',
-            'montant_estime',
+            'best_amount',
             'suivi_besoin',
             'suivi_etude',
             'suivi_autorisation',
@@ -965,7 +1079,7 @@ class PrevTvxSmartView(SmartView):
             # 'date_debut',
             # 'programme_dra',
             # 'ligne_dra',
-            'montant_estime',
+            'best_amount',
             'suivi_besoin',
             'suivi_etude',
             'suivi_autorisation',
@@ -998,8 +1112,8 @@ class PrevTvxSmartView(SmartView):
                 'max_width': 95,
                 'footer_data': "sum",
             },
-            'montant_estime': {
-                'title': _("Montant estimé"),
+            'best_amount': {
+                'title': _("Meilleur montant estimé"),
                 'format': 'money',
                 'decimal_symbol': ",",
                 'thousands_separator': " ",
@@ -1273,6 +1387,23 @@ class PrevTvxSmartView(SmartView):
             'depends': [
                 'num_dmd',
             ],
+        },
+    )
+    best_amount = (
+        ComputedSmartField,
+        {
+            'title': _("Meilleure estimation"),
+            'verbose_name': _("Meilleure estimation possible de la consommation de crédits du programme"),
+            'data': Case(
+                When(
+                    solder_ligne=False,
+                    then=Greatest(
+                        F('budget'), Coalesce(F('montant_commande'), F('montant_liquide'), F('montant_engage'), Decimal(0.0))
+                    ),
+                ),
+                default=Coalesce(F('montant_commande'), F('montant_liquide'), F('montant_engage'), Decimal(0.0)),
+            ),
+            'depends': ['budget', 'solder_ligne', 'montant_commande', 'montant_engage', 'montant_liquide'],
         },
     )
     roles = (

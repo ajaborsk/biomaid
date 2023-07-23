@@ -33,11 +33,19 @@ class AssetPlusDate1(DateField):
     vers un véritable datetime.date() Python
     """
 
-    def from_db_value(self, value, expression, connection):
+    def get_prep_value(self, value: Any) -> Any:
         if value:
-            return datetime.date(int(value[0:4]), int(value[5:7]), int(value[8:10]))
-        else:
-            return None
+            return value.strftime('%Y-%m-%d')[:10]
+
+    def from_db_value(self, value, expression, connection):
+        try:
+            if value:
+                return datetime.datetime(int(value[0:4]), int(value[5:7]), int(value[8:10]))
+            else:
+                return None
+        except ValueError:
+            print("Unable to extract timestamp from Asset+ value '{}'".format(value))
+            return datetime.datetime(2000, 1, 1)
 
 
 class AssetPlusDate2(DateField):
@@ -276,12 +284,12 @@ class BEq1996(models.Model):
     n_seri: models.TextField = models.TextField(blank=True, null=True)  # This field type is a guess.
     prix: models.TextField = models.TextField(blank=True, null=True)  # This field type is a guess.
     loca: models.TextField = models.TextField(blank=True, null=True)  # This field type is a guess.
-    mes1: models.CharField = models.CharField(max_length=10, blank=True, null=True)
+    mes1: models.CharField = AssetPlusDate1(blank=True, null=True)
     dpo: models.CharField = models.CharField(max_length=10, blank=True, null=True)
     fdg: models.CharField = models.CharField(max_length=10, blank=True, null=True)
     mhs: models.CharField = models.CharField(max_length=10, blank=True, null=True)
     fdg_constr: models.CharField = models.CharField(max_length=10, blank=True, null=True)
-    date_refor: models.CharField = models.CharField(max_length=10, blank=True, null=True)
+    date_refor: models.CharField = AssetPlusDate1(blank=True, null=True)
     ind_maint: models.TextField = models.TextField(blank=True, null=True)  # This field type is a guess.
     typ_maint: models.CharField = models.CharField(max_length=10, blank=True, null=True)
     c_ind_main: models.CharField = models.CharField(max_length=10, blank=True, null=True)

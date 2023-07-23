@@ -398,7 +398,7 @@ class Demande(models.Model):
         related_name='demandes_avis_donne',
     )
     # décision OUI/NON/vide du cadre sup
-    avis_cadre_sup = models.BooleanField(verbose_name=_("Avis cadre sup"), help_text="", blank=True, null=True)
+    avis_cadre_sup = models.IntegerField(verbose_name=_("Avis cadre sup"), help_text="", blank=True, null=True)
     # commentaire du cadre sup
     commentaire_cadre_sup = models.TextField(default=None, blank=True, null=True)
 
@@ -412,7 +412,7 @@ class Demande(models.Model):
         related_name='demandes_approuvees',
     )
     # décision OUI/NON/vide de l'approbateur
-    decision_validateur = models.BooleanField(verbose_name=_("Approbation"), help_text="", blank=True, null=True)
+    decision_validateur = models.IntegerField(verbose_name=_("Approbation"), help_text="", blank=True, null=True)
     # commentaire lors de l'approbation
     decision_soumission = models.TextField(default=None, blank=True, null=True)
     # date de l'approbation (ou non). Pour les demandes d'intéressement, il s'agit de la date de passage en bureau de pôle
@@ -556,15 +556,15 @@ class Demande(models.Model):
 
     # Calcul automatique du cout du projet sur 7 ans => voir comment intégrer
     # le résultat de calculs automatiques.
-    montant_bak = models.DecimalField(
-        verbose_name=_("Montant de la demande (TTC)"),
-        help_text=_("Par défaut, le montant est calculé à partir de la quantité et du prix unitaire."),
-        max_digits=9,
-        decimal_places=2,
-        default=None,
-        blank=True,
-        null=True,
-    )
+    # montant_bak = models.DecimalField(
+    #     verbose_name=_("Montant de la demande (TTC)"),
+    #     help_text=_("Par défaut, le montant est calculé à partir de la quantité et du prix unitaire."),
+    #     max_digits=9,
+    #     decimal_places=2,
+    #     default=None,
+    #     blank=True,
+    #     null=True,
+    # )
 
     # consommables éventuels
     consommables_eventuels = models.CharField(
@@ -632,15 +632,15 @@ class Demande(models.Model):
     )
 
     # montant total estimé par l'expert/acheteur : = quantite x montant acheteur unitaire
-    montant_total_expert_metier_bak = models.DecimalField(
-        max_digits=9,
-        verbose_name="Montant Total estimé par l'expert métier",
-        decimal_places=0,
-        default=None,
-        blank=True,
-        null=True,
-        help_text=_("Montant Total estimé par l'expert métier en fonction du projet et des quantités souhaitées"),
-    )
+    # montant_total_expert_metier_bak = models.DecimalField(
+    #     max_digits=9,
+    #     verbose_name="Montant Total estimé par l'expert métier",
+    #     decimal_places=0,
+    #     default=None,
+    #     blank=True,
+    #     null=True,
+    #     help_text=_("Montant Total estimé par l'expert métier en fonction du projet et des quantités souhaitées"),
+    # )
 
     # acquisition possible annee N
     acquisition_possible = models.BooleanField(verbose_name='Acquisition possible en année N', blank=True, null=True)
@@ -1129,6 +1129,13 @@ class Demande(models.Model):
     workflow_alert = models.CharField(
         verbose_name=_("Alerte traitement"),
         max_length=1024,
+        default=None,
+        blank=True,
+        null=True,
+    )
+
+    analyse = models.JSONField(
+        verbose_name=_("Analyse technique de la demande"),
         default=None,
         blank=True,
         null=True,

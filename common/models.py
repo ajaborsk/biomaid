@@ -19,7 +19,7 @@
 Created on Mon Dec 17 19:54:59 2018
 @author: kligliro
 """
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
@@ -65,71 +65,89 @@ class ActiveManagerCloture(ActiveManager):
     END_FIELDNAME = 'cloture'
 
 
+class ActiveManagerUser(models.Manager):
+    """
+    A ORM manager that returns only active users. Works only for Django 'User' herited classes
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
+
 class User(AbstractUser):
     from_ldap: models.BooleanField = models.BooleanField(_("LDAP user"), editable=False, default=False)
 
-    etablissement = models.ForeignKey(
+    etablissement: models.ForeignKey = models.ForeignKey(
         'Etablissement',
         on_delete=models.PROTECT,
         null=True,
     )
-    initiales = models.CharField(
+    initiales: models.CharField = models.CharField(
         max_length=10,
         blank=True,
         null=False,
     )
-    titre = models.CharField(
+    titre: models.CharField = models.CharField(
         verbose_name=_("Titre"),
         help_text=_("M. / Mme / Mlle / Dr / Pr ..."),
         max_length=32,
         null=True,
         blank=True,
     )
-    intitule_fonction = models.CharField(
+    intitule_fonction: models.CharField = models.CharField(
         verbose_name=_("Fonction (intitulé)"),
         max_length=256,
         null=True,
         blank=True,
     )
-    tel_fixe = models.CharField(
+    tel_fixe: models.CharField = models.CharField(
         verbose_name=_("Tél. fixe"),
         max_length=17,
         blank=True,
         null=False,
     )
-    tel_dect = models.CharField(
+    tel_dect: models.CharField = models.CharField(
         verbose_name=_("Tél. DECT"),
         max_length=17,
         blank=True,
         null=False,
     )
-    tel_mobile = models.CharField(
+    tel_mobile: models.CharField = models.CharField(
         verbose_name=_("Tél. mobile"),
         max_length=17,
         blank=True,
         null=False,
     )
-    preferences = models.TextField(
+    preferences: models.TextField = models.TextField(
         verbose_name=_("Préférences"),
         help_text=_("Préférences de l'utilisateur, stockées sous forme d'une chaine JSON"),
         null=False,
         blank=False,
         default="{}",
     )
-    last_seen = models.DateTimeField(
+    last_seen: models.DateTimeField = models.DateTimeField(
         verbose_name=_("Dernière visite"),
         help_text=_("Date de la dernière visite sur le portail"),
         null=True,
         blank=True,
     )
-    date_creation = models.DateTimeField(
+    last_email: models.DateTimeField = models.DateTimeField(
+        verbose_name=_("Dernier message"),
+        help_text=_("Date du dernier mail envoyé"),
+        null=True,
+        blank=True,
+    )
+    date_creation: models.DateTimeField = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_("date de création"),
     )
-    date_modification = models.DateTimeField(
+    date_modification: models.DateTimeField = models.DateTimeField(
         auto_now=True,
         verbose_name=_("date de modification"),
     )
+
+    objects = UserManager()  # The default manager.
+    active_objects = ActiveManagerUser()  # The active_objects manager.
 
     def __str__(self):
         return "{} {} ({})".format(self.first_name, self.last_name, self.username)
@@ -455,9 +473,12 @@ class Programme(models.Model):
     nom = models.CharField(max_length=64, null=False, blank=False)  # Nom du programme
     description = models.TextField(null=True, blank=True, default=None)  # commentaires si nécessaire
     etablissement = models.ForeignKey(Etablissement, null=True, blank=True, on_delete=models.SET_NULL)
+    site = models.ForeignKey(Site, null=True, blank=True, on_delete=models.SET_NULL)
     pole = models.ForeignKey(Pole, null=True, blank=True, on_delete=models.SET_NULL)
     uf = models.ForeignKey(Uf, null=True, blank=True, on_delete=models.SET_NULL)
     enveloppe = models.DecimalField(max_digits=10, decimal_places=0, null=False, blank=False)  # enveloppe budgetaire prévisionnelle
+    limit = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True)  # enveloppe budgetaire limite (bloquante)
+    consumed = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True)  # enveloppe budgetaire consommée
     arbitre = models.ForeignKey(
         config.settings.AUTH_USER_MODEL,
         db_column='arbitre_new',
@@ -491,25 +512,60 @@ class Programme(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Fournisseur(models.Model):  # quid du code vis a vis des différents établissements. comment les gérer
-    code_four = models.IntegerField(
-        null=False,
-        blank=False,
-    )
-    nom = models.CharField(
-        max_length=180,
-        null=False,
-        blank=False,
-    )
-    date_creation = models.DateTimeField(auto_now_add=True, verbose_name='date de création')
-    cloture = models.DateField(verbose_name='date de fin', null=True, blank=True)
-    date_modification = models.DateTimeField(auto_now=True, verbose_name='date de modification')
+class Fournisseur(models.Model):
+    """Table des fournisseurs de base dans BiomAid.
+    Pour les établissements, il est nécessaire d'avoir une table supplémentaire FournisseurEtablissement
+    qui fait le lien entre la codification propre de l'établissement (dans sa GEF) et cette table.
+    """
 
-    objects = models.Manager()  # The default manager.
-    active_objects = ActiveManagerCloture()  # The active_objects manager.
+    code: models.IntegerField = models.IntegerField(
+        null=False,
+        blank=False,
+    )
+    nom: models.CharField = models.CharField(
+        max_length=256,
+        null=False,
+        blank=False,
+    )
+
+    # Il faudra ajouter ici tous les champs qui sont identiques pour un fournisseur quelque soit l'établissement :
+    #   n°SIRET, adresse siège social, etc.
+
+    date_creation: models.DateTimeField = models.DateTimeField(auto_now_add=True, verbose_name='date de création')
+    cloture: models.DateTimeField = models.DateTimeField(verbose_name='date de fin', null=True, blank=True)
+    date_modification: models.DateTimeField = models.DateTimeField(auto_now=True, verbose_name='date de modification')
+
+    objects: models.Manager = models.Manager()  # The default manager.
+    active_objects: models.Manager = ActiveManagerCloture()  # The active_objects manager.
 
     def __str__(self):
-        return "{0} - {1}".format(self.code_four, self.nom)
+        return "{0} - {1}".format(self.code, self.nom)
+
+
+class FournisseurEtablissement:
+    code: models.CharField = models.CharField(
+        max_length=64,
+        null=False,
+        blank=False,
+    )
+    etablissement: models.ForeignKey = models.ForeignKey(
+        Etablissement,
+        on_delete=models.PROTECT,
+    )
+    fournisseur: models.ForeignKey = models.ForeignKey(
+        Fournisseur,
+        on_delete=models.PROTECT,
+    )
+
+    date_creation: models.DateTimeField = models.DateTimeField(auto_now_add=True, verbose_name='date de création')
+    date_modification: models.DateTimeField = models.DateTimeField(auto_now=True, verbose_name='date de modification')
+    cloture: models.DateTimeField = models.DateTimeField(verbose_name='date de fin', null=True, blank=True)
+
+    objects: models.Manager = models.Manager()  # The default manager.
+    active_objects: models.Manager = ActiveManagerCloture()  # The active_objects manager.
+
+    def __str__(self):
+        return "{0} - {1} ({2})".format(self.code, self.fournisseur.nom, self.etablissement.nom)
 
 
 class ContactFournisseur(models.Model):
@@ -521,74 +577,76 @@ class ContactFournisseur(models.Model):
         ('MARK', 'Marketing'),
         ('SAV', 'Service Apres Vente'),
     )
-    nom = models.CharField(max_length=300, verbose_name='Nom', null=True, blank=True)
-    prenom = models.CharField(max_length=300, verbose_name='Prenom', null=True, blank=True)
-    societe = models.ForeignKey(
+    nom: models.CharField = models.CharField(max_length=300, verbose_name='Nom', null=True, blank=True)
+    prenom: models.CharField = models.CharField(max_length=300, verbose_name='Prenom', null=True, blank=True)
+    societe: models.ForeignKey = models.ForeignKey(
         'Fournisseur',
         on_delete=models.PROTECT,
         null=False,
         blank=False,
     )
-    etablissement = models.ForeignKey(
+    # Lien entre le contact et les établissements. Si ce champ est NULL,
+    # cela signifie que le contact est valable pour tous les établissements de la base
+    etablissement: models.ForeignKey = models.ForeignKey(
         'Etablissement',
         on_delete=models.PROTECT,
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
     )
-    division = models.CharField(
+    division: models.CharField = models.CharField(
         choices=DIVISION,
         max_length=300,
         null=False,
         blank=False,
     )
-    telephone1 = models.CharField(
+    telephone1: models.CharField = models.CharField(
         max_length=300,
         null=True,
         blank=True,
     )
-    telephone2 = models.CharField(
+    telephone2: models.CharField = models.CharField(
         max_length=300,
         null=True,
         blank=True,
     )
-    Fax = models.CharField(
+    Fax: models.CharField = models.CharField(
         max_length=300,
         null=True,
         blank=True,
     )
-    mail = models.CharField(
+    mail: models.CharField = models.CharField(
         max_length=300,
         null=True,
         blank=True,
     )
-    adresse_contact = models.TextField(
+    adresse_contact: models.TextField = models.TextField(
         null=True,
         blank=True,
         default=None,
     )
-    cp_contact = models.CharField(
+    cp_contact: models.CharField = models.CharField(
         max_length=25,
         null=True,
         blank=True,
         default=None,
     )
-    ville_contact = models.CharField(
+    ville_contact: models.CharField = models.CharField(
         max_length=60,
         null=True,
         blank=True,
         default=None,
     )
-    commentaire = models.TextField(
+    commentaire: models.TextField = models.TextField(
         null=True,
         blank=True,
         default=None,
     )
-    date_creation = models.DateTimeField(auto_now_add=True, verbose_name='date de création')
-    cloture = models.DateField(verbose_name='date de fin', null=True, blank=True)
-    date_modification = models.DateTimeField(auto_now=True, verbose_name='date de modification')
+    date_creation: models.DateTimeField = models.DateTimeField(auto_now_add=True, verbose_name='date de création')
+    cloture: models.DateTimeField = models.DateTimeField(verbose_name='date de fin', null=True, blank=True)
+    date_modification: models.DateTimeField = models.DateTimeField(auto_now=True, verbose_name='date de modification')
 
-    objects = models.Manager()  # The default manager.
-    active_objects = ActiveManagerCloture()  # The active_objects manager.
+    objects: models.Manager = models.Manager()  # The default manager.
+    active_objects: models.Manager = ActiveManagerCloture()  # The active_objects manager.
 
     def __str__(self):
         return "{0} - {1} - {2}".format(self.nom, self.prenom, self.societe)
@@ -984,7 +1042,6 @@ class UserUfRole(models.Model):
 
 
 class LastUpdate(models.Model):
-
     id = models.AutoField(primary_key=True)
     table_in = models.CharField(
         verbose_name=_("Table BIOM_AID"),
@@ -1103,6 +1160,13 @@ class Alert(models.Model):
 
 
 class GenericRole(models.Model):
+    class Meta:
+        indexes = [
+            models.Index(fields=['cloture'], name='gen_role_end_idx'),
+            models.Index(fields=['role_code'], name='gen_role_code_idx'),
+            models.Index(fields=['content_type', 'object_id'], name='gen_role_ref_idx'),
+        ]
+
     user: models.ForeignKey = models.ForeignKey(
         config.settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,

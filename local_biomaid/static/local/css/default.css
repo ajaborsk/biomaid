@@ -1,0 +1,99 @@
+/*
+ * Copyright (c) 2020 Brice Nord, Romuald Kliglich, Alexandre Jaborska, Philomène Mazand.
+ * This file is part of the BiomAid distribution.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+  colors:
+
+  Blue (from the logo) : #151455
+  Dark blue (from the logo) : #151455
+  Cyan (from the logo) : #09aea7
+  Dark Cyan (from the logo) : #055d59
+  Light Cyan (from the logo) : #91aead
+  Purple (title) : #832b83
+*/
+
+footer a {
+    color: #91aead;
+}
+
+.menu-image > a {
+    width: 158px;
+    height: 100px;
+    border: solid 10px #fff;
+    box-shadow: rgba(0, 0, 0, 0.2) 10px 10px 10px 7px;
+    background-color: #fff;
+    background-image: url("../Logo BiomAid.png");
+    background-size: 158px 100px;
+}
+
+.topbar {
+    background: #151455;
+}
+
+.topbar i.fa {
+    color: #9c1012;
+}
+
+.topbar ul.dropdown {
+    background: #151455;
+}
+
+.topbar ul.dropdown li {
+    background: #151455;
+}
+
+.topbar ul.dropdown li:hover {
+    background: #6658a5;
+}
+
+.links-tile a:hover {
+	background: #6658a5;
+}
+
+.topbar2 {
+    color: #000;
+    background: #ddd;
+}
+
+.menubar {
+    background: #151455;
+}
+
+.menubar ul.dropdown {
+    background: #151455;
+}
+
+.menubar ul.dropdown ul {
+    background: #151455;
+}
+
+.menubar ul.dropdown li {
+    background: #151455;
+}
+
+.menubar ul.dropdown li:hover {
+    background: #6658a5;
+}
+
+.menubar i.fa {
+    color: #9c1012;
+}
+
+footer {
+    background: #151455;
+}
+
+.has-badge[data-count]::after {
+	background: rgba(255, 166, 0, 0.85);
+}

@@ -142,6 +142,10 @@ class FinanceConfig(AppConfig):
                             'label': _("Liste des programmes"),
                             'url_name': 'common:programme',
                         },
+                        {
+                            'label': _("Bilan demandes"),
+                            'url_name': 'finance:dem-assessment',
+                        },
                     ),
                 },
                 {
@@ -182,14 +186,10 @@ class FinanceConfig(AppConfig):
         }
     }
 
-    def ready(self) -> None:
-        from analytics.data import set_datasource
-        from finance.analytics import orders_flaws_processor
+    def ready(self):
+        from django.apps import apps
+        from finance.analytics import orders_flaws_processor, dem_financial_assess, immo_financial_assess
 
-        set_datasource(
-            'finance.orders-flaws',
-            label=_("Problèmes liés aux commandes"),
-            auto=[{}],
-            parameters={},
-            processor=orders_flaws_processor,
-        )
+        apps.get_app_config('analytics').register_data_processor('orders_flaws_processor', orders_flaws_processor)
+        apps.get_app_config('analytics').register_data_processor('dem_financial_assess', dem_financial_assess)
+        apps.get_app_config('analytics').register_data_processor('immo_financial_assess', immo_financial_assess)

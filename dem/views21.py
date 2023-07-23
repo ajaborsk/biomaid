@@ -168,14 +168,14 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
                         Q(prix_unitaire__isnull=False) | Q(montant_unitaire_expert_metier__isnull=False),
                         avis_biomed__isnull=False,
                         programme__isnull=False,
-                        decision_validateur__isnull=False,
+                        # decision_validateur__isnull=False,
                         calendrier=campagne.pk,
                     ),
                     'arbitrer_moi': queryset.filter(
                         Q(prix_unitaire__isnull=False) | Q(montant_unitaire_expert_metier__isnull=False),
                         avis_biomed__isnull=False,
                         programme__isnull=False,
-                        decision_validateur__isnull=False,
+                        # decision_validateur__isnull=False,
                         programme__arbitre=self.request.user,
                         calendrier=campagne.pk,
                     ),
@@ -187,8 +187,8 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
                                     'value': {'calendrier': campagne.pk},
                                 },
                                 {
-                                    'name': 'arbitre',
-                                    'value': {'arbitre': self.request.user.pk},
+                                    'name': 'avis_biomed',
+                                    'value': {'avis_biomed__isnull': False},
                                 },
                             ]
                         )
@@ -259,11 +259,22 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
                 ]
             )
         )
+        context['arbitrer_total_filters'] = quote_plus(
+            json.dumps(
+                [
+                    {
+                        'name': 'avis_biomed',
+                        'value': {'avis_biomed__isnull': False},
+                    }
+                ]
+            )
+        )
 
         context['arbitrer_total'] = Demande.objects.filter(
             ~Q(discipline_dmd__code='TX')
             & Q(programme__isnull=False)
-            & Q(decision_validateur__isnull=False)
+            & Q(programme__arbitre__isnull=False)
+            # & Q(decision_validateur__isnull=False)
             & ((Q(prix_unitaire__isnull=False) | Q(montant_unitaire_expert_metier__isnull=False)) & Q(avis_biomed__isnull=False))
             & (Q(gel=False) | Q(gel__isnull=True)),
         ).count()
@@ -272,7 +283,7 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
             ~Q(discipline_dmd__code='TX')
             & Q(programme__isnull=False)
             & Q(programme__arbitre=self.request.user)
-            & Q(decision_validateur__isnull=False)
+            # & Q(decision_validateur__isnull=False)
             & ((Q(prix_unitaire__isnull=False) | Q(montant_unitaire_expert_metier__isnull=False)) & Q(avis_biomed__isnull=False))
             & (Q(gel=False) | Q(gel__isnull=True)),
         ).count()

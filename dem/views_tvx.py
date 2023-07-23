@@ -23,7 +23,7 @@ from django.views.generic import TemplateView
 from common import config
 from common.base_views import BiomAidViewMixin
 from common.models import Discipline, Programme, UserUfRole, Uf
-from dem.models import Demande, Arbitrage
+from dem.models import Campagne, Demande, Arbitrage
 from dem.smart_views import DemandeSmartView
 from dem.utils import roles_demandes_possibles, user_campagnes
 from smart_view.smart_fields import ComputedSmartField, ToolsSmartField
@@ -33,6 +33,9 @@ from smart_view.smart_page import SmartPage
 class DemTvxSmartView(DemandeSmartView):
     class Meta:
         fields__add = (
+            'quantite',
+            'priorite',
+            'cause',
             'montant_qte_validee',
             'montant_arbitrage',
             'localisation',
@@ -43,16 +46,17 @@ class DemTvxSmartView(DemandeSmartView):
             'tvx_contrainte',
         )
         selectable_columns = (
-            'calendrier',
+            'campagne_redirect',
             # 'roles',
             # 'tvx_state',
             # 'state_code',
             # 'discipline_dmd',
             # 'couts_complementaires',
-            'num_dmd',
+            # 'num_dmd',
             'code',
             'date',
-            'uf',
+            'uf_code',
+            'uf_nom',
             'service_view',
             'pole_view',
             # 'redacteur',
@@ -92,6 +96,7 @@ class DemTvxSmartView(DemandeSmartView):
         )
         columns = (
             'calendrier',
+            'campagne_redirect',
             'roles',
             'tvx_state',
             # 'state_code',
@@ -101,7 +106,11 @@ class DemTvxSmartView(DemandeSmartView):
             'num_dmd',
             'code',
             'date',
-            'uf',
+            'uf_code',
+            'uf_nom',
+            'quantite',
+            'cause',
+            'priorite',
             'service_view',
             'pole_view',
             'redacteur',
@@ -110,7 +119,7 @@ class DemTvxSmartView(DemandeSmartView):
             'libelle',
             'nom_projet',
             'tvx_batiment',
-            'tvx_etage',
+            # 'tvx_etage',
             'localisation',
             'description',
             'tvx_contrainte_lib',
@@ -120,20 +129,20 @@ class DemTvxSmartView(DemandeSmartView):
             'tvx_contrainte',
             'tvx_contraintes_view',
             'tvx_priorite',
-            'tvx_arg_normes',
-            'tvx_arg_normes_comment',
-            'tvx_arg_reorg',
-            'tvx_arg_reorg_comment',
-            'tvx_arg_devact',
-            'tvx_arg_devact_comment',
-            'tvx_arg_eqpt',
-            'tvx_arg_eqpt_comment',
-            'tvx_arg_qvt',
-            'tvx_arg_qvt_comment',
-            'tvx_arg_securite',
-            'tvx_arg_securite_comment',
-            'tvx_arg_vetustes',
-            'tvx_arg_vetustes_comment',
+            # 'tvx_arg_normes',
+            # 'tvx_arg_normes_comment',
+            # 'tvx_arg_reorg',
+            # 'tvx_arg_reorg_comment',
+            # 'tvx_arg_devact',
+            # 'tvx_arg_devact_comment',
+            # 'tvx_arg_eqpt',
+            # 'tvx_arg_eqpt_comment',
+            # 'tvx_arg_qvt',
+            # 'tvx_arg_qvt_comment',
+            # 'tvx_arg_securite',
+            # 'tvx_arg_securite_comment',
+            # 'tvx_arg_vetustes',
+            # 'tvx_arg_vetustes_comment',
             'autre_argumentaire',
             'argumentaire_detaille_tvx',
             'documents_sf',
@@ -161,6 +170,39 @@ class DemTvxSmartView(DemandeSmartView):
             'commentaire_definitif_commission',
             'gel',
         )
+        user_filters = {
+            'campagne': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'calendrier',
+                    'label': F('calendrier__nom'),
+                    'sort': F('calendrier__code'),
+                },
+            },
+            'demande_contains': {
+                'type': 'contains',
+                'fieldnames': [
+                    'referent',
+                    'contact',
+                    'libelle',
+                    'nom_projet',
+                    'description',
+                    'commentaire_cadre_sup',
+                    'decision_soumission',
+                    'commentaire_biomed',
+                    'commentaire_definitif_commission',
+                    'autre_argumentaire',
+                    'montant_arbitrage',
+                    'localisation',
+                    'tvx_contrainte_lib',
+                    'tvx_contrainte_alib',
+                    'tvx_contrainte_lar',
+                    'tvx_contrainte_autre',
+                    'tvx_contrainte',
+                ],
+                'label': _('Demande contient'),
+            },
+        }
         settings = {
             'roles': {
                 # For debug only
@@ -168,9 +210,17 @@ class DemTvxSmartView(DemandeSmartView):
                 'hidden': not (hasattr(config.settings, 'SMARTVIEW_DEBUG') and config.settings.SMARTVIEW_DEBUG),
             },
             'calendrier': {
-                'form.hidden': True,
-                'title': _("Campagne"),
+                'hidden': True,
+                'title': _("Campagne H"),
                 'choices': lambda view_params: [(campagne.pk, campagne.nom) for campagne in user_campagnes(view_params, tvx=True)],
+            },
+            'campagne_redirect': {
+                'title': 'Campagne',
+                'format': 'coalesce_choice',
+                'fields': ['calendrier'],
+                'lookup': lambda view_params: [(campagne.pk, campagne.nom) for campagne in Campagne.objects.all()],
+                'choices': lambda view_params: [(campagne.pk, campagne.nom) for campagne in user_campagnes(view_params)]
+                + [(campagne.pk, '>> ' + campagne.nom) for campagne in Campagne.objects.filter(programme__isnull=True)],
             },
             'redacteur': {
                 'hidden': True,
@@ -238,7 +288,7 @@ class DemTvxSmartView(DemandeSmartView):
                 'choices': dict({None: '-- Indéfini --'}, **{p[0]: p[0] + ' - ' + p[1] for p in Demande.TVX_ETAGE_CHOICE}),
                 # null & blank are True in the model since this field isn't used for equipments
                 # but this field is needed for this SmartView
-                'blank': False,
+                'blank': True,
             },
             'tvx_priorite': {
                 'choices': dict({None: '-- Indéfinie --'}, **{p[0]: p[0] + ' - ' + p[1] for p in Demande.TVX_PRIORITE}),
@@ -399,6 +449,15 @@ class DemTvxSmartView(DemandeSmartView):
             'gel': {
                 'hidden': True,
             },
+            'priorite': {
+                'hidden': True,
+            },
+            'quantite': {
+                'hidden': True,
+            },
+            'raison': {
+                'hidden': True,
+            },
         }
 
         def base_filter(self, view_params: dict):
@@ -420,7 +479,7 @@ class DemTvxSmartView(DemandeSmartView):
         form_layout = """
         # demande de travaux courants {{ instance.code }}
             <calendrier>
-            <discipline_dmd> <nature>
+            <discipline_dmd> <nature> <quantite> <cause> <priorite>
             <couts_complementaires>
             <nom_projet>
             <redacteur>
@@ -794,7 +853,7 @@ class DemTvxSmartView(DemandeSmartView):
 class DemTvxEnCoursSmartView(DemTvxSmartView):
     class Meta:
         columns__remove = (
-            # 'calendrier',
+            'calendrier',
             'programme',
             # 'tvx_eval_devact',
             # 'tvx_eval_contin',
@@ -832,6 +891,29 @@ class DemTvxEnCoursSmartView(DemTvxSmartView):
                     'label': Concat(F('uf__code'), Value(' - '), F('uf__nom')),
                     'sort': F('uf__code'),
                 },
+            },
+            'demande_contains': {
+                'type': 'contains',
+                'fieldnames': [
+                    'referent',
+                    'contact',
+                    'libelle',
+                    'nom_projet',
+                    'description',
+                    'commentaire_cadre_sup',
+                    'decision_soumission',
+                    'commentaire_biomed',
+                    'commentaire_definitif_commission',
+                    'autre_argumentaire',
+                    'montant_arbitrage',
+                    'localisation',
+                    'tvx_contrainte_lib',
+                    'tvx_contrainte_alib',
+                    'tvx_contrainte_lar',
+                    'tvx_contrainte_autre',
+                    'tvx_contrainte',
+                ],
+                'label': _('Demande contient'),
             },
             'tvx_batiment': {
                 'type': 'select',
@@ -885,26 +967,40 @@ class DemTvxApprobSmartView(DemTvxSmartView):
         columns__remove = (
             # 'calendrier',
             'programme',
-            # 'tvx_eval_devact',
-            # 'tvx_eval_contin',
-            # 'tvx_eval_confort',
-            # 'tvx_eval_securite',
-            # 'tvx_eval_qvt',
+            'tvx_eval_devact',
+            'tvx_eval_contin',
+            'tvx_eval_confort',
+            'tvx_eval_securite',
+            'tvx_eval_qvt',
+            'tvx_eval_synthese',
             # 'montant_unitaire_expert_metier',
-            'prix_unitaire_conditional',
-            'montant_arbitrage',
+            # 'prix_unitaire_conditional',
+            # 'montant_arbitrage',
+            'expert_metier',
+            'commentaire_biomed',
+            'avis_biomed',
             'arbitrage_commission',
             # 'commentaire_provisoire_commission',
             'commentaire_definitif_commission',
             'quantite_validee_conditional',  # hidden
             'montant_qte_validee',
             'montant_valide_conditional',
+            'prix_unitaire_conditional',
+            'montant_arbitrage',
             'montant_final',
             'montant_consomme',
             'gel',
         )
         columns__add = ('tools',)
         user_filters = {
+            'campagne': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'calendrier',
+                    'label': F('calendrier__nom'),
+                    'sort': F('calendrier__code'),
+                },
+            },
             'pole': {
                 'label': _("Pôle"),
                 'type': 'select',
@@ -922,12 +1018,35 @@ class DemTvxApprobSmartView(DemTvxSmartView):
                     'sort': F('uf__code'),
                 },
             },
+            'demande_contains': {
+                'type': 'contains',
+                'fieldnames': [
+                    'referent',
+                    'contact',
+                    'libelle',
+                    'nom_projet',
+                    'description',
+                    'commentaire_cadre_sup',
+                    'decision_soumission',
+                    'commentaire_biomed',
+                    'commentaire_definitif_commission',
+                    'autre_argumentaire',
+                    'montant_arbitrage',
+                    'localisation',
+                    'tvx_contrainte_lib',
+                    'tvx_contrainte_alib',
+                    'tvx_contrainte_lar',
+                    'tvx_contrainte_autre',
+                    'tvx_contrainte',
+                ],
+                'label': _('Demande contient'),
+            },
             'tvx_batiment': {
                 'type': 'select',
             },
-            'tvx_etage': {
-                'type': 'select',
-            },
+            # 'tvx_etage': {
+            #     'type': 'select',
+            # },
             'tvx_priorite': {
                 'type': 'select',
             },
@@ -956,13 +1075,22 @@ class DemTvxEnCoursTechSmartView(DemTvxSmartView):
     class Meta:
         columns__add = ('tools',)
 
-        def base_filter(self, request):
-            return ~Q(tvx_state__endswith='_OTHER')
+        def base_filter(self, view_params: dict):  # NOQA : Unused parameter
+            return ~Q(tvx_state__endswith='_OTHER') & (Q(gel__isnull=True) | Q(gel=False))
+
             # {
             #    'tvx_state__contains': 'TVX',
             # }
 
         user_filters = {
+            'campagne': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'calendrier',
+                    'label': F('calendrier__nom'),
+                    'sort': F('calendrier__code'),
+                },
+            },
             'redacteur': {
                 'type': 'select',
                 'choices': lambda view_params, base_filter_args, base_filter_kwargs, manager: [
@@ -979,6 +1107,29 @@ class DemTvxEnCoursTechSmartView(DemTvxSmartView):
                     .distinct()
                 ],
             },
+            'demande_contains': {
+                'type': 'contains',
+                'fieldnames': [
+                    'referent',
+                    'contact',
+                    'libelle',
+                    'nom_projet',
+                    'description',
+                    'commentaire_cadre_sup',
+                    'decision_soumission',
+                    'commentaire_biomed',
+                    'commentaire_definitif_commission',
+                    'autre_argumentaire',
+                    'montant_arbitrage',
+                    'localisation',
+                    'tvx_contrainte_lib',
+                    'tvx_contrainte_alib',
+                    'tvx_contrainte_lar',
+                    'tvx_contrainte_autre',
+                    'tvx_contrainte',
+                ],
+                'label': _('Demande contient'),
+            },
             'uf': {
                 'type': 'select',
                 #    'choices': {'fieldname': 'uf', 'label': Concat(F('uf__code'),
@@ -992,6 +1143,24 @@ class DemTvxEnCoursTechSmartView(DemTvxSmartView):
             },
             'tvx_priorite': {
                 'type': 'select',
+            },
+            'avis_cadre_sup': {
+                'type': 'select',
+                'label': _('Avis Cadre Supérier de Pôle'),
+                'choices': {
+                    'fieldname': 'avis_cadre_sup',
+                    'label': F('avis_cadre_sup'),
+                    'sort': F('avis_cadre_sup'),
+                },
+            },
+            'decision_validateur': {
+                'type': 'select',
+                'label': _('Décision Chef de pôle'),
+                'choices': {
+                    'fieldname': 'decision_validateur',
+                    'label': F('decision_validateur'),
+                    'sort': F('decision_validateur'),
+                },
             },
         }
 
@@ -1068,7 +1237,6 @@ class DemTvxPreAnalyseSmartView(DemTvxSmartView):
         )
         columns__add = ('tools',)
         columns__remove = (
-            'calendrier',
             'arbitrage_commission',
             # 'commentaire_provisoire_commission',
             'commentaire_definitif_commission',
@@ -1084,15 +1252,35 @@ class DemTvxPreAnalyseSmartView(DemTvxSmartView):
             'montant_unitaire_expert_metier',
             'prix_unitaire_conditional',
             'commentaire_biomed',
+            'avis_biomed',
             'montant_valide_conditional',
+            'montant_arbitrage',
         )
 
-        def base_filter(self, request):
-            return {
-                'tvx_state': 'TVX_APPROB',
-            }
+        # def base_filter(self, request):
+        #     return {
+        #         'tvx_state': 'TVX_APPROB',
+        #     }
+
+        def base_filter(self, view_params):
+            return (
+                [
+                    (Q(programme__isnull=True) | Q(domaine__isnull=True) | Q(expert_metier__isnull=True))
+                    & (Q(gel__isnull=True) | Q(gel=False))
+                ],
+                # Il faut (juste) que l'utilisateur soit dispatcheur et que ce soit des travaux...
+                {'calendrier__dispatcher': view_params['user'], 'nature': 'TX'},
+            )
 
         user_filters = {
+            'campagne': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'calendrier',
+                    'label': F('calendrier__nom'),
+                    'sort': F('calendrier__code'),
+                },
+            },
             'redacteur': {
                 'type': 'select',
                 'choices': lambda view_params, base_filter_args, base_filter_kwargs, manager: [
@@ -1109,12 +1297,35 @@ class DemTvxPreAnalyseSmartView(DemTvxSmartView):
                     .distinct()
                 ],
             },
+            'demande_contains': {
+                'type': 'contains',
+                'fieldnames': [
+                    'referent',
+                    'contact',
+                    'libelle',
+                    'nom_projet',
+                    'description',
+                    'commentaire_cadre_sup',
+                    'decision_soumission',
+                    'commentaire_biomed',
+                    'commentaire_definitif_commission',
+                    'autre_argumentaire',
+                    'montant_arbitrage',
+                    'localisation',
+                    'tvx_contrainte_lib',
+                    'tvx_contrainte_alib',
+                    'tvx_contrainte_lar',
+                    'tvx_contrainte_autre',
+                    'tvx_contrainte',
+                ],
+                'label': _('Demande contient'),
+            },
             'tvx_batiment': {
                 'type': 'select',
             },
-            'tvx_etage': {
-                'type': 'select',
-            },
+            # 'tvx_etage': {
+            #     'type': 'select',
+            # },
             'tvx_priorite': {
                 'type': 'select',
             },
@@ -1175,7 +1386,9 @@ class DemTvxAnalyseSmartView(DemTvxSmartView):
         columns__add = ('tools',)
         columns__remove = (
             'calendrier',
+            'gel',
             'arbitrage_commission',
+            'montant_valide_conditional',
             # 'commentaire_provisoire_commission',
             'commentaire_definitif_commission',
         )
@@ -1186,10 +1399,22 @@ class DemTvxAnalyseSmartView(DemTvxSmartView):
             },
         }
 
-        def base_filter(self, request):
-            return {
-                'tvx_state': 'TVX_ANA',
-            }
+        # def base_filter(self, request):
+        #     return {
+        #         'tvx_state': 'TVX_ANA',
+        #     }
+
+        base_filter = [
+            # Demandes non validées
+            Q(gel=False) | Q(gel__isnull=True),
+            # Qui a un expert nommé
+            Q(expert_metier__isnull=False),
+            # Qui n'a pas d'avis défavorable du chef de pôle ou du directeur
+            Q(decision_validateur=True) | Q(decision_validateur__isnull=True),
+            # Qui reste à expertise
+            (Q(prix_unitaire__isnull=True) & Q(montant_unitaire_expert_metier__isnull=True)) | Q(avis_biomed__isnull=True),
+            Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
+        ]
 
         user_filters = {
             # Petit contournement ici car le calcul automatique du filtre (liste de tous les experts métiers valides dans la vue)
@@ -1230,6 +1455,29 @@ class DemTvxAnalyseSmartView(DemTvxSmartView):
                     .values_list('redacteur__first_name', 'redacteur__last_name', 'redacteur__pk')
                     .distinct()
                 ],
+            },
+            'demande_contains': {
+                'type': 'contains',
+                'fieldnames': [
+                    'referent',
+                    'contact',
+                    'libelle',
+                    'nom_projet',
+                    'description',
+                    'commentaire_cadre_sup',
+                    'decision_soumission',
+                    'commentaire_biomed',
+                    'commentaire_definitif_commission',
+                    'autre_argumentaire',
+                    'montant_arbitrage',
+                    'localisation',
+                    'tvx_contrainte_lib',
+                    'tvx_contrainte_alib',
+                    'tvx_contrainte_lar',
+                    'tvx_contrainte_autre',
+                    'tvx_contrainte',
+                ],
+                'label': _('Demande contient'),
             },
             'tvx_batiment': {
                 'type': 'select',
@@ -1305,10 +1553,13 @@ class DemTvxAnalyseSmartView(DemTvxSmartView):
 class DemTvxValidationSmartView(DemTvxSmartView):
     class Meta:
         columns__add = ('tools',)
-        columns__remove = ('calendrier',)
+        columns__remove = (
+            'calendrier',
+            'montant_arbitrage',
+        )
         settings = {
             'montant_arbitrage': {
-                'hidden': False,
+                'hidden': True,
                 'title': _("Estimation"),
             },
             'montant_valide_conditional': {
@@ -1324,9 +1575,12 @@ class DemTvxValidationSmartView(DemTvxSmartView):
         }
 
         def base_filter(self, view_params):
-            return {
-                'tvx_state': 'TVX_ARB',
-            }
+            return (
+                # Demandes non validées OU validées mais sans encore de prévisionnel (phase transitoire)
+                Q(gel=False) | (Q(gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True)),
+                Q(programme__arbitre=view_params['user'].pk),  # Dont je suis l'arbitre
+                Q(discipline_dmd__code='TX'),  # Uniquement les demandes de travaux
+            )
 
         user_filters__update = {
             'expert_metier': {'type': 'select'},
@@ -1436,6 +1690,37 @@ class DemTvxArchiveesSmartView(DemTvxSmartView):
             },
         }
         user_filters = {
+            'campagne': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'calendrier',
+                    'label': F('calendrier__nom'),
+                    'sort': F('calendrier__code'),
+                },
+            },
+            'demande_contains': {
+                'type': 'contains',
+                'fieldnames': [
+                    'referent',
+                    'contact',
+                    'libelle',
+                    'nom_projet',
+                    'description',
+                    'commentaire_cadre_sup',
+                    'decision_soumission',
+                    'commentaire_biomed',
+                    'commentaire_definitif_commission',
+                    'autre_argumentaire',
+                    'montant_arbitrage',
+                    'localisation',
+                    'tvx_contrainte_lib',
+                    'tvx_contrainte_alib',
+                    'tvx_contrainte_lar',
+                    'tvx_contrainte_autre',
+                    'tvx_contrainte',
+                ],
+                'label': _('Demande contient'),
+            },
             'pole': {
                 'label': _("Pôle"),
                 'type': 'select',

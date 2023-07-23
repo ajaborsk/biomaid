@@ -141,6 +141,10 @@ class SmartExpression:
             'django': None,
             'form_helper_js': lambda a, b: a + '.includes(' + b + ')',
         },
+        'residuel': {
+            'python': lambda actif, duree, mes: max((1 - (now() - mes).days / (duree * 365.2422)) * actif, 0),
+            'django': None,
+        },
     }
 
     PYTHON_VARS: dict = {

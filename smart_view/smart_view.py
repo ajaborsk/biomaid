@@ -119,6 +119,7 @@ from smart_view.layout import (
     SmartLayoutTemplate,
 )
 from smart_view.smart_form import AutocompleteWidget, BaseSmartModelForm, EurosField
+from common import config as main_config
 
 logger = logging.getLogger(__name__)
 
@@ -473,7 +474,6 @@ class SmartViewMetaclass(MediaDefiningClass):
 
         # Step 4 : Update using Meta class
         if 'Meta' in attrs and isinstance(attrs['Meta'], type):
-
             for attr_name in dir(attrs['Meta']):
                 if attr_name == 'settings':
                     if 'settings' not in _meta:
@@ -556,6 +556,24 @@ class SmartViewMetaclass(MediaDefiningClass):
 
         # No update timestamp field
         _meta['update_timestamps'] = []
+
+        # Step 5 : Get config defined settings (and update class ones)
+
+        config_settings = main_config.get(name, {})
+        if config_settings:
+            # print(f"{name}:")
+            for k, v in config_settings.items():
+                if k in _meta['fields']:
+                    for src, dest_f in {
+                        'hidden': lambda v: {'hidden': bool(v)},
+                        'null': lambda v: {'null': bool(v)},
+                        'default': lambda v: {'default': v},
+                        'label': lambda v: {'title': v},
+                        'help_text': lambda v: {'help_text': v},
+                    }.items():
+                        if v.get(src) is not None:
+                            _meta['settings'][k][1].update(dest_f(v.get(src)))
+                    # print(f"  {k}: {v} {_meta['settings'][k]}")
 
         # Step 6 : Create real SmartField
 
@@ -748,7 +766,6 @@ class SmartViewMetaclass(MediaDefiningClass):
                                 )
                         mfilter["choices"] = choices
                     elif isinstance(mfilter["choices"], dict):
-
                         # ensure there is a fieldname key
                         mfilter['choices']['fieldname'] = mfilter['choices'].get('fieldname', filtname)
                         mfilter['fieldname'] = mfilter['choices'].get('fieldname', filtname)
@@ -792,9 +809,13 @@ class SmartViewMetaclass(MediaDefiningClass):
                             + (
                                 [
                                     {
+                                        'label': _("-- Défini --"),
+                                        'value': '{{{}__isnull:false}}'.format(mf['fieldname']),
+                                    },
+                                    {
                                         'label': _("-- Indéfini --"),
-                                        'value': '{{{}__isnull:null}}'.format(mf['fieldname']),
-                                    }
+                                        'value': '{{{}__isnull:true}}'.format(mf['fieldname']),
+                                    },
                                 ]
                                 if add_null
                                 else []
@@ -833,9 +854,13 @@ class SmartViewMetaclass(MediaDefiningClass):
                                 + (
                                     [
                                         {
+                                            'label': _("-- Défini --"),
+                                            'value': '{"' + mf["fieldname"] + '__isnull":false}',
+                                        },
+                                        {
                                             'label': _("-- Indéfini --"),
                                             'value': '{"' + mf["fieldname"] + '__isnull":true}',
-                                        }
+                                        },
                                     ]
                                     if add_null
                                     else []
@@ -858,9 +883,13 @@ class SmartViewMetaclass(MediaDefiningClass):
                                 + (
                                     [
                                         {
+                                            'label': _("-- Défini --"),
+                                            'value': '{"' + mf["fieldname"] + '__isnull":false}',
+                                        },
+                                        {
                                             'label': _("-- Indéfini --"),
                                             'value': '{"' + mf["fieldname"] + '__isnull":true}',
-                                        }
+                                        },
                                     ]
                                     if add_null
                                     else []
@@ -880,13 +909,17 @@ class SmartViewMetaclass(MediaDefiningClass):
                         if smartfield.get('null'):
                             choices += [
                                 {
+                                    "label": _("-- Défini --"),
+                                    "value": json.dumps({mfilter["fieldname"] + "__isnull": False}),
+                                },
+                                {
                                     "label": _("-- Indéfini --"),
                                     "value": json.dumps({mfilter["fieldname"] + "__isnull": True}),
-                                }
+                                },
                             ]
                     else:
                         raise AttributeError(
-                            _("No choices given and no way to create one for filter '{}' ").format(mfilter["name"])
+                            _("No choices given and no way to create one for filter '{}' ").format(mfilter["fieldname"])
                         )
                     mfilter["choices"] = choices
             elif mfilter["type"] == "contains":
@@ -1120,7 +1153,8 @@ class SmartViewMetaclass(MediaDefiningClass):
 
             return objects, subforms
 
-        form_layout_definition = _meta.get('form_layout')
+        _meta['form_layout'] = main_config.get(name + '.form_layout', _meta.get('form_layout'))
+        form_layout_definition = _meta['form_layout']
         _meta['form_helper'] = FormHelper()
         _meta['form_helper'].template_pack = 'geqip'
         _meta['form_helper'].form_class = 'smart-view-form'
@@ -1525,6 +1559,9 @@ class SmartView(metaclass=SmartViewMetaclass):
                     filter['choices'] = choices
             return filter
 
+        columns = self.columns_as_def(context='table.tabulator', view_params=self._view_params)
+        columns_visible = [column['field'] for column in columns if not column.get('hidden', False)]
+
         context = {
             'url_prefix': self._view_params['url_prefix'],
             'prefix': self._prefix,
@@ -1535,13 +1572,14 @@ class SmartView(metaclass=SmartViewMetaclass):
             # qui ne les reconnait pas...
             'menu_left': [dict(entry) for entry in self._meta['menu_left']],
             'menu_right': [dict(entry) for entry in self._meta['menu_right']],
-            'columns': self.columns_as_def(context='table.tabulator', view_params=self._view_params),
+            'columns': columns,
             'selectable_columns': [
                 {
                     'id': col_name,
                     'title': getattr(self, col_name).properties.get('title', ""),
                 }
                 for col_name in self._meta['selectable_columns']
+                if col_name in columns_visible
             ],
             # 'user_filters': user_filters,
             'menu_user_filters': {
@@ -1686,8 +1724,6 @@ class SmartView(metaclass=SmartViewMetaclass):
           parce que c'était des dépendances) et ceux calculés 'au vol' dans le cadre de la SmartView.
         """
         # TODO: Multiple rows update ?
-        # DONE: CRSF checking (via POST Django middleware)
-        # DONE: Dependencies cascade (for database fields)
 
         # 1 - Get state and roles for this row
         # pkf = self._meta.id_field
@@ -1712,21 +1748,24 @@ class SmartView(metaclass=SmartViewMetaclass):
 
         # 2 - Check writing permission for theses columns
         perms = self._meta['permissions']
+        # --> perms is now the whole permissions dict
 
         if not perms.get("write", False):
             return {"error": {"message": _("Cet enregistrement ne peut pas être modifié")}}
         perms = perms.get("write", False)
+        # --> perms is now the write permissions dict (still depends on state and role)
 
         if not perms.get(row_state, False):
             return {"error": {"message": _("Cet enregistrement ne peut pas être modifié dans cet état")}}
         perms = perms.get(row_state, False)
+        # --> perms is now the write and state permissions dict (still depends on role)
 
-        allowed = False
+        allowed_fields = set()
         for role in row_roles:
             if perms.get(role, False):
-                allowed = perms.get(role, False)
-                break
-        if not allowed:
+                # At least this very role is allowed to modufy this record ; let's continue
+                allowed_fields = allowed_fields.union({fieldname for fieldname, allowed in perms.get(role, {}).items() if allowed})
+        if not allowed_fields:
             return {"error": {"message": _("Vos droits ne permettent pas de modifier cet enregistrement")}}
 
         # 3 - Update the row(s)
@@ -1740,7 +1779,17 @@ class SmartView(metaclass=SmartViewMetaclass):
         smartfields_to_read = []
 
         for name, value in updater["set"].items():
-            # print("  AJA> update:", name, dir(getattr(self, name)))
+            # print("  AJA> update:", name, value, allowed_fields, getattr(self, name).get('title', 'table.html'))
+
+            if name not in allowed_fields:
+                return {
+                    "error": {
+                        "message": _("Vos droits ne permettent pas de modifier le champ '{}' de cet enregistrement").format(
+                            getattr(self, name).get('title', 'table.html')
+                        )
+                    }
+                }
+
             if name in self._meta['data_fields']:
                 smartfields_to_read.append(name)
             if hasattr(getattr(self, name), "alters"):
@@ -1751,7 +1800,6 @@ class SmartView(metaclass=SmartViewMetaclass):
 
             # Vérifie que le champs existe dans la smartview et est bien lié à la base
             if isinstance(getattr(self, name).get('data'), str):
-
                 # Modification effective de l'enregistrement...
 
                 model_fieldname = getattr(self, name).get('data')
@@ -1823,7 +1871,7 @@ class SmartView(metaclass=SmartViewMetaclass):
             else:
                 # Si on arrive ici, c'est que le champ à modifier n'est pas un champ d'enregistrement
                 smart_field = getattr(self, name)
-                smart_field.update_instance(request, record, name, updater, allowed=allowed)
+                smart_field.update_instance(request, record, name, updater, allowed=bool(name in allowed_fields))
 
         try:
             record.save(update_fields=fields_to_save)
@@ -1832,17 +1880,38 @@ class SmartView(metaclass=SmartViewMetaclass):
         except ValueError as err:
             return {"error": {"message": str(err)}}
 
-        # 4 - Get _all_ updated rows/fields (updated field AND altered ones)
-        queryset = (
+        qs_list = []
+        # 4.1 - Get _all_ updated fields in this row/record (updated field AND altered ones)
+        record_queryset = (
             self.get_base_queryset(self._view_params, skip_base_filter=True)
             .filter(**{pkf: updater["where"][pkf]})
-            .values(*smartfields_to_read)
+            .values(*smartfields_to_read, _row_id=F(pkf))
         )
+        qs_list.append(record_queryset)
 
-        # 5 - Return them OR return the error
-        # print('Who:', request.user, row_state, row_roles)
-        # print('updater:', updater, "\n")
-        return {"updated": queryset[0], "error": {}}
+        # 4.2 - Get _all_ updated fields in other rows/records
+        for sf in smartfields_to_read:
+            for other_rows_desc in getattr(self, sf).get('alter_rows', '', []):
+                # same_field_value = (
+                #     self.get_base_queryset(self._view_params, skip_base_filter=True)
+                #     .filter(pk=updater['where'][pkf])
+                #     .values_list(other_rows_desc['same_field'])[0]
+                # )
+                # print(f"{sf=}, {other_rows_desc=}, {same_field_value=}")
+                qs_list.append(
+                    self.get_base_queryset(self._view_params, skip_base_filter=False)
+                    .filter(
+                        **{
+                            other_rows_desc['same_field']: self.get_base_queryset(self._view_params, skip_base_filter=True)
+                            .filter(pk=updater['where'][pkf])
+                            .values_list(other_rows_desc['same_field'])[0]
+                        }
+                    )
+                    .values(*other_rows_desc['fields'], _row_id=F(pkf))
+                )
+
+        # 5 - Return them
+        return {"updated": reduce(lambda a, b: a + list(b), qs_list, [])}
 
     def export_xlsx(self, export, queryset, view_params):
         def boolean_to_excel(value):
@@ -1860,6 +1929,14 @@ class SmartView(metaclass=SmartViewMetaclass):
 
         def conditional_to_excel(value):
             return next((item for item in json.loads(value)['fields'] if item is not None), None)
+
+        def analysis_to_excel(value):
+            # analysis = json.loads(value)
+            analysis = value or {}
+            if 'anomalies' in analysis and isinstance(analysis['anomalies'], list):
+                return '\n'.join([str(anomaly['level']) + ' - ' + anomaly['message'] for anomaly in analysis['anomalies']])
+            else:
+                return 'ø'
 
         user_prefs = UserSettings(view_params['user'])[self._meta['appname']]['tabulator-' + self._prefix]
         columns = []
@@ -1900,75 +1977,14 @@ class SmartView(metaclass=SmartViewMetaclass):
                     lookup = dict(lookup)
                     lookup.update({None: None})
                     converters[column['field']] = partial(choice_to_excel, lookup)
-
-        # columns = [
-        #     f for f in user_prefs['columns'] if not (getattr(self, f).get("hidden")
-        #       or isinstance(getattr(self, f), ToolsSmartField))
-        # ]
+                elif smart_field.get('format') == 'analysis':
+                    converters[column['field']] = analysis_to_excel
 
         response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         response["Content-Disposition"] = "attachment; filename={}".format(export.get("filename", "file"))
         wb = Workbook(response, {'remove_timezone': True})
         wd = DataWorksheet(wb, _("Feuille"), formats, converters)
         wd.prepare().put_query_set(queryset).finalize()
-
-        # ws = wb.add_worksheet()
-        #
-        # # Calcule les styles (au sens Excel 2003+) des différentes colonnes
-        # header_formats = {}
-        # formats = {}
-        # choices = {}
-        # for col in columns:
-        #
-        #     # Récupère le format de la colonne / du champ
-        #     col_format = getattr(self, col).get('format', 'xlsx', default=None)
-        #
-        #     # Format de la colonne
-        #     formats[col] = wb.add_format({'text_wrap': True, 'bottom': 1, 'top': 1, 'left': 1, 'right': 1})
-        #     if col_format == 'money':
-        #         formats[col].set_num_format('# ##0,00 €')
-        #     elif col_format == 'datetime':
-        #         formats[col].set_num_format('dd-mm-yyyy')
-        #     elif col_format == 'boolean':
-        #         pass
-        #
-        #     # Styles du titre de la colonne
-        #     header_formats[col] = wb.add_format({'bg_color': '#CCEEFF'})
-        #
-        #     col_choices = getattr(self, col).get('choices', 'xlsx', default=None)
-        #     if callable(col_choices):
-        #         col_choices = dict(col_choices(view_params))
-        #     choices[col] = col_choices
-        #
-        # current_row_idx = 0
-        #
-        # current_col_idx = 0
-        # for col in columns:
-        #     ws.write(
-        #         current_row_idx, current_col_idx, getattr(self, col).get("title", "xlsx", default=str(col)), header_formats[col]
-        #     )
-        #
-        #     # Largeur de la colonne
-        #     # ws.column_dimensions[get_column_letter(current_col_idx)].width = (
-        #     #    getattr(self, col).get("width", "xlsx", default=100) // 6
-        #     # )
-        #
-        #     current_col_idx += 1
-        # current_row_idx += 1
-        #
-        # data_rows = queryset.values(*columns)
-        # for data_row in data_rows:
-        #     current_col_idx = 0
-        #     for col in columns:
-        #         if choices[col] is None:
-        #             cell_value = data_row[col]
-        #         else:
-        #             cell_value = choices[col].get(data_row[col], choices[col].get(str(data_row[col]), _("-- indéfini --")))
-        #         ws.write(current_row_idx, current_col_idx, cell_value, formats[col])
-        #         current_col_idx += 1
-        #     current_row_idx += 1
-        #
-        # ws.autofilter(0, 0, current_row_idx - 1, len(columns) - 1)
 
         wb.close()
 

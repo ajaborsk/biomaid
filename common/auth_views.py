@@ -27,16 +27,25 @@ from django.template.response import TemplateResponse
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.views.generic import CreateView, TemplateView
+from django.utils.decorators import method_decorator
+from django.views.decorators.debug import sensitive_post_parameters
 
 from django.contrib.auth import views as auth_views
 
 from common import config
 from django.conf import settings
 
-from common.auth_backends import MyLDAPBackend
 from common.base_views import BiomAidViewMixin
 from common.forms import BiomAidUserCreationForm
 from common.models import User
+
+try:
+    from common.auth_backends import MyLDAPBackend
+
+    USING_LDAP = True
+except ImportError:
+    USING_LDAP = False
+
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +54,7 @@ class LoginView(BiomAidViewMixin, auth_views.LoginView):
     title = _("Connexion")
     permissions = '__PUBLIC__'
 
+    @method_decorator(sensitive_post_parameters('password'))
     def post(self, request, *args, **kwargs):
         resp = super().post(request, *args, **kwargs)
         # messages.info(self.request, "Vous êtes connecté (ou pas) !")
@@ -134,6 +144,7 @@ class Sign(BiomAidViewMixin, TemplateView):
         super().__init__(*args, **kwargs)
         self.message = ""
 
+    @method_decorator(sensitive_post_parameters('password', 'password1', 'password2'))
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.extra_email_context = {'url_prefix': self.url_prefix}
@@ -186,7 +197,8 @@ class Sign(BiomAidViewMixin, TemplateView):
             else:
                 # a_user is None => No identification
                 form = AuthenticationForm(request.POST)
-                if MyLDAPBackend in [b.__class__ for b in get_backends()]:
+
+                if USING_LDAP and MyLDAPBackend in [b.__class__ for b in get_backends()]:
                     message = _(
                         """Ces identifiants de connexion ne permettent pas de vous connecter au portail.
                     Si vous avez des identifiants Windows, vous pouvez les utiliser avec GEQIP/KOS."""
@@ -287,6 +299,7 @@ class SignUp(BiomAidViewMixin, CreateView):
         )
         return super().get(request, *args, **kwargs)
 
+    @method_decorator(sensitive_post_parameters('password1', 'password2'))
     def post(self, request, *args, **kwargs):
         # debug("SignUp.post()", request.POST)
 

@@ -114,7 +114,7 @@
         </span>
         <span class="dem-cockpit-subtile{% if arbitrer_total_moi %} highlight{% endif %}">
           <span class="dem-cockpit-number">{{ arbitrer_total_moi }}</span>
-          <span class="dem-cockpit-precision">Pour moi</span>
+          <span class="dem-cockpit-precision">{% if arbitrer_total_moi %}<a href="{% url_kwargs 'dem:arbitrage-all' %}?filters={{ arbitrer_total_filters }}">Pour moi</a>{% else %}Pour moi{% endif %}</span>
         </span>
       </span>
       <span class="dem-cockpit-tile">

@@ -5,12 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Django",
+            "name": "Django server",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "runserver"
+                "runserver",
+                "--insecure",
             ],
             "django": true,
             "justMyCode": true
@@ -21,7 +22,33 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "analytics_update"
+                "analytics_update",
+                "-v3",
+                "finance.dem_financial_assess",
+            ],
+            "django": true,
+            "justMyCode": true
+        },
+        {
+            "name": "Python: structure_check",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "structure_check"
+            ],
+            "django": true,
+            "justMyCode": true
+        },
+        {
+            "name": "Python: extable_update",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "extable_update",
+                "-v3",
+                "equipement"
             ],
             "django": true,
             "justMyCode": true
@@ -33,6 +60,28 @@
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "documents_check"
+            ],
+            "django": true,
+            "justMyCode": true
+        },
+        {
+            "name": "Django: reset_db",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "reset_db"
+            ],
+            "django": true,
+            "justMyCode": false
+        },
+        {
+            "name": "Django: migrate",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [
+                "migrate"
             ],
             "django": true,
             "justMyCode": true

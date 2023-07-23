@@ -72,15 +72,17 @@ class Configuration(dict):
         elif item == 'pyproject':
             return self.pyproject
         else:
-            return self._config.get(item, default)
+            cfg = self._config
+            while '.' in item:
+                key, item = item.split('.', 1)
+                if key in cfg:
+                    cfg = cfg[key]
+                else:
+                    return default
+            return cfg.get(item, default)
 
     def __getitem__(self, item):
-        if item == 'settings':
-            return self.settings
-        elif item == 'pyproject':
-            return self.pyproject
-        else:
-            return self._config.get(item, None)
+        return self.get(item)
 
     def __getattr__(self, item):
         return self._config.get(item, None)

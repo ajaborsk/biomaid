@@ -16,12 +16,15 @@
 #
 import datetime
 import json
+from decimal import Decimal
 
-from django.apps import AppConfig
-from django.db.models import Value, F, Q, Count, CharField
-from django.db.models.functions import JSONObject, Concat
+from django.apps import AppConfig, apps
+from django.db.models import Value, F, Q, Count, CharField, Subquery, OuterRef
+from django.db.models.functions import JSONObject, Concat, Coalesce
+from django.db.models.aggregates import Sum
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_save
 
 from common import config
 
@@ -155,6 +158,33 @@ class DemConfig(AppConfig):
                     'label': _("Demandes archivées"),
                     'url_name': 'dem:demandes-archivees-expert',
                 },
+                {
+                    'label': _("Synthèses"),
+                    # 'url_name': 'dem:demandes-archivees-expert',
+                    'permissions': (
+                        'P-ARB',
+                        'P-EXP',
+                    ),
+                    'show-only-if-allowed': True,
+                    'entries': [
+                        {
+                            'label': _("Parc"),
+                            'url_name': 'dem:all-assets-view',
+                        },
+                        {
+                            'label': _("Historique validées"),
+                            'url_name': 'dem:history-view',
+                        },
+                        {
+                            'label': _("Demandes en cours"),
+                            'url_name': 'dem:current-requests-view',
+                        },
+                        {
+                            'label': _("Aides à l'arbitrage"),
+                            'url_name': 'dem:arbitration-help-view',
+                        },
+                    ],
+                },
             ),
         },
         'user-settings-categories': {
@@ -242,3 +272,47 @@ class DemConfig(AppConfig):
             'timeout': 3600 * 7,  # timeout = 10s
         },
     }
+
+    def ready(self) -> None:
+        from dem.models import Demande
+        from dem.smart_views import DemandeEqptSmartView
+
+        # # This signal handler is called every time a 'demande' instance is saved
+        # # its purpose is to update, if needed, the 'programme'
+        # def dem_saved_hook(sender, **kwargs):
+        #     print(f"Saved hook {sender=} {kwargs=}")
+
+        #     if sender.programme is not None:
+        #         if (
+        #             kwargs['update_fields'] is None
+        #             or 'programme' in kwargs['update_fields']
+        #             or 'flag' in kwargs['update_fields']
+        #             or 'prix_unitaire_expert' in kwargs['update_fields']
+        #         ):
+        #             print(f"Saved hook recompute program {sender.programme=} {kwargs=}")
+
+        common_config = apps.get_app_config('common')
+        # Calcul de l'expression qui calcule la consommation de l'enveloppe UNIQUEMENT pour les demandes
+        # Toutes les demandes validées de façon définitives mais sans previsionnel associé (pas encore dans le plan)
+        dem_qs = Demande.objects.filter(
+            programme=OuterRef('pk'), gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True
+        )
+        # Ajoutons les champs calculés utiles (récupération depuis la SmartView)
+        for anno in ['montant_qte_validee', 'enveloppe_finale']:
+            dem_qs = dem_qs.annotate(**{anno: getattr(DemandeEqptSmartView, anno).expression})
+        # On déclare l'expression finale qui calcule la consommation de l'enveloppe du programme, pour le
+        # modèle des demandes
+        common_config.register_program_consumer(
+            Coalesce(
+                Subquery(dem_qs.values('programme').annotate(sum1=Sum('enveloppe_finale')).values('sum1')), Value(Decimal(0.0))
+            )
+        )
+
+        post_save.connect(
+            common_config.program_update,
+            sender=apps.get_model('dem.demande'),
+            weak=False,
+            dispatch_uid='dem_post_save',
+        )
+
+        return super().ready()

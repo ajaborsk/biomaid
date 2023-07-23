@@ -130,7 +130,7 @@ class AnomalyChecker:
 
     base_score = 0
 
-    def __init__(self, data, storage=None, **kwargs):
+    def __init__(self, data=None, storage=None, **kwargs):
         self.data = data
         self.storage = storage
         self.kwargs = kwargs

@@ -34,7 +34,7 @@ from django.utils.translation import gettext as _
 from django.apps import apps
 
 from common.db_utils import class_roles_expression, user_choices, user_lookup
-from common.models import Programme, UserUfRole, Alert, Uf
+from common.models import Fournisseur, Programme, UserUfRole, Alert, Uf
 from dem.models import Demande
 from document.views import all_documents_json_partial
 from drachar.models import Previsionnel
@@ -231,10 +231,12 @@ class ProgrammeSmartView(SmartView):
                         'code': True,
                         'anteriorite': True,
                         'etablissement': True,
+                        'site': True,
                         'pole': True,
                         'uf': True,
                         'nom': True,
                         'enveloppe': True,
+                        'limit': True,
                         'arbitre': True,
                         'discipline': True,
                         'description': True,
@@ -247,10 +249,12 @@ class ProgrammeSmartView(SmartView):
                         'code': True,
                         'anteriorite': True,
                         'etablissement': True,
+                        'site': True,
                         'pole': True,
                         'uf': True,
                         'nom': True,
                         'enveloppe': True,
+                        'limit': True,
                         'arbitre': True,
                         'discipline': True,
                         'description': True,
@@ -279,12 +283,34 @@ class ProgrammeSmartView(SmartView):
                 'title': _("Campagne"),
             },
             'nom': {
-                'format': 'text',
+                'format': 'string',
             },
             'uf': {
-                'editor': 'autocomplete',
+                'autocomplete': True,
             },
             'enveloppe': {
+                'title': _("Enveloppe"),
+                'help_text': _("Enveloppe estimative (non contraignante)"),
+                'format': 'money',
+                'decimal_symbol': ',',
+                'thousands_separator': ' ',
+                'currency_symbol': ' €',
+                'symbol_is_after': True,
+                'precision': 0,
+            },
+            'limit': {
+                'title': _("Limite"),
+                'help_text': _("Limite d'affectation : Il sera impossible de valider des demandes au delà de cette limite."),
+                'format': 'money',
+                'decimal_symbol': ',',
+                'thousands_separator': ' ',
+                'currency_symbol': ' €',
+                'symbol_is_after': True,
+                'precision': 0,
+            },
+            'consumed': {
+                'title': _("Consommé"),
+                'help_text': _("Enveloppe consommée"),
                 'format': 'money',
                 'decimal_symbol': ',',
                 'thousands_separator': ' ',
@@ -296,7 +322,7 @@ class ProgrammeSmartView(SmartView):
                 'title': "Code DRAV94",
             },
             'arbitre': {
-                'editor': 'autocomplete',
+                'autocomplete': True,
                 # La SmartView peut détecter seule les choix à faire mais comme elle ne dispose pas d'expression
                 # Django pour créer l'étiquette de ces choix (seulement la méthode __str__() du modèle User, qui est du pur python)
                 # C'est beaucoup plus long car elle doit faire de multiples requêtes SQL.
@@ -316,14 +342,17 @@ class ProgrammeSmartView(SmartView):
             'state_code',
             'calendrier',
             'etablissement',
+            'site',
             'pole',
             'uf',
             'code',
             'anteriorite',
             'nom',
             'enveloppe',
+            'limit',
             'distribue',
             'previsionnel_total',
+            'consumed',
             'arbitre',
             'discipline',
             'description',
@@ -342,7 +371,11 @@ class ProgrammeSmartView(SmartView):
                 'label': _("Actif"),
                 'fieldname': 'cloture',
                 'type': 'select',
-                'choices': [{'label': _("Tous"), 'value': '{}'}],
+                'choices': [
+                    {'label': _("Tous"), 'value': '{}'},
+                    {'label': _("Ouverts"), 'value': '{"cloture__isnull":true}'},
+                    {'label': _("Fermés"), 'value': '{"cloture__isnull":false}'},
+                ],
             },
         }
         menu_left = ({'label': 'Ajouter un programme', 'url_name': 'common:programme-create'},)
@@ -350,11 +383,12 @@ class ProgrammeSmartView(SmartView):
         #
             # Informations de base
                 <code> <nom>
-                <calendrier> <etablissement>
+                <calendrier> 
+                <etablissement> <site>
                 <pole> <uf>
                 <discipline> <arbitre>
-                <anteriorite> <enveloppe>
-                <cloture>
+                <enveloppe> <limit>
+                <anteriorite> <cloture>
                 <description+--->
             # Documents joints
                 <documents_sf+--->
@@ -564,3 +598,37 @@ class MyAlertsSmartView(UserAlertsSmartView):
 
         def base_filter(self, view_params: dict):
             return ((), {'destinataire': view_params['user']})
+
+
+class FournisseurSmartView(SmartView):
+    class Meta:
+        model = Fournisseur
+        permissions = {
+            'create': ('ADM',),
+            'delete': ('ADM',),
+            'write': {
+                None: {
+                    'ADM': {
+                        'code': True,
+                        'nom': True,
+                    }
+                },
+            },
+        }
+
+        columns = (
+            'code',
+            'nom',
+        )
+        user_filters = {
+            'contient': {
+                'type': 'contains',
+                'fields': ['code', 'nom'],
+            },
+        }
+        menu_left = ({'label': 'Ajouter un fournisseur', 'url_name': 'common:fournisseur-create'},)
+        form_layout = """
+        #
+            # Fournisseur
+                <code> <nom>
+        """

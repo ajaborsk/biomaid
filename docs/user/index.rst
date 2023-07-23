@@ -2,7 +2,8 @@
 Guide de l'utilisateur
 =================================
 
-Blablabla
-
-## .. toctree::
-    rien_a_dire
+.. toctree::
+    doc_common/index
+    doc_dem/index
+    doc_drachar/index
+    doc_finance/index

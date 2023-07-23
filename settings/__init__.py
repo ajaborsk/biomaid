@@ -110,7 +110,7 @@ INSTALLED_APPS = [
     'extable',
     'analytics',
     'smart_view',
-    'local',
+    # 'local',
     'assetplusconnect',
     'common',
     'dem',
@@ -164,36 +164,16 @@ AUTHENTICATION_BACKENDS = (
 
 WSGI_APPLICATION = 'dra.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-BASE_DIR_BDD = os.path.dirname("\\\\SHOR\\BDD_DRA$\\")
-# BASE_DIR_BDD = os.path.dirname(".")
-# DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#    }
-# }
-
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 AUTH_USER_MODEL = 'common.User'
@@ -234,10 +214,10 @@ STATICFILES_FINDERS = (
 FIXTURE_DIRS = [os.path.join(BASE_DIR, 'fixtures')]
 
 LOGIN_URL_NAME = 'common:sign'
-LOGIN_URL = '/geqip-chuap/sign/'  # Never used in regular code but seems used in tests
+LOGIN_URL = '/portal-config/common/sign/'  # Never used in regular code but seems used in tests (using generic portal/config)
 LOGIN_REDIRECT_URL = '/geqip-chuap/common/login_check/'
 LOGIN_REDIRECT_URL_NAME = 'common:login_check'
-LOGOUT_REDIRECT_URL_NAME = 'home'
+LOGOUT_REDIRECT_URL_NAME = 'dem:home'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -257,19 +237,22 @@ class DebugOnlyFilter(logging.Filter):
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'filters': {
         'debug_only_filter': {
             '()': DebugOnlyFilter,
         },
     },
     'formatters': {
-        'default': {'format': '[%(asctime)s]: %(levelname)s "%(message)s"'},
+        'default': {
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S',
+        },
         'debug_format': {'format': '[%(asctime)s]: %(levelname)s in %(name)s at line %(lineno)s: "%(message)s"'},
     },
     'handlers': {
         'console': {
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'class': 'logging.StreamHandler',
             'formatter': 'default',
         },
@@ -291,6 +274,10 @@ LOGGING = {
         'level': 'DEBUG',
     },
     'loggers': {
+        'django': {
+            'handlers': ['console', 'debug_console'],
+            'propagate': False,
+        },
         'common': {
             'handlers': ['console', 'debug_console'],
             'propagate': False,
@@ -323,7 +310,11 @@ except ModuleNotFoundError:
 
 # This will import specific settings for production, testing environment, development...
 try:
-    # New module name
-    from instance_settings import *  # noqa F403,F401
+    if os.getenv('MKTEST') is None:
+        # New module name
+        from instance_settings import *  # noqa F403,F401
+    else:
+        # New module name
+        from mktest_instance_settings import *  # noqa F403,F401
 except ModuleNotFoundError:
     print("No site/environment configuration found.")

@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from datetime import timedelta
 from django.core.management import BaseCommand
 from django.utils.timezone import now
 
@@ -35,7 +36,9 @@ class Command(BaseCommand):
             'now': now(),
         }
         smart_view = DemandesEnCoursExpSmartView(view_params=vp, appname='drachar')
-        qs = smart_view.get_base_queryset(vp, skip_base_filter=True).filter(dyn_state='A_BASCULER')
+        qs = smart_view.get_base_queryset(vp, skip_base_filter=True).filter(
+            dyn_state='A_BASCULER', date_modification__lt=now() - timedelta(minutes=30)
+        )
         for demande in qs:
             previsionnel = Previsionnel(
                 num_dmd=demande,

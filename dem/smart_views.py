@@ -22,7 +22,6 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db.models import (
-    BooleanField,
     Case,
     CharField,
     DecimalField,
@@ -33,6 +32,8 @@ from django.db.models import (
     TextField,
     Value,
     When,
+    Subquery,
+    Sum,
 )
 from django.db.models.functions import Cast, Coalesce, Concat
 from django.utils import timezone
@@ -133,6 +134,7 @@ class CampagneSmartView(SmartView):
                 <discipline> <natures>  <dispatcher>
                 <debut_recensement> <fin_recensement>
         """
+
         user_filters = {
             'discipline': {'type': 'select'},
         }
@@ -1507,6 +1509,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_NEW': {
                     'ADM': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
@@ -1576,12 +1579,14 @@ class DemandeSmartView(SmartView):
                         "autre_argumentaire": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1592,6 +1597,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_APPROB': {
                     'ADM': {
+                        'campagne_redirect': True,
                         'tvx_eval_devact': True,
                         'tvx_eval_contin': True,
                         'tvx_eval_confort': True,
@@ -1621,12 +1627,14 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1637,6 +1645,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_ANA': {
                     'ADM': {
+                        'campagne_redirect': True,
                         'tvx_eval_devact': True,
                         'tvx_eval_contin': True,
                         'tvx_eval_confort': True,
@@ -1658,12 +1667,14 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1674,6 +1685,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_ARB': {
                     'ADM': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1682,6 +1694,7 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1693,7 +1706,7 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                     },
                 },
-                'TVX_VAL': {
+                'TVX_VALIDE': {
                     'ADM': {
                         'gel': True,
                     },
@@ -1701,7 +1714,7 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                 },
-                'TVX_NVAL': {
+                'TVX_REFUSE': {
                     'ADM': {
                         'gel': True,
                     },
@@ -1709,6 +1722,285 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                 },
+                # These are states for dyn_state fields
+                'AAP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                },
+                'AAP_AREP': {
+                    'OWN': {
+                        'state_code': True,
+                        "referent": True,
+                        "uf": True,
+                        "priorite": True,
+                        "cause": True,
+                        "libelle": True,
+                        "nom_projet": True,
+                        "contact": True,
+                        "dect_contact": True,
+                        "date_premiere_demande": True,
+                        "materiel_existant": True,
+                        'it_caracteristiques_minimales': True,
+                        'it_a_installer': True,
+                        'tmp_int_year': True,
+                        'tmp_int_remain': True,
+                        'arg_interet_medical': True,
+                        'arg_commentaire_im': True,
+                        'arg_oblig_reglementaire': True,
+                        'arg_commentaire_or': True,
+                        'arg_recommandations': True,
+                        'arg_commentaire_r': True,
+                        'arg_projet_chu_pole': True,
+                        'arg_commentaire_pcp': True,
+                        'arg_confort_patient': True,
+                        'arg_commentaire_cp': True,
+                        'arg_confort_perso_ergo': True,
+                        'arg_commentaire_pe': True,
+                        'arg_notoriete': True,
+                        'arg_commentaire_n': True,
+                        'arg_innovation_recherche': True,
+                        'arg_commentaire_ir': True,
+                        'arg_gain_financier': True,
+                        'arg_commentaire_gf': True,
+                        'arg_mutualisation': True,
+                        'arg_commentaire_m': True,
+                        "autre_argumentaire": True,
+                        "consommables_eventuel": True,
+                        "impact_travaux": True,
+                        "impact_informatique": True,
+                        "quantite": True,
+                        "prix_unitaire": True,
+                        'montant': True,
+                        "description": True,
+                        "localisation": True,
+                    },
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                },
+                'AAP_AEXP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                },
+                'AAP_AREP_AEXP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                },
+                'AAP_AARB': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                },
+                'AREP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                },
+                'AREP_AEXP': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                },
+                'ANNULE': {
+                    'ADM': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                    'ARB': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                },
+                'REFUSE': {
+                    'ADM': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                    'ARB': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                },
+                'A_BASCULER': {
+                    'ADM': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                    'ARB': {
+                        'state_code': True,
+                        'gel': True,
+                    },
+                },
+                'VALIDE': {},
+                'TRAITE': {},
             },
         }
 
@@ -1781,7 +2073,7 @@ class DemandeSmartView(SmartView):
             'state_code': {
                 'title': _("Etat (debug)"),
                 'hidden': not (hasattr(config.settings, 'SMARTVIEW_DEBUG') and config.settings.SMARTVIEW_DEBUG),
-                'special': 'state',
+                # 'special': 'state',
                 'depends': [
                     'avis_cadre_sup',
                     'decision_validateur',
@@ -2072,7 +2364,7 @@ class DemandeSmartView(SmartView):
                 'width': 200,
             },
             'montant_unitaire_expert_metier': {
-                'title': _("Montant expert TMP TMP"),
+                'title': _("PU indiqué par l'expert"),
                 'table.hidden': True,
             },
             'arbitrage_commission': {
@@ -2129,6 +2421,22 @@ class DemandeSmartView(SmartView):
             'gel': {
                 'title': _("Définitif"),
                 'width': 40,
+                # If this very row/record consume too much amount of the 'programme", others rows may not be
+                # 'validable' anymore
+                #  --- This is a temporary and manual implementation (eventually, should cascade from a 'programme' dependency on every rows
+                # with the same 'programme') ---
+                'alter_rows': [
+                    {
+                        # Every row with the same 'programme' field value
+                        'same_field': 'programme',
+                        # Will have its field 'dyn_state' changed
+                        'fields': [
+                            'state_code',
+                            'dyn_state',
+                            'tmp_available',
+                        ],
+                    },
+                ],
             },
         }
 
@@ -2254,6 +2562,98 @@ class DemandeSmartView(SmartView):
         },
     )
 
+    # Maintenant les colonnes créées 'manuellement' (déclarées)
+    redacteur_view = (
+        ComputedSmartField,
+        {
+            'title': 'Rédacteur',
+            'help_text': _(
+                "Le rédacteur de la fiche est déterminé à partir "
+                "du nom de la personne connectée au moment de la création de la demande."
+            ),
+            'initial': lambda view_params: view_params['user'].first_name + ' ' + view_params['user'].last_name,
+            'data': Concat('redacteur__first_name', Value(' '), 'redacteur__last_name'),
+            'depends': ['redacteur'],
+        },
+    )
+
+    service_view = (
+        ComputedSmartField,
+        {
+            'title': 'Service',
+            'form.help_text': _("Le service est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("Automatique"),
+            'data': Concat('uf__service__code', Value(' - '), 'uf__service__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'service__nom')},
+            },
+            'depends': ['uf'],
+        },
+    )
+
+    cr_view = (
+        ComputedSmartField,
+        {
+            'title': 'Centre Resp.',
+            'form.help_text': _("Le centre de responsabilité est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("- Automatique -"),
+            'data': Concat('uf__centre_responsabilite__code', Value(' - '), 'uf__centre_responsabilite__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {
+                    id: name for id, name in Uf.objects.all().values_list('pk', 'centre_responsabilite__nom')
+                },
+            },
+            'depends': ['uf'],
+        },
+    )
+
+    pole_view = (
+        ComputedSmartField,
+        {
+            'title': 'Pôle',
+            'form.help_text': _("Le pôle est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("- Automatique -"),
+            'data': Concat('uf__pole__code', Value(' - '), 'uf__pole__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'pole__nom')},
+            },
+            'depends': ['uf'],
+        },
+    )
+
+    site_view = (
+        ComputedSmartField,
+        {
+            'title': 'Site',
+            'form.help_text': _("Le site est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("- Automatique -"),
+            'data': Concat('uf__site__code', Value(' - '), 'uf__site__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'site__nom')},
+            },
+            'depends': ['uf'],
+        },
+    )
+
+    etablissement_view = (
+        ComputedSmartField,
+        {
+            'title': 'Etablissement',
+            'form.help_text': _("L'établissement est déterminé automatiquement à partir de l'UF"),
+            'initial': lambda view_params: _("- Automatique -"),
+            'data': Concat('uf__etablissement__code', Value(' - '), 'uf__etablissement__nom'),
+            'form.data': {
+                'source': 'uf',
+                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'etablissement__nom')},
+            },
+            'depends': ['uf'],
+        },
+    )
+
     redacteur_nom = (
         ComputedSmartField,
         {
@@ -2301,6 +2701,16 @@ class DemandeSmartView(SmartView):
             'format': 'text',
             'width': 125,
             'data': F('uf__pole__nom'),
+            "depends": [],  # Trick as a workaround
+        },
+    )
+    site_nom = (
+        ComputedSmartField,
+        {
+            'title': _("Site"),
+            'format': 'text',
+            'width': 125,
+            'data': F('uf__site__nom'),
             "depends": [],  # Trick as a workaround
         },
     )
@@ -2648,6 +3058,32 @@ class DemandeSmartView(SmartView):
             ],
         },
     )
+    enveloppe_finale = (
+        ComputedSmartField,
+        {
+            'title': _("Enveloppe"),
+            'help_text': _("Montant de l'enveloppe finale"),
+            "format": "money",
+            "decimal_symbol": ",",
+            "thousands_separator": " ",
+            "currency_symbol": " €",
+            "symbol_is_after": True,
+            "precision": 0,
+            "max_width": 120,
+            "footer_data": "sum",
+            'data': Case(
+                When(
+                    arbitrage_commission__valeur=True,
+                    then=Coalesce(F('enveloppe_allouee'), F('montant_qte_validee'), Value(Decimal(0.0))),
+                ),
+            ),
+            'depends': [
+                'arbitrage_commission',
+                'enveloppe_allouee',
+                'montant_qte_validee',
+            ],
+        },
+    )
     montant_consomme = (
         ComputedSmartField,
         {
@@ -2672,6 +3108,16 @@ class DemandeSmartView(SmartView):
             ),
         },
     )
+    tmp_available = (
+        ComputedSmartField,
+        {
+            'title': "Dispo",
+            'data': F('programme__limit') - F('programme__consumed'),
+            # Since the 'gel' field modification will trigger a program.consumed field recomputation,
+            # we add here the 'gel' field as a dependency
+            'depends': ['programme', 'gel'],
+        },
+    )
     documents_sf = (
         DocumentsSmartField,
         {
@@ -2681,16 +3127,16 @@ class DemandeSmartView(SmartView):
     )
     # Ce drapeau peut désormais être remplacé par artitrage__valeur, qui donne le même résultat, mais sans dépendre de
     # l'interprétation d'un code...
-    valide_flag = (
-        ComputedSmartField,
-        {
-            'hidden': True,
-            'data': ExpressionWrapper(
-                Q(arbitrage_commission__code=1) | Q(arbitrage_commission__code=2),
-                output_field=BooleanField(),
-            ),
-        },
-    )
+    # valide_flag = (
+    #     ComputedSmartField,
+    #     {
+    #         'hidden': True,
+    #         'data': ExpressionWrapper(
+    #             Q(arbitrage_commission__code=1) | Q(arbitrage_commission__code=2),
+    #             output_field=BooleanField(),
+    #         ),
+    #     },
+    # )
     arbitrage = (
         ComputedSmartField,
         {
@@ -2698,6 +3144,48 @@ class DemandeSmartView(SmartView):
             'format': 'boolean',
             'hidden': True,
             'data': F('arbitrage_commission__valeur'),
+        },
+    )
+    available = (
+        ComputedSmartField,
+        {
+            'title': 'Disponible',
+            'help_text': _(
+                "Montant restant disponible dans l'enveloppe (une valeur négative empêchera "
+                "le passage en définitif vers le plan d'équipements)"
+            ),
+            "format": "money",
+            "decimal_symbol": ",",
+            "thousands_separator": " ",
+            "currency_symbol": " €",
+            "symbol_is_after": True,
+            "precision": 0,
+            "max_width": 120,
+            'data': F('programme__limit')
+            - Subquery(
+                Demande.objects.filter(programme=OuterRef('programme'))
+                .values('programme')
+                .annotate(
+                    total=Sum(  # Recompute 'enveloppe_finale' from primary fields
+                        Case(
+                            When(
+                                arbitrage_commission__valeur=True,
+                                then=Coalesce(
+                                    F('enveloppe_allouee'),
+                                    Coalesce(F('quantite_validee'), F('quantite'))
+                                    * Coalesce(F('montant_unitaire_expert_metier'), F('prix_unitaire')),
+                                    Value(Decimal(0.0)),
+                                ),
+                            ),
+                        )
+                    )
+                )
+                .values('total')
+            ),
+            'depends': [
+                'programme',
+                'enveloppe_finale',
+            ],
         },
     )
     roles = (
@@ -2729,8 +3217,9 @@ class DemandeSmartView(SmartView):
         ComputedSmartField,
         {
             'hidden': not config.settings.DEBUG,
+            'special': 'state',
             'title': _("Etat dyn."),
-            'help_text': _("Etat calculé dynamiquement à partir des valuers des champs de chaque demande."),
+            'help_text': _("Etat calculé dynamiquement à partir des valeurs des champs de chaque demande."),
             'data': lambda view_params: Case(
                 When(
                     gel=True,
@@ -2777,7 +3266,14 @@ class DemandeSmartView(SmartView):
                                             programme__arbitre__isnull=True,
                                             then=Value("AAP"),
                                         ),
-                                        default=Value("AAP_AARB"),
+                                        default=Case(
+                                            When(
+                                                arbitrage_commission__valeur=True,
+                                                enveloppe_finale__gt=F('tmp_available'),
+                                                then=Value('AAP_BLK'),
+                                            ),
+                                            default=Value("AAP_AARB"),
+                                        ),
                                     ),
                                 ),
                             ),
@@ -2791,7 +3287,14 @@ class DemandeSmartView(SmartView):
                                         programme__arbitre__isnull=True,
                                         then=Value("WAIT"),
                                     ),
-                                    default=Value("AARB"),
+                                    default=Case(
+                                        When(
+                                            arbitrage_commission__valeur=True,
+                                            enveloppe_finale__gt=F('tmp_available'),
+                                            then=Value('BLK'),
+                                        ),
+                                        default=Value("AARB"),
+                                    ),
                                 ),
                             ),
                         ),
@@ -2825,6 +3328,8 @@ class DemandeSmartView(SmartView):
             ),
             'depends': [
                 'gel',
+                'tmp_available',
+                'enveloppe_finale',
                 'programme',
                 'decision_validateur',
                 'expert_metier',
@@ -2841,6 +3346,7 @@ class DemandeEqptSmartView(DemandeSmartView):
         columns = (
             'code',
             'num_dmd',
+            'date',
             'nature',
             'calendrier',
             'campagne_redirect',
@@ -2855,6 +3361,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'date_premiere_demande',
             'uf',
             'pole_nom',
+            'site_nom',
             'uf_code',
             'uf_nom',
             'priorite',
@@ -2922,17 +3429,21 @@ class DemandeEqptSmartView(DemandeSmartView):
             'quantite_validee_conditional',
             'montant_qte_validee',
             'enveloppe_allouee',
+            'enveloppe_finale',
             'montant_valide_conditional',
             'montant_final',
             'montant_consomme',
+            'tmp_available',
             'dyn_state',
             'gel',
             'tools',
         )
         selectable_columns = (
             # 'num_dmd',
+            'date',
             'campagne_redirect',
             'date_premiere_demande',
+            'site_nom',
             'pole_nom',
             'uf_code',
             'uf_nom',
@@ -2981,6 +3492,10 @@ class DemandeEqptSmartView(DemandeSmartView):
             'code': {
                 # 'frozen': True,
             },
+            'date': {
+                'title': _("Date demande"),
+                'datetime_format': "%d/%m/%Y",
+            },
             'redacteur': {
                 'hidden': True,
                 'initial': lambda params: params['user'].pk,
@@ -3012,6 +3527,14 @@ class DemandeEqptSmartView(DemandeSmartView):
             'enveloppe_allouee': {
                 'hidden': True,  # Use montant_valide_conditional instead
             },
+            'avis_cadre_sup': {
+                'format': 'boolean',
+                'tristate': True,
+            },
+            'decision_validateur': {
+                'format': 'boolean',
+                'tristate': True,
+            },
         }
         # Exclusion des demandes de travaux (kind of hack...)
         base_filter = Q(discipline_dmd__isnull=True) | ~Q(discipline_dmd__code='TX')
@@ -3022,6 +3545,15 @@ class DemandeEqptSmartView(DemandeSmartView):
                     'fieldname': 'calendrier',
                     'label': F('calendrier__nom'),
                     'sort': F('calendrier__code'),
+                },
+            },
+            'site': {
+                'label': _("Site"),
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'uf__site',
+                    'label': F('uf__site__nom'),
+                    'sort': F('uf__site__code'),
                 },
             },
             'pole': {
@@ -3070,21 +3602,32 @@ class DemandeEqptSmartView(DemandeSmartView):
             },
             'avis_cadre_sup': {
                 'type': 'select',
+                'choices': {
+                    'fieldname': 'avis_cadre_sup',
+                    'label': F('avis_cadre_sup'),
+                    'sort': F('avis_cadre_sup'),
+                },
                 'label': _('Avis Cadre Supérier de Pôle'),
             },
             'decision_validateur': {
                 'type': 'select',
-                'label': _('Décision Chef de pôle'),
+                'label': _('Approbation Chef de pôle'),
+                'choices': {
+                    'fieldname': 'decision_validateur',
+                    'label': F('decision_validateur'),
+                    'sort': F('decision_validateur'),
+                },
             },
         }
         form_layout = """
         # d'équipement ou de logiciel {{ instance.code }}
             <redacteur> <discipline_dmd>
-            <calendrier> <nature>
+            <calendrier> <date> <nature>
             # Le demandeur
                 <referent> <redacteur_view>
-                <uf> <pole_view>
-                <service_view> <etablissement_view>
+                <uf> <service_view> 
+                <cr_view> <pole_view>
+                <site_view> <etablissement_view>
             # Description du projet
                 <--libelle----> <-cause->
                 <--contact----> <-dect_contact-->
@@ -3144,66 +3687,6 @@ class DemandeEqptSmartView(DemandeSmartView):
                 'targets': ['fieldset-arg'],
             },
         }
-
-    # Maintenant les colonnes créées 'manuellement' (déclarées)
-    redacteur_view = (
-        ComputedSmartField,
-        {
-            'title': 'Rédacteur',
-            'help_text': _(
-                "Le rédacteur de la fiche est déterminé à partir "
-                "du nom de la personne connectée au moment de la création de la demande."
-            ),
-            'initial': lambda view_params: view_params['user'].first_name + ' ' + view_params['user'].last_name,
-            'data': Concat('redacteur__first_name', Value(' '), 'redacteur__last_name'),
-            'depends': ['redacteur'],
-        },
-    )
-
-    service_view = (
-        ComputedSmartField,
-        {
-            'title': 'Service',
-            'form.help_text': _("Le service est déterminé automatiquement à partir de l'UF"),
-            'initial': lambda view_params: _("Automatique"),
-            'data': Concat('uf__service__code', Value(' - '), 'uf__service__nom'),
-            'form.data': {
-                'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'service__nom')},
-            },
-            'depends': ['uf'],
-        },
-    )
-
-    pole_view = (
-        ComputedSmartField,
-        {
-            'title': 'Pôle',
-            'form.help_text': _("Le pôle est déterminé automatiquement à partir de l'UF"),
-            'initial': lambda view_params: _("- Automatique -"),
-            'data': Concat('uf__pole__code', Value(' - '), 'uf__pole__nom'),
-            'form.data': {
-                'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'pole__nom')},
-            },
-            'depends': ['uf'],
-        },
-    )
-
-    etablissement_view = (
-        ComputedSmartField,
-        {
-            'title': 'Etablissement',
-            'form.help_text': _("L'établissement est déterminé automatiquement à partir de l'UF"),
-            'initial': lambda view_params: _("- Automatique -"),
-            'data': Concat('uf__etablissement__code', Value(' - '), 'uf__etablissement__nom'),
-            'form.data': {
-                'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'etablissement__nom')},
-            },
-            'depends': ['uf'],
-        },
-    )
 
     documents_sf = (
         DocumentsSmartField,
@@ -3360,10 +3843,10 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
             'arbitrage',
             'arbitrage_commission',
             'commentaire_provisoire_commission',
-            'commentaire_definitif_commission',
+            # 'commentaire_definitif_commission',
             'quantite_validee',
             'enveloppe_allouee',
-            'gel',
+            # 'gel',
         )
         selectable_columns__remove = (
             'expert_metier',
@@ -3371,21 +3854,21 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
             'domaine',
             'commentaire_biomed',
             'avis_biomed',
-            'montant_arbitrage',
-            'montant_unitaire_expert_metier',
+            # 'montant_arbitrage',
+            # 'montant_unitaire_expert_metier',
             'prix_unitaire_conditional',
             'quantite_validee_conditional',  # hidden
-            'montant_qte_validee',
+            # 'montant_qte_validee',
             'montant_valide_conditional',
             'commentaire_provisoire_commission',
-            'commentaire_definitif_commission',
-            'montant_final',
-            'montant_consomme',
+            # 'commentaire_definitif_commission',
+            # 'montant_final',
+            # 'montant_consomme',
             'arbitrage',
-            'arbitrage_commission',
-            'quantite_validee',
-            'enveloppe_allouee',
-            'gel',
+            # 'arbitrage_commission',
+            # 'quantite_validee',
+            # 'enveloppe_allouee',
+            # 'gel',
         )
 
         def base_filter(self, view_params: dict):  # NOQA
@@ -3468,25 +3951,28 @@ class DemandesEtudeSmartView(DemandeEqptSmartView):
 class DemandesArbitrageSmartView(DemandeEqptSmartView):
     class Meta:
         help_text = _("Toutes les demandes qui **peuvent** être arbitrées par moi")
+        # fields__add = ('available',)
         columns__remove = ('arbitrage',)
         columns__add = (
             'workflow_alert',
-            'valide_flag',
-            # 'montant_final', # test
+            # 'valide_flag',
+            # 'enveloppe_finale',  # test
+            'available',
         )
         selectable_columns__remove = ('arbitrage',)
 
         def base_filter(self, view_params):
             return (
-                # Demandes non validées
-                Q(gel=False),
-                Q(programme__arbitre=view_params['user'].pk),
+                # Demandes non validées OU validées mais sans encore de prévisionnel (phase transitoire)
+                Q(gel=False) | (Q(gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True)),
+                Q(programme__arbitre=view_params['user'].pk),  # Dont je suis l'arbitre
                 ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
             )
 
         user_filters__update = {
+            'programme': {'label': _("Programme"), 'type': 'select'},
             'expert_metier': {'label': _("Expert métier"), 'type': 'select'},
-            'avis_biomed': {'label': _("Avis favorable expert"), 'type': 'select'},
+            'avis_biomed': {'label': _("Avis de l'expert"), 'type': 'select'},
             'domaine': {'type': 'select'},
             'arbitrage_commission': {'label': _("Arbitrage"), 'type': 'select'},
         }
@@ -3528,6 +4014,7 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
 
 
 class DemandesArchiveesSmartView(MesDemandesSmartView):
+    # This is for the requesters (used a another SmartView for experts)
     class Meta:
         help_text = _(
             "Ce tableau reprend toutes les demandes archivées : Les demandes refusées <b>et</b>"
@@ -3555,48 +4042,29 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
                 | Q(uf__pole__in=tmp_scope.values('pole'))
                 | Q(uf__site__in=tmp_scope.values('site'))
                 | Q(uf__etablissement__in=tmp_scope.values('etablissement')),
-                Q(state_code__in=['NONVAL_DEF', 'NONVAL_CP_DEF'])
-                | Q(
-                    state_code__in=['VALIDE_DEF'],
-                    previsionnel__suivi_mes__startswith='1-',
-                    previsionnel__date_modification__lt=timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
+                Q(gel=True),
+                Q(arbitrage_commission__valeur=False)
+                | (
+                    (Q(previsionnel__suivi_mes__startswith='0-') | Q(previsionnel__suivi_mes__startswith='1-'))
+                    & Q(
+                        arbitrage_commission__valeur=True,
+                        previsionnel__solder_ligne=True,
+                        previsionnel__date_estimative_mes__lt=timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
+                    )
                 ),
-                # {
-                #     ':or': [
-                #         {'state_code__in': ['NONVAL_DEF', 'NONVAL_CP_DEF']},
-                #         {
-                #             'state_code__in': ['VALIDE_DEF'],
-                #             'previsionnel__suivi_mes__startswith': '1-',
-                #             'previsionnel__date_modification__lt': timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
-                #         },
-                #     ]
-                # },
             )
-            # return {
-            #     ':or': [
-            #         {'state_code__in': ['NONVAL_DEF', 'NONVAL_CP_DEF']},
-            #         {
-            #             'state_code__in': ['VALIDE_DEF'],
-            #             'previsionnel__suivi_mes__startswith': '1-',
-            #             'previsionnel__date_modification__lt': timezone.now() - DRACHAR_DELAI_DEMANDE_TERMINEE,
-            #         },
-            #     ]
-            # }
 
         settings = {
-            'state_code': {
+            'dyn_state': {
                 'title': _("Filtre type de demande"),
             },
         }
 
         row_styler = {
-            'fieldname': 'state_code',
+            'fieldname': 'dyn_state',
             'styles': {
-                ('NONVAL_DEF', 'NONVAL_CP_DEF'): (
-                    "background:#fcc",
-                    "Demande non validée",
-                ),
-                'VALIDE_DEF': ("background:#cfc", "Demande validée et traitée"),
+                'REFUSE': ("background:#fcc", "Demande non validée"),
+                'VALIDE': ("background:#cfc", "Demande validée et traitée"),
             },
         }
         exports = {
@@ -3607,7 +4075,7 @@ class DemandesArchiveesSmartView(MesDemandesSmartView):
             }
         }
         user_filters__update = {
-            'state_code': {
+            'dyn_state': {
                 'type': 'select',
                 'choices': '__STYLES__',
                 'position': 'bar',
@@ -3656,7 +4124,7 @@ class DemandesRepartitionSmartView(DemandeEqptSmartView):
             " La répartition consiste à affecter à chaque demande un programme, un domaine et un expert."
         )
 
-        def base_filter(self, view_params):  # noqa
+        def base_filter(self, view_params):
             return (
                 [
                     (Q(programme__isnull=True) | Q(domaine__isnull=True) | Q(expert_metier__isnull=True))
@@ -3795,6 +4263,8 @@ class DemandesArchiveesExpertSmartView(DemandesArchiveesSmartView):
             'programme': {
                 'type': 'select',
             },
+            'domaine': {'type': 'select'},
+            'expert_metier': {'type': 'select'},
         }
 
 
@@ -3815,7 +4285,7 @@ class DemandesExpertiseSmartView(DemandeEqptSmartView):
             'quantite_validee_conditional',
             'quantite_validee',
             # 'montant_valide_conditional',
-            'montant_valide',
+            # 'montant_valide',
             'arbitrage',
         )
         selectable_columns__remove = (
@@ -3823,10 +4293,10 @@ class DemandesExpertiseSmartView(DemandeEqptSmartView):
             'commentaire_provisoire_commission',
             'commentaire_definitif_commission',
             'quantite_validee_conditional',
-            'quantite_validee',
+            # 'quantite_validee',
             'montant_valide_conditional',
-            'montant_valide',
-            'montant_unitaire_expert_metier',
+            # 'montant_valide',
+            # 'montant_unitaire_expert_metier',
             'arbitrage',
             'gel',
         )
@@ -3907,8 +4377,12 @@ class DemandesEnCoursExpSmartView(DemandeEqptSmartView):
             }
         }
 
-        def base_filter(self, view_params: dict):  # NOQA : Unused parameter
-            return ~Q(calendrier__code__contains='TVX') & (Q(gel__isnull=True) | Q(gel=False))
+        def base_filter(self, view_params):
+            return (
+                # Demandes non validées OU validées mais sans encore de prévisionnel (phase transitoire)
+                Q(gel=False) | (Q(gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True)),
+                ~Q(discipline_dmd__code='TX'),  # Exclut les demandes de travaux
+            )
 
 
 class DemandesEnCoursTable(SmartTable):

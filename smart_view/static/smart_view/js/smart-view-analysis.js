@@ -2,7 +2,7 @@ Tabulator.extendModule("format", "formatters", {
     analysis: function(cell, formatterParams, onRendered) {
 
         var cell_value = cell.getValue();
-        console.log('Analyse cell value = ', cell_value);
+        //console.log('Analyse cell value = ', cell_value);
         if (Array.isArray(cell_value.anomalies)) {
             var html = '<div class="analysis"><ul>';
             // sort comments

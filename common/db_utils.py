@@ -1,6 +1,6 @@
 #
 # This file is part of the BIOM_AID distribution (https://bitbucket.org/kig13/dem/).
-# Copyright (c) 2020-2021 Brice Nord, Romuald Kliglich, Alexandre Jaborska, Philomène Mazand.
+# Copyright (c) 2020-2023 Brice Nord, Romuald Kliglich, Alexandre Jaborska, Philomène Mazand.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,12 +19,17 @@ Ensemble d'utilitaires (constantes, classes et fonctions)
 destiné à être utilisé avec la base de données (plus précisément l'ORM) de Django
 """
 import json
+import sys
 import logging
+from types import FunctionType
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models import (
+    Func,
+    Expression,
+    Exists,
     Subquery,
     Q,
     OuterRef,
@@ -36,6 +41,7 @@ from django.db.models import (
     ExpressionWrapper,
     CharField,
     Model,
+    IntegerField,
 )
 from django.db.models.functions import Concat, Left, Length, Cast
 from django.db.utils import ProgrammingError
@@ -47,6 +53,7 @@ from django.contrib.postgres.aggregates import StringAgg as PsqlStringAgg
 from common import config
 from common.models import (
     Alert,
+    Programme,
     Uf,
     UserUfRole,
     Etablissement,
@@ -57,7 +64,7 @@ from common.models import (
     User,
     GenericRole,
 )
-from dem.models import Demande
+from dem.models import Campagne, Demande
 from smart_view.smart_widget import LightAndTextWidget
 
 logger = logging.getLogger(__name__)
@@ -109,30 +116,28 @@ class SqliteStringAgg(Aggregate):
         return value
 
 
+class SqliteAgeDays(Func):
+    template = "cast(julianday('now') - julianday(%(expressions)s) as integer)"
+
+    def __init__(self, *expressions, output_field=None, **extra):
+        super().__init__(*expressions, output_field=IntegerField(), **extra)
+
+
+class PsqlAgeDays(Func):
+    template = "EXTRACT(DAY FROM (CURRENT_TIMESTAMP - %(expressions)s))"
+
+    def __init__(self, *expressions, output_field=None, **extra):
+        super().__init__(*expressions, output_field=IntegerField(), **extra)
+
+
 if "postgres" in config.settings.DATABASES["default"]["ENGINE"]:
     StringAgg = PsqlStringAgg
+    AgeDays = PsqlAgeDays
 elif "sqlite3" in config.settings.DATABASES["default"]["ENGINE"]:
     StringAgg = SqliteStringAgg
+    AgeDays = SqliteAgeDays
 else:
     raise RuntimeError(_("PostgreSQL and SQLite3 are the only supported database engines"))
-
-
-# def user_choices(*args, only_active=False, **kwargs):
-#     """Méthode qui retourne une liste de choix avec tous les utilisateurs, sous forme de fonction Django"""
-#     if only_active:
-#         return (
-#             get_user_model()
-#             .objects.filter(is_active=True)
-#             .order_by('last_name')
-#             .values_list('pk', Concat(F('first_name'), Value(' '), F('last_name'), Value(" ("), F('username'), Value(")")))
-#         )
-#     else:
-#         return (
-#             get_user_model()
-#             .objects.all()
-#             .order_by('last_name')
-#             .values_list('pk', Concat(F('first_name'), Value(' '), F('last_name'), Value(" ("), F('username'), Value(")")))
-#         )
 
 
 def user_lookup(*args, **kwargs):
@@ -211,6 +216,52 @@ def filter_choices_from_column_values(klass, fieldname, label_expr=None, order_b
     return choices
 
 
+#
+# Unused function for now. Role sources can be :
+# - Constant (always included)
+# - Conditional : Includes a given role code if a condition is filled (this does not depend of the row/record):
+#     - 'superuser' : The current user is a Django superuser
+#     - 'staff' : The current user is a site staff member (see Django user managment)
+# - Explicit : Includes all role codes given via ContentType GenericRole model
+#
+def get_roles_expression_function(model_class: Model, roles_sources: list) -> FunctionType:
+    """Create and return a function that can be used with Django ORM to compute for each row of a Model/SmartView a list of
+    effective role code.
+
+    This function is meant to be called at Django launch. It returns a instance_role_expression function, designed to be called
+    at View instanciation (with view_params as only parameter). This late function then return a Django ORM expression, which can
+    be used in a QuerySet annotation ('annotate' method) to get, for each row of the queryset, a field that give a list of
+    effective role codes, as a string like ",OWN,ADM,". PLease note the "," (comma) at the start and the end of the string. This
+    is meant to detect safely a role code by testing if ",CODE," is included in this string.
+
+    :param model_class: The model class that will
+    :type model_class: Model
+    :param roles_sources: _description_
+    :type roles_sources: list
+    """
+
+    # This trick allow to launch migrations from a empty database and reset_db command
+    # main_content_type = None
+    # if set(sys.argv).isdisjoint({'reset_db', 'migrate', 'makemigrations'}):
+    #     try:
+    #         main_content_type = ContentType.objects.get_for_model(model_class)
+    #         pass
+    #     except ProgrammingError:
+    #         pass
+
+    def instance_roles_expression(view_attrs: dict) -> Expression:
+        args = []
+
+        args.append(Value(','))
+
+        if len(args) > 1:
+            return ExpressionWrapper(Concat(*args), CharField())
+        else:
+            return ExpressionWrapper(args[0], CharField())
+
+    return instance_roles_expression
+
+
 def class_roles_expression(
     model_class: Model,
     owner_field: str = None,
@@ -234,11 +285,15 @@ def class_roles_expression(
     ATTENTION: Le champ discipline est utilisé pour déterminer le responsable technique, pas l'expert.
     Pour la discipline de l'expert, cela passe par le champ 'domaine_field', qui a un champ 'discipline' de lui-même...
     """
-    # This trick allow to launch migrations from a empty database
-    try:
-        content_type = ContentType.objects.get_for_model(model_class)
-    except ProgrammingError:
-        content_type = None
+    # This trick allow to launch migrations from a empty database and reset_db command
+    main_content_type = None
+    if set(sys.argv).isdisjoint({'reset_db', 'migrate', 'makemigrations'}):
+        try:
+            main_content_type = ContentType.objects.get_for_model(model_class)
+            programme_content_type = ContentType.objects.get_for_model(Programme)
+            campagne_content_type = ContentType.objects.get_for_model(Campagne)
+        except ProgrammingError:
+            pass
 
     # noinspection PyListCreation
     def instance_roles_expression(view_attrs):
@@ -270,6 +325,19 @@ def class_roles_expression(
                         **{programme_field + '__arbitre': view_attrs['user']},
                         then=Value('ARB,'),
                     ),
+                    When(
+                        Exists(
+                            Subquery(
+                                GenericRole.active_objects.filter(
+                                    content_type=programme_content_type,
+                                    object_id=Cast(OuterRef(programme_field), output_field=CharField()),
+                                    role_code='ARB',
+                                    user_id=view_attrs['user'].id,
+                                )
+                            )
+                        ),
+                        then=Value('ARB,'),
+                    ),
                     default=Value(''),
                 )
             )
@@ -280,6 +348,19 @@ def class_roles_expression(
                 Case(
                     When(
                         **{campagne_field + '__dispatcher': view_attrs['user']},
+                        then=Value('DIS,'),
+                    ),
+                    When(
+                        Exists(
+                            Subquery(
+                                GenericRole.active_objects.filter(
+                                    content_type=campagne_content_type,
+                                    object_id=Cast(OuterRef(campagne_field), output_field=CharField()),
+                                    role_code='DIS',
+                                    user_id=view_attrs['user'].id,
+                                )
+                            )
+                        ),
                         then=Value('DIS,'),
                     ),
                     default=Value(''),
@@ -484,7 +565,7 @@ def class_roles_expression(
         args.append(
             Subquery(
                 GenericRole.active_objects.filter(
-                    content_type=content_type,
+                    content_type=main_content_type,
                     object_id=Cast(OuterRef('pk'), output_field=CharField()),
                     user_id=view_attrs['user'].id,
                 )

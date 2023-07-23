@@ -21,6 +21,7 @@ import logging
 import tempfile
 from os import path
 from os.path import exists
+from copy import deepcopy
 
 import altair
 import pysftp
@@ -28,7 +29,7 @@ import tomlkit
 import pathlib
 
 from altair import Chart, Data
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView
@@ -78,7 +79,7 @@ from common.models import (
     Type,
     Compte,
 )
-from common.smart_views import MyAlertsSmartView, ProgrammeSmartView, RoleScopeSmartView
+from common.smart_views import MyAlertsSmartView, ProgrammeSmartView, RoleScopeSmartView, FournisseurSmartView
 
 from common.db_utils import MyAlertsWidget, StringAgg
 from smart_view.smart_page import SmartPage
@@ -106,17 +107,11 @@ def no_ie_view(request, **kwargs):
 
 
 def redirect_to_home(request, url_prefix=None):
-    if url_prefix:
-        return redirect('/{}/dem/'.format(url_prefix))
-    else:
-        return redirect('/dem/')
+    return redirect('dem:home', url_prefix=url_prefix)
 
 
 def redirect_to_kos_home(request, url_prefix=None):
-    if url_prefix:
-        return redirect('/{}/dem/tvx/'.format(url_prefix))
-    else:
-        return redirect('/dem/tvx/')
+    return redirect('dem:tvx-home', url_prefix=url_prefix)
 
 
 class AttachmentView(View):
@@ -367,6 +362,54 @@ class VueGridWidget(VueWidget):
         'montant_previsionnel_par_expert': MontantPrevisionnelParExpertWidget,
     }
 
+    def __init__(self, *args, **kwargs):
+        if 'contents' in kwargs:
+            self.contents = kwargs['contents']
+            del kwargs['contents']
+        else:
+            self.contents = None
+
+        if 'portal_name' in kwargs:
+            self.portal_name = kwargs['portal_name']
+            del kwargs['portal_name']
+        else:
+            self.portal_name = 'common'
+
+        if isinstance(self.contents, str):
+            self.config_name = self.contents
+            self.contents = common.config.get(self.config_name)
+            if self.contents is None:
+                logging.warning("Portal home contents '{}' not found in config files.".format(self.config_name))
+            elif not isinstance(self.contents, dict):
+                logging.warning("Portal home contents '{}' is not a dict.".format(self.config_name))
+            elif 'layout' not in self.contents:
+                logging.warning("Portal home contents '{}' does not have a 'layout' entry.".format(self.config_name))
+        else:
+            self.config_name = 'cockpit'
+
+        if not isinstance(self.contents, dict) or 'layout' not in self.contents:
+            logging.warning("Using fallback layout for portal home content (not using {}).".format(repr(self.contents)))
+            self.contents = {'layout': self.default_grid_layout}
+
+        try:
+            for widget in self.contents['layout']:
+                if 'w_params' in widget and not isinstance(widget['w_params'], str):
+                    # convert w_params to a JSON string (if needed)
+                    widget['w_params'] = json.dumps(widget['w_params'])
+        except TypeError:
+            logging.warning(
+                "Using fallback layout for portal home content (layout is not iterable: {}).".format(repr(self.contents['layout']))
+            )
+            self.contents = {'layout': self.default_grid_layout}
+
+        self.editable = self.contents.get('editable', True)
+        self.columns = self.contents.get('columns', 16)
+        self.rows = self.contents.get('rows', 32)
+        self.v_spacing = self.contents.get('v_spacing', 12)
+        self.h_spacing = self.contents.get('h_spacing', 12)
+
+        super().__init__(*args, **kwargs)
+
     def _get(self, request, *args, **kwargs):
         layout = json.loads(request.GET['layout'])
         r_layout = {}
@@ -384,38 +427,79 @@ class VueGridWidget(VueWidget):
                 r_layout[widget['i']] = {'html': 'Not found'}
         return JsonResponse({'ok': 'it s me !', 'layout': r_layout})
 
+    def _get_as_toml(self, request, cockpit_name, *args, **kwargs):
+        toml_doc = tomlkit.TOMLDocument()
+        grid_layout = self.contents['layout']
+        if self.editable:
+            if not request.GET.get('reset'):
+                try:
+                    grid_layout = self.params['user_preferences'][self.portal_name + '.my-cockpit.grid-layout']
+                except KeyError:
+                    pass
+        base_cfg = {}
+        cfg = base_cfg
+        if not cockpit_name:
+            cockpit_name = self.config_name
+        while '.' in cockpit_name:
+            root, cockpit_name = cockpit_name.split('.', 1)
+            cfg[root] = {}
+            cfg = cfg[root]
+        cfg[cockpit_name] = {
+            'layout': deepcopy(grid_layout),
+            'rows': self.rows,
+            'columns': self.columns,
+            'h_spacing': self.h_spacing,
+            'v_spacing': self.v_spacing,
+        }
+        if self.editable:
+            cfg[cockpit_name]['editable'] = True
+            cfg[cockpit_name]['available_widgets'] = list(self.available_widgets.keys())
+        else:
+            cfg[cockpit_name]['editable'] = False
+        for widget in cfg[cockpit_name]['layout']:
+            widget['w_params'] = json.loads(widget['w_params'])
+        toml_doc.update(base_cfg)
+        return HttpResponse(toml_doc.as_string(), content_type='text/plain; charset=utf-8')
+
     def _get_context_data(self, **kwargs):
         context = super()._get_context_data(**kwargs)
-        grid_layout = self.default_grid_layout
-        if not self.params['request_get'].get('reset'):
-            try:
-                grid_layout = self.params['user_preferences']['common.my-cockpit.grid-layout']
-            except KeyError:
-                pass
         available_widgets = []
-        for k, v in self.available_widgets.items():
-            label = k
-            help_text = ""
-            manual_params = {}
-            if hasattr(v, 'label'):
-                label = v.label
-            if hasattr(v, 'help_text'):
-                help_text = v.help_text
-            if hasattr(v, 'manual_params'):
-                if callable(v.manual_params):
-                    manual_params = v.manual_params(self.params)
-                else:
-                    manual_params = v.manual_params
+        grid_layout = self.contents['layout']
+        if self.editable:
+            if not self.params['request_get'].get('reset'):
+                try:
+                    grid_layout = self.params['user_preferences'][self.portal_name + '.my-cockpit.grid-layout']
+                except KeyError:
+                    pass
+            for k, v in self.available_widgets.items():
+                label = k
+                help_text = ""
+                manual_params = {}
+                if hasattr(v, 'label'):
+                    label = v.label
+                if hasattr(v, 'help_text'):
+                    help_text = v.help_text
+                if hasattr(v, 'manual_params'):
+                    if callable(v.manual_params):
+                        manual_params = v.manual_params(self.params)
+                    else:
+                        manual_params = v.manual_params
 
-            available_widgets.append(
-                {
-                    'w_class': k,
-                    'label': label,
-                    'help_text': help_text,
-                    'm_params': manual_params,
-                }
-            )
+                available_widgets.append(
+                    {
+                        'w_class': k,
+                        'label': label,
+                        'help_text': help_text,
+                        'm_params': manual_params,
+                    }
+                )
         context['grid_params'] = {
+            'portal_name': self.portal_name,
+            'columns': self.columns,
+            'rows': self.rows,
+            'v_spacing': self.v_spacing,
+            'h_spacing': self.h_spacing,
+            'editable': self.editable,
             'init_layout': grid_layout,
             'settings_url': reverse('common:api_user_settings', kwargs={'url_prefix': 'portal-config'}),
             'available_widgets': available_widgets,
@@ -437,10 +521,16 @@ class BiomAidCockpit(BiomAidViewMixin, TemplateView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        self.main_widget = VueGridWidget(params=self.view_params)
+        self.main_widget = VueGridWidget(
+            params=self.view_params, contents=self.portal.get('home-contents'), portal_name=self.url_prefix.split('-', 1)[0]
+        )
         self.widgets[self.main_widget.html_id] = self.main_widget
 
     def get(self, request, *args, **kwargs):
+        # Small trick to get toml text response (ready to cut/paste in a config file :-)
+        if 'get_toml' in request.GET:
+            return self.main_widget._get_as_toml(request, request.GET['get_toml'], *args, **kwargs)
+
         if 'id' in request.GET and request.GET['id'] in self.widgets:
             return self.widgets[request.GET['id']]._get(request, *args, **kwargs)
         else:
@@ -501,7 +591,7 @@ class BiomAidAccueil(BiomAidViewMixin, TemplateView):
     application = 'common'
     name = 'home-main'
     permissions = '__PUBLIC__'
-    template_name = 'common/accueil.html'
+    template_name = 'common/cockpit.html'
 
 
 # page d'accueil / Cockpite
@@ -2148,3 +2238,11 @@ class StructureView(BiomAidViewMixin, TemplateView):
         html_table += '</tr></table>'
         context['structure_table'] = html_table
         return context
+
+
+class FournisseurPage(SmartPage):
+    application = 'common'
+    name = 'fournisseur'
+    permissions = {'ADM'}
+    smart_view_class = FournisseurSmartView
+    title = "Fournisseurs"

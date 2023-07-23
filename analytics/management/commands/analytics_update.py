@@ -13,6 +13,7 @@ import datetime
 import json
 import warnings
 import sys
+from argparse import ArgumentParser
 
 from django.apps import apps
 from django.core.management.base import BaseCommand
@@ -28,11 +29,37 @@ ITERATION_LIMIT = 1000
 
 
 class Command(BaseCommand):
+    def add_arguments(self, parser: ArgumentParser):
+        parser.add_argument(
+            'datasources',
+            metavar='datasource',
+            type=lambda a: a.lower(),
+            nargs='*',
+            help='Datasources list (if none provided, all due datasources will be processed)',
+        )
+
     def handle(self, *args, **options):
         verbosity = options.get('verbosity', 1)
+        asked_datasources = options.get('datasources', [])
 
         app_config = apps.get_app_config('analytics')
-        qs = DataSource.objects.filter(Q(cloture__isnull=True) | Q(cloture__gt=now(), auto__isnull=False))
+        if verbosity > 2:
+            self.stdout.write(
+                _("Available datasources :\n{}").format(
+                    ''.join(
+                        '    ' + str(k) + '\n'
+                        for k in DataSource.objects.filter(
+                            Q(cloture__isnull=True) | Q(cloture__gt=now(), auto__isnull=False)
+                        ).values_list('code', flat=True)
+                    )
+                )
+            )
+        if asked_datasources:
+            qs = DataSource.objects.filter(
+                Q(cloture__isnull=True) | Q(cloture__gt=now()), code__in=asked_datasources, auto__isnull=False
+            )
+        else:
+            qs = DataSource.objects.filter(Q(cloture__isnull=True) | Q(cloture__gt=now()), auto__isnull=False)
 
         datasources = {}
         todo = set()

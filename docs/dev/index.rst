@@ -2,7 +2,7 @@
 Guide du développeur
 =======================
 
-Ce chapitre est destiné aux personnes qui souhaitent collaborer au projet BIOM_AID ou développer des applications
+Ce chapitre est destiné aux personnes qui souhaitent collaborer au projet |project| ou développer des applications
 pour leur usage propre.
 
 .. toctree::

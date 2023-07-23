@@ -53,7 +53,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = BaseUserAdmin.fieldsets + (
         (
             (
-                'Extensions BIOM_AID',
+                'Extensions BiomAid',
                 {
                     'fields': (
                         'titre',
@@ -64,6 +64,7 @@ class UserAdmin(BaseUserAdmin):
                         'tel_dect',
                         'preferences',
                         'last_seen',
+                        'last_email',
                     )
                 },
             ),
@@ -150,6 +151,7 @@ class ProgrammeAdmin(admin.ModelAdmin):
         'discipline',
         'description',
         'enveloppe',
+        'consumed',
     )
     search_fields = (
         'nom',
@@ -179,9 +181,9 @@ class DomaineAdmin(admin.ModelAdmin):
 
 
 class FournisseurAdmin(admin.ModelAdmin):
-    list_display = ('code_four', 'nom')
-    list_filter = ('code_four', 'nom')
-    search_fields = ('code_four', 'nom')
+    list_display = ('code', 'nom')
+    list_filter = ('code', 'nom')
+    search_fields = ('code', 'nom')
 
 
 # Re-register UserAdmin
