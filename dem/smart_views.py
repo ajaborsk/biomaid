@@ -1509,6 +1509,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_NEW': {
                     'ADM': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
@@ -1578,12 +1579,14 @@ class DemandeSmartView(SmartView):
                         "autre_argumentaire": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1594,6 +1597,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_APPROB': {
                     'ADM': {
+                        'campagne_redirect': True,
                         'tvx_eval_devact': True,
                         'tvx_eval_contin': True,
                         'tvx_eval_confort': True,
@@ -1623,12 +1627,14 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1639,6 +1645,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_ANA': {
                     'ADM': {
+                        'campagne_redirect': True,
                         'tvx_eval_devact': True,
                         'tvx_eval_contin': True,
                         'tvx_eval_confort': True,
@@ -1660,12 +1667,14 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1676,6 +1685,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_ARB': {
                     'ADM': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1684,6 +1694,7 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,

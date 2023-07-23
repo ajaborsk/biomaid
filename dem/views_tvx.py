@@ -23,7 +23,7 @@ from django.views.generic import TemplateView
 from common import config
 from common.base_views import BiomAidViewMixin
 from common.models import Discipline, Programme, UserUfRole, Uf
-from dem.models import Demande, Arbitrage
+from dem.models import Campagne, Demande, Arbitrage
 from dem.smart_views import DemandeSmartView
 from dem.utils import roles_demandes_possibles, user_campagnes
 from smart_view.smart_fields import ComputedSmartField, ToolsSmartField
@@ -46,7 +46,7 @@ class DemTvxSmartView(DemandeSmartView):
             'tvx_contrainte',
         )
         selectable_columns = (
-            'calendrier',
+            'campagne_redirect',
             # 'roles',
             # 'tvx_state',
             # 'state_code',
@@ -96,6 +96,7 @@ class DemTvxSmartView(DemandeSmartView):
         )
         columns = (
             'calendrier',
+            'campagne_redirect',
             'roles',
             'tvx_state',
             # 'state_code',
@@ -209,9 +210,17 @@ class DemTvxSmartView(DemandeSmartView):
                 'hidden': not (hasattr(config.settings, 'SMARTVIEW_DEBUG') and config.settings.SMARTVIEW_DEBUG),
             },
             'calendrier': {
-                'form.hidden': True,
-                'title': _("Campagne"),
+                'hidden': True,
+                'title': _("Campagne H"),
                 'choices': lambda view_params: [(campagne.pk, campagne.nom) for campagne in user_campagnes(view_params, tvx=True)],
+            },
+            'campagne_redirect': {
+                'title': 'Campagne',
+                'format': 'coalesce_choice',
+                'fields': ['calendrier'],
+                'lookup': lambda view_params: [(campagne.pk, campagne.nom) for campagne in Campagne.objects.all()],
+                'choices': lambda view_params: [(campagne.pk, campagne.nom) for campagne in user_campagnes(view_params)]
+                + [(campagne.pk, '>> ' + campagne.nom) for campagne in Campagne.objects.filter(programme__isnull=True)],
             },
             'redacteur': {
                 'hidden': True,
@@ -1228,7 +1237,6 @@ class DemTvxPreAnalyseSmartView(DemTvxSmartView):
         )
         columns__add = ('tools',)
         columns__remove = (
-            'calendrier',
             'arbitrage_commission',
             # 'commentaire_provisoire_commission',
             'commentaire_definitif_commission',
@@ -1244,7 +1252,9 @@ class DemTvxPreAnalyseSmartView(DemTvxSmartView):
             'montant_unitaire_expert_metier',
             'prix_unitaire_conditional',
             'commentaire_biomed',
+            'avis_biomed',
             'montant_valide_conditional',
+            'montant_arbitrage',
         )
 
         # def base_filter(self, request):
@@ -1258,11 +1268,19 @@ class DemTvxPreAnalyseSmartView(DemTvxSmartView):
                     (Q(programme__isnull=True) | Q(domaine__isnull=True) | Q(expert_metier__isnull=True))
                     & (Q(gel__isnull=True) | Q(gel=False))
                 ],
-                # Il faut (juste) que l'utilisateur soit dispatcheur...
-                {'calendrier__dispatcher': view_params['user']},
+                # Il faut (juste) que l'utilisateur soit dispatcheur et que ce soit des travaux...
+                {'calendrier__dispatcher': view_params['user'], 'nature': 'TX'},
             )
 
         user_filters = {
+            'campagne': {
+                'type': 'select',
+                'choices': {
+                    'fieldname': 'calendrier',
+                    'label': F('calendrier__nom'),
+                    'sort': F('calendrier__code'),
+                },
+            },
             'redacteur': {
                 'type': 'select',
                 'choices': lambda view_params, base_filter_args, base_filter_kwargs, manager: [
@@ -1305,9 +1323,9 @@ class DemTvxPreAnalyseSmartView(DemTvxSmartView):
             'tvx_batiment': {
                 'type': 'select',
             },
-            'tvx_etage': {
-                'type': 'select',
-            },
+            # 'tvx_etage': {
+            #     'type': 'select',
+            # },
             'tvx_priorite': {
                 'type': 'select',
             },
