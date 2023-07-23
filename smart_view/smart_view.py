@@ -561,16 +561,19 @@ class SmartViewMetaclass(MediaDefiningClass):
 
         config_settings = main_config.get(name, {})
         if config_settings:
-            print(f"{name}:")
+            # print(f"{name}:")
             for k, v in config_settings.items():
                 if k in _meta['fields']:
                     for src, dest_f in {
+                        'hidden': lambda v: {'hidden': bool(v)},
+                        'null': lambda v: {'null': bool(v)},
+                        'default': lambda v: {'default': v},
                         'label': lambda v: {'title': v},
                         'help_text': lambda v: {'help_text': v},
                     }.items():
                         if v.get(src) is not None:
                             _meta['settings'][k][1].update(dest_f(v.get(src)))
-                    print(f"  {k}: {v} {_meta['settings'][k]}")
+                    # print(f"  {k}: {v} {_meta['settings'][k]}")
 
         # Step 6 : Create real SmartField
 
