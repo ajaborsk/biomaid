@@ -1386,7 +1386,9 @@ class DemTvxAnalyseSmartView(DemTvxSmartView):
         columns__add = ('tools',)
         columns__remove = (
             'calendrier',
+            'gel',
             'arbitrage_commission',
+            'montant_valide_conditional',
             # 'commentaire_provisoire_commission',
             'commentaire_definitif_commission',
         )
