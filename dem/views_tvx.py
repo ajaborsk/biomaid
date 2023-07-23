@@ -33,6 +33,9 @@ from smart_view.smart_page import SmartPage
 class DemTvxSmartView(DemandeSmartView):
     class Meta:
         fields__add = (
+            'quantite',
+            'priorite',
+            'cause',
             'montant_qte_validee',
             'montant_arbitrage',
             'localisation',
@@ -102,6 +105,9 @@ class DemTvxSmartView(DemandeSmartView):
             'code',
             'date',
             'uf',
+            'quantite',
+            'cause',
+            'priorite',
             'service_view',
             'pole_view',
             'redacteur',
@@ -271,7 +277,7 @@ class DemTvxSmartView(DemandeSmartView):
                 'choices': dict({None: '-- Indéfini --'}, **{p[0]: p[0] + ' - ' + p[1] for p in Demande.TVX_ETAGE_CHOICE}),
                 # null & blank are True in the model since this field isn't used for equipments
                 # but this field is needed for this SmartView
-                'blank': False,
+                'blank': True,
             },
             'tvx_priorite': {
                 'choices': dict({None: '-- Indéfinie --'}, **{p[0]: p[0] + ' - ' + p[1] for p in Demande.TVX_PRIORITE}),
@@ -432,6 +438,15 @@ class DemTvxSmartView(DemandeSmartView):
             'gel': {
                 'hidden': True,
             },
+            'priorite': {
+                'hidden': True,
+            },
+            'quantite': {
+                'hidden': True,
+            },
+            'raison': {
+                'hidden': True,
+            },
         }
 
         def base_filter(self, view_params: dict):
@@ -453,7 +468,7 @@ class DemTvxSmartView(DemandeSmartView):
         form_layout = """
         # demande de travaux courants {{ instance.code }}
             <calendrier>
-            <discipline_dmd> <nature>
+            <discipline_dmd> <nature> <quantite> <cause> <priorite>
             <couts_complementaires>
             <nom_projet>
             <redacteur>
