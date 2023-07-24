@@ -34,6 +34,7 @@ from django.urls import reverse
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.forms import BooleanField, ChoiceField, CharField, Textarea, IntegerField
+from django.utils.autoreload import autoreload_started
 
 from common import config
 from smart_view.layout import SmartLayoutFieldset, SmartLayoutField
@@ -302,6 +303,12 @@ def check_useless_role_entry(name, data):
     return alerts, {'categorie': name}
 
 
+def toml_watcher(sender, **kwargs):
+    sender.watch_dir('.', '*.toml')
+    sender.watch_dir('local', '*.toml')
+    sender.watch_dir('local/config.d', '*.toml')
+
+
 class CommonConfig(AppConfig):
     name = 'common'
     verbose_name = _("Gestion des équipements (commun)")
@@ -415,6 +422,9 @@ class CommonConfig(AppConfig):
         # Cette méthode est lancée une fois que Django est initialisé (ce qui permet d'utiliser toutes les fonctionnalités)
         #  mais une seule fois au lancement de Django
         # print('préparation BIOM_AID...')
+
+        # Add .toml files to watched ones (useful for developpement)
+        autoreload_started.connect(toml_watcher)
 
         # Configs
         self.configs = {}
