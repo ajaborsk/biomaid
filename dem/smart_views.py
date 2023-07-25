@@ -134,6 +134,7 @@ class CampagneSmartView(SmartView):
                 <discipline> <natures>  <dispatcher>
                 <debut_recensement> <fin_recensement>
         """
+
         user_filters = {
             'discipline': {'type': 'select'},
         }
@@ -1496,6 +1497,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_NEW': {
                     'ADM': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
@@ -1565,12 +1567,14 @@ class DemandeSmartView(SmartView):
                         "autre_argumentaire": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1581,6 +1585,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_APPROB': {
                     'ADM': {
+                        'campagne_redirect': True,
                         'tvx_eval_devact': True,
                         'tvx_eval_contin': True,
                         'tvx_eval_confort': True,
@@ -1610,12 +1615,14 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1626,6 +1633,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_ANA': {
                     'ADM': {
+                        'campagne_redirect': True,
                         'tvx_eval_devact': True,
                         'tvx_eval_contin': True,
                         'tvx_eval_confort': True,
@@ -1647,12 +1655,14 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                         'dispatcher_note': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1663,6 +1673,7 @@ class DemandeSmartView(SmartView):
                 },
                 'TVX_ARB': {
                     'ADM': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1671,6 +1682,7 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                     'ARB': {
+                        'campagne_redirect': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
                         "commentaire_definitif_commission": True,
@@ -1682,7 +1694,7 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                     },
                 },
-                'TVX_VAL': {
+                'TVX_VALIDE': {
                     'ADM': {
                         'gel': True,
                     },
@@ -1690,7 +1702,7 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                 },
-                'TVX_NVAL': {
+                'TVX_REFUSE': {
                     'ADM': {
                         'gel': True,
                     },
@@ -3503,6 +3515,14 @@ class DemandeEqptSmartView(DemandeSmartView):
             'enveloppe_allouee': {
                 'hidden': True,  # Use montant_valide_conditional instead
             },
+            'avis_cadre_sup': {
+                'format': 'boolean',
+                'tristate': True,
+            },
+            'decision_validateur': {
+                'format': 'boolean',
+                'tristate': True,
+            },
         }
         # Exclusion des demandes de travaux (kind of hack...)
         base_filter = Q(discipline_dmd__isnull=True) | ~Q(discipline_dmd__code='TX')
@@ -3570,11 +3590,21 @@ class DemandeEqptSmartView(DemandeSmartView):
             },
             'avis_cadre_sup': {
                 'type': 'select',
+                'choices': {
+                    'fieldname': 'avis_cadre_sup',
+                    'label': F('avis_cadre_sup'),
+                    'sort': F('avis_cadre_sup'),
+                },
                 'label': _('Avis Cadre Supérier de Pôle'),
             },
             'decision_validateur': {
                 'type': 'select',
-                'label': _('Décision Chef de pôle'),
+                'label': _('Approbation Chef de pôle'),
+                'choices': {
+                    'fieldname': 'decision_validateur',
+                    'label': F('decision_validateur'),
+                    'sort': F('decision_validateur'),
+                },
             },
         }
         form_layout = """

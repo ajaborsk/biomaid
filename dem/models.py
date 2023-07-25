@@ -398,7 +398,7 @@ class Demande(models.Model):
         related_name='demandes_avis_donne',
     )
     # décision OUI/NON/vide du cadre sup
-    avis_cadre_sup = models.BooleanField(verbose_name=_("Avis cadre sup"), help_text="", blank=True, null=True)
+    avis_cadre_sup = models.IntegerField(verbose_name=_("Avis cadre sup"), help_text="", blank=True, null=True)
     # commentaire du cadre sup
     commentaire_cadre_sup = models.TextField(default=None, blank=True, null=True)
 
@@ -412,7 +412,7 @@ class Demande(models.Model):
         related_name='demandes_approuvees',
     )
     # décision OUI/NON/vide de l'approbateur
-    decision_validateur = models.BooleanField(verbose_name=_("Approbation"), help_text="", blank=True, null=True)
+    decision_validateur = models.IntegerField(verbose_name=_("Approbation"), help_text="", blank=True, null=True)
     # commentaire lors de l'approbation
     decision_soumission = models.TextField(default=None, blank=True, null=True)
     # date de l'approbation (ou non). Pour les demandes d'intéressement, il s'agit de la date de passage en bureau de pôle

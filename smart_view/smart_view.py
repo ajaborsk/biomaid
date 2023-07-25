@@ -119,6 +119,7 @@ from smart_view.layout import (
     SmartLayoutTemplate,
 )
 from smart_view.smart_form import AutocompleteWidget, BaseSmartModelForm, EurosField
+from common import config as main_config
 
 logger = logging.getLogger(__name__)
 
@@ -555,6 +556,24 @@ class SmartViewMetaclass(MediaDefiningClass):
 
         # No update timestamp field
         _meta['update_timestamps'] = []
+
+        # Step 5 : Get config defined settings (and update class ones)
+
+        config_settings = main_config.get(name, {})
+        if config_settings:
+            # print(f"{name}:")
+            for k, v in config_settings.items():
+                if k in _meta['fields']:
+                    for src, dest_f in {
+                        'hidden': lambda v: {'hidden': bool(v)},
+                        'null': lambda v: {'null': bool(v)},
+                        'default': lambda v: {'default': v},
+                        'label': lambda v: {'title': v},
+                        'help_text': lambda v: {'help_text': v},
+                    }.items():
+                        if v.get(src) is not None:
+                            _meta['settings'][k][1].update(dest_f(v.get(src)))
+                    # print(f"  {k}: {v} {_meta['settings'][k]}")
 
         # Step 6 : Create real SmartField
 
@@ -1134,7 +1153,8 @@ class SmartViewMetaclass(MediaDefiningClass):
 
             return objects, subforms
 
-        form_layout_definition = _meta.get('form_layout')
+        _meta['form_layout'] = main_config.get(name + '.form_layout', _meta.get('form_layout'))
+        form_layout_definition = _meta['form_layout']
         _meta['form_helper'] = FormHelper()
         _meta['form_helper'].template_pack = 'geqip'
         _meta['form_helper'].form_class = 'smart-view-form'
@@ -1539,6 +1559,9 @@ class SmartView(metaclass=SmartViewMetaclass):
                     filter['choices'] = choices
             return filter
 
+        columns = self.columns_as_def(context='table.tabulator', view_params=self._view_params)
+        columns_visible = [column['field'] for column in columns if not column.get('hidden', False)]
+
         context = {
             'url_prefix': self._view_params['url_prefix'],
             'prefix': self._prefix,
@@ -1549,13 +1572,14 @@ class SmartView(metaclass=SmartViewMetaclass):
             # qui ne les reconnait pas...
             'menu_left': [dict(entry) for entry in self._meta['menu_left']],
             'menu_right': [dict(entry) for entry in self._meta['menu_right']],
-            'columns': self.columns_as_def(context='table.tabulator', view_params=self._view_params),
+            'columns': columns,
             'selectable_columns': [
                 {
                     'id': col_name,
                     'title': getattr(self, col_name).properties.get('title', ""),
                 }
                 for col_name in self._meta['selectable_columns']
+                if col_name in columns_visible
             ],
             # 'user_filters': user_filters,
             'menu_user_filters': {

@@ -35,7 +35,6 @@ from django.forms.widgets import Input, NullBooleanSelect, Select, TextInput  # 
 
 class EurosField(CharField):
     def __init__(self, *args, **kwargs):
-
         if 'max_digits' in kwargs:
             del kwargs['max_digits']
         if 'decimal_places' in kwargs:
@@ -105,7 +104,7 @@ class AutocompleteWidget(SmartWidgetMixin, Input):
         self.smart_field = smart_field
         # self.attrs['list'] = 'list__{}'.format(self.smart_field.get('fieldname'))
 
-    def get_context(self, name: str, value: Any, attrs: Optional) -> Dict[str, Any]:
+    def get_context(self, name: str, value: Any, attrs: Optional[dict]) -> Dict[str, Any]:
         context = super().get_context(name, value, attrs)
         if attrs.get('disabled', False):
             lookup = self.smart_field.get("lookup", context='form.html')
@@ -285,7 +284,6 @@ class SmartFormMixin:
                     top_errors.extend([_('(Hidden field %(name)s) %(error)s') % {'name': name, 'error': str(e)} for e in bf_errors])
                 hidden_fields.append(str(bf))
             else:
-
                 if self.instance_state is None:
                     roles = self.user_roles
                 else:

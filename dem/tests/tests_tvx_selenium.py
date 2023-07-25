@@ -83,7 +83,6 @@ class TestsTvxBaseTestsConcrete(TestsTvxBaseTests):
 
     @time_machine.travel("2020-08-02 09:00 +0000")
     def test_saisie_demande_chp(self):
-
         url = (
             reverse(
                 'dem:tvx-demande-create',
@@ -102,10 +101,10 @@ class TestsTvxBaseTestsConcrete(TestsTvxBaseTests):
             by=By.CSS_SELECTOR, value='[value="CBH"]'
         )[0].click()
 
-        # L'étage
-        self.selenium.find_element(by=By.ID, value='id_tvx_demande_table-tvx_etage').find_elements(
-            by=By.CSS_SELECTOR, value='[value="RDC"]'
-        )[0].click()
+        # L'étage (no longer needed)
+        # self.selenium.find_element(by=By.ID, value='id_tvx_demande_table-tvx_etage').find_elements(
+        #     by=By.CSS_SELECTOR, value='[value="RDC"]'
+        # )[0].click()
 
         # Saisie de l'UF
         self.selenium.find_element(by=By.ID, value='id_tvx_demande_table-uf-flexdatalist').send_keys('0003')
@@ -148,10 +147,10 @@ class TestsTvxBaseTestsConcrete(TestsTvxBaseTests):
             by=By.CSS_SELECTOR, value='[value="CBH"]'
         )[0].click()
 
-        # L'étage
-        self.selenium.find_element(by=By.ID, value='id_tvx_demande_table-tvx_etage').find_elements(
-            by=By.CSS_SELECTOR, value='[value="RDC"]'
-        )[0].click()
+        # L'étage (no longer needed)
+        # self.selenium.find_element(by=By.ID, value='id_tvx_demande_table-tvx_etage').find_elements(
+        #     by=By.CSS_SELECTOR, value='[value="RDC"]'
+        # )[0].click()
 
         # Saisie de l'UF
         self.selenium.find_element(by=By.ID, value="id_tvx_demande_table-uf-flexdatalist").clear()
