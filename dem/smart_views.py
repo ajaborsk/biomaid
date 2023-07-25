@@ -1748,6 +1748,15 @@ class DemandeSmartView(SmartView):
                         'domaine': True,
                         'expert_metier': True,
                     },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
                 },
                 'AAP_AREP': {
                     'OWN': {
@@ -1857,6 +1866,15 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
                 },
                 'AAP_AREP_AEXP': {
                     'ADM': {
@@ -1924,6 +1942,55 @@ class DemandeSmartView(SmartView):
                         'state_code': True,
                         'avis_biomed': True,
                         'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
+                },
+                'AARB': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
                     },
                 },
                 'AREP': {
