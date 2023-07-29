@@ -605,6 +605,13 @@ class SuiviAcquisitions(SmartPage):
 
 
 class listedra(SmartPage):
+    permissions = {
+        'EXP',
+        'ACH',
+        'DIS',
+        'ARB',
+        'ADM',
+    }
     smart_view_class = DraSmartView
     name = 'liste-dra'
     title = _("Liste DRA")

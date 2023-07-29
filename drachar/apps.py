@@ -73,6 +73,8 @@ class DracharConfig(AppConfig):
             'main-menu': (
                 {'label': 'Accueil', 'url_name': 'drachar:home'},
                 {'label': 'Suivi', 'url_name': 'drachar:previsionnel'},
+                {'label': 'DRA', 'url_name': 'drachar:listedra'},
+                {'label': 'Nouvelle DRA', 'url_name': 'drachar:nouvelledra21'},
                 # {'label': 'Cockpit', 'url_name': 'drachar:cockpit'},
             ),
         },
