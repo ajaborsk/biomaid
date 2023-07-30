@@ -51,7 +51,7 @@ from dem.smart_views import CampagneSmartView
 from importationdata.views import BddImportation, FileImportation
 from common.forms import (
     UserProfileForm,
-    # FournisseurForm,
+    FournisseurForm,
     MarqueForm,
     TypeForm,
     CompteForm,
@@ -71,7 +71,7 @@ from common.models import (
     CentreResponsabilite,
     Site,
     Etablissement,
-    # Fournisseur,
+    Fournisseur,
     # ContactFournisseur,
     # DataFournisseurGEF,
     Alert,
@@ -2240,9 +2240,83 @@ class StructureView(BiomAidViewMixin, TemplateView):
         return context
 
 
+
+
 class FournisseurPage(SmartPage):
     application = 'common'
     name = 'fournisseur'
     permissions = {'ADM'}
     smart_view_class = FournisseurSmartView
     title = "Fournisseurs"
+
+# ==================================================================================================================
+# GESTION DES Fournisseurs
+# ==================================================================================================================
+
+#class GestionFournisseurs(GestionData):
+#    """Class maitresse utilisant GestionData"""
+#
+#    # éléments de base à renseigner pour la class "GestionData" :
+#    ''' Paramètres de base '''
+#    url = "../gestion_fournisseurs/"
+#    # nom du template à utiliser (template gestiondata.html par défaut et automatisé à conserver sauf exception
+#    template_name = 'common/gestiondata.html'
+#    titre_template = 'Liste des Fournisseurs "génériques"'  # titre de la page
+#    model = Fournisseur  # model à utiliser
+#    form = FournisseurForm  # formulaire à utiliser
+#    item_message = "Fournisseur"  # %s pour les messages automatisés
+#    ordre_affichage = [
+#        'exercice',
+#        'lettre_budgetaire',
+#        'discipline',
+#        'code',
+#        'nom',
+#        'budget_montant',
+#    ]  # ordre d'affichage de la liste de la fct GET : ajouter dans l'ordre d'autres filtres :['filter1', 'filter2',...]
+#    template_col_title = [
+#        'EXERCICE',
+#        'BUDGET',
+#        'CODE',
+#        'NOM',
+#        'DISCIPLINE',
+#        'budget_montant',
+#    ]  # colonne à afficher dans le table
+#    template_lig_var = [
+#        'exercice',
+#        'lettre_budgetaire',
+#        'code',
+#        'nom',
+#        'discipline',
+#        'budget_montant',
+#    ]  # champs correspondants aux colonnes dans le table
+#    template_additional = None
+#    formats = {
+#        "date": "Y",
+#        "string": "",
+#        "None": "",
+#        "None": "",
+#        "None": "",
+#        "None": "",
+#    }
+#    nbcol = len(template_col_title)  # nombre de colonne du tableau
+#    q_query = [Q(cloture__isnull=True)]  # filtre de la liste du GET
+#
+#    # critères de tests d'unicité avant enregistrement, suppression ou modification
+#    def crit_unic_to_get(self, item):
+#        return {
+#            'lettre_budgetaire__iexact': getattr(item, "lettre_budgetaire"),
+#            'code__iexact': getattr(item, "code"),
+#            'cloture__isnull': True,
+#        }  # champs de comparaison pour tester les éventuels doublons / test d'unicité
+#
+#    '''Cas particulier mode Automatique CONNEXION :'''
+#    bdd = 'GEF'  # Base de données à utiliser
+#    model_update = "Compte"  # fonction update à déclancher
+#
+#    def parametre_connexion(self, kwargs):
+#        # TODoO : passer en TOML
+#        self.lien = common.config.settings.LIEN_GEF['link_compte']
+#        self.model_bdd = common.config.settings.GEFTYPE['model_gef']
+#        self.version_bdd = common.config.settings.GEFTYPE['version_gef']
+#        self.app_bdd = common.config.settings.GEFTYPE['app_gef']
+#        self.fichier = common.config.settings.LIEN_GEF['file_compte']

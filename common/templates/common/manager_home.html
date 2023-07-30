@@ -15,10 +15,11 @@
         <ul>
             <li><a href="{% url_kwargs 'common:gestion_marques' %}">Liste des Marques</a></li>
             <li><a href="{% url_kwargs 'common:gestion_types' %}">Liste des Types</a></li>
-            {% comment %}<li><a href="{% url_kwargs 'common:gestion_fournisseurs' %}">Liste des Fournisseurs</a></li> {% endcomment %}
-            <li><a href="">Liste des des Contacts de livraison des établissements</a><em style="color:red;">(problème de
+            <li><a href="{% url_kwargs 'common:fournisseur' %}">Liste des Fournisseurs GHT</a></li>
+            {% comment %}<li><a href="{% url_kwargs 'common:gestion_fournisseurs_etab' %}">Liste des Fournisseurs des établissements</a></li> {% endcomment %}
+            <li><a href="">Liste des Contacts de livraison des établissements</a><em style="color:red;">(problème de
                 lien reverse drachar à corriger)</em></li>
-            <li><a href="{% url_kwargs 'common:gestion_comptes' %}">Liste des des Comptes financiers</a></li>
+            <li><a href="{% url_kwargs 'common:gestion_comptes' %}">Liste des Comptes financiers</a></li>
         </ul>
 
         <h2>Manager MARCHE</h2>
