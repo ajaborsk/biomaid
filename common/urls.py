@@ -66,7 +66,7 @@ urlpatterns = [
     # path('calendrier_view/', views.CalendrierView.as_view(), name='calendrier'),
     # path('roles_view/', views.RoleScopeView.as_view(), name='role-scope'),
     path('no_ie/', views.no_ie_view, name='no_ie_view'),
-    #path('gestion_fournisseurs/', views.GestionFournisseurs, name='gestion_fournisseurs_etab'),
+    #path('gestion_fournisseurs_etab/', views.GestionFournisseursEtab.as_view(), name='gestion_fournisseurs_etab'),
     path('gestion_marques/', views.GestionMarques.as_view(), name='gestion_marques'),
     path('gestion_types/', views.GestionTypes.as_view(), name='gestion_types'),
     path('gestion_comptes/', views.GestionComptes.as_view(), name='gestion_comptes'),
@@ -114,3 +114,4 @@ urlpatterns.extend(get_view_url_patterns(views.ProgrammePage))
 urlpatterns.extend(get_view_url_patterns(views.RoleScopeView))
 urlpatterns.extend(get_view_url_patterns(views.CalendrierView))
 urlpatterns.extend(get_view_url_patterns(views.FournisseurPage))
+urlpatterns.extend(get_view_url_patterns(views.FournisseurEtablissementPage))

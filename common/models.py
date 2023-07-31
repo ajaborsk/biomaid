@@ -542,7 +542,8 @@ class Fournisseur(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class FournisseurEtablissement:
+class FournisseurEtablissement(models.Model):
+
     code: models.CharField = models.CharField(
         max_length=64,
         null=False,

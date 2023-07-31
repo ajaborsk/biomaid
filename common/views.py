@@ -52,6 +52,7 @@ from importationdata.views import BddImportation, FileImportation
 from common.forms import (
     UserProfileForm,
     FournisseurForm,
+    FournisseurEtablissementForm,
     MarqueForm,
     TypeForm,
     CompteForm,
@@ -79,8 +80,13 @@ from common.models import (
     Type,
     Compte,
 )
-from common.smart_views import MyAlertsSmartView, ProgrammeSmartView, RoleScopeSmartView, FournisseurSmartView
-
+from common.smart_views import (
+    MyAlertsSmartView,
+    ProgrammeSmartView,
+    RoleScopeSmartView,
+    FournisseurSmartView,
+    FournisseurEtablissementSmartView,
+)
 from common.db_utils import MyAlertsWidget, StringAgg
 from smart_view.smart_page import SmartPage
 from smart_view.smart_widget import (
@@ -2240,35 +2246,41 @@ class StructureView(BiomAidViewMixin, TemplateView):
         return context
 
 
-
+# ==================================================================================================================
+# GESTION DES FOURNISSEURS GENERIQUES ET PAR ETABLISSEMENT
+# ==================================================================================================================
 
 class FournisseurPage(SmartPage):
     application = 'common'
     name = 'fournisseur'
-    permissions = {'ADM'}
+    permissions = {'ADM', 'MAN'}
     smart_view_class = FournisseurSmartView
     title = "Fournisseurs"
 
-# ==================================================================================================================
-# GESTION DES Fournisseurs
-# ==================================================================================================================
+class FournisseurEtablissementPage(SmartPage):
+    application = 'common'
+    name = 'fournisseuretablissement'
+    permissions = {'ADM', 'MAN'}
+    smart_view_class = FournisseurEtablissementSmartView
+    title = "Fournisseurs par établissement"
 
-#class GestionFournisseurs(GestionData):
+
+#class GestionFournisseursEtab(GestionData):
 #    """Class maitresse utilisant GestionData"""
 #
 #    # éléments de base à renseigner pour la class "GestionData" :
 #    ''' Paramètres de base '''
-#    url = "../gestion_fournisseurs/"
+#    url = "../gestion_fournisseurs_etab/"
 #    # nom du template à utiliser (template gestiondata.html par défaut et automatisé à conserver sauf exception
 #    template_name = 'common/gestiondata.html'
-#    titre_template = 'Liste des Fournisseurs "génériques"'  # titre de la page
+#    titre_template = 'Liste des Fournisseurs des établissements'  # titre de la page
 #    model = Fournisseur  # model à utiliser
 #    form = FournisseurForm  # formulaire à utiliser
-#    item_message = "Fournisseur"  # %s pour les messages automatisés
+#    item_message = "Fournisseur de l'établissement"  # %s pour les messages automatisés
 #    ordre_affichage = [
-#        'exercice',
-#        'lettre_budgetaire',
-#        'discipline',
+#        'code',
+#        'etablissement',
+#        'fournisseur',
 #        'code',
 #        'nom',
 #        'budget_montant',
@@ -2311,12 +2323,12 @@ class FournisseurPage(SmartPage):
 #
 #    '''Cas particulier mode Automatique CONNEXION :'''
 #    bdd = 'GEF'  # Base de données à utiliser
-#    model_update = "Compte"  # fonction update à déclancher
+#    model_update = "FournisseurEtablissement"  # fonction update à déclancher
 #
 #    def parametre_connexion(self, kwargs):
 #        # TODoO : passer en TOML
-#        self.lien = common.config.settings.LIEN_GEF['link_compte']
+#        self.lien = common.config.settings.LIEN_GEF['link_four_etab']
 #        self.model_bdd = common.config.settings.GEFTYPE['model_gef']
 #        self.version_bdd = common.config.settings.GEFTYPE['version_gef']
 #        self.app_bdd = common.config.settings.GEFTYPE['app_gef']
-#        self.fichier = common.config.settings.LIEN_GEF['file_compte']
+#        self.fichier = common.config.settings.LIEN_GEF['file_FourEtab']

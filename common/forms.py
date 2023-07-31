@@ -19,6 +19,7 @@ from django.contrib.auth import get_user_model
 
 from common.models import (
     Fournisseur,
+    FournisseurEtablissement,
     ContactFournisseur,
     Type,
     Marque,
@@ -112,6 +113,16 @@ class FournisseurForm(forms.ModelForm, LoginRequiredMixin):
             # 'proprietaire': forms.HiddenInput(),
         }
 
+class FournisseurEtablissementForm(forms.ModelForm, LoginRequiredMixin):
+    class Meta:
+        model = FournisseurEtablissement
+        # ici placer les champs du model à traiter dans le formulaire : les champs automatiques ne doivent pas être /
+        # inscrits
+        fields = '__all__'
+        widgets = {
+            # ici placer les surcharge des champs par défaut
+            # 'proprietaire': forms.HiddenInput(),
+        }
 
 class ContactFournisseurForm(forms.ModelForm, LoginRequiredMixin):
     class Meta:
@@ -123,7 +134,6 @@ class ContactFournisseurForm(forms.ModelForm, LoginRequiredMixin):
             # ici placer les surcharge des champs par défaut
             # 'proprietaire': forms.HiddenInput(),
         }
-
 
 class TypeForm(forms.ModelForm, LoginRequiredMixin):
     class Meta:

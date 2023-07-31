@@ -15,7 +15,11 @@
         <ul>
             <li><a href="{% url_kwargs 'common:gestion_marques' %}">Liste des Marques</a></li>
             <li><a href="{% url_kwargs 'common:gestion_types' %}">Liste des Types</a></li>
-            <li><a href="{% url_kwargs 'common:fournisseur' %}">Liste des Fournisseurs GHT</a></li>
+            <li>Liste des fournisseurs</li>
+            <ul>
+                <li><a href="{% url_kwargs 'common:fournisseur' %}">Liste générique des fournisseurs</a></li>
+                <li><a href="{% url_kwargs 'common:fournisseuretablissement' %}">Liste des fournisseurs des établissements</a></li>
+            </ul>
             {% comment %}<li><a href="{% url_kwargs 'common:gestion_fournisseurs_etab' %}">Liste des Fournisseurs des établissements</a></li> {% endcomment %}
             <li><a href="">Liste des Contacts de livraison des établissements</a><em style="color:red;">(problème de
                 lien reverse drachar à corriger)</em></li>

@@ -340,6 +340,10 @@ class CommonConfig(AppConfig):
                     'label': _("Fournisseurs"),
                     'url_name': 'common:fournisseur',
                 },
+                {
+                    'label': _("Fournisseurs Etab"),
+                    'url_name': 'common:fournisseuretablissement',
+                },
             ),
         },
         'user-settings-categories': {

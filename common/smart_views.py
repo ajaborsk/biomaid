@@ -34,7 +34,7 @@ from django.utils.translation import gettext as _
 from django.apps import apps
 
 from common.db_utils import class_roles_expression, user_choices, user_lookup
-from common.models import Fournisseur, Programme, UserUfRole, Alert, Uf
+from common.models import Fournisseur, FournisseurEtablissement, Programme, UserUfRole, Alert, Uf
 from dem.models import Demande
 from document.views import all_documents_json_partial
 from drachar.models import Previsionnel
@@ -615,7 +615,6 @@ class FournisseurSmartView(SmartView):
                 },
             },
         }
-
         columns = (
             'code',
             'nom',
@@ -632,3 +631,69 @@ class FournisseurSmartView(SmartView):
             # Fournisseur
                 <code> <nom>
         """
+
+class FournisseurEtablissementSmartView(SmartView):
+    class Meta:
+        model = FournisseurEtablissement
+        permissions = {
+            'create': ('ADM', 'MAN'),
+            'delete': ('ADM',),
+            'write': {
+                None: {
+                    'ADM': {
+                        'code': True,
+                        'etablissement': True,
+                        'fournisseur': True,
+                    }
+                },
+                'EDITABLE': {
+                    'ADM': {
+                        'code': True,
+                        'etablissement': True,
+                        'fournisseur': True,
+                    },
+                },
+            },
+        }
+        columns = (
+            'code',
+            'etablissement',
+            'fournisseur',
+            'tools',
+        )
+        user_filters = {
+            'contient': {
+                'type': 'contains',
+                'fields': ['code', 'etablissement', 'fournisseur'],
+            },
+            'etablissement': {'type': 'select'},
+            'fournisseur': {'type':'select'},
+        }
+        menu_left = ({'label': "Ajouter un fournisseur d'établissement", 'url_name': 'common:fournisseuretablissement-create'},)
+        form_layout = """
+        #
+            # Fournisseur
+                <code> <etablissement>
+                <fournisseur>
+        """
+
+    tools = (
+        ToolsSmartField,
+        {
+            'title': _("Actions"),
+            'tools': [
+                {
+                    'tool': 'open',
+                    'url_name': 'common:fournisseuretablissement-update',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Ouvrir la fiche de fourisseur établissement"),
+                },
+                {
+                    'tool': 'delete',
+                    'url_name': 'common:fournisseuretablissement-ask-delete',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Supprimer la fiche de fournisseur établissement"),
+                },
+            ],
+        },
+    )
