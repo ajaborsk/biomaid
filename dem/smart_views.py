@@ -121,6 +121,14 @@ class CampagneSmartView(SmartView):
                 'lookup': user_lookup,
                 'choices': user_choices,
             },
+            'natures': {
+                'format': 'multichoice',
+                'choices': (
+                    ('EQ', 'Equipements'),
+                    ('SW', 'Logiciels'),
+                    ('TX', 'Travaux'),
+                ),
+            },
             'debut_recensement': {
                 'editor': 'dateEditor',
             },

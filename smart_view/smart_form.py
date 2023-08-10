@@ -20,7 +20,7 @@ from typing import Any, Dict, Optional
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.forms import ModelMultipleChoiceField
+from django.forms import CheckboxSelectMultiple, ModelMultipleChoiceField
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from django.utils.html import conditional_escape
@@ -34,6 +34,8 @@ from django.forms.widgets import Input, NullBooleanSelect, Select, TextInput  # 
 
 
 class EurosField(CharField):
+    """This is a (Django) Form field (not a Django Model field)"""
+
     def __init__(self, *args, **kwargs):
         if 'max_digits' in kwargs:
             del kwargs['max_digits']
@@ -79,20 +81,20 @@ class EurosField(CharField):
         return value
 
 
-class SmartWidgetMixin:
+class SmartInputWidgetMixin:
     """For future use"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
-class MoneyWidget(SmartWidgetMixin, Input):
+class MoneyInputWidget(SmartInputWidgetMixin, Input):
     class Media(forms.Media):
         js = ('smart_view/js/money.js',)
         css = {'all': ('smart_view/css/jquery.flexdatalist.min.css',)}
 
 
-class AutocompleteWidget(SmartWidgetMixin, Input):
+class AutocompleteInputWidget(SmartInputWidgetMixin, Input):
     template_name = 'smart_view/autocomplete_widget.html'
 
     class Media(forms.Media):
@@ -167,6 +169,26 @@ class AutocompleteWidget(SmartWidgetMixin, Input):
             value_label=choices.get(str(value), ''),
         )
         return text_html + script
+
+
+class MultiChoiceInputWidget(SmartInputWidgetMixin, CheckboxSelectMultiple):
+    class Media(forms.Media):
+        pass
+
+    def __init__(self, smart_field=None):
+        # widgets = [CheckboxInput(), CheckboxInput()]
+        super().__init__(attrs={'class': 'smart-multichoices'})
+        self.smart_field = smart_field
+        print(f"MultiChoice.__init__({smart_field})")
+        # self.attrs['list'] = 'list__{}'.format(self.smart_field.get('fieldname'))
+
+    # def decompress(self, value: Any) -> Any | None:
+    #     print(f"decompress {value=}")
+    #     return []
+    def get_context(self, name: str, value: Any, attrs: Optional[dict]) -> Dict[str, Any]:
+        context = super().get_context(name, value, attrs)
+        print(f"{context=}")
+        return context
 
 
 class SmartFormMixin:
@@ -504,6 +526,6 @@ class BaseSmartModelForm(SmartFormMixin, ModelForm):
                             field.initial = field.choices[0][0]
 
                 # For autocomplete widget, a API url is also needed
-                if isinstance(field.widget, AutocompleteWidget):
+                if isinstance(field.widget, AutocompleteInputWidget):
                     field.widget.url = self.url + str(fname) + '/'
                     field.widget._request = request
