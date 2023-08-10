@@ -205,7 +205,27 @@ class FileImportation:
                             # etablissement_id = Etablissement.objects.get(prefix=file_info[0])
                             etablissement_id = Etablissement.objects.get(prefix=self.etabprefix)
                             fichier = str(self.fichier)
-                            data_csv = pd.read_csv(fichier, encoding='utf-8')
+
+                            def code_converter(v):
+                                """Ensure that the code is a string : If it's a integer, convert with {04d} format, if it's None, convert to ''"""
+                                if isinstance(v, int):
+                                    return '{:04d}'.format(v)
+                                elif v is None:
+                                    return ''
+                                return v
+
+                            data_csv = pd.read_csv(
+                                fichier,
+                                encoding='utf-8',
+                                converters={
+                                    'code_etablissement': code_converter,
+                                    'code_service': code_converter,
+                                    'code_site': code_converter,
+                                    'code_pole': code_converter,
+                                    'code_ccr': code_converter,
+                                    'code_uf': code_converter,
+                                },
+                            )
                             d = timezone.now()
                             d.replace(year=d.year + 1)
                             data_csv['cloture'] = data_csv['cloture'].apply(lambda x: datetime.strptime(x, '%d/%m/%Y'))
@@ -253,7 +273,7 @@ class FileImportation:
                                 if not bdd_data_site:  # cas ou la BDD est vierge ou Queryset vide, copie du CSV
                                     for element in csv_site.index:
                                         item = {}
-                                        item["code"] = '{:04d}'.format(csv_site["code_etablisssement"][element])
+                                        item["code"] = csv_site["code_etablisssement"][element]
                                         item["nom"] = csv_site["nom_etablissement"][element]
                                         item["etablissement"] = etablissement_id
                                         site = Site(**item)
@@ -267,7 +287,7 @@ class FileImportation:
                                             if stop_transaction is False:
                                                 found_element = []
                                                 for element in csv_site.index:
-                                                    if row.code == '{:04d}'.format(csv_site["code_etablisssement"][element]):
+                                                    if row.code == csv_site["code_etablisssement"][element]:
                                                         if csv_site["nom_etablissement"][element] != row.nom:
                                                             row.nom = csv_site["nom_etablissement"][element]
                                                             row.save()
@@ -311,11 +331,11 @@ class FileImportation:
                                             #   pour chercher les nouveaux élements
                                             found = False
                                             for row in bdd_data_site:
-                                                if str('{:04d}'.format(csv_site["code_etablisssement"][element])) == row.code:
+                                                if str(csv_site["code_etablisssement"][element]) == row.code:
                                                     found = True
                                             if not found:
                                                 item = {}
-                                                item["code"] = '{:04d}'.format(csv_site["code_etablisssement"][element])
+                                                item["code"] = csv_site["code_etablisssement"][element]
                                                 item["nom"] = csv_site["nom_etablissement"][element]
                                                 item["etablissement"] = etablissement_id
                                                 site = Site(**item)
@@ -325,7 +345,7 @@ class FileImportation:
                                 if not bdd_data_pole:  # cas ou la BDD est vierge ou Queryset vide, copie du CSV
                                     for element in csv_pole.index:
                                         item = {}
-                                        item["code"] = '{:04d}'.format(csv_pole['code_pole'][element])
+                                        item["code"] = csv_pole['code_pole'][element]
                                         item["nom"] = csv_pole['nom_pole_long'][element]
                                         item["etablissement"] = etablissement_id
                                         pole = Pole(**item)
@@ -336,11 +356,11 @@ class FileImportation:
                                         # pour supprimer les manquants ou corrier les modifications
                                         found_element = []
                                         for element in csv_pole.index:
-                                            if row.code == '{:04d}'.format(csv_pole['code_pole'][element]):
+                                            if row.code == csv_pole['code_pole'][element]:
                                                 if csv_pole['nom_pole_long'][element] != row.nom:
                                                     row.nom = csv_pole['nom_pole_long'][element]
                                                     row.save()
-                                                found_element = found_element + ['{:04d}'.format(csv_pole['code_pole'][element])]
+                                                found_element = found_element + [csv_pole['code_pole'][element]]
                                         """________________________test intégrité csv________________________________"""
                                         found_row = found_row + [row.code]
                                         if not found_element:  # suppression de la BDD car absent du CSV
@@ -376,11 +396,11 @@ class FileImportation:
                                         #   pour chercher les nouveaux élements
                                         found = False
                                         for row in bdd_data_pole:
-                                            if str('{:04d}'.format(csv_pole['code_pole'][element])) == row.code:
+                                            if str(csv_pole['code_pole'][element]) == row.code:
                                                 found = True
                                         if not found:
                                             item = {}
-                                            item["code"] = '{:04d}'.format(csv_pole['code_pole'][element])
+                                            item["code"] = csv_pole['code_pole'][element]
                                             item["nom"] = csv_pole['nom_pole_long'][element]
                                             item["etablissement"] = etablissement_id
                                             pole = Pole(**item)
@@ -390,7 +410,7 @@ class FileImportation:
                                     if not bdd_data_cr:  # cas ou la BDD est vierge ou Queryset vide, copie du CSV
                                         for element in csv_cr.index:
                                             item = {}
-                                            item["code"] = '{:04d}'.format(csv_cr['code_ccr'][element])
+                                            item["code"] = csv_cr['code_ccr'][element]
                                             item["nom"] = csv_cr['nom_ccr'][element]
                                             item["etablissement"] = etablissement_id
                                             cr = CentreResponsabilite(**item)
@@ -401,11 +421,11 @@ class FileImportation:
                                             #   pour supprimer les manquants ou corrier les modifications
                                             found_element = []
                                             for element in csv_cr.index:
-                                                if row.code == '{:04d}'.format(csv_cr['code_ccr'][element]):
+                                                if row.code == csv_cr['code_ccr'][element]:
                                                     if csv_cr['nom_ccr'][element] != row.nom:
                                                         row.nom = csv_cr['nom_ccr'][element]
                                                         row.save()
-                                                    found_element = found_element + ['{:04d}'.format(csv_cr['code_ccr'][element])]
+                                                    found_element = found_element + [csv_cr['code_ccr'][element]]
                                             """________________________test intégrité csv____________________________"""
                                             found_row = found_row + [row.code]
                                             if not found_element:  # suppression de la BDD car absent du CSV
@@ -442,11 +462,11 @@ class FileImportation:
                                             #   le CSV à la BDD pour chercher les nouveaux élements
                                             found = False
                                             for row in bdd_data_cr:
-                                                if str('{:04d}'.format(csv_cr['code_ccr'][element])) == row.code:
+                                                if str(csv_cr['code_ccr'][element]) == row.code:
                                                     found = True
                                             if not found:
                                                 item = {}
-                                                item["code"] = '{:04d}'.format(csv_cr['code_ccr'][element])
+                                                item["code"] = csv_cr['code_ccr'][element]
                                                 item["nom"] = csv_cr['nom_ccr'][element]
                                                 item["etablissement"] = etablissement_id
                                                 cr = CentreResponsabilite(**item)
@@ -456,7 +476,7 @@ class FileImportation:
                                     if not bdd_data_service:  # cas ou la BDD est vierge ou Queryset vide, copie du CSV
                                         for element in csv_service.index:
                                             item = {}
-                                            item["code"] = '{:04d}'.format(csv_service['code_service'][element])
+                                            item["code"] = csv_service['code_service'][element]
                                             item["nom"] = csv_service['nom_service_long'][element]
                                             item["etablissement"] = etablissement_id
                                             cr = Service(**item)
@@ -467,13 +487,11 @@ class FileImportation:
                                             #  pour supprimer les manquants ou corrier les modifications
                                             found_element = []
                                             for element in csv_service.index:
-                                                if row.code == '{:04d}'.format(csv_service['code_service'][element]):
+                                                if row.code == csv_service['code_service'][element]:
                                                     if csv_service['nom_service_long'][element] != row.nom:
                                                         row.nom = csv_service['nom_service_long'][element]
                                                         row.save()
-                                                    found_element = found_element + [
-                                                        '{:04d}'.format(csv_service['code_service'][element])
-                                                    ]
+                                                    found_element = found_element + [csv_service['code_service'][element]]
                                             """______________________test intégrité csv______________________________"""
                                             found_row = found_row + [row.code]
                                             if not found_element:  # suppression de la BDD car absent du CSV
@@ -509,11 +527,11 @@ class FileImportation:
                                             #  le CSV à la BDD pour chercher les nouveaux élements
                                             found = False
                                             for row in bdd_data_service:
-                                                if str('{:04d}'.format(csv_service['code_service'][element])) == row.code:
+                                                if str(csv_service['code_service'][element]) == row.code:
                                                     found = True
                                             if not found:
                                                 item = {}
-                                                item["code"] = '{:04d}'.format(csv_service['code_service'][element])
+                                                item["code"] = csv_service['code_service'][element]
                                                 item["nom"] = csv_service['nom_service_long'][element]
                                                 item["etablissement"] = etablissement_id
                                                 cr = Service(**item)
@@ -523,29 +541,29 @@ class FileImportation:
                                     if not bdd_data_uf:  # cas ou la BDD est vierge ou Queryset vide, copie du CSV
                                         for element in csv_uf.index:
                                             item = {}
-                                            item["code"] = '{:04d}'.format(csv_uf['code_uf'][element])
+                                            item["code"] = csv_uf['code_uf'][element]
                                             item["nom"] = csv_uf['nom_uf_long'][element]
                                             item["etablissement"] = etablissement_id
                                             item['lettre_budget'] = csv_uf['budget'][element]
                                             # TODO : créer une table des lettre Budgétaire ?
                                             #  ok, mais prévoir l modif de models + modif bdd actuelle
                                             item['site'] = Site.objects.get(
-                                                code='{:04d}'.format(csv_uf["code_etablisssement"][element]),
+                                                code=csv_uf["code_etablisssement"][element],
                                                 etablissement_id=etablissement_id,
                                                 cloture=None,
                                             )
                                             item['pole'] = Pole.objects.get(
-                                                code='{:04d}'.format(csv_uf['code_pole'][element]),
+                                                code=csv_uf['code_pole'][element],
                                                 etablissement_id=etablissement_id,
                                                 cloture=None,
                                             )
                                             item['centre_responsabilite'] = CentreResponsabilite.objects.get(
-                                                code='{:04d}'.format(csv_uf['code_ccr'][element]),
+                                                code=csv_uf['code_ccr'][element],
                                                 etablissement_id=etablissement_id,
                                                 cloture=None,
                                             )
                                             item['service'] = Service.objects.get(
-                                                code='{:04d}'.format(csv_uf['code_service'][element]),
+                                                code=csv_uf['code_service'][element],
                                                 etablissement_id=etablissement_id,
                                                 cloture=None,
                                             )
@@ -564,7 +582,7 @@ class FileImportation:
                                             # pour supprimer les manquants ou corrier les modifications
                                             found_element = []
                                             for element in csv_uf.index:
-                                                if row.code == '{:04d}'.format(csv_uf['code_uf'][element]):
+                                                if row.code == csv_uf['code_uf'][element]:
                                                     if csv_uf["cloture"][element] <= timezone.now().replace(tzinfo=None):
                                                         row.cloture = csv_uf["cloture"][element]
                                                         row.save()
@@ -585,33 +603,33 @@ class FileImportation:
                                                             row.save()
                                                         if csv_uf["code_etablisssement"][element] != row.site:
                                                             row.site = Site.objects.get(
-                                                                code='{:04d}'.format(csv_uf["code_etablisssement"][element]),
+                                                                code=csv_uf["code_etablisssement"][element],
                                                                 etablissement_id=etablissement_id,
                                                                 cloture=None,
                                                             )
                                                             row.save()
                                                         if csv_uf["code_pole"][element] != row.pole:
                                                             row.pole = Pole.objects.get(
-                                                                code='{:04d}'.format(csv_uf["code_pole"][element]),
+                                                                code=csv_uf["code_pole"][element],
                                                                 etablissement_id=etablissement_id,
                                                                 cloture=None,
                                                             )
                                                             row.save()
                                                         if csv_uf["code_ccr"][element] != row.centre_responsabilite:
                                                             row.centre_responsabilite = CentreResponsabilite.objects.get(
-                                                                code='{:04d}'.format(csv_uf["code_ccr"][element]),
+                                                                code=csv_uf["code_ccr"][element],
                                                                 etablissement_id=etablissement_id,
                                                                 cloture=None,
                                                             )
                                                             row.save()
                                                         if csv_uf["code_service"][element] != row.service:
                                                             row.service = Service.objects.get(
-                                                                code='{:04d}'.format(csv_uf["code_service"][element]),
+                                                                code=csv_uf["code_service"][element],
                                                                 etablissement_id=etablissement_id,
                                                                 cloture=None,
                                                             )
                                                             row.save()
-                                                    found_element = found_element + ['{:04d}'.format(csv_uf['code_uf'][element])]
+                                                    found_element = found_element + [csv_uf['code_uf'][element]]
                                             """______________________test intégrité csv______________________________"""
                                             found_row = found_row + [row.code]
                                             if not found_element:  # suppression de la BDD car absent du CSV
@@ -647,36 +665,36 @@ class FileImportation:
                                             # le CSV à la BDD pour chercher les nouveaux élements
                                             found = False
                                             for row in bdd_data_uf:
-                                                if str('{:04d}'.format(csv_uf['code_uf'][element])) == row.code:
+                                                if str(csv_uf['code_uf'][element]) == row.code:
                                                     found = True
                                             if not found and (
                                                 str(csv_uf["nom_uf_long"][element]).casefold()[:2] != "xx"
                                                 or csv_uf["cloture"][element] < timezone.now().replace(tzinfo=None)
                                             ):
                                                 item = {}
-                                                item["code"] = '{:04d}'.format(csv_uf['code_uf'][element])
+                                                item["code"] = csv_uf['code_uf'][element]
                                                 item["nom"] = csv_uf['nom_uf_long'][element]
                                                 item["etablissement"] = etablissement_id
                                                 item['lettre_budget'] = csv_uf['budget'][element]
                                                 # TODO : créer une table des lettre Budgétaire ?
                                                 #  ok, mais prévoir l modif de models + modif bdd actuelle
                                                 item['site'] = Site.objects.get(
-                                                    code='{:04d}'.format(csv_uf["code_etablisssement"][element]),
+                                                    code=csv_uf["code_etablisssement"][element],
                                                     etablissement_id=etablissement_id,
                                                     cloture=None,
                                                 )
                                                 item['pole'] = Pole.objects.get(
-                                                    code='{:04d}'.format(csv_uf['code_pole'][element]),
+                                                    code=csv_uf['code_pole'][element],
                                                     etablissement_id=etablissement_id,
                                                     cloture=None,
                                                 )
                                                 item['centre_responsabilite'] = CentreResponsabilite.objects.get(
-                                                    code='{:04d}'.format(csv_uf['code_ccr'][element]),
+                                                    code=csv_uf['code_ccr'][element],
                                                     etablissement_id=etablissement_id,
                                                     cloture=None,
                                                 )
                                                 item['service'] = Service.objects.get(
-                                                    code='{:04d}'.format(csv_uf['code_service'][element]),
+                                                    code=csv_uf['code_service'][element],
                                                     etablissement_id=etablissement_id,
                                                     cloture=None,
                                                 )
