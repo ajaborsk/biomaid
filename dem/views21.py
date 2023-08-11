@@ -18,12 +18,14 @@ import json
 from urllib.parse import quote_plus
 
 from django.db.models import Q
+from django.template import Context, Engine
 from django.utils.timezone import now
 
 from django.utils.translation import gettext as _
 
 # from common.base_views import BiomAidView
 from django.views.generic import TemplateView
+from common import config
 
 from common.base_views import BiomAidViewMixin
 from common.models import UserUfRole
@@ -62,6 +64,13 @@ class DemHomeView(BiomAidViewMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        engine = Engine.get_default()
+        content_context = Context({'url_prefix': self.url_prefix})
+        template = engine.from_string(
+            config.get('dem.home.template', default="""Set the dem.home.template variable in a config file !""")
+        )
+        context['content_html'] = template.render(content_context)
+
         context['title'] = "Accueil"
         context['campagne_code_kwargs'] = {'campagne_code': '2022-PE'}
         return context
