@@ -20,7 +20,7 @@ from typing import Any, Dict, Optional
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.forms import CheckboxSelectMultiple, ModelMultipleChoiceField
+from django.forms import CheckboxSelectMultiple, ModelMultipleChoiceField, MultipleChoiceField
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from django.utils.html import conditional_escape
@@ -34,7 +34,7 @@ from django.forms.widgets import Input, NullBooleanSelect, Select, TextInput  # 
 
 
 class EurosField(CharField):
-    """This is a (Django) Form field (not a Django Model field)"""
+    """This is a (Django) **Form** field (not a Django Model field)"""
 
     def __init__(self, *args, **kwargs):
         if 'max_digits' in kwargs:
@@ -78,6 +78,22 @@ class EurosField(CharField):
                     )
                     raise err
 
+        return value
+
+
+class MultiChoiceField(MultipleChoiceField):
+    def __init__(self, *args, **kwargs):
+        # AJA : I really don't know why, but 'encoder' and 'decoder' kwargs
+        # are not handled by MultipleChoiceField but are provided by form creation factory...
+        if 'encoder' in kwargs:
+            # print(f"{kwargs['encoder']} {kwargs['decoder']}")
+            del kwargs['encoder']
+            del kwargs['decoder']
+        super().__init__(*args, **kwargs)
+
+    def clean(self, value):
+        # The MultiChoiceField original clean method replace a empty list with None
+        # This is not the behaviour we need here, so keep the [] and return it
         return value
 
 
@@ -180,15 +196,14 @@ class MultiChoiceInputWidget(SmartInputWidgetMixin, CheckboxSelectMultiple):
         super().__init__(attrs={'class': 'smart-multichoices'})
         self.smart_field = smart_field
         print(f"MultiChoice.__init__({smart_field})")
-        # self.attrs['list'] = 'list__{}'.format(self.smart_field.get('fieldname'))
 
-    # def decompress(self, value: Any) -> Any | None:
-    #     print(f"decompress {value=}")
-    #     return []
-    def get_context(self, name: str, value: Any, attrs: Optional[dict]) -> Dict[str, Any]:
-        context = super().get_context(name, value, attrs)
-        print(f"{context=}")
-        return context
+    def format_value(self, value):
+        return [cx[0] for cx in self.choices if cx[0] in value]
+
+    # def get_context(self, name: str, value: Any, attrs: Optional[dict]) -> Dict[str, Any]:
+    #     context = super().get_context(name, value, attrs)
+    #     print(f"{context=}")
+    #     return context
 
 
 class SmartFormMixin:
