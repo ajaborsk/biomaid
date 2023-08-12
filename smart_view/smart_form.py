@@ -82,6 +82,8 @@ class EurosField(CharField):
 
 
 class MultiChoiceField(MultipleChoiceField):
+    """This is a (Django) **Form** field (not a Django Model field)"""
+
     def __init__(self, *args, **kwargs):
         # AJA : I really don't know why, but 'encoder' and 'decoder' kwargs
         # are not handled by MultipleChoiceField but are provided by form creation factory...
@@ -195,15 +197,10 @@ class MultiChoiceInputWidget(SmartInputWidgetMixin, CheckboxSelectMultiple):
         # widgets = [CheckboxInput(), CheckboxInput()]
         super().__init__(attrs={'class': 'smart-multichoices'})
         self.smart_field = smart_field
-        print(f"MultiChoice.__init__({smart_field})")
+        # print(f"MultiChoice.__init__({smart_field})")
 
     def format_value(self, value):
         return [cx[0] for cx in self.choices if cx[0] in value]
-
-    # def get_context(self, name: str, value: Any, attrs: Optional[dict]) -> Dict[str, Any]:
-    #     context = super().get_context(name, value, attrs)
-    #     print(f"{context=}")
-    #     return context
 
 
 class SmartFormMixin:
