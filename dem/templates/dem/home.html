@@ -2,5 +2,5 @@
 {% load static %}
 {% load url_kwargs %}
 {% block tab_contents %}
-    {{ content_html }}
+    {{ content_html|safe }}
 {% endblock tab_contents %}

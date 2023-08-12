@@ -22,6 +22,7 @@ from django.template import Context, Engine
 from django.utils.timezone import now
 
 from django.utils.translation import gettext as _
+from html_sanitizer.django import get_sanitizer
 
 # from common.base_views import BiomAidView
 from django.views.generic import TemplateView
@@ -69,7 +70,9 @@ class DemHomeView(BiomAidViewMixin, TemplateView):
         template = engine.from_string(
             config.get('dem.home.template', default="""Set the dem.home.template variable in a config file !""")
         )
-        context['content_html'] = template.render(content_context)
+        # html sanitizer
+        sanitizer = get_sanitizer('page_content')
+        context['content_html'] = sanitizer.sanitize(template.render(content_context))
 
         context['title'] = "Accueil"
         context['campagne_code_kwargs'] = {'campagne_code': '2022-PE'}
