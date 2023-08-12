@@ -461,12 +461,15 @@ class AnalysisSmartFormat(SmartFormat):
 
 class MultiChoiceSmartFormat(SmartFormat):
     class Media:
-        pass
+        js = ("smart_view/js/smart-view-multichoice.js",)
 
     def get_definition(self, target: str = None, view_params: dict = None):
         settings = super().get_definition(target, view_params)
         settings["formatter"] = "'multichoice'"
-        settings['formatter_params'] = {'choices': {'PO': "popo", 'LI': "lili"}}
+        choices = dict(self.get("choices"))
+        if callable(choices):
+            choices = dict(choices(view_params))
+        settings['formatter_params'] = {'lookup': choices}
         return settings
 
     def get_widget(self, context=None, default=None, **kwargs):
