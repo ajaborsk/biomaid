@@ -2111,6 +2111,12 @@ class DemandeSmartView(SmartView):
                     },
                     'EXP': {
                         'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
