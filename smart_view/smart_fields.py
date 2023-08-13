@@ -42,7 +42,7 @@ from django.forms.widgets import (
 
 # from document.forms import DocumentsSmartFormat
 from smart_view.smart_expression import SmartExpression
-from smart_view.smart_form import AutocompleteWidget
+from smart_view.smart_form import AutocompleteInputWidget, MultiChoiceInputWidget
 
 logger = logging.getLogger(__name__)
 
@@ -311,7 +311,7 @@ class ChoiceSmartFormat(SmartFormat):
 
     def get_widget(self, context=None, default=None, **kwargs):
         if self.get('autocomplete', context):
-            return AutocompleteWidget(smart_field=self.field)
+            return AutocompleteInputWidget(smart_field=self.field)
         else:
             return Select()
 
@@ -459,6 +459,23 @@ class AnalysisSmartFormat(SmartFormat):
         return settings
 
 
+class MultiChoiceSmartFormat(SmartFormat):
+    class Media:
+        js = ("smart_view/js/smart-view-multichoice.js",)
+
+    def get_definition(self, target: str = None, view_params: dict = None):
+        settings = super().get_definition(target, view_params)
+        settings["formatter"] = "'multichoice'"
+        choices = dict(self.get("choices"))
+        if callable(choices):
+            choices = dict(choices(view_params))
+        settings['formatter_params'] = {'lookup': choices}
+        return settings
+
+    def get_widget(self, context=None, default=None, **kwargs):
+        return MultiChoiceInputWidget(smart_field=self.field)
+
+
 class SubviewsSmartFormat(SmartFormat):
     def get_definition(self, target=None, view_params: dict = None):
         settings = super().get_definition(target, view_params)
@@ -504,6 +521,7 @@ apps.get_app_config('smart_view').register_formats(
         'money': MoneySmartFormat,
         'conditional_money': ConditionnalMoneySmartFormat,
         'boolean': BooleanSmartFormat,
+        'multichoice': MultiChoiceSmartFormat,
         'html': HtmlSmartFormat,
         'analysis': AnalysisSmartFormat,
         'subviews': SubviewsSmartFormat,

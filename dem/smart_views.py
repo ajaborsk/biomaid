@@ -121,6 +121,14 @@ class CampagneSmartView(SmartView):
                 'lookup': user_lookup,
                 'choices': user_choices,
             },
+            'natures': {
+                'format': 'multichoice',
+                'choices': (
+                    ('EQ', 'Equipements'),
+                    ('SW', 'Logiciels'),
+                    ('TX', 'Travaux'),
+                ),
+            },
             'debut_recensement': {
                 'editor': 'dateEditor',
             },
@@ -1736,6 +1744,15 @@ class DemandeSmartView(SmartView):
                         'domaine': True,
                         'expert_metier': True,
                     },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
                 },
                 'AAP_AREP': {
                     'OWN': {
@@ -1845,6 +1862,15 @@ class DemandeSmartView(SmartView):
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
                 },
                 'AAP_AREP_AEXP': {
                     'ADM': {
@@ -1912,6 +1938,184 @@ class DemandeSmartView(SmartView):
                         'state_code': True,
                         'avis_biomed': True,
                         'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
+                },
+                'AAP_BLK': {
+                    # A approuver, bloqué (budget insuffisant)
+                    # TODO
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                    },
+                },
+                'BLK': {
+                    # Bloqué (budget insuffisant)
+                    # TODO
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                    },
+                },
+                'AARB': {
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
+                    },
+                },
+                'AEXP': {
+                    # A expertiser
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'CSP': {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
+                    'ARB': {
+                        'campagne_redirect': True,
+                        "arbitrage_commission": True,
+                        "commentaire_provisoire_commission": True,
+                        "commentaire_definitif_commission": True,
+                        "quantite_validee": True,
+                        "enveloppe_allouee": True,
+                        'gel': True,
                     },
                 },
                 'AREP': {
@@ -1985,6 +2189,29 @@ class DemandeSmartView(SmartView):
                     'ARB': {
                         'state_code': True,
                         'gel': True,
+                    },
+                },
+                'WAIT': {
+                    # En attente (programme non actif)
+                    'ADM': {
+                        'state_code': True,
+                    },
+                    'DIS': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                    },
+                    'EXP': {
+                        'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
                     },
                 },
                 'VALIDE': {},

@@ -13,6 +13,7 @@ pour leur usage propre.
     create-module.rst
     doc_smart_view/smart_widget.rst
     new-version.rst
+    create-type.rst
 
 
 **à compléter...**

@@ -156,6 +156,20 @@ TEMPLATES = [
     },
 ]
 
+
+HTML_SANITIZERS = {
+    'page_content': {
+        'tags': {'div', 'span', 'p', 'h1', 'h2', 'hr', 'br', 'a', 'ul', 'li'},
+        'attributes': {
+            'div': {
+                'class',
+            },
+            'a': ('href',),
+        },
+        'separate': ('div',),
+    },
+}
+
 AUTHENTICATION_BACKENDS = (
     'common.auth_backends.MyLDAPBackend',
     'common.auth_backends.MyAuthBackend',
