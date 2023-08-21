@@ -362,11 +362,11 @@ class PrevisionnelSmartView(SmartView):
                 'formatter': "'suivi'",
             },
             'date_debut': {
-                'editor': 'dateEditor',
+                # 'editor': 'dateEditor',
                 'datetime_format': '%d/%m/%Y',
             },
             'date_estimative_mes': {
-                'editor': 'dateEditor',
+                # 'editor': 'dateEditor',
                 'datetime_format': '%m/%Y',
             },
             'solder_ligne': {

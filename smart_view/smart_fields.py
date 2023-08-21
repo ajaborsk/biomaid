@@ -148,6 +148,12 @@ class BooleanSmartFormat(SmartFormat):
 
 
 class SmartDateInput(DateInput):
+    class Media:
+        js = (
+            "smart_view/js/datepicker.min.js",
+            "smart_view/js/datepicker.fr.js",
+        )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -162,6 +168,8 @@ class SmartDateInput(DateInput):
 class DateSmartFormat(SmartFormat):
     class Media:
         js = (
+            "smart_view/js/datepicker.min.js",
+            "smart_view/js/datepicker.fr.js",
             "smart_view/js/luxon.min.js",
             "smart_view/js/smart-table-datetime.js",
         )
@@ -235,7 +243,8 @@ class DatetimeSmartFormat(SmartFormat):
         }
         settings["hoz_align"] = self.get("hoz_align", default="center")
         # TODO: A real date editor (cf. tabulator example)
-        settings["editor"] = "'" + self.get("editor", context=target, default="datetimeEditor") + "'"
+        settings["editor"] = "'" + self.get("editor", context=target, default="date") + "'"
+        settings["editor_params"] = {'format': 'iso'}
         return settings
 
 
