@@ -178,7 +178,7 @@ class Lot(models.Model):
     id = models.AutoField(primary_key=True)
     code = models.IntegerField()
     intitule = models.TextField()
-    code_four = models.ForeignKey('common.Fournisseur', on_delete=models.CASCADE)
+    code_four = models.ForeignKey('common.Fournisseur', on_delete=models.PROTECT)
     commentaire = models.TextField()
     montant_mini = models.DecimalField(max_digits=20, decimal_places=0, default=None, blank=False, null=False)
     sans_mini = models.BooleanField()

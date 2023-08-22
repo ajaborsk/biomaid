@@ -89,6 +89,6 @@ class GenericDocument(models.Model):
     modification_datetime = models.DateTimeField(auto_now=True, verbose_name=_("date de modification"))
     desactivation_datetime = models.DateTimeField(null=True, blank=True)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id = models.CharField(max_length=64)
     content_object = GenericForeignKey('content_type', 'object_id')
