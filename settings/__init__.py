@@ -311,6 +311,13 @@ LOGGING = {
     },
 }
 
+# Use a file based caching
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "/var/tmp/django_cache",
+    }
+}
 
 # Do not modify code below, please !
 

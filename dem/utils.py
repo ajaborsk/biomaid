@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 from django.db.models import Q
+from django.core.cache import cache
 
 from common.models import UserUfRole
 from common import config
@@ -36,48 +37,66 @@ def user_campagnes(view_params: dict, tvx=False):
     """
     Fonction qui retourne un queryset avec la liste des campagnes actives pour un utilisateur donné à une date donnée.
     """
-    f_role = UserUfRole.objects.filter(user=view_params['user'], role_code__in=config.settings.DEM_DEMANDE_CREATION_ROLES)
+    cache_key = view_params['user'].username + '-open-campaigns'
+    # print(f"{cache_key=}")
 
-    if tvx is False:
-        tvx_condition = ~Q(code__contains='TVX')
-    elif tvx is True:
-        tvx_condition = Q(code__contains='TVX')
-    else:
-        tvx_condition = Q()
+    campaigns_pk_list = cache.get(cache_key)
 
-    return (
-        Campagne.objects.order_by()
-        .filter(
-            tvx_condition
-            & (
-                Q(programme__uf__in=f_role.values('uf'))
-                | Q(programme__uf__service__in=f_role.values('service'))
-                | Q(programme__uf__centre_responsabilite__in=f_role.values('centre_responsabilite'))
-                | Q(programme__uf__pole__in=f_role.values('pole'))
-                | Q(programme__uf__site__in=f_role.values('site'))
-                | Q(programme__uf__etablissement__in=f_role.values('etablissement'))
-                | Q(programme__pole__uf__in=f_role.values('uf'))
-                | Q(programme__pole__uf__service__in=f_role.values('service'))
-                | Q(programme__pole__uf__centre_responsabilite__in=f_role.values('centre_responsabilite'))
-                | Q(programme__pole__in=f_role.values('pole'))
-                | Q(programme__pole__uf__site__in=f_role.values('site'))
-                | Q(programme__pole__uf__etablissement__in=f_role.values('etablissement'))
-                | Q(programme__site__uf__in=f_role.values('uf'))
-                | Q(programme__site__uf__service__in=f_role.values('service'))
-                | Q(programme__site__uf__centre_responsabilite__in=f_role.values('centre_responsabilite'))
-                | Q(programme__site__uf__pole__in=f_role.values('pole'))
-                | Q(programme__site__in=f_role.values('site'))
-                | Q(programme__site__uf__etablissement__in=f_role.values('etablissement'))
-                | Q(programme__etablissement__uf__in=f_role.values('uf'))
-                | Q(programme__etablissement__uf__service__in=f_role.values('service'))
-                | Q(programme__etablissement__uf__centre_responsabilite__in=f_role.values('centre_responsabilite'))
-                | Q(programme__etablissement__uf__pole__in=f_role.values('pole'))
-                | Q(programme__etablissement__uf__site__in=f_role.values('site'))
-                | Q(programme__etablissement__in=f_role.values('etablissement'))
-            ),
-            debut_recensement__lt=view_params['now'],
-            fin_recensement__gt=view_params['now'],
+    if not campaigns_pk_list:
+        # Not in cache ==> compute the available campaigns list
+        # print("  ==> Not in cache")
+        f_role = UserUfRole.objects.filter(user=view_params['user'], role_code__in=config.settings.DEM_DEMANDE_CREATION_ROLES)
+
+        if tvx is False:
+            tvx_condition = ~Q(code__contains='TVX')
+        elif tvx is True:
+            tvx_condition = Q(code__contains='TVX')
+        else:
+            tvx_condition = Q()
+
+        campaigns_pk_list = (
+            Campagne.objects.order_by()
+            .filter(
+                tvx_condition
+                & (
+                    Q(programme__uf__in=f_role.values('uf'))
+                    | Q(programme__uf__service__in=f_role.values('service'))
+                    | Q(programme__uf__centre_responsabilite__in=f_role.values('centre_responsabilite'))
+                    | Q(programme__uf__pole__in=f_role.values('pole'))
+                    | Q(programme__uf__site__in=f_role.values('site'))
+                    | Q(programme__uf__etablissement__in=f_role.values('etablissement'))
+                    | Q(programme__pole__uf__in=f_role.values('uf'))
+                    | Q(programme__pole__uf__service__in=f_role.values('service'))
+                    | Q(programme__pole__uf__centre_responsabilite__in=f_role.values('centre_responsabilite'))
+                    | Q(programme__pole__in=f_role.values('pole'))
+                    | Q(programme__pole__uf__site__in=f_role.values('site'))
+                    | Q(programme__pole__uf__etablissement__in=f_role.values('etablissement'))
+                    | Q(programme__site__uf__in=f_role.values('uf'))
+                    | Q(programme__site__uf__service__in=f_role.values('service'))
+                    | Q(programme__site__uf__centre_responsabilite__in=f_role.values('centre_responsabilite'))
+                    | Q(programme__site__uf__pole__in=f_role.values('pole'))
+                    | Q(programme__site__in=f_role.values('site'))
+                    | Q(programme__site__uf__etablissement__in=f_role.values('etablissement'))
+                    | Q(programme__etablissement__uf__in=f_role.values('uf'))
+                    | Q(programme__etablissement__uf__service__in=f_role.values('service'))
+                    | Q(programme__etablissement__uf__centre_responsabilite__in=f_role.values('centre_responsabilite'))
+                    | Q(programme__etablissement__uf__pole__in=f_role.values('pole'))
+                    | Q(programme__etablissement__uf__site__in=f_role.values('site'))
+                    | Q(programme__etablissement__in=f_role.values('etablissement'))
+                ),
+                debut_recensement__lt=view_params['now'],
+                fin_recensement__gt=view_params['now'],
+            )
+            .distinct()
+            .order_by('fin_recensement')
+            .values_list('pk', flat=True)
         )
-        .distinct()
-        .order_by('fin_recensement')
-    )
+        # Put result in cache, with 6 hours timeout
+        cache.set(cache_key, list(campaigns_pk_list), 21600)
+    else:
+        # print(f"  In cache: {campaigns_pk_list=}")
+        pass
+
+    # result = Campagne.objects.filter(pk=3)
+
+    return Campagne.objects.filter(pk__in=campaigns_pk_list)
