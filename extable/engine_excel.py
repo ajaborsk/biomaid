@@ -4,10 +4,10 @@ from typing import Type
 
 from pandas import read_excel
 
-from django.db import models
 from django.utils.translation import gettext as _
 
 from extable.engine_pandas import DataFrameExtableEngine
+from overoly.base import OverolyModel as Model
 
 
 class ExcelEngine(DataFrameExtableEngine):
@@ -30,7 +30,7 @@ class ExcelEngine(DataFrameExtableEngine):
             warning(_("File not found: '{}'. No schema guessing.").format(filename))
         return {}
 
-    def read_into_model(self, filename: str, model: Type[models.Model], log, progress) -> int:
+    def read_into_model(self, filename: str, model: Type[Model], log, progress) -> int:
         header_row = self.schema['parser_opts'].get('header_row', 1) - 1
         df = read_excel(filename, header=header_row)
         return self.dataframe_to_model(df, model, log, progress)

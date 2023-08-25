@@ -20,8 +20,10 @@ from django.utils.translation import gettext as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+from overoly.base import OverolyModel as Model
 
-class Document(models.Model):
+
+class Document(Model):
     class Meta:
         indexes = [models.Index(fields=['hash'])]
 
@@ -75,7 +77,7 @@ class Document(models.Model):
         return f"{self.get_doc_type_display()}: '{self.logical_path}' ({self.description})"
 
 
-class GenericDocument(models.Model):
+class GenericDocument(Model):
     name = models.CharField(max_length=256, null=True, blank=True)
     document = models.ForeignKey(Document, on_delete=models.PROTECT, related_name='generic_document')
     user = models.ForeignKey(

@@ -1,4 +1,3 @@
-from django.db import models
 
 # This is an auto-generated Django model module.
 # You'll have to do the following manually to clean this up:
@@ -7,9 +6,11 @@ from django.db import models
 #   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
 # Feel free to rename the models, but don't rename db_table values or field names.
+from django.db import models
 
+from overoly.base import OverolyModel as Model
 
-class Absences(models.Model):
+class Absences(Model):
     code_techn = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom_techn = models.TextField(blank=True, null=True)  # This field type is a guess.
     pren_techn = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -42,7 +43,7 @@ class Absences(models.Model):
         db_table = 'absences'
 
 
-class Account(models.Model):
+class Account(Model):
     nu_compte = models.TextField(primary_key=True)  # This field type is a guess.
     account_name = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -53,7 +54,7 @@ class Account(models.Model):
         db_table = 'account'
 
 
-class Activation(models.Model):
+class Activation(Model):
     when_act = models.TextField(primary_key=True)  # This field type is a guess.
     data_act = models.TextField(unique=True)  # This field type is a guess.
 
@@ -62,7 +63,7 @@ class Activation(models.Model):
         db_table = 'activation'
 
 
-class ActivityPole(models.Model):
+class ActivityPole(Model):
     id = models.BigIntegerField(primary_key=True)
     fk_customer_id = models.BigIntegerField(unique=True)
     pole_code = models.TextField(unique=True)  # This field type is a guess.
@@ -84,7 +85,7 @@ class ActivityPole(models.Model):
         db_table = 'activity_pole'
 
 
-class Address(models.Model):
+class Address(Model):
     id = models.BigIntegerField(primary_key=True)
     fk_etabli_n_etab = models.TextField(blank=True, null=True)  # This field type is a guess.
     fk_customer_id = models.BigIntegerField(blank=True, null=True)
@@ -101,7 +102,7 @@ class Address(models.Model):
         db_table = 'address'
 
 
-class Affecoimp(models.Model):
+class Affecoimp(Model):
     n_imma = models.TextField(blank=True, null=True)  # This field type is a guess.
     be2implant = models.TextField(primary_key=True)  # This field type is a guess.
     c_refer = models.TextField()  # This field type is a guess.
@@ -119,7 +120,7 @@ class Affecoimp(models.Model):
         unique_together = (('be2implant', 'c_refer', 'code_four'),)
 
 
-class Alert(models.Model):
+class Alert(Model):
     alt_id = models.TextField(primary_key=True)  # This field type is a guess.
     alt_title = models.TextField(blank=True, null=True)  # This field type is a guess.
     alt_request = models.TextField(blank=True, null=True)
@@ -134,7 +135,7 @@ class Alert(models.Model):
         db_table = 'alert'
 
 
-class AlertRedhandSettings(models.Model):
+class AlertRedhandSettings(Model):
     p_profile = models.TextField(primary_key=True)  # This field type is a guess.
     is_what = models.TextField(unique=True)  # This field type is a guess.
     warranty = models.NullBooleanField()
@@ -173,7 +174,7 @@ class AlertRedhandSettings(models.Model):
         unique_together = (('p_profile', 'is_what'),)
 
 
-class AllPictures(models.Model):
+class AllPictures(Model):
     id = models.BigIntegerField(primary_key=True)
     picture = models.BinaryField(unique=True)
     description = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -185,7 +186,7 @@ class AllPictures(models.Model):
         db_table = 'all_pictures'
 
 
-class AllPicturesTmp(models.Model):
+class AllPicturesTmp(Model):
     id = models.BigIntegerField(blank=True, null=True)
     picture = models.BinaryField(blank=True, null=True)
     description = models.TextField(primary_key=True)  # This field type is a guess.
@@ -197,7 +198,7 @@ class AllPicturesTmp(models.Model):
         db_table = 'all_pictures_tmp'
 
 
-class Applications(models.Model):
+class Applications(Model):
     nom_appli = models.TextField(primary_key=True)  # This field type is a guess.
     chem_appli = models.TextField(blank=True, null=True)  # This field type is a guess.
     window_name = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -209,7 +210,7 @@ class Applications(models.Model):
         db_table = 'applications'
 
 
-class AptimerLog(models.Model):
+class AptimerLog(Model):
     type = models.CharField(primary_key=True, max_length=1)
     feature = models.TextField(blank=True, null=True)  # This field type is a guess.
     success = models.CharField(max_length=1, blank=True, null=True)
@@ -223,7 +224,7 @@ class AptimerLog(models.Model):
         db_table = 'aptimer_log'
 
 
-class AssetContractHistoric(models.Model):
+class AssetContractHistoric(Model):
     historic_date = models.TextField(primary_key=True)  # This field type is a guess.
     historic_time = models.TextField(unique=True)  # This field type is a guess.
     user_login = models.TextField(unique=True)  # This field type is a guess.
@@ -238,7 +239,7 @@ class AssetContractHistoric(models.Model):
         db_table = 'asset_contract_historic'
 
 
-class AssetHistoricCounter(models.Model):
+class AssetHistoricCounter(Model):
     n_imma = models.TextField(primary_key=True)  # This field type is a guess.
     counter_value = models.IntegerField(blank=True, null=True)
     historic_user_login = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -254,7 +255,7 @@ class AssetHistoricCounter(models.Model):
         db_table = 'asset_historic_counter'
 
 
-class AssetSupplierHistoric(models.Model):
+class AssetSupplierHistoric(Model):
     ash_id = models.IntegerField(primary_key=True)
     ash_date = models.TextField(unique=True)  # This field type is a guess.
     ash_time = models.TextField(unique=True)  # This field type is a guess.
@@ -266,7 +267,7 @@ class AssetSupplierHistoric(models.Model):
         db_table = 'asset_supplier_historic'
 
 
-class AssetplusSchemas(models.Model):
+class AssetplusSchemas(Model):
     pk_field = models.TextField(primary_key=True)  # This field type is a guess.
     ap_owner = models.TextField(blank=True, null=True)  # This field type is a guess.
     table_view_name = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -288,7 +289,7 @@ class AssetplusSchemas(models.Model):
         db_table = 'assetplus_schemas'
 
 
-class AssetplusScripts(models.Model):
+class AssetplusScripts(Model):
     aps_id = models.BigIntegerField(primary_key=True)
     aps_date = models.TextField(blank=True, null=True)  # This field type is a guess.
     aps_heure = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -298,7 +299,7 @@ class AssetplusScripts(models.Model):
         db_table = 'assetplus_scripts'
 
 
-class Assetstatus(models.Model):
+class Assetstatus(Model):
     asset_status = models.IntegerField(primary_key=True)
     lib_assetstatus = models.TextField(unique=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -310,7 +311,7 @@ class Assetstatus(models.Model):
         db_table = 'assetstatus'
 
 
-class BCompA(models.Model):
+class BCompA(Model):
     c_refer = models.TextField(primary_key=True)  # This field type is a guess.
     c_design = models.TextField(blank=True, null=True)  # This field type is a guess.
     marque = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -370,7 +371,7 @@ class BCompA(models.Model):
         db_table = 'b_comp_a'
 
 
-class BEq1996(models.Model):
+class BEq1996(Model):
     n_imma = models.TextField(primary_key=True)  # This field type is a guess.
     n_nom_cneh = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -570,7 +571,7 @@ class BEq1996(models.Model):
         db_table = 'b_eq1996'
 
 
-class BFt1996(models.Model):
+class BFt1996(Model):
     nu_int = models.TextField(primary_key=True)  # This field type is a guess.
     nu_bon_c = models.TextField(blank=True, null=True)  # This field type is a guess.
     nu_imm = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -739,7 +740,7 @@ class BFt1996(models.Model):
         db_table = 'b_ft1996'
 
 
-class BSf1996(models.Model):
+class BSf1996(Model):
     n_ufef = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_ef = models.TextField(primary_key=True)  # This field type is a guess.
@@ -815,7 +816,7 @@ class BSf1996(models.Model):
         db_table = 'b_sf1996'
 
 
-class BarcodeDetailSettings(models.Model):
+class BarcodeDetailSettings(Model):
     fk_id_header_label = models.IntegerField(primary_key=True)
     order_id_field = models.IntegerField(unique=True)
     name_table_view = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -848,7 +849,7 @@ class BarcodeDetailSettings(models.Model):
         unique_together = (('fk_id_header_label', 'order_id_field'),)
 
 
-class BarcodeHeaderSettings(models.Model):
+class BarcodeHeaderSettings(Model):
     id_barcode_header = models.IntegerField(primary_key=True)
     description_header = models.TextField(unique=True)  # This field type is a guess.
     category_label = models.IntegerField(unique=True)
@@ -878,7 +879,7 @@ class BarcodeHeaderSettings(models.Model):
         db_table = 'barcode_header_settings'
 
 
-class Batim(models.Model):
+class Batim(Model):
     n_bati = models.CharField(primary_key=True, max_length=10)
     n_etab = models.CharField(max_length=10, blank=True, null=True)
     bat_nom = models.CharField(max_length=25, blank=True, null=True)
@@ -897,7 +898,7 @@ class Batim(models.Model):
         db_table = 'batim'
 
 
-class BoDictionary(models.Model):
+class BoDictionary(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     field_name = models.TextField(unique=True)  # This field type is a guess.
     field_value = models.IntegerField(unique=True)
@@ -908,7 +909,7 @@ class BoDictionary(models.Model):
         db_table = 'bo_dictionary'
 
 
-class Bonpre(models.Model):
+class Bonpre(Model):
     nummag = models.TextField(blank=True, null=True)  # This field type is a guess.
     nommag = models.TextField(blank=True, null=True)  # This field type is a guess.
     numbp = models.TextField(primary_key=True)  # This field type is a guess.
@@ -926,7 +927,7 @@ class Bonpre(models.Model):
         db_table = 'bonpre'
 
 
-class BonpreDetails(models.Model):
+class BonpreDetails(Model):
     no_bonpre_detail = models.IntegerField(blank=True, null=True)
     no_bonpre = models.TextField(primary_key=True)  # This field type is a guess.
     code_supp_store = models.TextField()  # This field type is a guess.
@@ -953,7 +954,7 @@ class BonpreDetails(models.Model):
         unique_together = (('no_bonpre', 'code_supp_store', 'c_refer', 'code_four'),)
 
 
-class Budget(models.Model):
+class Budget(Model):
     nu_compte = models.TextField(primary_key=True)  # This field type is a guess.
     lib_compte = models.TextField(blank=True, null=True)  # This field type is a guess.
     mt_cumul = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -977,7 +978,7 @@ class Budget(models.Model):
         unique_together = (('nu_compte', 'an_exo'),)
 
 
-class Catpiece(models.Model):
+class Catpiece(Model):
     typ_mod = models.TextField(blank=True, null=True)  # This field type is a guess.
 
     class Meta:
@@ -985,7 +986,7 @@ class Catpiece(models.Model):
         db_table = 'catpiece'
 
 
-class Causes(models.Model):
+class Causes(Model):
     num = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_nom_cneh = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1005,7 +1006,7 @@ class Causes(models.Model):
         db_table = 'causes'
 
 
-class Chantiers(models.Model):
+class Chantiers(Model):
     nom_chant = models.CharField(primary_key=True, max_length=50)
     commentair = models.CharField(max_length=255, blank=True, null=True)
     retired_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1016,7 +1017,7 @@ class Chantiers(models.Model):
         db_table = 'chantiers'
 
 
-class ChecklistResDetails(models.Model):
+class ChecklistResDetails(Model):
     crd_id = models.BigIntegerField(primary_key=True)
     crd_idcrh = models.BigIntegerField(unique=True)
     crd_idctd = models.BigIntegerField(unique=True)
@@ -1030,7 +1031,7 @@ class ChecklistResDetails(models.Model):
         db_table = 'checklist_res_details'
 
 
-class ChecklistResHeader(models.Model):
+class ChecklistResHeader(Model):
     crh_id = models.BigIntegerField(primary_key=True)
     crh_idctv = models.BigIntegerField(unique=True)
     crh_nu_int = models.TextField(unique=True)  # This field type is a guess.
@@ -1049,7 +1050,7 @@ class ChecklistResHeader(models.Model):
         db_table = 'checklist_res_header'
 
 
-class ChecklistTplDetails(models.Model):
+class ChecklistTplDetails(Model):
     ctd_id = models.BigIntegerField(primary_key=True)
     ctd_idctv = models.BigIntegerField(blank=True, null=True)
     ctd_numordre = models.BigIntegerField(blank=True, null=True)
@@ -1078,7 +1079,7 @@ class ChecklistTplDetails(models.Model):
         db_table = 'checklist_tpl_details'
 
 
-class ChecklistTplHeader(models.Model):
+class ChecklistTplHeader(Model):
     cth_id = models.BigIntegerField(primary_key=True)
     cth_code = models.TextField(blank=True, null=True)  # This field type is a guess.
     cth_description = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1090,7 +1091,7 @@ class ChecklistTplHeader(models.Model):
         db_table = 'checklist_tpl_header'
 
 
-class ChecklistTplType(models.Model):
+class ChecklistTplType(Model):
     ctt_id = models.BigIntegerField(primary_key=True)
     ctt_manufacturer = models.TextField(unique=True)  # This field type is a guess.
     ctt_software = models.TextField(unique=True)  # This field type is a guess.
@@ -1103,7 +1104,7 @@ class ChecklistTplType(models.Model):
         db_table = 'checklist_tpl_type'
 
 
-class ChecklistTplVersion(models.Model):
+class ChecklistTplVersion(Model):
     ctv_id = models.BigIntegerField(primary_key=True)
     ctv_idcth = models.BigIntegerField(unique=True)
     ctv_date = models.TextField(unique=True)  # This field type is a guess.
@@ -1118,7 +1119,7 @@ class ChecklistTplVersion(models.Model):
         db_table = 'checklist_tpl_version'
 
 
-class ChkContentType(models.Model):
+class ChkContentType(Model):
     id = models.BigIntegerField(primary_key=True)
     format = models.TextField(blank=True, null=True)  # This field type is a guess.
     manufacturer = models.TextField(unique=True)  # This field type is a guess.
@@ -1129,7 +1130,7 @@ class ChkContentType(models.Model):
         db_table = 'chk_content_type'
 
 
-class ChkResults(models.Model):
+class ChkResults(Model):
     id = models.BigIntegerField(primary_key=True)
     fk_chk_tpl_id = models.BigIntegerField(unique=True)
     fk_nu_int = models.TextField(unique=True)  # This field type is a guess.
@@ -1150,7 +1151,7 @@ class ChkResults(models.Model):
         db_table = 'chk_results'
 
 
-class ChkTpl(models.Model):
+class ChkTpl(Model):
     id = models.BigIntegerField(primary_key=True)
     code = models.TextField(unique=True)  # This field type is a guess.
     version = models.BigIntegerField(unique=True)
@@ -1169,7 +1170,7 @@ class ChkTpl(models.Model):
         db_table = 'chk_tpl'
 
 
-class Classe(models.Model):
+class Classe(Model):
     classecode = models.TextField(primary_key=True)  # This field type is a guess.
     classelabel = models.TextField(unique=True)  # This field type is a guess.
     filler1 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1183,7 +1184,7 @@ class Classe(models.Model):
         db_table = 'classe'
 
 
-class Codehora(models.Model):
+class Codehora(Model):
     h_exploit = models.CharField(primary_key=True, max_length=10)
     nbh_fonc = models.IntegerField(blank=True, null=True)
     s_jdeb = models.CharField(max_length=8, blank=True, null=True)
@@ -1204,7 +1205,7 @@ class Codehora(models.Model):
         db_table = 'codehora'
 
 
-class Codelai(models.Model):
+class Codelai(Model):
     typedelai = models.CharField(primary_key=True, max_length=1)
     codedelai = models.TextField(unique=True)  # This field type is a guess.
     libdelai = models.TextField(unique=True)  # This field type is a guess.
@@ -1215,7 +1216,7 @@ class Codelai(models.Model):
         unique_together = (('typedelai', 'codedelai'),)
 
 
-class CommandStatus(models.Model):
+class CommandStatus(Model):
     code_status = models.TextField(primary_key=True)  # This field type is a guess.
     label_status = models.TextField(blank=True, null=True)  # This field type is a guess.
 
@@ -1224,7 +1225,7 @@ class CommandStatus(models.Model):
         db_table = 'command_status'
 
 
-class Commande(models.Model):
+class Commande(Model):
     numcomm = models.TextField(blank=True, null=True)  # This field type is a guess.
     datecomm = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_magor = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1297,7 +1298,7 @@ class Commande(models.Model):
         db_table = 'commande'
 
 
-class Commlign(models.Model):
+class Commlign(Model):
     numcomm = models.TextField(primary_key=True)  # This field type is a guess.
     numligne = models.IntegerField()
     datecomm = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1347,7 +1348,7 @@ class Commlign(models.Model):
         unique_together = (('numcomm', 'numligne'),)
 
 
-class ConnectionLogin(models.Model):
+class ConnectionLogin(Model):
     profile_name = models.TextField(primary_key=True)  # This field type is a guess.
     id_login = models.TextField(unique=True)  # This field type is a guess.
     pw_login = models.TextField(unique=True)  # This field type is a guess.
@@ -1358,7 +1359,7 @@ class ConnectionLogin(models.Model):
         db_table = 'connection_login'
 
 
-class Constant(models.Model):
+class Constant(Model):
     n_marche = models.CharField(primary_key=True, max_length=20)
     m_an_effet = models.CharField(max_length=2, blank=True, null=True)
     m_k1 = models.IntegerField(blank=True, null=True)
@@ -1373,7 +1374,7 @@ class Constant(models.Model):
         db_table = 'constant'
 
 
-class Contact(models.Model):
+class Contact(Model):
     nu_contact = models.CharField(primary_key=True, max_length=10)
     nu_four = models.CharField(max_length=10, blank=True, null=True)
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1399,7 +1400,7 @@ class Contact(models.Model):
         db_table = 'contact'
 
 
-class ContactDescription(models.Model):
+class ContactDescription(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     name = models.TextField(unique=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1410,7 +1411,7 @@ class ContactDescription(models.Model):
         db_table = 'contact_description'
 
 
-class ContactPerson(models.Model):
+class ContactPerson(Model):
     id = models.BigIntegerField(primary_key=True)
     name = models.TextField(unique=True)  # This field type is a guess.
     email = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1430,7 +1431,7 @@ class ContactPerson(models.Model):
         db_table = 'contact_person'
 
 
-class ContractCoverageDetail(models.Model):
+class ContractCoverageDetail(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     n_contrat = models.TextField(unique=True)  # This field type is a guess.
     is_corr_pm = models.TextField(unique=True)  # This field type is a guess.
@@ -1446,7 +1447,7 @@ class ContractCoverageDetail(models.Model):
         db_table = 'contract_coverage_detail'
 
 
-class ContractCoverageHeader(models.Model):
+class ContractCoverageHeader(Model):
     n_contrat = models.TextField(primary_key=True)  # This field type is a guess.
     is_option_corr = models.TextField(blank=True, null=True)  # This field type is a guess.
     comment_corr = models.TextField(blank=True, null=True)
@@ -1461,7 +1462,7 @@ class ContractCoverageHeader(models.Model):
         db_table = 'contract_coverage_header'
 
 
-class ContractInvoice(models.Model):
+class ContractInvoice(Model):
     n_contrat = models.TextField(primary_key=True)  # This field type is a guess.
     invoice_id = models.TextField()  # This field type is a guess.
     invoice_periodicity = models.IntegerField(blank=True, null=True)
@@ -1481,7 +1482,7 @@ class ContractInvoice(models.Model):
         unique_together = (('n_contrat', 'invoice_id'),)
 
 
-class ContractPurchaseOrder(models.Model):
+class ContractPurchaseOrder(Model):
     n_contrat = models.TextField(primary_key=True)  # This field type is a guess.
     n_order = models.TextField(unique=True)  # This field type is a guess.
     total = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1495,7 +1496,7 @@ class ContractPurchaseOrder(models.Model):
         unique_together = (('n_contrat', 'n_order'),)
 
 
-class ContractServicesHistoric(models.Model):
+class ContractServicesHistoric(Model):
     n_contrat = models.TextField(primary_key=True)  # This field type is a guess.
     annee_exo = models.IntegerField()
     date_effet = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1528,7 +1529,7 @@ class ContractServicesHistoric(models.Model):
         unique_together = (('n_contrat', 'annee_exo'),)
 
 
-class Contrat(models.Model):
+class Contrat(Model):
     n_contrat = models.TextField(primary_key=True)  # This field type is a guess.
     code_type = models.CharField(max_length=10, blank=True, null=True)
     n_presta = models.CharField(max_length=10, blank=True, null=True)
@@ -1647,7 +1648,7 @@ class Contrat(models.Model):
         db_table = 'contrat'
 
 
-class ContratBkp108(models.Model):
+class ContratBkp108(Model):
     n_contrat = models.TextField(blank=True, null=True)  # This field type is a guess.
     code_type = models.CharField(max_length=10, blank=True, null=True)
     n_presta = models.CharField(max_length=10, blank=True, null=True)
@@ -1766,7 +1767,7 @@ class ContratBkp108(models.Model):
         db_table = 'contrat_bkp_108'
 
 
-class Controls(models.Model):
+class Controls(Model):
     typ_mod = models.TextField(primary_key=True)  # This field type is a guess.
     ctrl1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     ctrl1unite = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1900,7 +1901,7 @@ class Controls(models.Model):
         unique_together = (('typ_mod', 'ctrl_release_number'),)
 
 
-class Cr(models.Model):
+class Cr(Model):
     n_cent_res = models.TextField(primary_key=True)  # This field type is a guess.
     nom_centre = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_etab = models.TextField(unique=True)  # This field type is a guess.
@@ -1915,7 +1916,7 @@ class Cr(models.Model):
         db_table = 'cr'
 
 
-class Criticite(models.Model):
+class Criticite(Model):
     riskcode = models.TextField(primary_key=True)  # This field type is a guess.
     risklabel = models.TextField(blank=True, null=True)  # This field type is a guess.
     filler1 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1933,7 +1934,7 @@ class Criticite(models.Model):
         db_table = 'criticite'
 
 
-class Customer(models.Model):
+class Customer(Model):
     id = models.BigIntegerField(primary_key=True)
     code = models.TextField(blank=True, null=True)  # This field type is a guess.
     name = models.TextField(unique=True)  # This field type is a guess.
@@ -1949,7 +1950,7 @@ class Customer(models.Model):
         db_table = 'customer'
 
 
-class DashboardCached(models.Model):
+class DashboardCached(Model):
     cache_key = models.TextField(primary_key=True)  # This field type is a guess.
     time_stamp = models.TextField(blank=True, null=True)  # This field type is a guess.
     xml = models.TextField(blank=True, null=True)
@@ -1960,7 +1961,7 @@ class DashboardCached(models.Model):
         db_table = 'dashboard_cached'
 
 
-class DashboardImages(models.Model):
+class DashboardImages(Model):
     file_name = models.TextField(primary_key=True)  # This field type is a guess.
     image = models.TextField(blank=True, null=True)
 
@@ -1969,7 +1970,7 @@ class DashboardImages(models.Model):
         db_table = 'dashboard_images'
 
 
-class Dashboards(models.Model):
+class Dashboards(Model):
     id = models.BigIntegerField(primary_key=True)
     title = models.TextField(blank=True, null=True)  # This field type is a guess.
 
@@ -1978,7 +1979,7 @@ class Dashboards(models.Model):
         db_table = 'dashboards'
 
 
-class DeletedRecords(models.Model):
+class DeletedRecords(Model):
     delete_date = models.TextField(blank=True, null=True)  # This field type is a guess.
     table_name = models.TextField(blank=True, null=True)  # This field type is a guess.
     pk_fields = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -1992,7 +1993,7 @@ class DeletedRecords(models.Model):
         db_table = 'deleted_records'
 
 
-class DeviceType(models.Model):
+class DeviceType(Model):
     id_device_type = models.BigIntegerField(primary_key=True)
     code_label = models.TextField(unique=True)  # This field type is a guess.
 
@@ -2002,7 +2003,7 @@ class DeviceType(models.Model):
         unique_together = (('id_device_type', 'code_label'),)
 
 
-class Dgos(models.Model):
+class Dgos(Model):
     n_dgos = models.TextField(primary_key=True)  # This field type is a guess.
     buying_family_n_0 = models.TextField(unique=True)  # This field type is a guess.
     purchase_area_n_1 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2022,7 +2023,7 @@ class Dgos(models.Model):
         db_table = 'dgos'
 
 
-class DicoItLabel(models.Model):
+class DicoItLabel(Model):
     code_label = models.TextField(primary_key=True)  # This field type is a guess.
     code_langue = models.TextField(unique=True)  # This field type is a guess.
     label = models.TextField(unique=True)  # This field type is a guess.
@@ -2033,7 +2034,7 @@ class DicoItLabel(models.Model):
         unique_together = (('code_label', 'code_langue'),)
 
 
-class Diffus(models.Model):
+class Diffus(Model):
     ref_int = models.TextField(primary_key=True)  # This field type is a guess.
     n_uf_dif = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom_uf_dif = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2052,7 +2053,7 @@ class Diffus(models.Model):
         db_table = 'diffus'
 
 
-class Docliste(models.Model):
+class Docliste(Model):
     nu_doc = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom_doc = models.TextField(blank=True, null=True)  # This field type is a guess.
     type_doc = models.IntegerField(blank=True, null=True)
@@ -2104,7 +2105,7 @@ class Docliste(models.Model):
         db_table = 'docliste'
 
 
-class DoclisteOld(models.Model):
+class DoclisteOld(Model):
     nu_doc = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom_doc = models.TextField(blank=True, null=True)  # This field type is a guess.
     type_doc = models.IntegerField(blank=True, null=True)
@@ -2152,7 +2153,7 @@ class DoclisteOld(models.Model):
         db_table = 'docliste_old'
 
 
-class DocsAppli(models.Model):
+class DocsAppli(Model):
     app_id = models.TextField(primary_key=True)  # This field type is a guess.
     app_label = models.TextField(unique=True)  # This field type is a guess.
 
@@ -2161,7 +2162,7 @@ class DocsAppli(models.Model):
         db_table = 'docs_appli'
 
 
-class Doctype(models.Model):
+class Doctype(Model):
     nom_doc = models.TextField(primary_key=True)  # This field type is a guess.
     eqouint = models.IntegerField(blank=True, null=True)
 
@@ -2170,7 +2171,7 @@ class Doctype(models.Model):
         db_table = 'doctype'
 
 
-class Droits(models.Model):
+class Droits(Model):
     u_password = models.TextField(primary_key=True)  # This field type is a guess.
     eqmt = models.CharField(max_length=1, blank=True, null=True)
     intv = models.CharField(max_length=1, blank=True, null=True)
@@ -2263,7 +2264,7 @@ class Droits(models.Model):
         db_table = 'droits'
 
 
-class Ecri(models.Model):
+class Ecri(Model):
     code_ecri = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(unique=True)  # This field type is a guess.
     nom2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2280,7 +2281,7 @@ class Ecri(models.Model):
         db_table = 'ecri'
 
 
-class ElRequest(models.Model):
+class ElRequest(Model):
     request_id = models.BigIntegerField(primary_key=True)
     fk_md_code = models.TextField(unique=True)  # This field type is a guess.
     fk_site_code = models.TextField(unique=True)  # This field type is a guess.
@@ -2325,7 +2326,7 @@ class ElRequest(models.Model):
         db_table = 'el_request'
 
 
-class ElRequestItem(models.Model):
+class ElRequestItem(Model):
     request_item_id = models.BigIntegerField(primary_key=True)
     request_id = models.BigIntegerField(unique=True)
     n_imma = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2364,7 +2365,7 @@ class ElRequestItem(models.Model):
         db_table = 'el_request_item'
 
 
-class EmailNotificationEvents(models.Model):
+class EmailNotificationEvents(Model):
     id_email = models.BigIntegerField(primary_key=True)
     notif_datetimestamp = models.TextField(blank=True, null=True)  # This field type is a guess.
     wo_number = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2382,7 +2383,7 @@ class EmailNotificationEvents(models.Model):
         db_table = 'email_notification_events'
 
 
-class EnCours(models.Model):
+class EnCours(Model):
     nu_int = models.TextField(primary_key=True)  # This field type is a guess.
     nu_bon_c = models.TextField(blank=True, null=True)  # This field type is a guess.
     nu_imm = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2550,7 +2551,7 @@ class EnCours(models.Model):
         db_table = 'en_cours'
 
 
-class EnCoursTampon(models.Model):
+class EnCoursTampon(Model):
     id = models.BigIntegerField(primary_key=True)
     nu_int = models.TextField(unique=True)  # This field type is a guess.
     int_statut = models.CharField(max_length=20, blank=True, null=True)
@@ -2573,7 +2574,7 @@ class EnCoursTampon(models.Model):
         db_table = 'en_cours_tampon'
 
 
-class EqCneh(models.Model):
+class EqCneh(Model):
     n_nom_cneh = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2603,7 +2604,7 @@ class EqCneh(models.Model):
         db_table = 'eq_cneh'
 
 
-class Etabli(models.Model):
+class Etabli(Model):
     n_etab = models.TextField(primary_key=True)  # This field type is a guess.
     nom_etab = models.TextField(blank=True, null=True)  # This field type is a guess.
     adr_etab = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2630,7 +2631,7 @@ class Etabli(models.Model):
         db_table = 'etabli'
 
 
-class EventAutodispatchAssignment(models.Model):
+class EventAutodispatchAssignment(Model):
     id = models.BigIntegerField(primary_key=True)
     n_imma = models.TextField(unique=True)  # This field type is a guess.
     int_cm = models.TextField(unique=True)  # This field type is a guess.
@@ -2645,7 +2646,7 @@ class EventAutodispatchAssignment(models.Model):
         db_table = 'event_autodispatch_assignment'
 
 
-class EventAutodispatchAudit(models.Model):
+class EventAutodispatchAudit(Model):
     id = models.BigIntegerField(primary_key=True)
     nu_int = models.TextField(unique=True)  # This field type is a guess.
     event_date = models.TextField(unique=True)  # This field type is a guess.
@@ -2663,7 +2664,7 @@ class EventAutodispatchAudit(models.Model):
         db_table = 'event_autodispatch_audit'
 
 
-class EventAutodispatchWoid(models.Model):
+class EventAutodispatchWoid(Model):
     short_id = models.BigIntegerField(primary_key=True)
     nu_int = models.TextField(unique=True)  # This field type is a guess.
 
@@ -2672,7 +2673,7 @@ class EventAutodispatchWoid(models.Model):
         db_table = 'event_autodispatch_woid'
 
 
-class EventAutodispatchWorkflow(models.Model):
+class EventAutodispatchWorkflow(Model):
     id = models.BigIntegerField(primary_key=True)
     nu_int = models.TextField(unique=True)  # This field type is a guess.
     n_imma = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2691,7 +2692,7 @@ class EventAutodispatchWorkflow(models.Model):
         db_table = 'event_autodispatch_workflow'
 
 
-class EventContextFields(models.Model):
+class EventContextFields(Model):
     event_context_id = models.IntegerField(primary_key=True)
     table_view_name = models.TextField()  # This field type is a guess.
     field_name = models.TextField()  # This field type is a guess.
@@ -2709,7 +2710,7 @@ class EventContextFields(models.Model):
         unique_together = (('event_context_id', 'table_view_name', 'field_name'),)
 
 
-class EventContextHeaders(models.Model):
+class EventContextHeaders(Model):
     event_context_id = models.IntegerField(primary_key=True)
     event_context_name = models.TextField(unique=True)  # This field type is a guess.
 
@@ -2718,7 +2719,7 @@ class EventContextHeaders(models.Model):
         db_table = 'event_context_headers'
 
 
-class EventContextRecipients(models.Model):
+class EventContextRecipients(Model):
     event_context_id = models.IntegerField(primary_key=True)
     event_recipient_group_id = models.IntegerField(unique=True)
     event_recipient_group_name = models.TextField(unique=True)  # This field type is a guess.
@@ -2729,7 +2730,7 @@ class EventContextRecipients(models.Model):
         unique_together = (('event_context_id', 'event_recipient_group_id'),)
 
 
-class EventNotificationDetail(models.Model):
+class EventNotificationDetail(Model):
     event_detail_id = models.BigIntegerField(primary_key=True)
     fk_event_header_id = models.BigIntegerField(unique=True)
     event_context_id = models.IntegerField(blank=True, null=True)
@@ -2749,7 +2750,7 @@ class EventNotificationDetail(models.Model):
         db_table = 'event_notification_detail'
 
 
-class EventNotificationHeader(models.Model):
+class EventNotificationHeader(Model):
     event_header_id = models.BigIntegerField(primary_key=True)
     event_name = models.TextField(blank=True, null=True)  # This field type is a guess.
     event_description = models.TextField(blank=True, null=True)
@@ -2778,7 +2779,7 @@ class EventNotificationHeader(models.Model):
         db_table = 'event_notification_header'
 
 
-class EventNotificationRecipient(models.Model):
+class EventNotificationRecipient(Model):
     event_recipient_id = models.BigIntegerField(primary_key=True)
     fk_event_header_id = models.BigIntegerField(unique=True)
     event_context_id = models.IntegerField(unique=True)
@@ -2790,7 +2791,7 @@ class EventNotificationRecipient(models.Model):
         db_table = 'event_notification_recipient'
 
 
-class EventNotificationTracking(models.Model):
+class EventNotificationTracking(Model):
     event_tracking_id = models.BigIntegerField(primary_key=True)
     nu_int = models.TextField(unique=True)  # This field type is a guess.
     event_tracking_date = models.TextField(unique=True)  # This field type is a guess.
@@ -2812,7 +2813,7 @@ class EventNotificationTracking(models.Model):
         db_table = 'event_notification_tracking'
 
 
-class Famimag(models.Model):
+class Famimag(Model):
     magdef = models.TextField(blank=True, null=True)  # This field type is a guess.
 
     class Meta:
@@ -2820,7 +2821,7 @@ class Famimag(models.Model):
         db_table = 'famimag'
 
 
-class Feature(models.Model):
+class Feature(Model):
     id = models.BigIntegerField(primary_key=True)
     name = models.TextField(unique=True)  # This field type is a guess.
 
@@ -2829,7 +2830,7 @@ class Feature(models.Model):
         db_table = 'feature'
 
 
-class FinanceExclusion(models.Model):
+class FinanceExclusion(Model):
     table_name = models.TextField(primary_key=True)  # This field type is a guess.
     field_name = models.TextField(unique=True)  # This field type is a guess.
     keyword_name = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2842,7 +2843,7 @@ class FinanceExclusion(models.Model):
         unique_together = (('table_name', 'field_name'),)
 
 
-class Fournis2(models.Model):
+class Fournis2(Model):
     code_four = models.CharField(primary_key=True, max_length=10)
     f_cle_comp = models.CharField(max_length=1, blank=True, null=True)
     fourni = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2920,7 +2921,7 @@ class Fournis2(models.Model):
         db_table = 'fournis2'
 
 
-class Grpeqp(models.Model):
+class Grpeqp(Model):
     n_imma = models.TextField(unique=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_seri = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -2941,7 +2942,7 @@ class Grpeqp(models.Model):
         db_table = 'grpeqp'
 
 
-class Histctrl(models.Model):
+class Histctrl(Model):
     nu_ctrl = models.TextField(primary_key=True)  # This field type is a guess.
     typ_mod = models.TextField(unique=True)  # This field type is a guess.
     nu_int = models.TextField(unique=True)  # This field type is a guess.
@@ -3045,7 +3046,7 @@ class Histctrl(models.Model):
         db_table = 'histctrl'
 
 
-class HistoEq(models.Model):
+class HistoEq(Model):
     n_contrat = models.TextField(primary_key=True)  # This field type is a guess.
     code_type = models.CharField(max_length=10, blank=True, null=True)
     n_imma = models.TextField()  # This field type is a guess.
@@ -3119,7 +3120,7 @@ class HistoEq(models.Model):
         unique_together = (('n_contrat', 'n_imma', 'generic_seq', 'financial_period_from'),)
 
 
-class HistoEqBkp108(models.Model):
+class HistoEqBkp108(Model):
     n_contrat = models.TextField(blank=True, null=True)  # This field type is a guess.
     code_type = models.CharField(max_length=10, blank=True, null=True)
     n_imma = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3192,7 +3193,7 @@ class HistoEqBkp108(models.Model):
         db_table = 'histo_eq_bkp_108'
 
 
-class Idepiece(models.Model):
+class Idepiece(Model):
     c_refer = models.TextField(primary_key=True)  # This field type is a guess.
     c_design = models.TextField(blank=True, null=True)  # This field type is a guess.
     marque = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3259,7 +3260,7 @@ class Idepiece(models.Model):
         unique_together = (('c_refer', 'code_four'),)
 
 
-class InVenan(models.Model):
+class InVenan(Model):
     nu_int = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_ordre = models.IntegerField(blank=True, null=True)
     da_int = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3345,7 +3346,7 @@ class InVenan(models.Model):
         db_table = 'in_venan'
 
 
-class InVenanTampon(models.Model):
+class InVenanTampon(Model):
     id = models.BigIntegerField(primary_key=True)
     in_venan_index = models.BigIntegerField(unique=True)
     nu_int = models.TextField(unique=True)  # This field type is a guess.
@@ -3365,7 +3366,7 @@ class InVenanTampon(models.Model):
         db_table = 'in_venan_tampon'
 
 
-class Inciden(models.Model):
+class Inciden(Model):
     ref_int = models.TextField(primary_key=True)  # This field type is a guess.
     num_seq = models.IntegerField(blank=True, null=True)
     date_inc = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3444,7 +3445,7 @@ class Inciden(models.Model):
         db_table = 'inciden'
 
 
-class Insertuf(models.Model):
+class Insertuf(Model):
     id = models.TextField(primary_key=True)  # This field type is a guess.
     username = models.TextField(blank=True, null=True)  # This field type is a guess.
     password = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3457,7 +3458,7 @@ class Insertuf(models.Model):
         db_table = 'insertuf'
 
 
-class ItUsers(models.Model):
+class ItUsers(Model):
     id_it_user = models.BigIntegerField(primary_key=True)
     n_util = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom_util = models.TextField(unique=True)  # This field type is a guess.
@@ -3482,7 +3483,7 @@ class ItUsers(models.Model):
         db_table = 'it_users'
 
 
-class Jferies(models.Model):
+class Jferies(Model):
     datefete = models.CharField(primary_key=True, max_length=10)
     texte = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3493,7 +3494,7 @@ class Jferies(models.Model):
         db_table = 'jferies'
 
 
-class KpiDashboard(models.Model):
+class KpiDashboard(Model):
     fk_id_kpi_ref = models.IntegerField(primary_key=True)
     id_dashboard = models.IntegerField(unique=True)
     dashboard_sql = models.TextField(blank=True, null=True)
@@ -3509,7 +3510,7 @@ class KpiDashboard(models.Model):
         unique_together = (('fk_id_kpi_ref', 'id_dashboard'),)
 
 
-class KpiDashboardX(models.Model):
+class KpiDashboardX(Model):
     fk_id_kpi_ref = models.IntegerField(primary_key=True)
     fk_id_dashboard = models.IntegerField(unique=True)
     fk_pk_field = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3526,7 +3527,7 @@ class KpiDashboardX(models.Model):
         unique_together = (('fk_id_kpi_ref', 'fk_id_dashboard'),)
 
 
-class KpiDashboardY(models.Model):
+class KpiDashboardY(Model):
     fk_id_kpi_ref = models.IntegerField(primary_key=True)
     fk_id_dashboard = models.IntegerField(unique=True)
     order_seq = models.IntegerField(unique=True)
@@ -3549,7 +3550,7 @@ class KpiDashboardY(models.Model):
         unique_together = (('fk_id_kpi_ref', 'fk_id_dashboard', 'order_seq'),)
 
 
-class KpiFieldsFilter(models.Model):
+class KpiFieldsFilter(Model):
     fk_id_kpi_ref = models.IntegerField(primary_key=True)
     order_seq = models.IntegerField(unique=True)
     fk_pk_field = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3566,7 +3567,7 @@ class KpiFieldsFilter(models.Model):
         unique_together = (('fk_id_kpi_ref', 'order_seq'),)
 
 
-class KpiFieldsFilterValues(models.Model):
+class KpiFieldsFilterValues(Model):
     id_kpi_user = models.IntegerField(primary_key=True)
     fk_id_kpi_ref = models.IntegerField(unique=True)
     order_seq = models.IntegerField(unique=True)
@@ -3591,7 +3592,7 @@ class KpiFieldsFilterValues(models.Model):
         unique_together = (('id_kpi_user', 'fk_id_kpi_ref', 'fk_profile_user', 'order_seq'),)
 
 
-class KpiFieldsSelect(models.Model):
+class KpiFieldsSelect(Model):
     fk_id_kpi_ref = models.IntegerField(primary_key=True)
     order_seq = models.IntegerField(unique=True)
     fk_pk_field = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3609,7 +3610,7 @@ class KpiFieldsSelect(models.Model):
         unique_together = (('fk_id_kpi_ref', 'order_seq'),)
 
 
-class KpiMandatoryFilter(models.Model):
+class KpiMandatoryFilter(Model):
     fk_id_kpi_ref = models.IntegerField(primary_key=True)
     order_seq = models.IntegerField(unique=True)
     fk_pk_field = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3631,7 +3632,7 @@ class KpiMandatoryFilter(models.Model):
         unique_together = (('fk_id_kpi_ref', 'order_seq'),)
 
 
-class KpiMandatoryFilterValues(models.Model):
+class KpiMandatoryFilterValues(Model):
     id_kpi_user = models.IntegerField(primary_key=True)
     fk_id_kpi_ref = models.IntegerField(unique=True)
     order_seq = models.IntegerField(unique=True)
@@ -3656,7 +3657,7 @@ class KpiMandatoryFilterValues(models.Model):
         unique_together = (('id_kpi_user', 'fk_id_kpi_ref', 'fk_profile_user', 'order_seq'),)
 
 
-class KpiProfileSelection(models.Model):
+class KpiProfileSelection(Model):
     id_kpi_user = models.IntegerField(primary_key=True)
     fk_id_kpi_ref = models.IntegerField(unique=True)
     fk_profile_user = models.TextField(unique=True)  # This field type is a guess.
@@ -3668,7 +3669,7 @@ class KpiProfileSelection(models.Model):
         unique_together = (('id_kpi_user', 'fk_id_kpi_ref', 'fk_profile_user'),)
 
 
-class KpiReference(models.Model):
+class KpiReference(Model):
     id_kpi = models.IntegerField(primary_key=True)
     title_kpi = models.TextField(unique=True)  # This field type is a guess.
     description_kpi = models.TextField(unique=True)  # This field type is a guess.
@@ -3691,7 +3692,7 @@ class KpiReference(models.Model):
         db_table = 'kpi_reference'
 
 
-class KpiSqlFilter(models.Model):
+class KpiSqlFilter(Model):
     fk_id_kpi_ref = models.IntegerField(primary_key=True)
     order_seq = models.IntegerField(unique=True)
     sql_filter = models.TextField(blank=True, null=True)
@@ -3705,7 +3706,7 @@ class KpiSqlFilter(models.Model):
         unique_together = (('fk_id_kpi_ref', 'order_seq'),)
 
 
-class KpiSqlFilterValues(models.Model):
+class KpiSqlFilterValues(Model):
     id_kpi_user = models.IntegerField(primary_key=True)
     fk_id_kpi_ref = models.IntegerField(unique=True)
     order_seq = models.IntegerField(unique=True)
@@ -3721,7 +3722,7 @@ class KpiSqlFilterValues(models.Model):
         unique_together = (('id_kpi_user', 'fk_id_kpi_ref', 'fk_profile_user', 'order_seq'),)
 
 
-class KpiTdbUserSetting(models.Model):
+class KpiTdbUserSetting(Model):
     id_tdb_user = models.IntegerField(primary_key=True)
     id_kpi_user = models.IntegerField(unique=True)
     fk_id_kpi_ref = models.IntegerField(unique=True)
@@ -3742,7 +3743,7 @@ class KpiTdbUserSetting(models.Model):
         db_table = 'kpi_tdb_user_setting'
 
 
-class KpiUserFilter(models.Model):
+class KpiUserFilter(Model):
     fk_id_kpi_ref = models.IntegerField(primary_key=True)
     order_seq = models.IntegerField(unique=True)
     user_filter_type = models.IntegerField(unique=True)
@@ -3761,7 +3762,7 @@ class KpiUserFilter(models.Model):
         unique_together = (('fk_id_kpi_ref', 'order_seq'),)
 
 
-class KpiUserSetting(models.Model):
+class KpiUserSetting(Model):
     id_kpi_user = models.IntegerField(primary_key=True)
     fk_id_kpi_ref = models.IntegerField(unique=True)
     fk_profile_user = models.TextField(unique=True)  # This field type is a guess.
@@ -3776,7 +3777,7 @@ class KpiUserSetting(models.Model):
         unique_together = (('id_kpi_user', 'fk_id_kpi_ref', 'fk_profile_user'),)
 
 
-class Kpilog(models.Model):
+class Kpilog(Model):
     kpiname = models.TextField(primary_key=True)  # This field type is a guess.
     value = models.TextField(unique=True)  # This field type is a guess.
     logdate = models.TextField(unique=True)  # This field type is a guess.
@@ -3787,7 +3788,7 @@ class Kpilog(models.Model):
         db_table = 'kpilog'
 
 
-class LibChampsTechnique(models.Model):
+class LibChampsTechnique(Model):
     name = models.TextField(primary_key=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
     update_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3801,7 +3802,7 @@ class LibChampsTechnique(models.Model):
         unique_together = (('name', 'fk_lib_unites_technique_name'),)
 
 
-class LibUnitesTechnique(models.Model):
+class LibUnitesTechnique(Model):
     name = models.TextField(primary_key=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
     update_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3811,7 +3812,7 @@ class LibUnitesTechnique(models.Model):
         db_table = 'lib_unites_technique'
 
 
-class LicenseServiceArea(models.Model):
+class LicenseServiceArea(Model):
     id = models.BigIntegerField(primary_key=True)
     code = models.TextField(blank=True, null=True)  # This field type is a guess.
     name = models.TextField(unique=True)  # This field type is a guess.
@@ -3822,7 +3823,7 @@ class LicenseServiceArea(models.Model):
         db_table = 'license_service_area'
 
 
-class Lieu(models.Model):
+class Lieu(Model):
     n_lieu = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -3861,7 +3862,7 @@ class Lieu(models.Model):
         db_table = 'lieu'
 
 
-class LieuRecup20140630(models.Model):
+class LieuRecup20140630(Model):
     n_lieu = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.CharField(max_length=7, blank=True, null=True)
@@ -3895,7 +3896,7 @@ class LieuRecup20140630(models.Model):
         db_table = 'lieu_recup_20140630'
 
 
-class LieuSav20140507(models.Model):
+class LieuSav20140507(Model):
     n_lieu = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.CharField(max_length=7, blank=True, null=True)
@@ -3929,7 +3930,7 @@ class LieuSav20140507(models.Model):
         db_table = 'lieu_sav_20140507'
 
 
-class LieuSav20140523(models.Model):
+class LieuSav20140523(Model):
     n_lieu = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.CharField(max_length=7, blank=True, null=True)
@@ -3963,7 +3964,7 @@ class LieuSav20140523(models.Model):
         db_table = 'lieu_sav_20140523'
 
 
-class LieuSav20140613(models.Model):
+class LieuSav20140613(Model):
     n_lieu = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.CharField(max_length=7, blank=True, null=True)
@@ -3997,7 +3998,7 @@ class LieuSav20140613(models.Model):
         db_table = 'lieu_sav_20140613'
 
 
-class LieuSav20140702(models.Model):
+class LieuSav20140702(Model):
     n_lieu = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.CharField(max_length=7, blank=True, null=True)
@@ -4031,7 +4032,7 @@ class LieuSav20140702(models.Model):
         db_table = 'lieu_sav_20140702'
 
 
-class LieuSav20140704(models.Model):
+class LieuSav20140704(Model):
     n_lieu = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.CharField(max_length=7, blank=True, null=True)
@@ -4065,7 +4066,7 @@ class LieuSav20140704(models.Model):
         db_table = 'lieu_sav_20140704'
 
 
-class LieuTest(models.Model):
+class LieuTest(Model):
     n_lieu = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.CharField(max_length=7, blank=True, null=True)
@@ -4099,7 +4100,7 @@ class LieuTest(models.Model):
         db_table = 'lieu_test'
 
 
-class LieuTestSav20140630(models.Model):
+class LieuTestSav20140630(Model):
     n_lieu = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.CharField(max_length=7, blank=True, null=True)
@@ -4133,7 +4134,7 @@ class LieuTestSav20140630(models.Model):
         db_table = 'lieu_test_sav_20140630'
 
 
-class Lieusauve(models.Model):
+class Lieusauve(Model):
     n_lieu = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4167,7 +4168,7 @@ class Lieusauve(models.Model):
         db_table = 'lieusauve'
 
 
-class LinkPropertiesPart(models.Model):
+class LinkPropertiesPart(Model):
     id_lk_property_part = models.BigIntegerField(primary_key=True)
     flag_part_eqp = models.TextField(blank=True, null=True)  # This field type is a guess.
     c_refer = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4191,7 +4192,7 @@ class LinkPropertiesPart(models.Model):
         db_table = 'link_properties_part'
 
 
-class LkAssetTd(models.Model):
+class LkAssetTd(Model):
     fk_asset = models.TextField(primary_key=True)  # This field type is a guess.
     fk_td = models.TextField(unique=True)  # This field type is a guess.
     is_master_td = models.BooleanField(unique=True)
@@ -4202,7 +4203,7 @@ class LkAssetTd(models.Model):
         unique_together = (('fk_asset', 'fk_td'),)
 
 
-class LkBCompAPrevent2(models.Model):
+class LkBCompAPrevent2(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     nu_prevent = models.TextField(blank=True, null=True)  # This field type is a guess.
     external_consumption = models.CharField(max_length=1, blank=True, null=True)
@@ -4224,7 +4225,7 @@ class LkBCompAPrevent2(models.Model):
         db_table = 'lk_b_comp_a_prevent2'
 
 
-class LkBEq1996Lieu(models.Model):
+class LkBEq1996Lieu(Model):
     fk_b_eq1996_n_imma = models.TextField(primary_key=True)  # This field type is a guess.
     fk_lieu_n_lieu = models.TextField(unique=True)  # This field type is a guess.
     nb_imma = models.IntegerField(blank=True, null=True)
@@ -4237,7 +4238,7 @@ class LkBEq1996Lieu(models.Model):
         unique_together = (('fk_b_eq1996_n_imma', 'fk_lieu_n_lieu'),)
 
 
-class LkBEq1996PrLines(models.Model):
+class LkBEq1996PrLines(Model):
     no_request = models.TextField(primary_key=True)  # This field type is a guess.
     no_line = models.IntegerField(unique=True)
     n_imma = models.TextField(unique=True)  # This field type is a guess.
@@ -4247,7 +4248,7 @@ class LkBEq1996PrLines(models.Model):
         db_table = 'lk_b_eq1996_pr_lines'
 
 
-class LkBEq1996Unites(models.Model):
+class LkBEq1996Unites(Model):
     fk_b_eq1996_n_imma = models.TextField(primary_key=True)  # This field type is a guess.
     fk_unites_n_uf = models.TextField()  # This field type is a guess.
     nb_imma = models.IntegerField(blank=True, null=True)
@@ -4258,7 +4259,7 @@ class LkBEq1996Unites(models.Model):
         unique_together = (('fk_b_eq1996_n_imma', 'fk_unites_n_uf'),)
 
 
-class LkCalendarPrevent2(models.Model):
+class LkCalendarPrevent2(Model):
     nu_prevent = models.TextField(primary_key=True)  # This field type is a guess.
     date_planned = models.TextField(unique=True)  # This field type is a guess.
     date_execute = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4273,7 +4274,7 @@ class LkCalendarPrevent2(models.Model):
         unique_together = (('nu_prevent', 'date_planned'),)
 
 
-class LkChecklistEqCneh(models.Model):
+class LkChecklistEqCneh(Model):
     fk_cth_id = models.BigIntegerField(primary_key=True)
     fk_n_nom_cneh = models.TextField()  # This field type is a guess.
     lce_mandatory = models.BooleanField(unique=True)
@@ -4284,7 +4285,7 @@ class LkChecklistEqCneh(models.Model):
         unique_together = (('fk_cth_id', 'fk_n_nom_cneh'),)
 
 
-class LkChecklistPrevent2(models.Model):
+class LkChecklistPrevent2(Model):
     fk_cth_id = models.BigIntegerField(primary_key=True)
     fk_nu_prevent = models.TextField()  # This field type is a guess.
     lcp_mandatory = models.BooleanField(unique=True)
@@ -4295,7 +4296,7 @@ class LkChecklistPrevent2(models.Model):
         unique_together = (('fk_cth_id', 'fk_nu_prevent'),)
 
 
-class LkChecklistTypes(models.Model):
+class LkChecklistTypes(Model):
     fk_cth_id = models.BigIntegerField(primary_key=True)
     fk_tp_type = models.TextField()  # This field type is a guess.
     fk_marque = models.TextField()  # This field type is a guess.
@@ -4307,7 +4308,7 @@ class LkChecklistTypes(models.Model):
         unique_together = (('fk_cth_id', 'fk_tp_type', 'fk_marque'),)
 
 
-class LkChkTplEqCneh(models.Model):
+class LkChkTplEqCneh(Model):
     fk_chk_tpl_code = models.TextField(primary_key=True)  # This field type is a guess.
     fk_eq_cneh_n_nom_cneh = models.TextField(unique=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4319,7 +4320,7 @@ class LkChkTplEqCneh(models.Model):
         unique_together = (('fk_chk_tpl_code', 'fk_eq_cneh_n_nom_cneh'),)
 
 
-class LkChkTplPrevent2(models.Model):
+class LkChkTplPrevent2(Model):
     fk_chk_tpl_code = models.TextField(primary_key=True)  # This field type is a guess.
     fk_prevent2_nu_prevent = models.TextField(unique=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4331,7 +4332,7 @@ class LkChkTplPrevent2(models.Model):
         unique_together = (('fk_chk_tpl_code', 'fk_prevent2_nu_prevent'),)
 
 
-class LkChkTplTypes(models.Model):
+class LkChkTplTypes(Model):
     fk_chk_tpl_code = models.TextField(primary_key=True)  # This field type is a guess.
     fk_types_tp_type = models.TextField(unique=True)  # This field type is a guess.
     fk_types_marque = models.TextField(unique=True)  # This field type is a guess.
@@ -4344,7 +4345,7 @@ class LkChkTplTypes(models.Model):
         unique_together = (('fk_chk_tpl_code', 'fk_types_tp_type', 'fk_types_marque'),)
 
 
-class LkContactSite(models.Model):
+class LkContactSite(Model):
     nu_contact = models.CharField(primary_key=True, max_length=10)
     n_etab = models.TextField(unique=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4356,7 +4357,7 @@ class LkContactSite(models.Model):
         unique_together = (('nu_contact', 'n_etab'),)
 
 
-class LkCounterPrevent2(models.Model):
+class LkCounterPrevent2(Model):
     nu_prevent = models.TextField(primary_key=True)  # This field type is a guess.
     counter_planned = models.IntegerField(unique=True)
     nb_asset_done = models.IntegerField(blank=True, null=True)
@@ -4370,7 +4371,7 @@ class LkCounterPrevent2(models.Model):
         unique_together = (('nu_prevent', 'counter_planned'),)
 
 
-class LkDashboardProfile(models.Model):
+class LkDashboardProfile(Model):
     fk_profile_id = models.BigIntegerField(primary_key=True)
     fk_dashboard_id = models.BigIntegerField(unique=True)
 
@@ -4380,7 +4381,7 @@ class LkDashboardProfile(models.Model):
         unique_together = (('fk_profile_id', 'fk_dashboard_id'),)
 
 
-class LkPicture(models.Model):
+class LkPicture(Model):
     fk_all_pictures_id = models.BigIntegerField(blank=True, null=True)
     fk_b_eq1996_n_imma = models.TextField(blank=True, null=True)  # This field type is a guess.
     fk_idepiece_c_refer = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4396,7 +4397,7 @@ class LkPicture(models.Model):
         db_table = 'lk_picture'
 
 
-class LkPropFieldLocation(models.Model):
+class LkPropFieldLocation(Model):
     auto_id = models.BigIntegerField(unique=True)
     fk_pfs_auto_id = models.BigIntegerField(primary_key=True)
     fk_n_lieu = models.TextField(unique=True)  # This field type is a guess.
@@ -4410,7 +4411,7 @@ class LkPropFieldLocation(models.Model):
         unique_together = (('fk_pfs_auto_id', 'fk_n_lieu'),)
 
 
-class LkPropFieldTechfamily(models.Model):
+class LkPropFieldTechfamily(Model):
     auto_id = models.BigIntegerField(unique=True)
     fk_pfs_auto_id = models.BigIntegerField(primary_key=True)
     fk_code_fam = models.TextField(unique=True)  # This field type is a guess.
@@ -4424,7 +4425,7 @@ class LkPropFieldTechfamily(models.Model):
         unique_together = (('fk_pfs_auto_id', 'fk_code_fam'),)
 
 
-class LkTechfield(models.Model):
+class LkTechfield(Model):
     fk_lib_champs_technique_name = models.TextField(blank=True, null=True)  # This field type is a guess.
     fk_lib_unites_technique_name = models.TextField(blank=True, null=True)  # This field type is a guess.
     fk_b_eq1996_n_imma = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4443,7 +4444,7 @@ class LkTechfield(models.Model):
         db_table = 'lk_techfield'
 
 
-class LkTrainingModels(models.Model):
+class LkTrainingModels(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     fk_id_training = models.IntegerField(unique=True)
     fk_model_type = models.TextField(unique=True)  # This field type is a guess.
@@ -4456,7 +4457,7 @@ class LkTrainingModels(models.Model):
         db_table = 'lk_training_models'
 
 
-class LkTrainingUsers(models.Model):
+class LkTrainingUsers(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     fk_id_training = models.IntegerField(unique=True)
     category_user = models.IntegerField(unique=True)
@@ -4473,7 +4474,7 @@ class LkTrainingUsers(models.Model):
         db_table = 'lk_training_users'
 
 
-class LkUniteStBEq1996(models.Model):
+class LkUniteStBEq1996(Model):
     fk_unite_st_code_techn = models.TextField(primary_key=True)  # This field type is a guess.
     fk_b_eq1996_n_imma = models.TextField(unique=True)  # This field type is a guess.
     c_metier = models.TextField(unique=True)  # This field type is a guess.
@@ -4484,7 +4485,7 @@ class LkUniteStBEq1996(models.Model):
         unique_together = (('fk_unite_st_code_techn', 'fk_b_eq1996_n_imma', 'c_metier'),)
 
 
-class LkUniteStTypes(models.Model):
+class LkUniteStTypes(Model):
     fk_unite_st_code_techn = models.TextField(primary_key=True)  # This field type is a guess.
     fk_types_tp_type = models.TextField(unique=True)  # This field type is a guess.
     fk_types_marque = models.TextField(unique=True)  # This field type is a guess.
@@ -4497,7 +4498,7 @@ class LkUniteStTypes(models.Model):
         unique_together = (('fk_unite_st_code_techn', 'fk_types_tp_type', 'fk_types_marque', 'c_metier'),)
 
 
-class LkUserCsEtabli(models.Model):
+class LkUserCsEtabli(Model):
     fk_user_cs_id = models.TextField(primary_key=True)  # This field type is a guess.
     fk_etabli_n_etab = models.TextField(unique=True)  # This field type is a guess.
 
@@ -4507,7 +4508,7 @@ class LkUserCsEtabli(models.Model):
         unique_together = (('fk_user_cs_id', 'fk_etabli_n_etab'),)
 
 
-class LkUserCsTd(models.Model):
+class LkUserCsTd(Model):
     fk_usercslogin = models.TextField(primary_key=True)  # This field type is a guess.
     fk_td = models.TextField(unique=True)  # This field type is a guess.
     is_master_td = models.BooleanField(unique=True)
@@ -4521,7 +4522,7 @@ class LkUserCsTd(models.Model):
         unique_together = (('fk_usercslogin', 'fk_td'),)
 
 
-class LkUserCsUnites(models.Model):
+class LkUserCsUnites(Model):
     fk_user_cs_id = models.TextField(primary_key=True)  # This field type is a guess.
     fk_unites_n_uf = models.TextField()  # This field type is a guess.
 
@@ -4531,7 +4532,7 @@ class LkUserCsUnites(models.Model):
         unique_together = (('fk_user_cs_id', 'fk_unites_n_uf'),)
 
 
-class LkUserCustomer(models.Model):
+class LkUserCustomer(Model):
     fk_user_id = models.BigIntegerField(primary_key=True)
     fk_customer_id = models.BigIntegerField(unique=True)
 
@@ -4541,7 +4542,7 @@ class LkUserCustomer(models.Model):
         unique_together = (('fk_user_id', 'fk_customer_id'),)
 
 
-class LkUserEtabli(models.Model):
+class LkUserEtabli(Model):
     fk_user_id = models.BigIntegerField(primary_key=True)
     fk_etabli_n_etab = models.TextField()  # This field type is a guess.
     lutieta_insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4553,7 +4554,7 @@ class LkUserEtabli(models.Model):
         unique_together = (('fk_user_id', 'fk_etabli_n_etab'),)
 
 
-class LkUserLieu(models.Model):
+class LkUserLieu(Model):
     fk_user_id = models.BigIntegerField(primary_key=True)
     fk_lieu_n_lieu = models.TextField(unique=True)  # This field type is a guess.
 
@@ -4563,7 +4564,7 @@ class LkUserLieu(models.Model):
         unique_together = (('fk_user_id', 'fk_lieu_n_lieu'),)
 
 
-class LkUserMetiers(models.Model):
+class LkUserMetiers(Model):
     fk_user_id = models.BigIntegerField(primary_key=True)
     fk_metiers_c_metier = models.TextField(unique=True)  # This field type is a guess.
 
@@ -4573,7 +4574,7 @@ class LkUserMetiers(models.Model):
         unique_together = (('fk_user_id', 'fk_metiers_c_metier'),)
 
 
-class LkUserUnites(models.Model):
+class LkUserUnites(Model):
     fk_user_id = models.BigIntegerField(primary_key=True)
     fk_unites_n_uf = models.TextField()  # This field type is a guess.
     lutiuf_insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4585,7 +4586,7 @@ class LkUserUnites(models.Model):
         unique_together = (('fk_user_id', 'fk_unites_n_uf'),)
 
 
-class LkUserUnitesSav20141031(models.Model):
+class LkUserUnitesSav20141031(Model):
     fk_user_id = models.BigIntegerField(unique=True)
     fk_unites_n_uf = models.CharField(primary_key=True, max_length=7)
 
@@ -4594,7 +4595,7 @@ class LkUserUnitesSav20141031(models.Model):
         db_table = 'lk_user_unites_sav_20141031'
 
 
-class LocaHistoAsset(models.Model):
+class LocaHistoAsset(Model):
     loca_histo_date = models.TextField(unique=True)  # This field type is a guess.
     loca_histo_time = models.TextField(primary_key=True)  # This field type is a guess.
     loca_id = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4623,7 +4624,7 @@ class LocaHistoAsset(models.Model):
         db_table = 'loca_histo_asset'
 
 
-class LocaHistoSets(models.Model):
+class LocaHistoSets(Model):
     date_time = models.TextField(primary_key=True)  # This field type is a guess.
     who_update = models.TextField(blank=True, null=True)  # This field type is a guess.
     loca_histo_manage = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4640,7 +4641,7 @@ class LocaHistoSets(models.Model):
         db_table = 'loca_histo_sets'
 
 
-class Magasin(models.Model):
+class Magasin(Model):
     magnum = models.TextField(primary_key=True)  # This field type is a guess.
     magnom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4665,7 +4666,7 @@ class Magasin(models.Model):
         db_table = 'magasin'
 
 
-class Marques(models.Model):
+class Marques(Model):
     ma_nom = models.TextField(primary_key=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
     update_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4679,7 +4680,7 @@ class Marques(models.Model):
         db_table = 'marques'
 
 
-class MdsEventSetting(models.Model):
+class MdsEventSetting(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     event_description = models.TextField(unique=True)  # This field type is a guess.
     event_comments = models.TextField(blank=True, null=True)
@@ -4699,7 +4700,7 @@ class MdsEventSetting(models.Model):
         db_table = 'mds_event_setting'
 
 
-class MdsSignatoryHistoric(models.Model):
+class MdsSignatoryHistoric(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     fk_nu_int = models.TextField(unique=True)  # This field type is a guess.
     fk_id_wf_event_sign = models.IntegerField(unique=True)
@@ -4732,7 +4733,7 @@ class MdsSignatoryHistoric(models.Model):
         db_table = 'mds_signatory_historic'
 
 
-class MdsSignatorySetting(models.Model):
+class MdsSignatorySetting(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     signatory_description = models.TextField(unique=True)  # This field type is a guess.
     signatory_comments = models.TextField(blank=True, null=True)
@@ -4752,7 +4753,7 @@ class MdsSignatorySetting(models.Model):
         db_table = 'mds_signatory_setting'
 
 
-class MdsSignatoryTracking(models.Model):
+class MdsSignatoryTracking(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     fk_nu_int = models.TextField(unique=True)  # This field type is a guess.
     fk_id_wf_event_sign = models.IntegerField(unique=True)
@@ -4785,7 +4786,7 @@ class MdsSignatoryTracking(models.Model):
         db_table = 'mds_signatory_tracking'
 
 
-class MdsWfEventSignSetting(models.Model):
+class MdsWfEventSignSetting(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     fk_id_wf = models.IntegerField(unique=True)
     fk_id_event = models.IntegerField(unique=True)
@@ -4799,7 +4800,7 @@ class MdsWfEventSignSetting(models.Model):
         db_table = 'mds_wf_event_sign_setting'
 
 
-class MdsWfSetting(models.Model):
+class MdsWfSetting(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     wf_description = models.TextField(unique=True)  # This field type is a guess.
     wf_comments = models.TextField(blank=True, null=True)
@@ -4814,7 +4815,7 @@ class MdsWfSetting(models.Model):
         db_table = 'mds_wf_setting'
 
 
-class Metiers(models.Model):
+class Metiers(Model):
     c_metier = models.TextField(primary_key=True)  # This field type is a guess.
     resp = models.TextField(blank=True, null=True)  # This field type is a guess.
     cmnt = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4842,7 +4843,7 @@ class Metiers(models.Model):
         db_table = 'metiers'
 
 
-class MobilityTechnicalUse(models.Model):
+class MobilityTechnicalUse(Model):
     mtu_id = models.TextField(unique=True)  # This field type is a guess.
     mtu_value = models.IntegerField(primary_key=True)
 
@@ -4851,7 +4852,7 @@ class MobilityTechnicalUse(models.Model):
         db_table = 'mobility_technical_use'
 
 
-class Modality(models.Model):
+class Modality(Model):
     mod_code = models.TextField(primary_key=True)  # This field type is a guess.
     mod_name = models.TextField(unique=True)  # This field type is a guess.
 
@@ -4860,7 +4861,7 @@ class Modality(models.Model):
         db_table = 'modality'
 
 
-class Numcom(models.Model):
+class Numcom(Model):
     numco = models.IntegerField(primary_key=True)
 
     class Meta:
@@ -4868,7 +4869,7 @@ class Numcom(models.Model):
         db_table = 'numcom'
 
 
-class Numintv(models.Model):
+class Numintv(Model):
     numintv = models.IntegerField(primary_key=True)
 
     class Meta:
@@ -4876,7 +4877,7 @@ class Numintv(models.Model):
         db_table = 'numintv'
 
 
-class Numpieces(models.Model):
+class Numpieces(Model):
     numco = models.IntegerField(primary_key=True)
 
     class Meta:
@@ -4884,7 +4885,7 @@ class Numpieces(models.Model):
         db_table = 'numpieces'
 
 
-class Numprev(models.Model):
+class Numprev(Model):
     numprev = models.IntegerField(primary_key=True)
 
     class Meta:
@@ -4892,7 +4893,7 @@ class Numprev(models.Model):
         db_table = 'numprev'
 
 
-class OperatSchedule(models.Model):
+class OperatSchedule(Model):
     operat_id = models.TextField(primary_key=True)  # This field type is a guess.
     operat_name = models.TextField(blank=True, null=True)  # This field type is a guess.
     operat_day1 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4910,7 +4911,7 @@ class OperatSchedule(models.Model):
         db_table = 'operat_schedule'
 
 
-class ParaIni(models.Model):
+class ParaIni(Model):
     secname = models.TextField(primary_key=True)  # This field type is a guess.
     kwname = models.TextField(unique=True)  # This field type is a guess.
     kwvalue = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4921,7 +4922,7 @@ class ParaIni(models.Model):
         unique_together = (('secname', 'kwname'),)
 
 
-class Parafen(models.Model):
+class Parafen(Model):
     p_profil = models.TextField(primary_key=True)  # This field type is a guess.
     p_fenetre = models.TextField(unique=True)  # This field type is a guess.
     p_nom_chp = models.TextField(unique=True)  # This field type is a guess.
@@ -4949,7 +4950,7 @@ class Parafen(models.Model):
         db_table = 'parafen'
 
 
-class Param(models.Model):
+class Param(Model):
     rep = models.CharField(unique=True, max_length=20)
     datemaj = models.CharField(max_length=10, blank=True, null=True)
     cmnt = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4966,7 +4967,7 @@ class Param(models.Model):
         db_table = 'param'
 
 
-class Paramets(models.Model):
+class Paramets(Model):
     para_type = models.CharField(max_length=1, blank=True, null=True)
     so_lib_fen = models.TextField(blank=True, null=True)  # This field type is a guess.
     para_fen = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -4982,7 +4983,7 @@ class Paramets(models.Model):
         db_table = 'paramets'
 
 
-class Paranum(models.Model):
+class Paranum(Model):
     nomtab = models.TextField(primary_key=True)  # This field type is a guess.
     numero = models.BigIntegerField(blank=True, null=True)
     para1 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5003,7 +5004,7 @@ class Paranum(models.Model):
         db_table = 'paranum'
 
 
-class Paraplanning(models.Model):
+class Paraplanning(Model):
     plandesc = models.TextField(blank=True, null=True)  # This field type is a guess.
     plandefault = models.TextField(blank=True, null=True)  # This field type is a guess.
     wocolor = models.IntegerField(blank=True, null=True)
@@ -5043,7 +5044,7 @@ class Paraplanning(models.Model):
         db_table = 'paraplanning'
 
 
-class Paraprno(models.Model):
+class Paraprno(Model):
     prnobject = models.TextField(primary_key=True)  # This field type is a guess.
     prntheme = models.TextField(unique=True)  # This field type is a guess.
     prndescription = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5054,7 +5055,7 @@ class Paraprno(models.Model):
         unique_together = (('prnobject', 'prntheme'),)
 
 
-class Paraprnt(models.Model):
+class Paraprnt(Model):
     prnlanguage = models.CharField(primary_key=True, max_length=10)
     prnkey = models.TextField(unique=True)  # This field type is a guess.
     prnlabel = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5065,7 +5066,7 @@ class Paraprnt(models.Model):
         unique_together = (('prnlanguage', 'prnkey'),)
 
 
-class Parasoph(models.Model):
+class Parasoph(Model):
     so_lib_fen = models.TextField(primary_key=True)  # This field type is a guess.
     so_lib_chp = models.TextField(unique=True)  # This field type is a guess.
     so_lib = models.TextField(unique=True)  # This field type is a guess.
@@ -5077,7 +5078,7 @@ class Parasoph(models.Model):
         db_table = 'parasoph'
 
 
-class Paratbls(models.Model):
+class Paratbls(Model):
     pname = models.TextField(primary_key=True)  # This field type is a guess.
     wname = models.TextField(unique=True)  # This field type is a guess.
     tname = models.TextField(unique=True)  # This field type is a guess.
@@ -5092,7 +5093,7 @@ class Paratbls(models.Model):
         unique_together = (('pname', 'wname', 'tname'),)
 
 
-class PasswordHistoric(models.Model):
+class PasswordHistoric(Model):
     u_id = models.TextField(primary_key=True)  # This field type is a guess.
     user_pw_creationdate = models.TextField(unique=True)  # This field type is a guess.
     user_old_password = models.TextField(unique=True)  # This field type is a guess.
@@ -5105,7 +5106,7 @@ class PasswordHistoric(models.Model):
         unique_together = (('u_id', 'user_pw_creationdate'),)
 
 
-class PermanentInventory(models.Model):
+class PermanentInventory(Model):
     pi_index = models.BigIntegerField(primary_key=True)
     pi_ppc_date = models.TextField(unique=True)  # This field type is a guess.
     u_id = models.TextField(unique=True)  # This field type is a guess.
@@ -5141,7 +5142,7 @@ class PermanentInventory(models.Model):
         db_table = 'permanent_inventory'
 
 
-class PieLEq(models.Model):
+class PieLEq(Model):
     ref_four = models.TextField(blank=True, null=True)  # This field type is a guess.
     typ_mod_ap = models.TextField(blank=True, null=True)  # This field type is a guess.
     cneh_type = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5157,7 +5158,7 @@ class PieLEq(models.Model):
         db_table = 'pie_l_eq'
 
 
-class Pieces(models.Model):
+class Pieces(Model):
     nu_piece = models.TextField(blank=True, null=True)  # This field type is a guess.
     c_refer = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_imma = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5214,7 +5215,7 @@ class Pieces(models.Model):
         db_table = 'pieces'
 
 
-class PiecesReception(models.Model):
+class PiecesReception(Model):
     id = models.BigIntegerField(primary_key=True)
     n_mag = models.TextField(unique=True)  # This field type is a guess.
     c_refer = models.TextField(unique=True)  # This field type is a guess.
@@ -5245,7 +5246,7 @@ class PiecesReception(models.Model):
         db_table = 'pieces_reception'
 
 
-class PlanningEvent(models.Model):
+class PlanningEvent(Model):
     auto_id = models.BigIntegerField(primary_key=True)
     plne_fk_category = models.CharField(unique=True, max_length=2)
     plne_event_title = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5270,7 +5271,7 @@ class PlanningEvent(models.Model):
         db_table = 'planning_event'
 
 
-class PlanningEventGuests(models.Model):
+class PlanningEventGuests(Model):
     auto_id = models.BigIntegerField(primary_key=True)
     plng_fk_plne_auto_id = models.BigIntegerField(unique=True)
     plng_technician_code = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5285,7 +5286,7 @@ class PlanningEventGuests(models.Model):
         db_table = 'planning_event_guests'
 
 
-class Ppcsettings(models.Model):
+class Ppcsettings(Model):
     webserverurl = models.TextField(primary_key=True)  # This field type is a guess.
     webserverport = models.TextField(unique=True)  # This field type is a guess.
 
@@ -5295,7 +5296,7 @@ class Ppcsettings(models.Model):
         unique_together = (('webserverurl', 'webserverport'),)
 
 
-class PrefixAutonumbering(models.Model):
+class PrefixAutonumbering(Model):
     prefix_other_id = models.TextField(primary_key=True)  # This field type is a guess.
     prefix_numero = models.BigIntegerField(blank=True, null=True)
     is_used_prefix_numero = models.IntegerField(blank=True, null=True)
@@ -5307,7 +5308,7 @@ class PrefixAutonumbering(models.Model):
         db_table = 'prefix_autonumbering'
 
 
-class PrevEqp(models.Model):
+class PrevEqp(Model):
     nu_prevent = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_imma = models.TextField(blank=True, null=True)  # This field type is a guess.
     p1_num = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5359,7 +5360,7 @@ class PrevEqp(models.Model):
         db_table = 'prev_eqp'
 
 
-class PrevEqpBkp105(models.Model):
+class PrevEqpBkp105(Model):
     nu_prevent = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_imma = models.TextField(blank=True, null=True)  # This field type is a guess.
     p1_num = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5411,7 +5412,7 @@ class PrevEqpBkp105(models.Model):
         db_table = 'prev_eqp_bkp_105'
 
 
-class PrevEqpPlanned(models.Model):
+class PrevEqpPlanned(Model):
     prep_id = models.BigIntegerField(primary_key=True)
     prep_fk_nu_prevent = models.TextField(unique=True)  # This field type is a guess.
     prep_fk_prev_eqp_pk = models.BigIntegerField(unique=True)
@@ -5443,7 +5444,7 @@ class PrevEqpPlanned(models.Model):
         db_table = 'prev_eqp_planned'
 
 
-class Prevent2(models.Model):
+class Prevent2(Model):
     nu_prevent = models.TextField(primary_key=True)  # This field type is a guess.
     nature = models.TextField(blank=True, null=True)  # This field type is a guess.
     titre = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5517,7 +5518,7 @@ class Prevent2(models.Model):
         db_table = 'prevent2'
 
 
-class Prevent2Bkp105(models.Model):
+class Prevent2Bkp105(Model):
     nu_prevent = models.TextField(blank=True, null=True)  # This field type is a guess.
     nature = models.TextField(blank=True, null=True)  # This field type is a guess.
     titre = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5591,7 +5592,7 @@ class Prevent2Bkp105(models.Model):
         db_table = 'prevent2_bkp_105'
 
 
-class Preventif(models.Model):
+class Preventif(Model):
     num_prev = models.CharField(max_length=10, blank=True, null=True)
     date_prev = models.CharField(max_length=10, blank=True, null=True)
     user_connected = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5601,7 +5602,7 @@ class Preventif(models.Model):
         db_table = 'preventif'
 
 
-class PrimarykeyChanges(models.Model):
+class PrimarykeyChanges(Model):
     pkchange_id = models.BigIntegerField(primary_key=True)
     pkchange_update_datetime = models.TextField(unique=True)  # This field type is a guess.
     pkchange_table_name = models.TextField(unique=True)  # This field type is a guess.
@@ -5614,7 +5615,7 @@ class PrimarykeyChanges(models.Model):
         db_table = 'primarykey_changes'
 
 
-class PrioritizationAge(models.Model):
+class PrioritizationAge(Model):
     range = models.TextField(primary_key=True)  # This field type is a guess.
     value1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     value2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5625,7 +5626,7 @@ class PrioritizationAge(models.Model):
         db_table = 'prioritization_age'
 
 
-class PrioritizationAssetValues(models.Model):
+class PrioritizationAssetValues(Model):
     n_imma = models.TextField(primary_key=True)  # This field type is a guess.
     value_formula1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     value_formula2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5639,7 +5640,7 @@ class PrioritizationAssetValues(models.Model):
         db_table = 'prioritization_asset_values'
 
 
-class PrioritizationFormula(models.Model):
+class PrioritizationFormula(Model):
     formula_code = models.TextField(primary_key=True)  # This field type is a guess.
     formula_name = models.TextField(blank=True, null=True)  # This field type is a guess.
     formula = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5650,7 +5651,7 @@ class PrioritizationFormula(models.Model):
         db_table = 'prioritization_formula'
 
 
-class PrioritizationPmValues(models.Model):
+class PrioritizationPmValues(Model):
     prev_eqp_pk = models.BigIntegerField(primary_key=True)
     value_formula1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     value_formula2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5664,7 +5665,7 @@ class PrioritizationPmValues(models.Model):
         db_table = 'prioritization_pm_values'
 
 
-class PrioritizationPrice(models.Model):
+class PrioritizationPrice(Model):
     range = models.TextField(primary_key=True)  # This field type is a guess.
     value1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     value2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5675,7 +5676,7 @@ class PrioritizationPrice(models.Model):
         db_table = 'prioritization_price'
 
 
-class PrioritizationUserTable(models.Model):
+class PrioritizationUserTable(Model):
     user_table_type = models.TextField(primary_key=True)  # This field type is a guess.
     user_table_name = models.TextField(unique=True)  # This field type is a guess.
 
@@ -5684,7 +5685,7 @@ class PrioritizationUserTable(models.Model):
         db_table = 'prioritization_user_table'
 
 
-class PrioritizationWoValues(models.Model):
+class PrioritizationWoValues(Model):
     nu_int = models.TextField(primary_key=True)  # This field type is a guess.
     value_formula1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     value_formula2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5710,7 +5711,7 @@ class PrioritizationWoValues(models.Model):
         db_table = 'prioritization_wo_values'
 
 
-class Profes(models.Model):
+class Profes(Model):
     id_profes = models.BigIntegerField(primary_key=True)
     pocode = models.TextField(blank=True, null=True)  # This field type is a guess.
     ponom = models.TextField(unique=True)  # This field type is a guess.
@@ -5720,7 +5721,7 @@ class Profes(models.Model):
         db_table = 'profes'
 
 
-class Profile(models.Model):
+class Profile(Model):
     id = models.BigIntegerField(primary_key=True)
     name = models.TextField(unique=True)  # This field type is a guess.
     fk_dashboard_id = models.BigIntegerField(blank=True, null=True)
@@ -5730,7 +5731,7 @@ class Profile(models.Model):
         db_table = 'profile'
 
 
-class Properties(models.Model):
+class Properties(Model):
     id_property = models.BigIntegerField(primary_key=True)
     code_label = models.TextField(unique=True)  # This field type is a guess.
     id_device_type = models.BigIntegerField(blank=True, null=True)
@@ -5741,7 +5742,7 @@ class Properties(models.Model):
         unique_together = (('id_property', 'code_label'),)
 
 
-class PropertyFieldSetting(models.Model):
+class PropertyFieldSetting(Model):
     auto_id = models.BigIntegerField(primary_key=True)
     fk_pgs_auto_id = models.BigIntegerField(unique=True)
     pfs_code = models.TextField(unique=True)  # This field type is a guess.
@@ -5761,7 +5762,7 @@ class PropertyFieldSetting(models.Model):
         db_table = 'property_field_setting'
 
 
-class PropertyGroupSetting(models.Model):
+class PropertyGroupSetting(Model):
     auto_id = models.BigIntegerField(primary_key=True)
     pgs_code = models.TextField(unique=True)  # This field type is a guess.
     pgs_name = models.TextField(unique=True)  # This field type is a guess.
@@ -5774,7 +5775,7 @@ class PropertyGroupSetting(models.Model):
         db_table = 'property_group_setting'
 
 
-class PropertyValueSetting(models.Model):
+class PropertyValueSetting(Model):
     auto_id = models.BigIntegerField(primary_key=True)
     pvs_value = models.TextField(unique=True)  # This field type is a guess.
     pvs_category = models.BooleanField(unique=True)
@@ -5784,7 +5785,7 @@ class PropertyValueSetting(models.Model):
         db_table = 'property_value_setting'
 
 
-class Proven(models.Model):
+class Proven(Model):
     pv_nom = models.TextField(primary_key=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
     update_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5794,7 +5795,7 @@ class Proven(models.Model):
         db_table = 'proven'
 
 
-class PublicTenderCode(models.Model):
+class PublicTenderCode(Model):
     code_mpu = models.TextField(primary_key=True)  # This field type is a guess.
     name = models.TextField(blank=True, null=True)  # This field type is a guess.
     commentaire = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5813,7 +5814,7 @@ class PublicTenderCode(models.Model):
         db_table = 'public_tender_code'
 
 
-class PublicTenderContract(models.Model):
+class PublicTenderContract(Model):
     n_marche_publique = models.TextField(primary_key=True)  # This field type is a guess.
     designation = models.TextField(blank=True, null=True)  # This field type is a guess.
     code_four = models.CharField(max_length=10)
@@ -5837,7 +5838,7 @@ class PublicTenderContract(models.Model):
         unique_together = (('n_marche_publique', 'code_four'),)
 
 
-class PurchaseRequestLines(models.Model):
+class PurchaseRequestLines(Model):
     no_line = models.IntegerField(primary_key=True)
     no_request = models.TextField()  # This field type is a guess.
     code_supp_store = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5869,7 +5870,7 @@ class PurchaseRequestLines(models.Model):
         unique_together = (('no_line', 'no_request'),)
 
 
-class PurchaseRequests(models.Model):
+class PurchaseRequests(Model):
     no_request = models.TextField(primary_key=True)  # This field type is a guess.
     date_creation = models.TextField(blank=True, null=True)  # This field type is a guess.
     date_sent = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5908,7 +5909,7 @@ class PurchaseRequests(models.Model):
         db_table = 'purchase_requests'
 
 
-class RdsUserConnection(models.Model):
+class RdsUserConnection(Model):
     ip_address = models.TextField(primary_key=True)  # This field type is a guess.
     computer_name = models.TextField(unique=True)  # This field type is a guess.
     domain_name = models.TextField(unique=True)  # This field type is a guess.
@@ -5921,7 +5922,7 @@ class RdsUserConnection(models.Model):
         unique_together = (('ip_address', 'computer_name', 'domain_name', 'nt_user_name'),)
 
 
-class Remedes(models.Model):
+class Remedes(Model):
     num = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_nom_cneh = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5940,7 +5941,7 @@ class Remedes(models.Model):
         db_table = 'remedes'
 
 
-class ReportTemplate(models.Model):
+class ReportTemplate(Model):
     id = models.BigIntegerField(primary_key=True)
     name = models.TextField(blank=True, null=True)  # This field type is a guess.
     theme = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5955,7 +5956,7 @@ class ReportTemplate(models.Model):
         db_table = 'report_template'
 
 
-class RfidLog(models.Model):
+class RfidLog(Model):
     rfid_log_id = models.TextField(primary_key=True)  # This field type is a guess.
     rfid_log_date = models.TextField(blank=True, null=True)  # This field type is a guess.
     rfid_log_time = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5972,7 +5973,7 @@ class RfidLog(models.Model):
         db_table = 'rfid_log'
 
 
-class RightManagement(models.Model):
+class RightManagement(Model):
     fk_profile_id = models.BigIntegerField(primary_key=True)
     fk_feature_id = models.BigIntegerField(unique=True)
     access_right = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -5983,7 +5984,7 @@ class RightManagement(models.Model):
         unique_together = (('fk_profile_id', 'fk_feature_id'),)
 
 
-class SchemaVersion(models.Model):
+class SchemaVersion(Model):
     schema_version = models.TextField(primary_key=True)  # This field type is a guess.
 
     class Meta:
@@ -5991,7 +5992,7 @@ class SchemaVersion(models.Model):
         db_table = 'schema_version'
 
 
-class ScriptResults(models.Model):
+class ScriptResults(Model):
     line_id = models.BigIntegerField(primary_key=True)
     script_version = models.TextField(blank=True, null=True)  # This field type is a guess.
     table_name = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6002,7 +6003,7 @@ class ScriptResults(models.Model):
         db_table = 'script_results'
 
 
-class Services(models.Model):
+class Services(Model):
     n_servi2 = models.TextField(unique=True)  # This field type is a guess.
     n_chef_s = models.TextField(blank=True, null=True)  # This field type is a guess.
     s_tel1 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6019,7 +6020,7 @@ class Services(models.Model):
         db_table = 'services'
 
 
-class Settings(models.Model):
+class Settings(Model):
     stg_global = models.TextField(primary_key=True)  # This field type is a guess.
     stg_fkprofil = models.TextField(blank=True, null=True)  # This field type is a guess.
     stg_fkuser = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6033,7 +6034,7 @@ class Settings(models.Model):
         db_table = 'settings'
 
 
-class Strfen(models.Model):
+class Strfen(Model):
     p_fenetre = models.TextField(primary_key=True)  # This field type is a guess.
     p_nom_chp = models.TextField(unique=True)  # This field type is a guess.
     p_lib_chp = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6047,7 +6048,7 @@ class Strfen(models.Model):
         unique_together = (('p_fenetre', 'p_nom_chp'),)
 
 
-class SupplierHistoricForLink(models.Model):
+class SupplierHistoricForLink(Model):
     shfl_id = models.BigIntegerField(primary_key=True)
     shfl_date = models.TextField(unique=True)  # This field type is a guess.
     shfl_time = models.TextField(unique=True)  # This field type is a guess.
@@ -6062,7 +6063,7 @@ class SupplierHistoricForLink(models.Model):
         db_table = 'supplier_historic_for_link'
 
 
-class SupplierOwnerHistoric(models.Model):
+class SupplierOwnerHistoric(Model):
     soh_id = models.IntegerField(primary_key=True)
     soh_date = models.TextField(unique=True)  # This field type is a guess.
     soh_time = models.TextField(unique=True)  # This field type is a guess.
@@ -6074,7 +6075,7 @@ class SupplierOwnerHistoric(models.Model):
         db_table = 'supplier_owner_historic'
 
 
-class SynchAnomaly(models.Model):
+class SynchAnomaly(Model):
     sa_index = models.BigIntegerField(primary_key=True)
     sah_index = models.BigIntegerField(blank=True, null=True)
     sa_type = models.IntegerField(blank=True, null=True)
@@ -6088,7 +6089,7 @@ class SynchAnomaly(models.Model):
         db_table = 'synch_anomaly'
 
 
-class SynchAnomalyHeader(models.Model):
+class SynchAnomalyHeader(Model):
     sah_index = models.BigIntegerField(primary_key=True)
     u_id = models.TextField(blank=True, null=True)  # This field type is a guess.
     sah_datehour = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6101,7 +6102,7 @@ class SynchAnomalyHeader(models.Model):
         db_table = 'synch_anomaly_header'
 
 
-class TdbDef(models.Model):
+class TdbDef(Model):
     db_id = models.BigIntegerField(primary_key=True)
     db_type = models.NullBooleanField()
     db_description = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6119,7 +6120,7 @@ class TdbDef(models.Model):
         db_table = 'tdb_def'
 
 
-class TdbDefMandfilter(models.Model):
+class TdbDefMandfilter(Model):
     db_id = models.BigIntegerField(primary_key=True)
     db_mand_filter_id = models.BigIntegerField(unique=True)
     db_mand_filter_description = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6132,7 +6133,7 @@ class TdbDefMandfilter(models.Model):
         unique_together = (('db_id', 'db_mand_filter_id'),)
 
 
-class TdbDefMandfilterSql(models.Model):
+class TdbDefMandfilterSql(Model):
     db_id = models.BigIntegerField(primary_key=True)
     db_mand_filter_id = models.BigIntegerField(unique=True)
     db_mand_filter_sqltype = models.BooleanField(unique=True)
@@ -6144,7 +6145,7 @@ class TdbDefMandfilterSql(models.Model):
         unique_together = (('db_id', 'db_mand_filter_id', 'db_mand_filter_sqltype'),)
 
 
-class TdbDefOptfilter(models.Model):
+class TdbDefOptfilter(Model):
     db_id = models.BigIntegerField(primary_key=True)
     db_opt_filter_id = models.BigIntegerField(unique=True)
     db_opt_filter_description = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6162,7 +6163,7 @@ class TdbDefOptfilter(models.Model):
         unique_together = (('db_id', 'db_opt_filter_id'),)
 
 
-class TdbDefOptfilterSql(models.Model):
+class TdbDefOptfilterSql(Model):
     db_id = models.BigIntegerField(primary_key=True)
     db_opt_filter_id = models.BigIntegerField(unique=True)
     db_opt_filter_sqltype = models.BooleanField(unique=True)
@@ -6176,7 +6177,7 @@ class TdbDefOptfilterSql(models.Model):
         unique_together = (('db_id', 'db_opt_filter_id', 'db_opt_filter_sqltype'),)
 
 
-class TdbDefSql(models.Model):
+class TdbDefSql(Model):
     db_id = models.BigIntegerField(primary_key=True)
     db_sqltype = models.BooleanField(unique=True)
     db_sqlqueryforgraph = models.TextField(blank=True, null=True)
@@ -6196,7 +6197,7 @@ class TdbDefSql(models.Model):
         unique_together = (('db_id', 'db_sqltype'),)
 
 
-class TdbValueFilterMandatory(models.Model):
+class TdbValueFilterMandatory(Model):
     db_id = models.BigIntegerField(primary_key=True)
     u_password = models.TextField(unique=True)  # This field type is a guess.
     db_mand_filter_id = models.BigIntegerField(unique=True)
@@ -6212,7 +6213,7 @@ class TdbValueFilterMandatory(models.Model):
         unique_together = (('db_id', 'u_password', 'db_mand_filter_id', 'db_position'),)
 
 
-class TdbValueFilterOptional(models.Model):
+class TdbValueFilterOptional(Model):
     db_id = models.BigIntegerField(primary_key=True)
     u_password = models.TextField(unique=True)  # This field type is a guess.
     db_opt_filter_id = models.BigIntegerField(unique=True)
@@ -6228,7 +6229,7 @@ class TdbValueFilterOptional(models.Model):
         unique_together = (('db_id', 'u_password', 'db_opt_filter_id', 'db_position'),)
 
 
-class TdbValueProfileAssociation(models.Model):
+class TdbValueProfileAssociation(Model):
     db_id = models.BigIntegerField(primary_key=True)
     u_password = models.TextField(unique=True)  # This field type is a guess.
     db_position = models.BooleanField(unique=True)
@@ -6242,7 +6243,7 @@ class TdbValueProfileAssociation(models.Model):
         unique_together = (('db_id', 'u_password', 'db_position'),)
 
 
-class Techfamily(models.Model):
+class Techfamily(Model):
     code_fam = models.TextField(primary_key=True)  # This field type is a guess.
     nom_fam = models.TextField(blank=True, null=True)  # This field type is a guess.
     niveau = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6258,7 +6259,7 @@ class Techfamily(models.Model):
         db_table = 'techfamily'
 
 
-class TechnicalFieldValues(models.Model):
+class TechnicalFieldValues(Model):
     value_index = models.IntegerField(primary_key=True)
     name = models.TextField(unique=True)  # This field type is a guess.
     technicalunitname = models.TextField(unique=True)  # This field type is a guess.
@@ -6269,7 +6270,7 @@ class TechnicalFieldValues(models.Model):
         db_table = 'technical_field_values'
 
 
-class Territory(models.Model):
+class Territory(Model):
     id = models.BigIntegerField(primary_key=True)
     code = models.TextField(blank=True, null=True)  # This field type is a guess.
     name = models.TextField(unique=True)  # This field type is a guess.
@@ -6279,7 +6280,7 @@ class Territory(models.Model):
         db_table = 'territory'
 
 
-class Theme(models.Model):
+class Theme(Model):
     codecouleur = models.TextField(primary_key=True)  # This field type is a guess.
     element = models.TextField(unique=True)  # This field type is a guess.
     libelle = models.TextField(unique=True)  # This field type is a guess.
@@ -6291,7 +6292,7 @@ class Theme(models.Model):
         db_table = 'theme'
 
 
-class Tracker(models.Model):
+class Tracker(Model):
     item_type = models.CharField(primary_key=True, max_length=1)
     track_item = models.TextField(unique=True)  # This field type is a guess.
     high_response_time = models.IntegerField(blank=True, null=True)
@@ -6317,7 +6318,7 @@ class Tracker(models.Model):
         unique_together = (('item_type', 'track_item'),)
 
 
-class TrackerLog(models.Model):
+class TrackerLog(Model):
     event_id = models.TextField(primary_key=True)  # This field type is a guess.
     process_id = models.TextField(blank=True, null=True)  # This field type is a guess.
     user_id = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6338,7 +6339,7 @@ class TrackerLog(models.Model):
         db_table = 'tracker_log'
 
 
-class TrackerProp(models.Model):
+class TrackerProp(Model):
     prop_name = models.TextField(primary_key=True)  # This field type is a guess.
     prop_value = models.TextField(blank=True, null=True)  # This field type is a guess.
     prop_desc = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6348,7 +6349,7 @@ class TrackerProp(models.Model):
         db_table = 'tracker_prop'
 
 
-class TrainingHeader(models.Model):
+class TrainingHeader(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     code_training = models.TextField(unique=True)  # This field type is a guess.
     title = models.TextField(unique=True)  # This field type is a guess.
@@ -6382,7 +6383,7 @@ class TrainingHeader(models.Model):
         db_table = 'training_header'
 
 
-class TrainingType(models.Model):
+class TrainingType(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     description_training_type = models.TextField(unique=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6393,7 +6394,7 @@ class TrainingType(models.Model):
         db_table = 'training_type'
 
 
-class Tva(models.Model):
+class Tva(Model):
     c_tva = models.CharField(primary_key=True, max_length=1)
     t_tva = models.TextField(blank=True, null=True)  # This field type is a guess.
 
@@ -6402,7 +6403,7 @@ class Tva(models.Model):
         db_table = 'tva'
 
 
-class TwoHistoric(models.Model):
+class TwoHistoric(Model):
     nu_int = models.TextField(blank=True, null=True)  # This field type is a guess.
     u_id = models.TextField(blank=True, null=True)  # This field type is a guess.
     user_name = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6428,7 +6429,7 @@ class TwoHistoric(models.Model):
         db_table = 'two_historic'
 
 
-class TwoHistoricInVenan(models.Model):
+class TwoHistoricInVenan(Model):
     nu_int = models.TextField(blank=True, null=True)  # This field type is a guess.
     u_id = models.TextField(blank=True, null=True)  # This field type is a guess.
     user_name = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6460,7 +6461,7 @@ class TwoHistoricInVenan(models.Model):
         db_table = 'two_historic_in_venan'
 
 
-class TwoHistoricLogin(models.Model):
+class TwoHistoricLogin(Model):
     id = models.IntegerField(primary_key=True)  # AutoField?
     username = models.TextField(unique=True)  # This field type is a guess.
     fk_profile_name = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6477,7 +6478,7 @@ class TwoHistoricLogin(models.Model):
         db_table = 'two_historic_login'
 
 
-class TwoQuotation(models.Model):
+class TwoQuotation(Model):
     id_quotation = models.BigIntegerField(primary_key=True)
     nu_int = models.TextField(unique=True)  # This field type is a guess.
     status_quotation = models.BooleanField(unique=True)
@@ -6508,7 +6509,7 @@ class TwoQuotation(models.Model):
         db_table = 'two_quotation'
 
 
-class TypCont(models.Model):
+class TypCont(Model):
     code_type = models.CharField(primary_key=True, max_length=10)
     lib_type = models.TextField(unique=True)  # This field type is a guess.
     calcul_ext = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6520,7 +6521,7 @@ class TypCont(models.Model):
         db_table = 'typ_cont'
 
 
-class TypeAbs(models.Model):
+class TypeAbs(Model):
     typ_abs = models.CharField(primary_key=True, max_length=2)
     motif = models.TextField(blank=True, null=True)  # This field type is a guess.
     color = models.IntegerField(blank=True, null=True)
@@ -6531,7 +6532,7 @@ class TypeAbs(models.Model):
         db_table = 'type_abs'
 
 
-class TypeEf(models.Model):
+class TypeEf(Model):
     ef_typ = models.CharField(primary_key=True, max_length=25)
     famille = models.CharField(max_length=35, blank=True, null=True)
 
@@ -6540,7 +6541,7 @@ class TypeEf(models.Model):
         db_table = 'type_ef'
 
 
-class Types(models.Model):
+class Types(Model):
     tp_type = models.TextField(primary_key=True)  # This field type is a guess.
     marque = models.TextField()  # This field type is a guess.
     four_type = models.CharField(max_length=10, blank=True, null=True)
@@ -6574,7 +6575,7 @@ class Types(models.Model):
         unique_together = (('tp_type', 'marque'),)
 
 
-class UniteSt(models.Model):
+class UniteSt(Model):
     unit_st = models.TextField(blank=True, null=True)  # This field type is a guess.
     code_techn = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom_techn = models.TextField(primary_key=True)  # This field type is a guess.
@@ -6601,7 +6602,7 @@ class UniteSt(models.Model):
         unique_together = (('nom_techn', 'metier'),)
 
 
-class UniteStHeader(models.Model):
+class UniteStHeader(Model):
     tech_code_techn = models.TextField(primary_key=True)  # This field type is a guess.
     tech_inside_code = models.TextField(blank=True, null=True)  # This field type is a guess.
     tech_hr_id = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6622,7 +6623,7 @@ class UniteStHeader(models.Model):
         db_table = 'unite_st_header'
 
 
-class Unites(models.Model):
+class Unites(Model):
     n_uf = models.TextField(primary_key=True)  # This field type is a guess.
     n_servi = models.TextField(unique=True)  # This field type is a guess.
     n_servi2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6659,7 +6660,7 @@ class Unites(models.Model):
         db_table = 'unites'
 
 
-class UrgencyLevel(models.Model):
+class UrgencyLevel(Model):
     ul_id = models.IntegerField(primary_key=True)
     ul_color = models.IntegerField(unique=True)
     ul_max_response_time = models.IntegerField(blank=True, null=True)
@@ -6669,7 +6670,7 @@ class UrgencyLevel(models.Model):
         db_table = 'urgency_level'
 
 
-class UserInterfaceAssociated(models.Model):
+class UserInterfaceAssociated(Model):
     id_ui_associated_kpi = models.IntegerField(primary_key=True)
     screen_name = models.TextField(unique=True)  # This field type is a guess.
     pk_ui_field_name = models.TextField(unique=True)  # This field type is a guess.
@@ -6680,7 +6681,7 @@ class UserInterfaceAssociated(models.Model):
         db_table = 'user_interface_associated'
 
 
-class UserInterfaceList(models.Model):
+class UserInterfaceList(Model):
     ui_screen_name = models.TextField(primary_key=True)  # This field type is a guess.
     field_name = models.TextField(unique=True)  # This field type is a guess.
     field_type = models.TextField(unique=True)  # This field type is a guess.
@@ -6691,7 +6692,7 @@ class UserInterfaceList(models.Model):
         unique_together = (('ui_screen_name', 'field_name'),)
 
 
-class Usershortcuts(models.Model):
+class Usershortcuts(Model):
     usershortcuts_username = models.TextField(primary_key=True)  # This field type is a guess.
     usershortcuts_ordre = models.IntegerField(unique=True)
     usershortcuts_type = models.IntegerField(unique=True)
@@ -6705,7 +6706,7 @@ class Usershortcuts(models.Model):
         unique_together = (('usershortcuts_username', 'usershortcuts_ordre', 'usershortcuts_type', 'usershortcuts_description'),)
 
 
-class Usertable1(models.Model):
+class Usertable1(Model):
     id_usertable1 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6717,7 +6718,7 @@ class Usertable1(models.Model):
         db_table = 'usertable1'
 
 
-class Usertable1Contract(models.Model):
+class Usertable1Contract(Model):
     id_usertable1 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6728,7 +6729,7 @@ class Usertable1Contract(models.Model):
         db_table = 'usertable1_contract'
 
 
-class Usertable1Loan(models.Model):
+class Usertable1Loan(Model):
     id_usertable1 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6739,7 +6740,7 @@ class Usertable1Loan(models.Model):
         db_table = 'usertable1_loan'
 
 
-class Usertable1Location(models.Model):
+class Usertable1Location(Model):
     id_usertable1 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6754,7 +6755,7 @@ class Usertable1Location(models.Model):
         db_table = 'usertable1_location'
 
 
-class Usertable1Part(models.Model):
+class Usertable1Part(Model):
     id_usertable1 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6765,7 +6766,7 @@ class Usertable1Part(models.Model):
         db_table = 'usertable1_part'
 
 
-class Usertable1PartWo(models.Model):
+class Usertable1PartWo(Model):
     id_usertable1 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6776,7 +6777,7 @@ class Usertable1PartWo(models.Model):
         db_table = 'usertable1_part_wo'
 
 
-class Usertable1Pm(models.Model):
+class Usertable1Pm(Model):
     id_usertable1_pm = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6787,7 +6788,7 @@ class Usertable1Pm(models.Model):
         db_table = 'usertable1_pm'
 
 
-class Usertable1Po(models.Model):
+class Usertable1Po(Model):
     id_usertable1 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6798,7 +6799,7 @@ class Usertable1Po(models.Model):
         db_table = 'usertable1_po'
 
 
-class Usertable1Ri(models.Model):
+class Usertable1Ri(Model):
     id_usertable1 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6809,7 +6810,7 @@ class Usertable1Ri(models.Model):
         db_table = 'usertable1_ri'
 
 
-class Usertable1Tech(models.Model):
+class Usertable1Tech(Model):
     id_usertable1 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6820,7 +6821,7 @@ class Usertable1Tech(models.Model):
         db_table = 'usertable1_tech'
 
 
-class Usertable1Wo(models.Model):
+class Usertable1Wo(Model):
     id_usertable1_wo = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6831,7 +6832,7 @@ class Usertable1Wo(models.Model):
         db_table = 'usertable1_wo'
 
 
-class Usertable2(models.Model):
+class Usertable2(Model):
     id_usertable2 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6843,7 +6844,7 @@ class Usertable2(models.Model):
         db_table = 'usertable2'
 
 
-class Usertable2Contract(models.Model):
+class Usertable2Contract(Model):
     id_usertable2 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6854,7 +6855,7 @@ class Usertable2Contract(models.Model):
         db_table = 'usertable2_contract'
 
 
-class Usertable2Loan(models.Model):
+class Usertable2Loan(Model):
     id_usertable2 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6865,7 +6866,7 @@ class Usertable2Loan(models.Model):
         db_table = 'usertable2_loan'
 
 
-class Usertable2Location(models.Model):
+class Usertable2Location(Model):
     id_usertable2 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6880,7 +6881,7 @@ class Usertable2Location(models.Model):
         db_table = 'usertable2_location'
 
 
-class Usertable2Part(models.Model):
+class Usertable2Part(Model):
     id_usertable2 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6891,7 +6892,7 @@ class Usertable2Part(models.Model):
         db_table = 'usertable2_part'
 
 
-class Usertable2PartWo(models.Model):
+class Usertable2PartWo(Model):
     id_usertable2 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6902,7 +6903,7 @@ class Usertable2PartWo(models.Model):
         db_table = 'usertable2_part_wo'
 
 
-class Usertable2Pm(models.Model):
+class Usertable2Pm(Model):
     id_usertable2_pm = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6917,7 +6918,7 @@ class Usertable2Pm(models.Model):
         db_table = 'usertable2_pm'
 
 
-class Usertable2Po(models.Model):
+class Usertable2Po(Model):
     id_usertable2 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6928,7 +6929,7 @@ class Usertable2Po(models.Model):
         db_table = 'usertable2_po'
 
 
-class Usertable2Ri(models.Model):
+class Usertable2Ri(Model):
     id_usertable2 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6939,7 +6940,7 @@ class Usertable2Ri(models.Model):
         db_table = 'usertable2_ri'
 
 
-class Usertable2Tech(models.Model):
+class Usertable2Tech(Model):
     id_usertable2 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6950,7 +6951,7 @@ class Usertable2Tech(models.Model):
         db_table = 'usertable2_tech'
 
 
-class Usertable2Wo(models.Model):
+class Usertable2Wo(Model):
     id_usertable2_wo = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6961,7 +6962,7 @@ class Usertable2Wo(models.Model):
         db_table = 'usertable2_wo'
 
 
-class Usertable3(models.Model):
+class Usertable3(Model):
     id_usertable3 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6977,7 +6978,7 @@ class Usertable3(models.Model):
         db_table = 'usertable3'
 
 
-class Usertable3Contract(models.Model):
+class Usertable3Contract(Model):
     id_usertable3 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -6992,7 +6993,7 @@ class Usertable3Contract(models.Model):
         db_table = 'usertable3_contract'
 
 
-class Usertable3Part(models.Model):
+class Usertable3Part(Model):
     id_usertable3 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7007,7 +7008,7 @@ class Usertable3Part(models.Model):
         db_table = 'usertable3_part'
 
 
-class Usertable3PartWo(models.Model):
+class Usertable3PartWo(Model):
     id_usertable3 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7022,7 +7023,7 @@ class Usertable3PartWo(models.Model):
         db_table = 'usertable3_part_wo'
 
 
-class Usertable3Pm(models.Model):
+class Usertable3Pm(Model):
     id_usertable3_pm = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7037,7 +7038,7 @@ class Usertable3Pm(models.Model):
         db_table = 'usertable3_pm'
 
 
-class Usertable3Po(models.Model):
+class Usertable3Po(Model):
     id_usertable3 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7052,7 +7053,7 @@ class Usertable3Po(models.Model):
         db_table = 'usertable3_po'
 
 
-class Usertable3Ri(models.Model):
+class Usertable3Ri(Model):
     id_usertable3 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7067,7 +7068,7 @@ class Usertable3Ri(models.Model):
         db_table = 'usertable3_ri'
 
 
-class Usertable3Tech(models.Model):
+class Usertable3Tech(Model):
     id_usertable3 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7082,7 +7083,7 @@ class Usertable3Tech(models.Model):
         db_table = 'usertable3_tech'
 
 
-class Usertable3Wo(models.Model):
+class Usertable3Wo(Model):
     id_usertable3_wo = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7097,7 +7098,7 @@ class Usertable3Wo(models.Model):
         db_table = 'usertable3_wo'
 
 
-class Usertable4(models.Model):
+class Usertable4(Model):
     id_usertable4 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7113,7 +7114,7 @@ class Usertable4(models.Model):
         db_table = 'usertable4'
 
 
-class Usertable4Contract(models.Model):
+class Usertable4Contract(Model):
     id_usertable4 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7128,7 +7129,7 @@ class Usertable4Contract(models.Model):
         db_table = 'usertable4_contract'
 
 
-class Usertable4Part(models.Model):
+class Usertable4Part(Model):
     id_usertable4 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7143,7 +7144,7 @@ class Usertable4Part(models.Model):
         db_table = 'usertable4_part'
 
 
-class Usertable4PartWo(models.Model):
+class Usertable4PartWo(Model):
     id_usertable4 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7158,7 +7159,7 @@ class Usertable4PartWo(models.Model):
         db_table = 'usertable4_part_wo'
 
 
-class Usertable4Po(models.Model):
+class Usertable4Po(Model):
     id_usertable4 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7173,7 +7174,7 @@ class Usertable4Po(models.Model):
         db_table = 'usertable4_po'
 
 
-class Usertable4Ri(models.Model):
+class Usertable4Ri(Model):
     id_usertable4 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7188,7 +7189,7 @@ class Usertable4Ri(models.Model):
         db_table = 'usertable4_ri'
 
 
-class Usertable4Tech(models.Model):
+class Usertable4Tech(Model):
     id_usertable4 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7203,7 +7204,7 @@ class Usertable4Tech(models.Model):
         db_table = 'usertable4_tech'
 
 
-class Usertable4Wo(models.Model):
+class Usertable4Wo(Model):
     id_usertable4_wo = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7218,7 +7219,7 @@ class Usertable4Wo(models.Model):
         db_table = 'usertable4_wo'
 
 
-class Usertable5(models.Model):
+class Usertable5(Model):
     id_usertable5 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7234,7 +7235,7 @@ class Usertable5(models.Model):
         db_table = 'usertable5'
 
 
-class Usertable5Contract(models.Model):
+class Usertable5Contract(Model):
     id_usertable5 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7249,7 +7250,7 @@ class Usertable5Contract(models.Model):
         db_table = 'usertable5_contract'
 
 
-class Usertable5Part(models.Model):
+class Usertable5Part(Model):
     id_usertable5 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7264,7 +7265,7 @@ class Usertable5Part(models.Model):
         db_table = 'usertable5_part'
 
 
-class Usertable5PartWo(models.Model):
+class Usertable5PartWo(Model):
     id_usertable5 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7279,7 +7280,7 @@ class Usertable5PartWo(models.Model):
         db_table = 'usertable5_part_wo'
 
 
-class Usertable5Po(models.Model):
+class Usertable5Po(Model):
     id_usertable5 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7294,7 +7295,7 @@ class Usertable5Po(models.Model):
         db_table = 'usertable5_po'
 
 
-class Usertable5Ri(models.Model):
+class Usertable5Ri(Model):
     id_usertable5 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7309,7 +7310,7 @@ class Usertable5Ri(models.Model):
         db_table = 'usertable5_ri'
 
 
-class Usertable5Tech(models.Model):
+class Usertable5Tech(Model):
     id_usertable5 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7324,7 +7325,7 @@ class Usertable5Tech(models.Model):
         db_table = 'usertable5_tech'
 
 
-class Usertable5Wo(models.Model):
+class Usertable5Wo(Model):
     id_usertable5_wo = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7339,7 +7340,7 @@ class Usertable5Wo(models.Model):
         db_table = 'usertable5_wo'
 
 
-class Usertable6(models.Model):
+class Usertable6(Model):
     id_usertable6 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7355,7 +7356,7 @@ class Usertable6(models.Model):
         db_table = 'usertable6'
 
 
-class Usertable6Po(models.Model):
+class Usertable6Po(Model):
     id_usertable6 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7366,7 +7367,7 @@ class Usertable6Po(models.Model):
         db_table = 'usertable6_po'
 
 
-class Usertable7(models.Model):
+class Usertable7(Model):
     id_usertable7 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7382,7 +7383,7 @@ class Usertable7(models.Model):
         db_table = 'usertable7'
 
 
-class Usertable7Po(models.Model):
+class Usertable7Po(Model):
     id_usertable7 = models.IntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7393,7 +7394,7 @@ class Usertable7Po(models.Model):
         db_table = 'usertable7_po'
 
 
-class Usertable8(models.Model):
+class Usertable8(Model):
     id_usertable8 = models.BigIntegerField(primary_key=True)
     field1 = models.TextField(blank=True, null=True)  # This field type is a guess.
     field2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7409,7 +7410,7 @@ class Usertable8(models.Model):
         db_table = 'usertable8'
 
 
-class Utilisat(models.Model):
+class Utilisat(Model):
     u_password = models.TextField(blank=True, null=True)  # This field type is a guess.
     u_uf = models.TextField(blank=True, null=True)  # This field type is a guess.
     u_marche = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7454,7 +7455,7 @@ class Utilisat(models.Model):
         db_table = 'utilisat'
 
 
-class Version(models.Model):
+class Version(Model):
     script_run_on = models.TextField(blank=True, null=True)  # This field type is a guess.
     module_impacted = models.TextField(blank=True, null=True)  # This field type is a guess.
     software_version = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7471,7 +7472,7 @@ class Version(models.Model):
         db_table = 'version'
 
 
-class Vocfonc(models.Model):
+class Vocfonc(Model):
     voc_fonc = models.TextField(primary_key=True)  # This field type is a guess.
     lib = models.TextField(blank=True, null=True)  # This field type is a guess.
     insert_date = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7484,7 +7485,7 @@ class Vocfonc(models.Model):
         db_table = 'vocfonc'
 
 
-class WebStats(models.Model):
+class WebStats(Model):
     web_stats_name = models.TextField(unique=True)  # This field type is a guess.
     web_stats_count = models.IntegerField(primary_key=True)
     web_stats_min = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7503,7 +7504,7 @@ class WebStats(models.Model):
         db_table = 'web_stats'
 
 
-class WebUser(models.Model):
+class WebUser(Model):
     id = models.BigIntegerField(primary_key=True)
     username = models.TextField(blank=True, null=True)  # This field type is a guess.
     password = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7533,7 +7534,7 @@ class WebUser(models.Model):
         db_table = 'web_user'
 
 
-class WebUserSav20141030(models.Model):
+class WebUserSav20141030(Model):
     id = models.BigIntegerField(primary_key=True)
     username = models.TextField(unique=True)  # This field type is a guess.
     password = models.TextField(unique=True)  # This field type is a guess.
@@ -7557,7 +7558,7 @@ class WebUserSav20141030(models.Model):
         db_table = 'web_user_sav_20141030'
 
 
-class WfDomains(models.Model):
+class WfDomains(Model):
     domain_id = models.TextField(unique=True)  # This field type is a guess.
     domain_label = models.TextField(primary_key=True)  # This field type is a guess.
 
@@ -7566,7 +7567,7 @@ class WfDomains(models.Model):
         db_table = 'wf_domains'
 
 
-class WfItems(models.Model):
+class WfItems(Model):
     item_id = models.TextField(primary_key=True)  # This field type is a guess.
     item_label = models.TextField(unique=True)  # This field type is a guess.
 
@@ -7575,7 +7576,7 @@ class WfItems(models.Model):
         db_table = 'wf_items'
 
 
-class WfLinks(models.Model):
+class WfLinks(Model):
     item_id = models.TextField(primary_key=True)  # This field type is a guess.
     pre_item = models.TextField(blank=True, null=True)  # This field type is a guess.
     post_item = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7589,7 +7590,7 @@ class WfLinks(models.Model):
         db_table = 'wf_links'
 
 
-class WhoDoWhat(models.Model):
+class WhoDoWhat(Model):
     www_who = models.TextField(blank=True, null=True)  # This field type is a guess.
     www_when = models.TextField(blank=True, null=True)  # This field type is a guess.
     www_mode = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7611,7 +7612,7 @@ class WhoDoWhat(models.Model):
         db_table = 'who_do_what'
 
 
-class Wksserver(models.Model):
+class Wksserver(Model):
     wks_id = models.TextField(primary_key=True)  # This field type is a guess.
 
     class Meta:
@@ -7619,7 +7620,7 @@ class Wksserver(models.Model):
         db_table = 'wksserver'
 
 
-class WoQuotation(models.Model):
+class WoQuotation(Model):
     id_quotation = models.BigIntegerField(primary_key=True)
     nu_int = models.TextField(unique=True)  # This field type is a guess.
     status_quotation = models.BooleanField(unique=True)
@@ -7648,7 +7649,7 @@ class WoQuotation(models.Model):
         db_table = 'wo_quotation'
 
 
-class WoSubStatus(models.Model):
+class WoSubStatus(Model):
     auto_id = models.BigIntegerField(primary_key=True)
     wo_status_option = models.NullBooleanField()
     sub_status_description = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7661,7 +7662,7 @@ class WoSubStatus(models.Model):
         db_table = 'wo_sub_status'
 
 
-class WoSubType(models.Model):
+class WoSubType(Model):
     auto_id = models.BigIntegerField(primary_key=True)
     wo_type_option = models.NullBooleanField()
     sub_type_description = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -7674,7 +7675,7 @@ class WoSubType(models.Model):
         db_table = 'wo_sub_type'
 
 
-class WoTester(models.Model):
+class WoTester(Model):
     wot_id = models.IntegerField(primary_key=True)
     wot_wo_number = models.TextField(unique=True)  # This field type is a guess.
     wot_assetnumber = models.TextField(unique=True)  # This field type is a guess.
@@ -7692,7 +7693,7 @@ class WoTester(models.Model):
         db_table = 'wo_tester'
 
 
-class WwwOnLocation(models.Model):
+class WwwOnLocation(Model):
     www_who = models.TextField(primary_key=True)  # This field type is a guess.
     www_when = models.TextField(unique=True)  # This field type is a guess.
     www_mode = models.TextField(unique=True)  # This field type is a guess.

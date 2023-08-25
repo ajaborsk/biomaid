@@ -25,6 +25,7 @@ from django.db.models import DateField
 from django.utils.translation import gettext as _
 
 # Create your models here.
+from overoly.base import OverolyModel as Model
 
 
 class AssetPlusDate1(DateField):
@@ -122,7 +123,7 @@ class AssetPlusDate3(DateField):
             return datetime.date(2000, 1, 1)
 
 
-class SuiviUpdates(models.Model):
+class SuiviUpdates(Model):
     table: models.CharField = models.CharField(
         verbose_name=_("Table modifiée"),
         max_length=128,
@@ -133,7 +134,7 @@ class SuiviUpdates(models.Model):
 
 
 # TABLE DES MARQUES DANS ASSET+
-class Marques(models.Model):
+class Marques(Model):
     ma_nom: models.TextField = models.TextField(primary_key=True)
     insert_date = AssetPlusDate2(blank=True, null=True)
     update_date = AssetPlusDate2(blank=True, null=True)
@@ -151,7 +152,7 @@ class Marques(models.Model):
 
 
 # TABLE DES TYPES/MODELS DANS ASSET+
-class Types(models.Model):
+class Types(Model):
     tp_type: models.TextField = models.TextField(primary_key=True)
     marque: models.TextField = models.TextField()
     four_type: models.CharField = models.CharField(max_length=10, blank=True, null=True)
@@ -188,7 +189,7 @@ class Types(models.Model):
         return self.ma_tp
 
 
-class Fournis2(models.Model):
+class Fournis2(Model):
     code_four: models.CharField = models.CharField(primary_key=True, max_length=10)
     f_cle_comp: models.CharField = models.CharField(max_length=1, blank=True, null=True)
     fourni: models.TextField = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -267,7 +268,7 @@ class Fournis2(models.Model):
 
 
 # TABLE DE L'INVENTAIRE DANS ASSET+
-class BEq1996(models.Model):
+class BEq1996(Model):
     n_imma: models.CharField = models.CharField(max_length=64, primary_key=True)  # This field type is a guess.
     n_nom_cneh: models.TextField = models.TextField(blank=True, null=True)  # This field type is a guess.
     n_uf: models.TextField = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -470,7 +471,7 @@ class BEq1996(models.Model):
         return self.n_imma
 
 
-class EqCneh(models.Model):
+class EqCneh(Model):
     n_nom_cneh = models.TextField(primary_key=True)  # This field type is a guess.
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
     nom2 = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -503,7 +504,7 @@ class EqCneh(models.Model):
         return self.n_nom_cneh
 
 
-class Contact(models.Model):
+class Contact(Model):
     nu_contact: models.CharField = models.CharField(primary_key=True, max_length=10)
     nu_four: models.CharField = models.CharField(max_length=10, blank=True, null=True)
     nom = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -532,7 +533,7 @@ class Contact(models.Model):
         return self.nom
 
 
-class ContactDescription(models.Model):
+class ContactDescription(Model):
     id: models.IntegerField = models.IntegerField(primary_key=True)  # AutoField?
     name = models.TextField(unique=True)  # This field type is a guess.
     insert_date = AssetPlusDate2(blank=True, null=True)  # This field type is a guess.
@@ -546,7 +547,7 @@ class ContactDescription(models.Model):
         return self.name
 
 
-class ContactPerson(models.Model):
+class ContactPerson(Model):
     id: models.BigIntegerField = models.BigIntegerField(primary_key=True)
     name = models.TextField(unique=True)  # This field type is a guess.
     email = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -569,7 +570,7 @@ class ContactPerson(models.Model):
         return self.name
 
 
-class Budget(models.Model):
+class Budget(Model):
     nu_compte = models.TextField(primary_key=True)  # This field type is a guess.
     lib_compte = models.TextField(blank=True, null=True)  # This field type is a guess.
     mt_cumul = models.TextField(blank=True, null=True)  # This field type is a guess.
@@ -596,7 +597,7 @@ class Budget(models.Model):
         return self.nu_compte
 
 
-class EnCours(models.Model):
+class EnCours(Model):
     nu_int: models.CharField = models.CharField(max_length=64, primary_key=True)  # This field type is a guess.
     nu_bon_c: models.CharField = models.CharField(max_length=64, blank=True, null=True)  # This field type is a guess.
     nu_imm: models.CharField = models.CharField(max_length=64, blank=True, null=True)  # This field type is a guess.
@@ -774,7 +775,7 @@ class EnCours(models.Model):
         db_table = 'en_cours'
 
 
-class BFt1996(models.Model):
+class BFt1996(Model):
     nu_int = models.CharField(max_length=64, primary_key=True)  # This field type is a guess.
     nu_bon_c = models.CharField(max_length=64, blank=True, null=True)  # This field type is a guess.
     nu_imm = models.CharField(max_length=64, blank=True, null=True)  # This field type is a guess.
@@ -953,7 +954,7 @@ class BFt1996(models.Model):
         db_table = 'b_ft1996'
 
 
-class Docliste(models.Model):
+class Docliste(Model):
     nu_doc = models.CharField(max_length=1024, blank=True, null=True)  # This field type is a guess.
     nom_doc = models.CharField(max_length=1024, blank=True, null=True)  # This field type is a guess.
     type_doc = models.IntegerField(blank=True, null=True)
@@ -1005,7 +1006,7 @@ class Docliste(models.Model):
         db_table = 'docliste'
 
 
-class Contrat(models.Model):
+class Contrat(Model):
     """
     Ce modèle est utilisé pour stocker les contrats (/marchés) de maintenance.
     """
@@ -1128,7 +1129,7 @@ class Contrat(models.Model):
         db_table = 'contrat'
 
 
-class HistoEq(models.Model):
+class HistoEq(Model):
     """
     Ce modèle est utilisé pour stocker les lients entre les contrats (/marchés) et les équipements.
     """

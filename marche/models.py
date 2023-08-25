@@ -23,9 +23,10 @@ from django.utils.translation import gettext as _
 
 from generic_comment.models import GenericComment
 from document.models import GenericDocument
+from overoly.base import OverolyModel as Model
 
 
-class Marche(models.Model):
+class Marche(Model):
     """
     Liste des marchés disponible
     """
@@ -131,7 +132,7 @@ class Marche(models.Model):
 
 
 # type de procédure disponible dans le CMP
-class TypeProcedure(models.Model):
+class TypeProcedure(Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=200)  # 30-1-3, AO, MAPA, UGAP, UNIHA, RESAH...
     intitule = models.TextField(
@@ -147,7 +148,7 @@ class TypeProcedure(models.Model):
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class Procedure(models.Model):
+class Procedure(Model):
     """Procédure de marché public"""
 
     id = models.AutoField(primary_key=True)
@@ -165,7 +166,7 @@ class Procedure(models.Model):
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class Lot(models.Model):
+class Lot(Model):
     RECONDUCTION_CHOICES = (
         ('Tacite', 'TACITE'),
         ('Expresse', 'EXPRESSE'),
@@ -208,7 +209,7 @@ class Lot(models.Model):
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class FamilleAchat(models.Model):
+class FamilleAchat(Model):
     id = models.AutoField(primary_key=True)
     code = models.IntegerField()
 
@@ -216,7 +217,7 @@ class FamilleAchat(models.Model):
         return "{0}".format(self.code)
 
 
-class Suivi(models.Model):
+class Suivi(Model):
     id = models.AutoField(primary_key=True)
     code = models.IntegerField()
 
@@ -257,8 +258,7 @@ HM6	Avenant à prévoir
 """
 
 
-class ExceptionMarche(models.Model):
-
+class ExceptionMarche(Model):
     CODE_HM_CHOICES = (
         ('HM1', 'HM1 - Procédure en cours'),
         ('HM2', 'HM2 - Procédure à prévoir'),
@@ -313,7 +313,7 @@ class ExceptionMarche(models.Model):
         return "{0}".format(self.code)
 
 
-# class Document(models.Model):
+# class Document(Model):
 #
 #     DOCS_CHOICES = (
 #         ('DEVIS', 'Devis'),
@@ -363,7 +363,7 @@ class ExceptionMarche(models.Model):
 #         return reverse('doc:document', kwargs={'UNCpath': self.UNCpath})
 #
 #
-# class DocumentLink(models.Model):
+# class DocumentLink(Model):
 #     class Meta:
 #         indexes = [
 #             models.Index(fields=['document']),

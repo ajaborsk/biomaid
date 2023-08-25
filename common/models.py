@@ -31,6 +31,7 @@ from document.models import GenericDocument
 from generic_comment.models import GenericComment
 
 from common import config
+from overoly.base import OverolyModel as Model
 
 # les tables ci-dessous sont mise à jour par des scripts
 # qui vont chercher dans ASSETPLUS les infos :
@@ -153,7 +154,7 @@ class User(AbstractUser):
         return "{} {} ({})".format(self.first_name, self.last_name, self.username)
 
 
-class Uf(models.Model):
+class Uf(Model):
     class Meta:
         unique_together = (('etablissement', 'code', 'cloture'),)
         ordering = ['code']
@@ -211,7 +212,7 @@ class Uf(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Service(models.Model):
+class Service(Model):
     class Meta:
         verbose_name = _("service")
 
@@ -247,7 +248,7 @@ class Service(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class CentreResponsabilite(models.Model):
+class CentreResponsabilite(Model):
     class Meta:
         verbose_name = _("centre de responsabilité")
         verbose_name_plural = _("centres de responsabilité")
@@ -284,7 +285,7 @@ class CentreResponsabilite(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Pole(models.Model):
+class Pole(Model):
     class Meta:
         verbose_name = _("pôle")
 
@@ -317,7 +318,7 @@ class Pole(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Site(models.Model):
+class Site(Model):
     code = models.CharField(max_length=8)
     nom = models.CharField(max_length=50)
     intitule = models.CharField(
@@ -346,7 +347,7 @@ class Site(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Etablissement(models.Model):
+class Etablissement(Model):
     """terme employé dans AssetPlus pour désigner les Centres du GHT : CHD, CHUAP, CHAM, CHABB..."""
 
     class Meta:
@@ -382,7 +383,7 @@ class Etablissement(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Discipline(models.Model):
+class Discipline(Model):
     """il s'agit d'un SERVICE ACHETEUR/EXPERT METIER et qui sera référent de la demande"""
 
     code = models.CharField(max_length=3)  # code du service concerné par la demande
@@ -398,7 +399,7 @@ class Discipline(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-# class ExpertMetier(models.Model):
+# class ExpertMetier(Model):
 # """acheteur/expert métier.
 
 # """
@@ -424,7 +425,7 @@ class Discipline(models.Model):
 # return "{0} - {1}".format(self.code, self.nom)
 
 
-class Domaine(models.Model):
+class Domaine(Model):
     """Il s'agit d'une domaine technique : Imagerie, Endoscopie, Perfusion..."""
 
     class Meta:
@@ -463,7 +464,7 @@ class Domaine(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Programme(models.Model):
+class Programme(Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['code'], name='programme_code_is_unique'),
@@ -512,7 +513,7 @@ class Programme(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Fournisseur(models.Model):
+class Fournisseur(Model):
     """Table des fournisseurs de base dans BiomAid.
     Pour les établissements, il est nécessaire d'avoir une table supplémentaire FournisseurEtablissement
     qui fait le lien entre la codification propre de l'établissement (dans sa GEF) et cette table.
@@ -568,7 +569,7 @@ class FournisseurEtablissement:
         return "{0} - {1} ({2})".format(self.code, self.fournisseur.nom, self.etablissement.nom)
 
 
-class ContactFournisseur(models.Model):
+class ContactFournisseur(Model):
     """ajouter class ContactFournisseur avec FK sur Fournisseur"""
 
     DIVISION = (
@@ -652,7 +653,7 @@ class ContactFournisseur(models.Model):
         return "{0} - {1} - {2}".format(self.nom, self.prenom, self.societe)
 
 
-class DataFournisseurGEF(models.Model):  # quid du code vis a vis des différents établissements. comment les gérer
+class DataFournisseurGEF(Model):  # quid du code vis a vis des différents établissements. comment les gérer
     code_gef = models.CharField(
         max_length=60,
         null=False,
@@ -735,7 +736,7 @@ class DataFournisseurGEF(models.Model):  # quid du code vis a vis des différent
         return "{0} - {1}".format(self.id, self.intitule_fournisseur)
 
 
-class Compte(models.Model):
+class Compte(Model):
     LETTRE_BUDGETAIRE = (
         ('A', 'DOTATION NON AFFECTEE'),
         ('B', 'LONG SEJOUR'),
@@ -779,7 +780,7 @@ class Compte(models.Model):
         return "{0} - {1} - {2}".format(self.lettre_budgetaire, self.code, self.nom)
 
 
-class ClasseCode(models.Model):
+class ClasseCode(Model):
     code = models.CharField(
         max_length=90,
         default=None,
@@ -813,7 +814,7 @@ class ClasseCode(models.Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Marque(models.Model):
+class Marque(Model):
     nom = models.CharField(
         max_length=90,
         default=None,
@@ -844,7 +845,7 @@ class Marque(models.Model):
     #    super().save(*args, **kwargs)
 
 
-class Type(models.Model):
+class Type(Model):
     CLASSE_CHOICES = (
         ('1', 'Classe 1'),
         ('2a', 'Classe 2a'),
@@ -878,7 +879,7 @@ class Type(models.Model):
         return "{0} - {1}".format(self.type, self.marque)
 
 
-class Cneh(models.Model):
+class Cneh(Model):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=90, default=None, verbose_name="Code CNEH", blank=False, null=False)
     intitule = models.CharField(max_length=90, default=None, verbose_name="Nom du CNEH", blank=False, null=False)
@@ -890,7 +891,7 @@ class Cneh(models.Model):
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class Cnehs(models.Model):  # Table pour complément des codes CNEH
+class Cnehs(Model):  # Table pour complément des codes CNEH
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=90, default=None, blank=False, null=False)
     intitule = models.CharField(max_length=90, default=None, blank=False, null=False)
@@ -912,7 +913,7 @@ class Cnehs(models.Model):  # Table pour complément des codes CNEH
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class Role(models.Model):
+class Role(Model):
     """
     Ce modèle décrit la liste des rôles utilisés dans cette instance de BIOM_AID.
 
@@ -924,7 +925,7 @@ class Role(models.Model):
     note = models.TextField(null=True, blank=True)
 
 
-class UserUfRole(models.Model):
+class UserUfRole(Model):
     """
     Ce modèle sert à déterminer la portée d'un rôle pour un utilisateur (il pourrait donc s'intituler "UserRoleScope")
 
@@ -1041,7 +1042,7 @@ class UserUfRole(models.Model):
         )
 
 
-class LastUpdate(models.Model):
+class LastUpdate(Model):
     id = models.AutoField(primary_key=True)
     table_in = models.CharField(
         verbose_name=_("Table BIOM_AID"),
@@ -1061,7 +1062,7 @@ class LastUpdate(models.Model):
         return "{0} - {1}".format(self.table_in, self.date_last_update)
 
 
-class Alert(models.Model):
+class Alert(Model):
     class Meta:
         verbose_name = _("Alerte")
 
@@ -1159,7 +1160,7 @@ class Alert(models.Model):
     active_objects = ActiveManagerCloture()  # The active_objects manager.
 
 
-class GenericRole(models.Model):
+class GenericRole(Model):
     class Meta:
         indexes = [
             models.Index(fields=['cloture'], name='gen_role_end_idx'),

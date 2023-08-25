@@ -1,6 +1,5 @@
 from django.db.models import (
     JSONField,
-    Model,
     DateTimeField,
     CharField,
     TextField,
@@ -9,6 +8,8 @@ from django.db.models import (
     UniqueConstraint,
 )
 from django.utils.translation import gettext as _
+
+from overoly.base import OverolyModel as Model
 
 
 class DataSource(Model):

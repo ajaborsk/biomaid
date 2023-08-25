@@ -43,6 +43,7 @@ from pytz import utc
 
 from common import config
 from smart_view.smart_expression import SmartExpression
+from overoly.base import OverolyModel as Model
 
 
 class ExtableManager(Manager):
@@ -68,7 +69,7 @@ class ExtableEngine(ABC):
     }
 
     @staticmethod
-    def create_model_class(schema: dict, prefix: str = '', module=None) -> Type[models.Model]:
+    def create_model_class(schema: dict, prefix: str = '', module=None) -> Type[Model]:
         """Create a (Django) model from a descriptive Schema and put it in the extable (Django) application"""
 
         # Used as a template for model class
@@ -119,7 +120,7 @@ class ExtableEngine(ABC):
             attrs['objects'] = ExtableManager(list(schema.get('key')))
 
         # Do create the model class
-        model_class: Type[models.Model] = type(prefix + schema['name'], (models.Model,), attrs)
+        model_class: Type[Model] = type(prefix + schema['name'], (Model,), attrs)
 
         # Add this model class to module
         if isinstance(module, types.ModuleType):
@@ -225,7 +226,7 @@ class ExtableEngine(ABC):
         self.key = schema['parser_opts'].get('key')
         self.preprocess = schema['parser_opts'].get('preprocess')
 
-    def read_into_model(self, filename: str, model: Type[models.Model], log, progress) -> int:
+    def read_into_model(self, filename: str, model: Type[Model], log, progress) -> int:
         raise NotImplementedError("Method read_into_model() must be overloaded.")
 
     def update(self, log=None, progress=None, options={}):

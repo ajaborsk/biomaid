@@ -23,8 +23,9 @@ from generic_comment.models import GenericComment
 
 from common.models import Uf
 
+from overoly.base import OverolyModel as Model
 
-class Geprete(models.Model):
+class Geprete(Model):
 
     """Liste des prêts réalisés"""
 
@@ -64,7 +65,7 @@ class Geprete(models.Model):
         return "{0}".format(self.num_inv)
 
 
-class Gessaye(models.Model):
+class Gessaye(Model):
 
     """Liste des essais réalisés dans les services - géré par le biomed et le service en question"""
 

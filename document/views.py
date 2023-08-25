@@ -18,7 +18,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-import django.db.models
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Value, TextField, OuterRef, Expression, CharField
 from django.db.models.functions import Concat, Cast, JSONObject, Coalesce
@@ -28,8 +27,10 @@ import functools
 from common.db_utils import StringAgg
 from document.models import GenericDocument
 
+from overoly.base import OverolyModel as Model
 
-def _all_documents_json(model: django.db.models.Model, name: str | None, view_params: dict) -> Expression:
+
+def _all_documents_json(model: Model, name: str | None, view_params: dict) -> Expression:
     """
     Django expression to get generic documents data in a json strings
 
@@ -88,5 +89,5 @@ def _all_documents_json(model: django.db.models.Model, name: str | None, view_pa
     )
 
 
-def all_documents_json_partial(model: django.db.models.Model, name: str | None = None) -> Callable[dict, Expression]:
+def all_documents_json_partial(model: Model, name: str | None = None) -> Callable[dict, Expression]:
     return functools.partial(_all_documents_json, model, name)

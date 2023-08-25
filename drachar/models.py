@@ -40,8 +40,10 @@ from common import config
     --------------
 """
 
+from overoly.base import OverolyModel as Model
 
-class Previsionnel(models.Model):
+
+class Previsionnel(Model):
     # id = models.AutoField()
     num = models.AutoField(primary_key=True)  # numero de demande validée
     uf = models.ForeignKey(
@@ -310,7 +312,7 @@ class Previsionnel(models.Model):
         return "{0} - {1}".format(self.num, self.num_dmd)
 
 
-class Dra(models.Model):
+class Dra(Model):
     num_dra = models.AutoField(primary_key=True)  # numero de la demande de réalisation d'achat
     intitule = models.TextField(
         default=None,
@@ -396,7 +398,7 @@ class Dra(models.Model):
         return "{0} - {1}".format(self.num_dra, self.fournisseur)
 
 
-# class DocumentDracharLink(models.Model):
+# class DocumentDracharLink(Model):
 #     class Meta:
 #         indexes = [
 #             models.Index(fields=['document']),
@@ -416,7 +418,7 @@ class Dra(models.Model):
 #         return "{0} {1}".format(self.document, self.dra)
 
 
-class ContactLivraison(models.Model):
+class ContactLivraison(Model):
     code = models.CharField(max_length=50, blank=True, null=True, help_text="Champs automatique")
     nom = models.CharField(
         verbose_name="Nom contact livraison",
@@ -458,7 +460,7 @@ class ContactLivraison(models.Model):
         return "{0} - {1} - {2}".format(self.code, self.nom, self.prenom)
 
 
-class LigneCommande(models.Model):
+class LigneCommande(Model):
     CLASSE_EQT = (
         ('1', '1'),
         ('2A', '2A'),
@@ -603,8 +605,7 @@ class LigneCommande(models.Model):
         return "{0} - {1}".format(self.num_ligne, self.num_previsionnel)
 
 
-class Dossier(models.Model):
-
+class Dossier(Model):
     PRIO_CHOICES = (
         ('1', 'Haute'),
         ('2', 'Normale'),
@@ -663,7 +664,7 @@ class Dossier(models.Model):
         return "{0} - {1}".format(self.num_dossier, self.nom_dossier)
 
 
-# class DocumentDossierLink(models.Model):
+# class DocumentDossierLink(Model):
 #     class Meta:
 #         indexes = [
 #             models.Index(fields=['document']),
@@ -683,7 +684,7 @@ class Dossier(models.Model):
 #         return "{0} {1}".format(self.document, self.dossier)
 
 
-class AffiliationDossierParticipants(models.Model):
+class AffiliationDossierParticipants(Model):
     class Meta:
         indexes = [
             models.Index(fields=['dossier']),
@@ -719,7 +720,7 @@ class AffiliationDossierParticipants(models.Model):
         return "{0} {1}".format(self.dossier, self.participant)
 
 
-class Execution(models.Model):  # à remplacer par un outil de Workflow
+class Execution(Model):  # à remplacer par un outil de Workflow
     ID = (
         ('0', 'NA'),
         ('1', 'OK'),

@@ -5,12 +5,12 @@ from typing import Type
 from common.command import BiomAidCommand
 
 import pandas as pd
-from django.db import models
 from django.utils.translation import gettext as _
 from numpy import dtype
 from pandas import read_csv
 
 from extable.engine_pandas import DataFrameExtableEngine
+from overoly.base import OverolyModel as Model
 
 
 class CsvEngine(DataFrameExtableEngine):
@@ -23,7 +23,6 @@ class CsvEngine(DataFrameExtableEngine):
         cfg = cfg or {}
         if os.path.exists(filename):
             if filename.endswith('.csv'):
-
                 # read the file (1000 first rows)
                 separator = cfg.get('separator', ',')
                 df = read_csv(filename, engine='python', sep=separator, decimal=',', nrows=1000)
@@ -48,7 +47,7 @@ class CsvEngine(DataFrameExtableEngine):
             warning(_("File not found: '{}'. No schema guessing.").format(filename))
         return {}
 
-    def read_into_model(self, filename: str, model: Type[models.Model], log, progress, **kwargs) -> int:
+    def read_into_model(self, filename: str, model: Type[Model], log, progress, **kwargs) -> int:
         separator = self.schema['parser_opts'].get('separator', ',')
 
         # A dict that associate src_columns (= CSV columns headers) to columns id

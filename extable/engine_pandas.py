@@ -7,12 +7,12 @@ from numpy import dtype
 from pandas import DataFrame, Int64Dtype, StringDtype, Series
 from pandas.core.arrays.floating import Float64Dtype
 from django.apps import apps
-from django.db import models
 from django.db.models import IntegerField
 from django.utils.translation import gettext as _
 
 from common import config
 from common.command import BiomAidCommand
+from overoly.base import OverolyModel as Model
 
 
 from extable.engines import FileExtableEngine, ExtableEngine
@@ -58,7 +58,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
             schema[column] = {'type': guessed_type, 'src_column': src_column}
         return schema
 
-    def dataframe_to_model(self, df: DataFrame, model: Type[models.Model], log, progress, **kwargs) -> int:
+    def dataframe_to_model(self, df: DataFrame, model: Type[Model], log, progress, **kwargs) -> int:
         """Read pandas DataFrame and records every line as a record in the given (Django) model. Returns the number of rows
         recorded.
         """

@@ -19,9 +19,10 @@
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.utils.translation import gettext_lazy as _
+from overoly.base import OverolyModel as Model
 
 
-class Table(models.Model):
+class Table(Model):
     """ "List of external tables, with update timestamp"""
 
     table_name: models.Field = models.CharField(verbose_name=_("External table name (SQL name, with prefix)"), max_length=256)
