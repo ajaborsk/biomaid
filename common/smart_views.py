@@ -613,11 +613,22 @@ class FournisseurSmartView(SmartView):
                         'nom': True,
                     }
                 },
-            },
+                'EDITABLE': {
+                    'ADM': {
+                        'code': True,
+                        'etablissement': True,
+                        'fournisseur': True,
+                    },
+                },
+            }
         }
         columns = (
+            'id',
+            'roles',
+            'state_code',
             'code',
             'nom',
+            'tools',
         )
         user_filters = {
             'contient': {
@@ -631,13 +642,49 @@ class FournisseurSmartView(SmartView):
             # Fournisseur
                 <code> <nom>
         """
+    roles = (
+        ComputedSmartField,
+        {
+            'hidden': True,
+            'special': 'roles',
+            'data': class_roles_expression(Fournisseur),
+        },
+    )
+    state_code = (
+        ComputedSmartField,
+        {
+            'special': 'state',
+            'hidden': True,
+            'data': lambda vc: Value('EDITABLE'),
+        },
+    )
+    tools = (
+        ToolsSmartField,
+        {
+            'title': _("Actions"),
+            'tools': [
+                {
+                    'tool': 'open',
+                    'url_name': 'common:fournisseur-update',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Ouvrir la fiche de fourisseur générique"),
+                },
+                {
+                    'tool': 'delete',
+                    'url_name': 'common:fournisseur-ask-delete',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Supprimer la fiche de fourisseur générique"),
+                },
+            ],
+        },
+    )
 
 class FournisseurEtablissementSmartView(SmartView):
     class Meta:
         model = FournisseurEtablissement
         permissions = {
             'create': ('ADM', 'MAN'),
-            'delete': ('ADM',),
+            'delete': ('ADM'),
             'write': {
                 None: {
                     'ADM': {
@@ -656,6 +703,9 @@ class FournisseurEtablissementSmartView(SmartView):
             },
         }
         columns = (
+            'id',
+            'roles',
+            'state_code',
             'code',
             'etablissement',
             'fournisseur',
@@ -676,7 +726,22 @@ class FournisseurEtablissementSmartView(SmartView):
                 <code> <etablissement>
                 <fournisseur>
         """
-
+    roles = (
+        ComputedSmartField,
+        {
+            'hidden': True,
+            'special': 'roles',
+            'data': class_roles_expression(FournisseurEtablissement),
+        },
+    )
+    state_code = (
+        ComputedSmartField,
+        {
+            'special': 'state',
+            'hidden': True,
+            'data': lambda vc: Value('EDITABLE'),
+        },
+    )
     tools = (
         ToolsSmartField,
         {
