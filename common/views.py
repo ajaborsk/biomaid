@@ -241,7 +241,7 @@ class PrevisionnelParExpertWidget(AltairWidget):
             'discipline': {
                 'label': "Discipline",
                 'type': 'choice',
-                'choices': list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
+                'choices': list(Discipline.records.filter(cloture__isnull=True).values_list('code', 'nom')),
             },
         }
 
@@ -276,7 +276,7 @@ class MontantPrevisionnelParExpertWidget(AltairWidget):
             'discipline': {
                 'label': "Discipline",
                 'type': 'choice',
-                'choices': list(Discipline.objects.filter(cloture__isnull=True).values_list('code', 'nom')),
+                'choices': list(Discipline.records.filter(cloture__isnull=True).values_list('code', 'nom')),
             },
         }
 
@@ -676,7 +676,7 @@ class UserAlerts(SmartPage):
 
     def get(self, request, **kwargs):
         # Marque mes alertes non vues comme vues !
-        Alert.objects.filter(destinataire=request.user, date_lecture__isnull=True).update(date_lecture=timezone.now())
+        Alert.records.filter(destinataire=request.user, date_lecture__isnull=True).update(date_lecture=timezone.now())
         return super().get(request)
 
 
@@ -700,7 +700,7 @@ class AdminHome(BiomAidViewMixin, TemplateView):
         # logger.debug("log test : Page admin debug message")
         context = super().get_context_data(**kwargs)
         # context.update(dem_context(self.request))
-        context['etablissements'] = Etablissement.objects.all()
+        context['etablissements'] = Etablissement.records.all()
         # TODO : changer le moyen de déterminer le contexte avec le congig.tml et non le .ini
         context['link_structure'] = {}
         for etab in context['etablissements']:
@@ -745,7 +745,7 @@ class ManagerHome(BiomAidViewMixin, TemplateView):
         # logger.debug("log test : Page admin debug message")
         context = super().get_context_data(**kwargs)
         # context.update(dem_context(self.request))
-        context['etablissements'] = Etablissement.objects.all()
+        context['etablissements'] = Etablissement.records.all()
         # TODO : changer le moyen de déterminer le contexte avec le congig.tml et non le .ini
         context['link_structure'] = {}
         for etab in context['etablissements']:
@@ -782,7 +782,7 @@ class AdminConfig(BiomAidViewMixin, TemplateView):
     def datageneration(self):
         self.config_data = tomlkit.loads(pathlib.Path("local/config.toml").read_text())
         """Pour la structure"""
-        self.etab = Etablissement.objects.all()
+        self.etab = Etablissement.records.all()
         self.linkstruc_bibl = {}
         for e in self.etab:
             self.linkstruc_bibl.update({e.prefix: self.config_data['LINK'].get(e.prefix, {'structure': 'OFF'})['structure']})
@@ -925,11 +925,11 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #     if request.method == 'GET':
 #         status = 'gestion'
 #         if status == 'gestion':
-#             list_data_fournisseur = DataFournisseurGEF.objects.order_by('etablissement', 'intitule_fournisseur').filter(
+#             list_data_fournisseur = DataFournisseurGEF.records.order_by('etablissement', 'intitule_fournisseur').filter(
 #                 Q(cloture__isnull=True)
 #             )
-#             list_fournisseurs = Fournisseur.objects.order_by('nom').filter(Q(cloture__isnull=True))
-#             list_contact_fournisseur = ContactFournisseur.objects.order_by('societe').filter(Q(cloture__isnull=True))
+#             list_fournisseurs = Fournisseur.records.order_by('nom').filter(Q(cloture__isnull=True))
+#             list_contact_fournisseur = ContactFournisseur.records.order_by('societe').filter(Q(cloture__isnull=True))
 #             context = drachar_context(request, title=_("GESTION DES FOURNISSEURS"), url_prefix=url_prefix)
 #             context.update(
 #                 {
@@ -974,7 +974,7 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #         if modifiercontactid is not None:  # load template intermédiaire formulaire modificatif
 #             print("modifiercontactid")
 #             status = "modifier"  # => template modifier
-#             contactfour_instance = ContactLivraison.objects.get(pk=modifiercontactid)
+#             contactfour_instance = ContactLivraison.records.get(pk=modifiercontactid)
 #             contactfour_form = ContactLivForm(instance=contactfour_instance)
 #             context = drachar_context(request, title=_("MODIFIER LE CONTACT N° %s" % modifiercontactid), url_prefix=url_prefix)
 #             print(contactfour_instance)
@@ -989,7 +989,7 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #         elif supprimercontactid is not None:  # load template intermédiaire confirmation suppression
 #             print("supprimercontactid")
 #             status = "supprimer"  # => template modifier
-#             contactfour_instance = ContactLivraison.objects.get(pk=supprimercontactid)
+#             contactfour_instance = ContactLivraison.records.get(pk=supprimercontactid)
 #             context = drachar_context(request, title=_("SUPPRIMER LE CONTACT N° %s" % supprimercontactid),
 #                       url_prefix=url_prefix)
 #             contactfour_form = ContactLivForm(instance=contactfour_instance)
@@ -1007,7 +1007,7 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #         if modifierfourid is not None:  # load template intermédiaire formulaire modificatif
 #             print("modifierfour")
 #             status = "modifierfour"  # => template modifier
-#             fourgenerique_instance = Fournisseur.objects.get(pk=modifierfourid)
+#             fourgenerique_instance = Fournisseur.records.get(pk=modifierfourid)
 #             fourgenerique_form = FournisseurForm(instance=fourgenerique_instance)
 #             context = drachar_context(
 #                 request,
@@ -1026,7 +1026,7 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #         elif supprimerfourid is not None:  # load template intermédiaire confirmation suppression
 #             print("supprimefour")
 #             status = "supprimerfour"  # => template modifier
-#             fourgenerique_instance = Fournisseur.objects.get(pk=supprimerfourid)
+#             fourgenerique_instance = Fournisseur.records.get(pk=supprimerfourid)
 #             context = drachar_context(
 #                 request,
 #                 title=_("SUPPRIMER LE FOURNISSEUR N° %s" % supprimerfourid + ", " + fourgenerique_instance.nom),
@@ -1071,7 +1071,7 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #                 post.code_four = fournisseurform.cleaned_data["code_four"]
 #                 post.nom = fournisseurform.cleaned_data["nom"]
 #                 try:  # test d'unicité dans les contacts non encore supprimés
-#                     test = Fournisseur.objects.get(nom__iexact=post.nom, cloture__isnull=True)
+#                     test = Fournisseur.records.get(nom__iexact=post.nom, cloture__isnull=True)
 #                     message = "impossible de faire cette modification : "
 #                           "contact (nom&prenom) existe déjà voyez l'administrateur"
 #                 except Fournisseur.DoesNotExist:  # pas de doublons, on sauvegarde
@@ -1081,7 +1081,7 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #                     message = "Enregistrement fait avec succès"
 #
 #                 status = "gestion"
-#                 list_fournisseurs = Fournisseur.objects.order_by('nom').filter(Q(cloture__isnull=True))
+#                 list_fournisseurs = Fournisseur.records.order_by('nom').filter(Q(cloture__isnull=True))
 #                 context = drachar_context(request,
 #                       title=_("GESTION DES FOURNISSEURS DE LIVRAISON"), url_prefix=url_prefix)
 #                 context.update(
@@ -1094,13 +1094,13 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #         elif status == "modifierfour":  # Code fonction de modification fournisseur générique
 #             modifierid = request.POST.get("modifierfourid") or None
 #             print(modifierid)
-#             Instance = Fournisseur.objects.get(pk=modifierid)
+#             Instance = Fournisseur.records.get(pk=modifierid)
 #             form = FournisseurForm(request.POST or None)
 #             if form.is_valid():
 #                 Instance.code_four = form.cleaned_data["code_four"]
 #                 Instance.nom = form.cleaned_data["nom"]
 #                 try:
-#                     test = Fournisseur.objects.get(nom__iexact=Instance.nom)
+#                     test = Fournisseur.records.get(nom__iexact=Instance.nom)
 #                     if int(test.id) == int(modifierid):  # normal, c'est celui qu'on modifie
 #                         Instance.save()
 #                         message = "Modifications faites avec succès"
@@ -1112,7 +1112,7 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #                     message = "Modifications faites avec succès"
 #             # recharger la page Gestion
 #             status = "gestion"
-#             list_fournisseurs = Fournisseur.objects.order_by('nom').filter(Q(cloture__isnull=True))
+#             list_fournisseurs = Fournisseur.records.order_by('nom').filter(Q(cloture__isnull=True))
 #             context = drachar_context(request,
 #                       title=_("GESTION DES FOURNISSEURS DE LIVRAISON"), url_prefix=url_prefix)
 #             context.update(
@@ -1124,14 +1124,14 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 #             )
 #         elif status == "supprimerfour":  # code fonction de suppression
 #             supprimerid = request.POST.get("supprimerfourid") or None
-#             Instance = Fournisseur.objects.get(pk=supprimerid)
+#             Instance = Fournisseur.records.get(pk=supprimerid)
 #             Instance.cloture = timezone.now()
 #             Instance.save(update_fields=['cloture'])
 #
 #             # recharger la page Gestion
 #             message = "Fournisseur supprimer avec succès"
 #             status = "gestion"
-#             list_fournisseurs = Fournisseur.objects.order_by('nom').filter(Q(cloture__isnull=True))
+#             list_fournisseurs = Fournisseur.records.order_by('nom').filter(Q(cloture__isnull=True))
 #             context = drachar_context(request,
 #                           title=_("GESTION DES FOURNISSEURS DE LIVRAISON"), url_prefix=url_prefix)
 #             context.update(
@@ -1149,6 +1149,7 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 # ==================================================================================================================
 # GESTION DES DATAs MARQUES, TYPES, Structure...
 # ==================================================================================================================
+
 
 # TODO : Faire de même pour Type, pour Comptes, Familles d'achat, CNEH,
 class GestionData(BiomAidViewMixin, TemplateView, BddImportation):
@@ -1222,7 +1223,7 @@ class GestionData(BiomAidViewMixin, TemplateView, BddImportation):
                 titre_template = 'Modifier %s' % self.item_message
                 kwargs['status'] = 'modifier'
                 modifierid = request.GET.get("modifier") or None
-                instance = self.model.objects.get(pk=modifierid)
+                instance = self.model.records.get(pk=modifierid)
                 form = self.form(instance=instance)
                 return render(
                     request,
@@ -1245,7 +1246,7 @@ class GestionData(BiomAidViewMixin, TemplateView, BddImportation):
                 status = 'supprimer'
                 titre_template = 'Supprimer %s' % self.item_message
                 supprimerid = request.GET.get("supprimer") or None
-                instance = self.model.objects.get(pk=supprimerid)
+                instance = self.model.records.get(pk=supprimerid)
                 form = self.form(instance=instance)
                 return render(
                     request,
@@ -1269,7 +1270,7 @@ class GestionData(BiomAidViewMixin, TemplateView, BddImportation):
                 status = "Main"
                 titre_template = self.titre_template
                 titre2 = "mode enregistrement manuel"
-                list = self.model.objects.order_by(*self.ordre_affichage).filter(*q_query)
+                list = self.model.records.order_by(*self.ordre_affichage).filter(*q_query)
                 return render(
                     request,
                     self.template_name,
@@ -1296,7 +1297,7 @@ class GestionData(BiomAidViewMixin, TemplateView, BddImportation):
                 titre2 = "mode connecté à BDD"
             elif self.lien == "FILE":
                 titre2 = "mode import via un Fichier"
-            list = self.model.objects.order_by(*self.ordre_affichage).filter(*q_query)
+            list = self.model.records.order_by(*self.ordre_affichage).filter(*q_query)
             # TODO : faire une fonction pour pouvoir choisir le formatage dans le tableau
             # GestionData.formatter(list, self.formats)
             print(url)
@@ -1335,7 +1336,7 @@ class GestionData(BiomAidViewMixin, TemplateView, BddImportation):
                 if form.is_valid():
                     item = form.save(commit=False)
                     try:  # test d'unicité dans les items de la table non encore supprimés
-                        test = self.model.objects.get(**self.crit_unic_to_get(item))
+                        test = self.model.records.get(**self.crit_unic_to_get(item))
                         # TODO : prévoir un dexieme critère d'unicité :
                         #   premier général, second sur un champs dimportance.
                         kwargs['message'] = "Impossible d'ajouter %s : %s existe déjà" % (
@@ -1354,11 +1355,11 @@ class GestionData(BiomAidViewMixin, TemplateView, BddImportation):
                     return self.get(request, *args, **kwargs)
             elif status == 'modifier':  # Fonction Modification
                 modifierid = request.POST.get("modifierid") or None
-                item = self.model.objects.get(pk=modifierid)
+                item = self.model.records.get(pk=modifierid)
                 form = self.form(request.POST or None, instance=item)
                 if form.is_valid():
                     try:
-                        test = self.model.objects.get(**self.crit_unic_to_get(item))
+                        test = self.model.records.get(**self.crit_unic_to_get(item))
                         if int(test.id) == int(modifierid):  # normal, c'est celui qu'on modifie
                             form.save()
                             kwargs['message'] = "Modifications faites avec succès"
@@ -1376,7 +1377,7 @@ class GestionData(BiomAidViewMixin, TemplateView, BddImportation):
                     return self.get(request, *args, **kwargs)
             elif status == 'supprimer':  # Fonction Suppression
                 supprimerid = request.POST.get("supprimerid") or None
-                instance = self.model.objects.get(pk=supprimerid)
+                instance = self.model.records.get(pk=supprimerid)
                 instance.cloture = timezone.now()
                 instance.save(update_fields=['cloture'])
                 return self.get(request, *args, **kwargs)
@@ -1640,7 +1641,7 @@ class GestionUf(GestionData):
     model_update = "structure"  # fonction update à déclancher
 
     def parametre_connexion(self, kwargs):
-        self.etabprefix = Etablissement.objects.get(id=kwargs.get('etabid')).prefix
+        self.etabprefix = Etablissement.records.get(id=kwargs.get('etabid')).prefix
         config = TOMLFile('local/config.toml').read()
         self.lien = config['LINK'][self.etabprefix][self.model_update]
         self.model_bdd = config['BDD'][self.bdd]['model']
@@ -1710,7 +1711,7 @@ class GestionPole(GestionData):
     model_update = "structure"  # fonction update à déclencher
 
     def parametre_connexion(self, kwargs):
-        self.etabprefix = Etablissement.objects.get(id=kwargs.get('etabid')).prefix
+        self.etabprefix = Etablissement.records.get(id=kwargs.get('etabid')).prefix
         config = TOMLFile('local/config.toml').read()
         self.lien = config['LINK'][self.etabprefix][self.model_update]
         self.model_bdd = config['BDD'][self.bdd]['model']
@@ -1778,7 +1779,7 @@ class GestionService(GestionData):
     model_update = "structure"  # fonction update à déclencher
 
     def parametre_connexion(self, kwargs):
-        self.etabprefix = Etablissement.objects.get(id=kwargs.get('etabid')).prefix
+        self.etabprefix = Etablissement.records.get(id=kwargs.get('etabid')).prefix
         config = TOMLFile('local/config.toml').read()
         self.lien = config['LINK'][self.etabprefix][self.model_update]
         self.model_bdd = config['BDD'][self.bdd]['model']
@@ -1848,7 +1849,7 @@ class GestionCentreResponsabilite(GestionData):
     model_update = "structure"  # fonction update à déclancher
 
     def parametre_connexion(self, kwargs):
-        self.etabprefix = Etablissement.objects.get(id=kwargs.get('etabid')).prefix
+        self.etabprefix = Etablissement.records.get(id=kwargs.get('etabid')).prefix
         config = TOMLFile('local/config.toml').read()
         self.lien = config['LINK'][self.etabprefix][self.model_update]
         self.model_bdd = config['BDD'][self.bdd]['model']
@@ -1917,7 +1918,7 @@ class GestionSite(GestionData):
     model_update = "structure"  # fonction update à déclancher
 
     def parametre_connexion(self, kwargs):
-        self.etabprefix = Etablissement.objects.get(id=kwargs.get('etabid')).prefix
+        self.etabprefix = Etablissement.records.get(id=kwargs.get('etabid')).prefix
         config = TOMLFile('local/config.toml').read()
         self.lien = config['LINK'][self.etabprefix][self.model_update]
         self.model_bdd = config['BDD'][self.bdd]['model']
@@ -2031,6 +2032,7 @@ class GestionStructure(GestionData):
 
     # éléments de base à renseigner pour la class "GestionData" :
     ''' Paramètres de base '''
+
     # url = "/drachar-chuap/common/gestion_structure/1/"
     # TODO : régler le problème de l'URL
     def fonc_url(self, kwargs):
@@ -2108,11 +2110,11 @@ class GestionStructure(GestionData):
         etabid = kwargs.get('etabid')
         print(etabid)
         config = TOMLFile('local/config.toml').read()
-        if Etablissement.objects.get(id=kwargs.get('etabid')).prefix == "" or None:
+        if Etablissement.records.get(id=kwargs.get('etabid')).prefix == "" or None:
             self.etabprefix = "DEFAUT"
             self.lien = config['LINK'][self.etabprefix][self.model_update]
         else:
-            self.etabprefix = Etablissement.objects.get(id=kwargs.get('etabid')).prefix
+            self.etabprefix = Etablissement.records.get(id=kwargs.get('etabid')).prefix
             try:
                 self.lien = config['LINK'][self.etabprefix][self.model_update]
             except Exception:
@@ -2160,7 +2162,7 @@ class StructureView(BiomAidViewMixin, TemplateView):
     def _role_expr(self, role_code):
         expr = Concat(
             Value('['),
-            UserUfRole.objects.filter(
+            UserUfRole.records.filter(
                 (Q(uf__isnull=True) | Q(uf=OuterRef('pk')))
                 & (Q(service__isnull=True) | Q(service=OuterRef('service')))
                 & (Q(centre_responsabilite__isnull=True) | Q(centre_responsabilite=OuterRef('centre_responsabilite')))
@@ -2214,7 +2216,7 @@ class StructureView(BiomAidViewMixin, TemplateView):
 
         fields = base_fields + list(computed_fields.keys()) + [role.lower() for role in roles]
 
-        qs = Uf.objects.filter(cloture__isnull=True).annotate(**computed_fields)
+        qs = Uf.records.filter(cloture__isnull=True).annotate(**computed_fields)
         qs = qs.annotate(**{role.lower(): self._role_expr(role.upper()) for role in roles})
 
         html_table = '<table><tr>'

@@ -15,7 +15,7 @@ from drachar.models import Previsionnel
 
 
 def reset_previsionnel_montant_commande(apps, schema_editor):
-    Previsionnel.objects.filter(montant_commande=0).update(montant_commande=None)
+    Previsionnel.records.filter(montant_commande=0).update(montant_commande=None)
 
 
 class Migration(migrations.Migration):

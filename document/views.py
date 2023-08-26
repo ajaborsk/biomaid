@@ -55,7 +55,7 @@ def _all_documents_json(model: Model, name: str | None, view_params: dict) -> Ex
     return Concat(
         Value('['),
         Coalesce(
-            GenericDocument.objects.filter(
+            GenericDocument.records.filter(
                 content_type_id=model_id, object_id=Cast(OuterRef('pk'), output_field=CharField()), name=name
             )
             .order_by()

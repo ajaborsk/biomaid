@@ -90,7 +90,7 @@ def test_new_request_minimal(biomaid_page: Callable, user, uf_code, failure_poin
     dialog_text = page.locator('#main-dialog').get_by_text(recorded_dialog_text_re).inner_text()
     page.get_by_role("button", name="C'est noté").click()
     m = recorded_dialog_text_re.search(dialog_text)
-    request = Demande.objects.get(code=m.group(1))
+    request = Demande.records.get(code=m.group(1))
     assert request.redacteur.username == user
     assert str(request.uf).startswith(uf_code)
     assert request.calendrier.nom == campaign
@@ -157,7 +157,7 @@ def test_new_request_full(biomaid_page: Callable, user, uf_code, failure_point) 
     dialog_text = page.locator('#main-dialog').get_by_text(recorded_dialog_text_re).inner_text()
     page.get_by_role("button", name="C'est noté").click()
     m = recorded_dialog_text_re.search(dialog_text)
-    request = Demande.objects.get(code=m.group(1))
+    request = Demande.records.get(code=m.group(1))
     assert request.redacteur.username == user
     assert str(request.uf).startswith(uf_code)
     assert request.calendrier.nom == campaign
@@ -286,7 +286,7 @@ def test_reroute_request_to_virtual_campaign(biomaid_page: Callable) -> None:
 
 def test_full_dispatch_in_table_ok(biomaid_page: Callable) -> None:
     # Check the value stored in the database
-    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    dem = Demande.records.filter(code='DEM-2021-00000').get()
     assert dem.programme is None
     assert dem.domaine is None
     assert dem.expert_metier is None
@@ -338,7 +338,7 @@ def test_full_dispatch_in_table_ok(biomaid_page: Callable) -> None:
     assert loc.filter(has_text="324 - Perfusion / Nutrition / Transfusion").count() == 1
 
     # Check the values stored in the database
-    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    dem = Demande.records.filter(code='DEM-2021-00000').get()
     assert dem.programme.code == 'BIO-00-PE'
     assert dem.domaine.code == '324'
     assert dem.expert_metier.username == 'bonbeuje'
@@ -346,7 +346,7 @@ def test_full_dispatch_in_table_ok(biomaid_page: Callable) -> None:
 
 def test_dispatch_in_table_expert_only(biomaid_page: Callable) -> None:
     # Check the value stored in the database
-    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    dem = Demande.records.filter(code='DEM-2021-00000').get()
     assert dem.programme is None
     assert dem.domaine is None
     assert dem.expert_metier is None
@@ -398,7 +398,7 @@ def test_dispatch_in_table_expert_only(biomaid_page: Callable) -> None:
     assert loc.filter(has_text="324 - Perfusion / Nutrition / Transfusion").count() == 1
 
     # Check the values stored in the database
-    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    dem = Demande.records.filter(code='DEM-2021-00000').get()
     assert dem.programme.code == 'BIO-00-PE'
     assert dem.domaine.code == '324'
     assert dem.expert_metier.username == 'bonbeuje'
@@ -409,7 +409,7 @@ def test_dispatch_in_table_expert_only(biomaid_page: Callable) -> None:
 
 def test_dispatch_in_table_program_only(biomaid_page: Callable) -> None:
     # Check the value stored in the database
-    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    dem = Demande.records.filter(code='DEM-2021-00000').get()
     assert dem.programme is None
     assert dem.domaine is None
     assert dem.expert_metier is None
@@ -461,7 +461,7 @@ def test_dispatch_in_table_program_only(biomaid_page: Callable) -> None:
     assert loc.filter(has_text="324 - Perfusion / Nutrition / Transfusion").count() == 1
 
     # Check the values stored in the database
-    dem = Demande.objects.filter(code='DEM-2021-00000').get()
+    dem = Demande.records.filter(code='DEM-2021-00000').get()
     assert dem.programme.code == 'BIO-00-PE'
     assert dem.domaine.code == '324'
     assert dem.expert_metier.username == 'bonbeuje'

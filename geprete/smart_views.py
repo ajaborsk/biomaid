@@ -225,7 +225,7 @@ class GessayeSmartView(SmartView):
     class Meta:
         def choix_inge(view_params):
             return (
-                UserUfRole.objects.filter(role_code='EXP')
+                UserUfRole.records.filter(role_code='EXP')
                 .annotate(fullname=Concat(F('user__first_name'), Value(" "), F('user__last_name')))
                 .values_list('user', 'fullname')
                 .distinct()

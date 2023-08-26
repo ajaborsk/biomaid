@@ -125,13 +125,13 @@ class DraData:
     def get(self, request, *args, **kwargs):
         template_name = 'drachar/nouvelledra.html'
         data = {
-            "four_list": Fournisseur.objects.filter(Q(cloture__isnull=True)),
-            "contact_four_list": ContactFournisseur.objects.filter(Q(cloture__isnull=True)),
-            "marche_list": Marche.objects.filter(Q(cloture__isnull=True)),
-            "dossier_list": Dossier.objects.filter(Q(cloture__isnull=True)),
-            "contact_liv_list": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
-            "expert_metier_list": get_user_model().objects.filter(
-                # vocation_fonctionnelle=ExtensionUser.objects.get(user=self.request.user).vocation_fonctionnelle
+            "four_list": Fournisseur.records.filter(Q(cloture__isnull=True)),
+            "contact_four_list": ContactFournisseur.records.filter(Q(cloture__isnull=True)),
+            "marche_list": Marche.records.filter(Q(cloture__isnull=True)),
+            "dossier_list": Dossier.records.filter(Q(cloture__isnull=True)),
+            "contact_liv_list": ContactLivraison.records.filter(Q(cloture__isnull=True)),
+            "expert_metier_list": get_user_model().records.filter(
+                # vocation_fonctionnelle=ExtensionUser.records.get(user=self.request.user).vocation_fonctionnelle
             ),
         }
         form_dra = self.formulaire_dra(request.user, request.GET, **data)
@@ -168,7 +168,7 @@ class Nouvelle_draView(DracharView, DraData):
         if self.dra_id is not None:  # FORMULAIRE DEJA RENSEIGNE : Modifification ou demande en cours pré enregistrée
             context['title'] = "DRA N° " + str(self.dra_id)
             kwargs['dra_id'] = self.dra_id
-            Instance_dra = Dra.objects.get(pk=self.dra_id)
+            Instance_dra = Dra.records.get(pk=self.dra_id)
             context['form_dra'] = Instance_dra
             # print("dra existante n° = " + str(Instance_dra))
             return render(request, self.template_name, context=context)
@@ -247,11 +247,11 @@ class LigneClass:
     def get(self, request, *arg, **kwargs):
         template_name = 'drachar/nouvelleligne.html'
         data = {
-            "num_previsionnel": Previsionnel.objects.filter(Q(solder_ligne=False)),
-            # "num_compte": Compte.objects.filter(Q())
+            "num_previsionnel": Previsionnel.records.filter(Q(solder_ligne=False)),
+            # "num_compte": Compte.records.filter(Q())
             # TODO : ligne a corriger à cause de ID dans le models : "num_previsionnel":
-            #  Previsionnel.objects.filter(Q(solder_ligne=True,
-            #                   expert=ExtensionUser.objects.get(user=self.request.user))),
+            #  Previsionnel.records.filter(Q(solder_ligne=True,
+            #                   expert=ExtensionUser.records.get(user=self.request.user))),
             # TODO : faire le code pour l'importation depuis asset+ des comptes
         }
         form = self.form_ligne(request.user, request.GET, **data)
@@ -261,7 +261,6 @@ class LigneClass:
 
 
 class NouvelleLigneView(DracharView, LigneClass):
-
     form_ligne = LigneForm
     template_name = 'drachar/nouvelleligne.html'
     initial = {}
@@ -279,7 +278,7 @@ class NouvelleLigneView(DracharView, LigneClass):
         return context
 
     def get(self, request, dra_id, *args, **kwargs):
-        # Instance_dra = Dra.objects.get(pk=kwargs.dra_id)
+        # Instance_dra = Dra.records.get(pk=kwargs.dra_id)
         form = self.ligneclass.get(self, request)
         dra_id = dra_id  # TODO : renvoyer également le num de la DRA.
         return render(request, self.template_name, {'form_ligne': form, 'dra_id': dra_id})
@@ -335,16 +334,16 @@ pdf : reportlab bilio python
         """
         extra_forms = 1
         #form_dra1 = modelformset_factory(Dra, NouvelleDra)
-        #form_dra = form_dra1(queryset=Dra.objects.none())
+        #form_dra = form_dra1(queryset=Dra.records.none())
         if request.method == 'GET':
             print("GET")
-            four_list = Fournisseur.objects.filter(Q(cloture__isnull=True))
+            four_list = Fournisseur.records.filter(Q(cloture__isnull=True))
             print(four_list)
-            contact_four_list = ContactFournisseur.objects.filter(Q(cloture__isnull=True))
+            contact_four_list = ContactFournisseur.records.filter(Q(cloture__isnull=True))
             print(contact_four_list)
-            marche_list = Marche.objects.all()
+            marche_list = Marche.records.all()
             print(marche_list)
-            contact_liv_list = ContactLivraison.objects.filter(Q(cloture__isnull=True))
+            contact_liv_list = ContactLivraison.records.filter(Q(cloture__isnull=True))
             print(contact_liv_list)
             form_dra = NouvelleDra(request.user,
                                    request.GET,
@@ -357,15 +356,15 @@ pdf : reportlab bilio python
 
 
             DocForm_model_formset = modelformset_factory(Document, DocForm, extra=extra_forms, max_num=5)
-            formsetDoc = DocForm_model_formset(queryset=DocumentDracharLink.objects.none())
+            formsetDoc = DocForm_model_formset(queryset=DocumentDracharLink.records.none())
             # DocForm_model_formset = modelformset_factory(DocumentDracharLink,
                     DocFormliendra, extra=extra_forms, max_num=5)
-            # formsetlien = DocForm_model_formset(queryset=DocumentDracharLink.objects.none())
+            # formsetlien = DocForm_model_formset(queryset=DocumentDracharLink.records.none())
 
             context = drachar_context(request, title=_("Nouvelle demande d'achat"))
             context.update(
                 {
-                    #"contact_livraison": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
+                    #"contact_livraison": ContactLivraison.records.filter(Q(cloture__isnull=True)),
                     #"fournisseurs": fournisseurs,
                     #"contactsfournisseurs": contactsfournisseurs,
                 })
@@ -376,10 +375,10 @@ pdf : reportlab bilio python
                 })
         elif request.method == 'POST':
             print("POST")
-            four_list = Fournisseur.objects.filter(Q(cloture__isnull=True))
-            contact_four_list = ContactFournisseur.objects.filter(Q(cloture__isnull=True))
-            marche_list = Marche.objects.filter(Q(cloture__isnull=True))
-            contact_liv_list = ContactLivraison.objects.filter(Q(cloture__isnull=True))
+            four_list = Fournisseur.records.filter(Q(cloture__isnull=True))
+            contact_four_list = ContactFournisseur.records.filter(Q(cloture__isnull=True))
+            marche_list = Marche.records.filter(Q(cloture__isnull=True))
+            contact_liv_list = ContactLivraison.records.filter(Q(cloture__isnull=True))
             form_dra = NouvelleDra(request.user,
                                    request.POST or None,
                                    data_list1=four_list,

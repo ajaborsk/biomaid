@@ -15,11 +15,10 @@ class Command(BaseCommand):
         db_documents = 0
         db_documents_not_found = 0
         db_documents_bad_hash = 0
-        for document in Document.objects.all().values('physical_path', 'hash', 'mime_type'):
+        for document in Document.records.all().values('physical_path', 'hash', 'mime_type'):
             db_documents += 1
             # Does the filename exists in the filesystem ?
             if os.path.isfile(config.settings.MEDIA_ROOT + os.path.sep + document['physical_path']):
-
                 # Compute hash for perfect identity check
                 hash = md5()
                 with open(config.settings.MEDIA_ROOT + os.path.sep + document['physical_path'], 'rb') as f:
@@ -46,7 +45,7 @@ class Command(BaseCommand):
         files_duplicates = 0
         for filename in files_list:
             # If the file registred in the database ?
-            if not Document.objects.filter(physical_path=filename).exists():
+            if not Document.records.filter(physical_path=filename).exists():
                 if options['verbosity'] >= 3:
                     self.stdout.write(self.style.WARNING(f"  File is in the folder but not in the database : '{filename}'"))
                 files_not_in_database += 1
@@ -56,7 +55,7 @@ class Command(BaseCommand):
                 with open(config.settings.MEDIA_ROOT + os.path.sep + filename, 'rb') as f:
                     for block in iter(partial(f.read, 1024 * 1024), b''):
                         hash.update(block)
-                qs = Document.objects.filter(hash=hash.hexdigest())
+                qs = Document.records.filter(hash=hash.hexdigest())
                 if qs.exists():
                     files_duplicates += 1
                     if options['verbosity'] >= 3:

@@ -146,7 +146,7 @@ class RoleScopeSmartView(SmartView):
                             codeuf=choice['code']
                         ),
                     }
-                    for choice in Uf.objects.all().values('code', label=Concat(F('code'), Value(' - '), F('nom')))
+                    for choice in Uf.records.all().values('code', label=Concat(F('code'), Value(' - '), F('nom')))
                 ],
             },
             'service': {'type': 'select'},
@@ -331,7 +331,7 @@ class ProgrammeSmartView(SmartView):
                 # l'utilisation d'une méthode (au lieu d'une fonction lambda) rend le code un peu plus lisible
                 'lookup': user_lookup,
                 'choices': user_choices,
-                # 'choices': lambda dummy=None: User.objects.all().values_list(
+                # 'choices': lambda dummy=None: User.records.all().values_list(
                 #    'pk', Concat(F('first_name'), Value(' '), F('last_name'), Value(" ("), F('username'), Value(")"))
                 # )
             },
@@ -408,7 +408,7 @@ class ProgrammeSmartView(SmartView):
             'precision': 0,
             'data': lambda view_params: ExpressionWrapper(
                 Subquery(
-                    Demande.objects.order_by()
+                    Demande.records.order_by()
                     .values('programme')
                     .filter(programme=OuterRef('pk'), arbitrage_commission__valeur=True)
                     .annotate(tot=Sum('enveloppe_allouee'))
@@ -430,7 +430,7 @@ class ProgrammeSmartView(SmartView):
             'precision': 0,
             'data': lambda view_params: ExpressionWrapper(
                 Subquery(
-                    Previsionnel.objects.order_by()
+                    Previsionnel.records.order_by()
                     .values('programme')
                     .filter(programme=OuterRef('pk'))
                     .annotate(total=Sum('budget'))

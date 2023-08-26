@@ -31,7 +31,7 @@ class DatabaseEngine(ExtableEngine):
         }
         dst_model = apps.get_model('extable.Ext' + self.schema['parser_opts']['name'])
         try:
-            qs = src_model.objects.using(database).values(*columns.keys())
+            qs = src_model.records.using(database).values(*columns.keys())
             qs._fetch_all()
         except DatabaseError:
             log(
@@ -50,7 +50,7 @@ class DatabaseEngine(ExtableEngine):
             return
         else:
             tz = ZoneInfo(self.schema['parser_opts'].get('timezone', 'UTC'))
-            dst_model.objects.all().delete()
+            dst_model.records.all().delete()
             columns_desc = self.schema['parser_opts'].get('column', {})
             for src_record in qs:
                 values = {}

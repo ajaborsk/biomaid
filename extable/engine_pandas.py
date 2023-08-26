@@ -110,7 +110,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
 
             for column, col_def in self.schema['columns'].items():
                 if col_def['type'] == 'foreign_key' and 'src_column' in col_def and col_def['src_column'] in df.columns:
-                    foreign_object_qs = foreign_tables[col_def['foreign_table']]['model'].objects.filter(
+                    foreign_object_qs = foreign_tables[col_def['foreign_table']]['model'].records.filter(
                         **{col_def['foreign_column']: foreign_tables[col_def['foreign_table']]['field_type'](record_dict[column])}
                     )
                     if foreign_object_qs.count() == 1:
@@ -126,7 +126,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
                     record_dict[column] = foreign_object
 
             if self.key:
-                records = model.objects.filter(**{k: record_dict[k] for k in self.key})
+                records = model.records.filter(**{k: record_dict[k] for k in self.key})
                 # stdout.write("  key: {}".format(repr({k:record_dict[k] for k in self.key})))
                 if records.count() == 1:
                     # Get record from database

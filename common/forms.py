@@ -175,11 +175,11 @@ class UfForm(forms.ModelForm, LoginRequiredMixin):
     def __init__(self, kwargs):
         self.etabid = kwargs.get('etabid', None)
         super(UfForm, self).__init__(kwargs)
-        self.fields['etablissement'].queryset = Etablissement.objects.filter(code=self.etabid)
-        self.fields['pole'].queryset = Pole.objects.filter(etablissement=self.etabid)
-        self.fields['site'].queryset = Site.objects.filter(etablissement=self.etabid)
-        self.fields['centre_responsabilite'].queryset = Site.objects.filter(etablissement=self.etabid)
-        self.fields['service'].queryset = Site.objects.filter(etablissement=self.etabid)
+        self.fields['etablissement'].queryset = Etablissement.records.filter(code=self.etabid)
+        self.fields['pole'].queryset = Pole.records.filter(etablissement=self.etabid)
+        self.fields['site'].queryset = Site.records.filter(etablissement=self.etabid)
+        self.fields['centre_responsabilite'].queryset = Site.records.filter(etablissement=self.etabid)
+        self.fields['service'].queryset = Site.records.filter(etablissement=self.etabid)
 
 
 class PoleForm(forms.ModelForm, LoginRequiredMixin):
@@ -196,7 +196,7 @@ class PoleForm(forms.ModelForm, LoginRequiredMixin):
     def __init__(self, kwargs):
         self.etabid = kwargs.get('etabid', None)
         super(PoleForm, self).__init__(kwargs)
-        self.fields['etablissement'].queryset = Etablissement.objects.filter(code=self.etabid)
+        self.fields['etablissement'].queryset = Etablissement.records.filter(code=self.etabid)
 
 
 class ServiceForm(forms.ModelForm, LoginRequiredMixin):
@@ -213,7 +213,7 @@ class ServiceForm(forms.ModelForm, LoginRequiredMixin):
     def __init__(self, kwargs):
         self.etabid = kwargs.get('etabid', None)
         super(ServiceForm, self).__init__(kwargs)
-        self.fields['etablissement'].queryset = Etablissement.objects.filter(code=self.etabid)
+        self.fields['etablissement'].queryset = Etablissement.records.filter(code=self.etabid)
 
 
 class CentreResponsabiliteForm(forms.ModelForm, LoginRequiredMixin):
@@ -230,7 +230,7 @@ class CentreResponsabiliteForm(forms.ModelForm, LoginRequiredMixin):
     def __init__(self, kwargs):
         self.etabid = kwargs.get('etabid', None)
         super(CentreResponsabiliteForm, self).__init__(kwargs)
-        self.fields['etablissement'].queryset = Etablissement.objects.filter(code=self.etabid)
+        self.fields['etablissement'].queryset = Etablissement.records.filter(code=self.etabid)
 
 
 class SiteForm(forms.ModelForm, LoginRequiredMixin):
@@ -247,7 +247,7 @@ class SiteForm(forms.ModelForm, LoginRequiredMixin):
     def __init__(self, kwargs):
         self.etabid = kwargs.get('etabid', None)
         super(SiteForm, self).__init__(kwargs)
-        self.fields['etablissement'].queryset = Etablissement.objects.filter(code=self.etabid)
+        self.fields['etablissement'].queryset = Etablissement.records.filter(code=self.etabid)
 
 
 class EtablissementForm(forms.ModelForm, LoginRequiredMixin):

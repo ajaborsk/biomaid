@@ -42,7 +42,7 @@ def check_demande_a_dispatcher(name, data):
     from common.user_settings import UserSettings
 
     alerts = []
-    demandes_a_dispatcher = Demande.objects.filter(
+    demandes_a_dispatcher = Demande.records.filter(
         ~Q(discipline_dmd__code='TX')
         & (Q(programme__isnull=True) | Q(expert_metier__isnull=True) | Q(domaine__isnull=True))
         & (Q(gel=False) | Q(gel__isnull=True))
@@ -294,7 +294,7 @@ class DemConfig(AppConfig):
         common_config = apps.get_app_config('common')
         # Calcul de l'expression qui calcule la consommation de l'enveloppe UNIQUEMENT pour les demandes
         # Toutes les demandes validées de façon définitives mais sans previsionnel associé (pas encore dans le plan)
-        dem_qs = Demande.objects.filter(
+        dem_qs = Demande.records.filter(
             programme=OuterRef('pk'), gel=True, arbitrage_commission__valeur=True, previsionnel__isnull=True
         )
         # Ajoutons les champs calculés utiles (récupération depuis la SmartView)

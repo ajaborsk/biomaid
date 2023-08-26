@@ -218,9 +218,9 @@ class DemTvxSmartView(DemandeSmartView):
                 'title': 'Campagne',
                 'format': 'coalesce_choice',
                 'fields': ['calendrier'],
-                'lookup': lambda view_params: [(campagne.pk, campagne.nom) for campagne in Campagne.objects.all()],
+                'lookup': lambda view_params: [(campagne.pk, campagne.nom) for campagne in Campagne.records.all()],
                 'choices': lambda view_params: [(campagne.pk, campagne.nom) for campagne in user_campagnes(view_params)]
-                + [(campagne.pk, '>> ' + campagne.nom) for campagne in Campagne.objects.filter(programme__isnull=True)],
+                + [(campagne.pk, '>> ' + campagne.nom) for campagne in Campagne.records.filter(programme__isnull=True)],
             },
             'redacteur': {
                 'hidden': True,
@@ -228,7 +228,7 @@ class DemTvxSmartView(DemandeSmartView):
             },
             'discipline_dmd': {
                 'hidden': True,
-                'initial': lambda params: Discipline.objects.filter(code='TX')[0],
+                'initial': lambda params: Discipline.records.filter(code='TX')[0],
             },
             'nature': {
                 'hidden': True,
@@ -367,7 +367,7 @@ class DemTvxSmartView(DemandeSmartView):
             'programme': {
                 'title': _("Intervenants"),
                 'autocomplete': True,
-                'choices': lambda view_params: tuple(Programme.objects.filter(discipline__code='TX').values_list('pk', 'nom')),
+                'choices': lambda view_params: tuple(Programme.records.filter(discipline__code='TX').values_list('pk', 'nom')),
             },
             # Limitons le choix pour l'expert métier aux personnes qui ont au moins un rôle d'expert
             # L'utilisation d'une fonction (ici une fonction lambda) permet de faire cette évaluation à chaque instanciation
@@ -377,7 +377,7 @@ class DemTvxSmartView(DemandeSmartView):
                 'autocomplete': True,
                 'editor': 'autocomplete',
                 'choices': lambda view_params=None: tuple(
-                    UserUfRole.objects.order_by()
+                    UserUfRole.records.order_by()
                     .filter(role_code='EXP', discipline__code='TX')
                     .annotate(
                         libelle=ExpressionWrapper(
@@ -439,7 +439,7 @@ class DemTvxSmartView(DemandeSmartView):
             'arbitrage_commission': {
                 'title': _("Arbitrage"),
                 'width': 100,
-                'choices': lambda view_params: Arbitrage.objects.filter(
+                'choices': lambda view_params: Arbitrage.records.filter(
                     Q(cloture__isnull=True) | Q(cloture__gt=timezone.now()),
                     discipline__code='TX',
                 )
@@ -603,7 +603,7 @@ class DemTvxSmartView(DemandeSmartView):
             'data': Concat('uf__service__code', Value(' - '), 'uf__service__nom'),
             'form.data': {
                 'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'service__nom')},
+                'choices': lambda view_params: {id: name for id, name in Uf.records.all().values_list('pk', 'service__nom')},
             },
             'depends': ['uf'],
         },
@@ -618,7 +618,7 @@ class DemTvxSmartView(DemandeSmartView):
             'data': Concat('uf__pole__code', Value(' - '), 'uf__pole__nom'),
             'form.data': {
                 'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'pole__nom')},
+                'choices': lambda view_params: {id: name for id, name in Uf.records.all().values_list('pk', 'pole__nom')},
             },
             'depends': ['uf'],
         },
@@ -1101,7 +1101,7 @@ class DemTvxEnCoursTechSmartView(DemTvxSmartView):
                         'label': '%s %s' % (record[0], record[1]),
                         'value': '{"redacteur":%d}' % record[2],
                     }
-                    for record in Demande.objects.filter(redacteur__isnull=False, discipline_dmd__code='TX')
+                    for record in Demande.records.filter(redacteur__isnull=False, discipline_dmd__code='TX')
                     .order_by()
                     .values_list('redacteur__first_name', 'redacteur__last_name', 'redacteur__pk')
                     .distinct()
@@ -1291,7 +1291,7 @@ class DemTvxPreAnalyseSmartView(DemTvxSmartView):
                         'label': '%s %s' % (record[0], record[1]),
                         'value': '{"redacteur":%d}' % record[2],
                     }
-                    for record in Demande.objects.filter(redacteur__isnull=False, discipline_dmd__code='TX')
+                    for record in Demande.records.filter(redacteur__isnull=False, discipline_dmd__code='TX')
                     .order_by()
                     .values_list('redacteur__first_name', 'redacteur__last_name', 'redacteur__pk')
                     .distinct()
@@ -1430,7 +1430,7 @@ class DemTvxAnalyseSmartView(DemTvxSmartView):
                         'label': '%s %s' % (record[0], record[1]),
                         'value': '{"expert_metier":%d}' % record[2],
                     }
-                    for record in Demande.objects.filter(expert_metier__isnull=False, discipline_dmd__code='TX')
+                    for record in Demande.records.filter(expert_metier__isnull=False, discipline_dmd__code='TX')
                     .order_by()
                     .values_list(
                         'expert_metier__first_name',
@@ -1450,7 +1450,7 @@ class DemTvxAnalyseSmartView(DemTvxSmartView):
                         'label': '%s %s' % (record[0], record[1]),
                         'value': '{"redacteur":%d}' % record[2],
                     }
-                    for record in Demande.objects.filter(redacteur__isnull=False, discipline_dmd__code='TX')
+                    for record in Demande.records.filter(redacteur__isnull=False, discipline_dmd__code='TX')
                     .order_by()
                     .values_list('redacteur__first_name', 'redacteur__last_name', 'redacteur__pk')
                     .distinct()

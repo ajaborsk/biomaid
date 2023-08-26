@@ -9,11 +9,10 @@ def set_datasource_in_migration(
     auto: None | list = None,
     processor: None | str = None,
 ) -> bool:
-
     datasource_model = apps.get_model('analytics', 'DataSource')
 
     # return False
-    datasource, created = datasource_model.objects.get_or_create(code=code)
+    datasource, created = datasource_model.records.get_or_create(code=code)
     datasource.label = label or ''
     datasource.parameters = parameters or {}
     datasource.auto = auto or []

@@ -30,7 +30,7 @@ class Command(BaseCommand):
             # No need for a request here
             'request': None,
             # Use the first superuser account
-            'user': User.objects.filter(is_active=True, is_superuser=True)[0],
+            'user': User.records.filter(is_active=True, is_superuser=True)[0],
             # Give us a admin role
             'user_roles': ['ADM'],
             'now': now(),

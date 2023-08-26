@@ -334,7 +334,7 @@ class PrevisionnelSmartView(SmartView):
                 'format': 'choice',
                 'editor': 'autocomplete',
                 'choices': lambda view_params: tuple(
-                    UserUfRole.objects.order_by()
+                    UserUfRole.records.order_by()
                     .filter(role_code='EXP')
                     .annotate(
                         libelle=ExpressionWrapper(
@@ -890,7 +890,7 @@ class PrevisionnelUtilisateursSmartView(PrevisionnelSmartView):
                 & (
                     # Hack pour ne pas voir les demandes de travaux
                     Q(discipline_dmd__isnull=True)
-                    | ~Q(discipline_dmd=Discipline.objects.values_list('pk', flat=True).filter(code='TX')[0])
+                    | ~Q(discipline_dmd=Discipline.records.values_list('pk', flat=True).filter(code='TX')[0])
                     # Uniquement les demandes qui ne sont pas terminées depuis 'longtemps'
                     & (
                         ~(Q(suivi_mes__startswith='1-') & Q(suivi_mes__startswith='0-'))
@@ -1139,7 +1139,7 @@ class PrevTvxSmartView(SmartView):
                 'format': 'choice',
                 'editor': 'autocomplete',
                 'choices': lambda view_params: tuple(
-                    UserUfRole.objects.order_by()
+                    UserUfRole.records.order_by()
                     .filter(role_code='EXP')
                     .annotate(
                         libelle=ExpressionWrapper(

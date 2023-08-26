@@ -111,7 +111,7 @@ def flawed_orders(gest='IF'):
 
     ext_commande_model = apps.get_model('extable', 'ExtCommande')
     order_qs = (
-        ext_commande_model.objects.filter(gest_ec=gest, lg_soldee_lc='N')
+        ext_commande_model.records.filter(gest_ec=gest, lg_soldee_lc='N')
         .order_by()
         .annotate(
             lg_zero=Case(When(mt_engage_lc__gt=-0.01, mt_engage_lc__lt=0.01, then=Value(1))),
@@ -157,7 +157,7 @@ def flawed_orders(gest='IF'):
         anomalies = set()
         rows = [
             dict(row, **{'interv': no_interv_re.findall(row['libelle'])})
-            for row in ext_commande_model.objects.filter(commande=order['commande']).values(
+            for row in ext_commande_model.records.filter(commande=order['commande']).values(
                 'no_ligne_lc',
                 'libelle',
                 'mt_engage_lc',
@@ -238,7 +238,7 @@ def flawed_orders(gest='IF'):
         #     order['problemes'].append(_("Commande ancienne ({} mois)").format(age_over_limit + 6))
         #     destination = 'old_orders'
         #
-        # nb_intvs_arch = BFt1996.objects.using('gmao').filter(nu_int__in=list(intvs.keys())).count()
+        # nb_intvs_arch = BFt1996.records.using('gmao').filter(nu_int__in=list(intvs.keys())).count()
         # if nb_intvs_arch > order['lgs_soldees']:
         #     score += 25
         #     order['problemes'].append('Probablement {} lignes à solder'.format(nb_intvs_arch - order['lgs_soldees']))
@@ -275,7 +275,7 @@ class MyTestWidget1(AltairWidget):
         order_class = apps.get_model('extable', 'ExtCommande')
 
         qs = (
-            order_class.objects.filter(
+            order_class.records.filter(
                 Q(gest_ec__in=['IF', 'II', 'IM', 'IN']),
                 ~Q(no_fournisseur_fr=33034),
                 exercice_ec__lt=2022,
@@ -296,7 +296,6 @@ class MyTestWidget1(AltairWidget):
 
 
 class GestWidget(HtmlWidget):
-
     template_string = """
     {% load render_table from django_tables2 %}
     <div>
@@ -789,7 +788,6 @@ class OrderRowWidget(ContainerWidget):
 
 
 class OrderWidget(ContainerWidget):
-
     template_string = """<div id="{{ html_id }}">
             {% if order %}
                 <table class="simple" style="width:80%;margin:0 10%;background-color:#eee;">
@@ -813,7 +811,6 @@ class OrderWidget(ContainerWidget):
             libelle_html=Replace(F('libelle'), Value('\n'), Value('<br>'), output_field=CharField())
         )
         if qs.count():
-
             # Order header
             header = (
                 qs.values(
@@ -955,7 +952,6 @@ class OrderViewBak(FinanceView):
         dernier_commentaire = Column(orderable=False)
 
     class EqptTable(Table):
-
         FIELDS = (
             'n_imma',
             'n_order',
@@ -1098,7 +1094,7 @@ class OrderViewBak(FinanceView):
                 context['rows_table'] = self.RowsTable(qs.order_by('no_ligne_lc').values())
 
                 ext_facture_model = apps.get_model('extable', 'ExtFacture')
-                f_qs = ext_facture_model.objects.filter(commande=order_id)
+                f_qs = ext_facture_model.records.filter(commande=order_id)
 
                 if f_qs.count():
                     context['invoices_table'] = self.InvoicesTable(f_qs.values())
@@ -1113,24 +1109,24 @@ class OrderViewBak(FinanceView):
 
                     # 2 - On recherche les interventions (en cours et archivées) qui portent
                     #      ce numéro de commande en référence
-                    interventions_qs = EnCours.objects.using('gmao').filter(nu_bon_c=order_id).values_list('nu_int', flat=True)
+                    interventions_qs = EnCours.records.using('gmao').filter(nu_bon_c=order_id).values_list('nu_int', flat=True)
                     if interventions_qs.count():
                         interventions_qs._fetch_all()
                         interventions = interventions.union(set(interventions_qs))
-                    interventions_qs = BFt1996.objects.using('gmao').filter(nu_bon_c=order_id).values_list('nu_int', flat=True)
+                    interventions_qs = BFt1996.records.using('gmao').filter(nu_bon_c=order_id).values_list('nu_int', flat=True)
                     if interventions_qs.count():
                         interventions_qs._fetch_all()
                         interventions = interventions.union(set(interventions_qs))
 
                     interventions_list = []
                     for intervention in interventions:
-                        docs_qs = Docliste.objects.using('gmao').filter(nu_int=intervention).values('nom_doc').distinct()
+                        docs_qs = Docliste.records.using('gmao').filter(nu_int=intervention).values('nom_doc').distinct()
                         docs = []
                         if len(docs_qs):
                             docs += [dict(doc) for doc in docs_qs]
 
                         intv_qs = (
-                            EnCours.objects.using('gmao')
+                            EnCours.records.using('gmao')
                             .filter(nu_int=intervention)
                             .values(*self.IntvTable.FIELDS, 'int_statut', 'lib_statut')
                         )
@@ -1159,7 +1155,7 @@ class OrderViewBak(FinanceView):
                             )
 
                         intv_qs = (
-                            BFt1996.objects.using('gmao')
+                            BFt1996.records.using('gmao')
                             .filter(nu_int=intervention)
                             .values(*self.IntvTable.FIELDS, 'int_statut', 'lib_statut')
                         )
@@ -1190,7 +1186,7 @@ class OrderViewBak(FinanceView):
                     immos_list = []
 
                     ext_immos_model = apps.get_model('extable', 'ExtImmobilisation')
-                    immos_qs = ext_immos_model.objects.filter(commande=order_id)
+                    immos_qs = ext_immos_model.records.filter(commande=order_id)
 
                     immos_list += immos_qs.values(*self.ImmoTable.FIELDS)
 
@@ -1209,7 +1205,7 @@ class OrderViewBak(FinanceView):
                     #       à une fiche d'immobilisation portant ce n° de commande
 
                     # 1 - équipement dont le N° de commande correspond à la commande examinée (fait)
-                    equipements_qs = BEq1996.objects.using('gmao').filter(n_order=order_id)
+                    equipements_qs = BEq1996.records.using('gmao').filter(n_order=order_id)
                     if len(equipements_qs):
                         equipements = equipements.union(set(equipements_qs.values_list('n_imma', flat=True)))
 
@@ -1223,11 +1219,11 @@ class OrderViewBak(FinanceView):
 
                     equipements_list = []
                     for equipement in sorted(list(equipements)):
-                        docs_qs = Docliste.objects.using('gmao').filter(n_imma=equipement).values('nom_doc').distinct()
+                        docs_qs = Docliste.records.using('gmao').filter(n_imma=equipement).values('nom_doc').distinct()
                         docs = []
                         if len(docs_qs):
                             docs += [dict(doc) for doc in docs_qs]
-                        equipements_qs = BEq1996.objects.using('gmao').filter(n_imma=equipement).values(*self.EqptTable.FIELDS)
+                        equipements_qs = BEq1996.records.using('gmao').filter(n_imma=equipement).values(*self.EqptTable.FIELDS)
                         if len(equipements_qs):
                             equipements_list.append(
                                 dict(

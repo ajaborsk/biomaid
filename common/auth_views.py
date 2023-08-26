@@ -336,7 +336,7 @@ class LoginCheck(BiomAidViewMixin, TemplateView):
         # print("POST:")
         # 1 - Vérifier que les conditions de la fusion/mutation sont toujours valides
         user = request.user
-        old_user = User.objects.filter(~Q(pk=request.user.pk), email__iexact=request.user.email).get()
+        old_user = User.records.filter(~Q(pk=request.user.pk), email__iexact=request.user.email).get()
 
         # 2 - Rechercher tous les champs avec une ref externe de User
         user_links = []
@@ -353,7 +353,7 @@ class LoginCheck(BiomAidViewMixin, TemplateView):
             # 3.1 - Dans les tables avec un lien vers User
             for user_link in user_links:
                 # print(user_link)
-                qs = user_link[0].objects.filter(**{user_link[1]: old_user.pk})
+                qs = user_link[0].records.filter(**{user_link[1]: old_user.pk})
                 # print("  Nb:", qs.count())
                 qs.update(**{user_link[1]: request.user})
 
@@ -396,7 +396,7 @@ class LoginCheck(BiomAidViewMixin, TemplateView):
         )
         if request.user.from_ldap:
             template = 'common/new_ldap_account.html'
-            users = User.objects.filter(~Q(pk=request.user.pk), email__iexact=request.user.email)
+            users = User.records.filter(~Q(pk=request.user.pk), email__iexact=request.user.email)
             n_users = users.count()
             logger.debug("Comptes {n_users} {users.values_list('username', flat=1)}")
 

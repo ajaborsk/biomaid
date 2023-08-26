@@ -24,7 +24,7 @@ class Command(BaseCommand):
      - Met le calendrier à 1 (campagne recensement 2021) pour toutes les anciennes demnandes où il est NULL"""
 
     def handle(self, *args, **options):
-        demandes = Demande.objects.filter(calendrier__isnull=True).order_by('num_dmd')
+        demandes = Demande.records.filter(calendrier__isnull=True).order_by('num_dmd')
         for demande in demandes:
-            demande.calendrier = Calendrier.objects.get(pk=1)
+            demande.calendrier = Calendrier.records.get(pk=1)
             demande.save(update_fields=['date_modification', 'calendrier'])

@@ -472,7 +472,7 @@ class CmdCheckerBase(AnomalySubCheckerMixin, AnomalyChecker):
         super().__init__(
             data,
             storage=JsonAnomaliesStorage(
-                data[0].objects.filter(commande=data[1]['commande']).order_by('no_ligne_lc')[0],
+                data[0].records.filter(commande=data[1]['commande']).order_by('no_ligne_lc')[0],
                 'analyse_cmd',
             ),
         )
@@ -480,7 +480,7 @@ class CmdCheckerBase(AnomalySubCheckerMixin, AnomalyChecker):
     def check(self, verbosity=1):
         if verbosity > 1:
             print(_("Analyse de la commande {} :").format(self.data[1]['commande']))
-        order_rows = self.data[0].objects.filter(commande=self.data[1]['commande']).order_by('no_ligne_lc')
+        order_rows = self.data[0].records.filter(commande=self.data[1]['commande']).order_by('no_ligne_lc')
         row_anomalies = {}
         for row in order_rows:
             row_anomalies[row.no_ligne_lc] = CmdRowBaseChecker(data=(self.data[1], row)).check(verbosity=verbosity).anomalies
@@ -506,7 +506,7 @@ class CmdCheckerAssetPlus(AnomalySubCheckerMixin, AnomalyChecker):
         super().__init__(
             data,
             storage=JsonAnomaliesStorage(
-                data[0].objects.filter(commande=data[1]['commande']).order_by('no_ligne_lc')[0], 'analyse_cmd', append_mode=True
+                data[0].records.filter(commande=data[1]['commande']).order_by('no_ligne_lc')[0], 'analyse_cmd', append_mode=True
             ),
         )
 
@@ -515,7 +515,7 @@ class CmdCheckerAssetPlus(AnomalySubCheckerMixin, AnomalyChecker):
             print(_("Analyse (avec Asset+) de la commande {} :").format(self.data[1]['commande']))
         order_rows = (
             self.data[0]
-            .objects.filter(commande=self.data[1]['commande'])
+            .records.filter(commande=self.data[1]['commande'])
             .annotate(no_fournisseur=F('fournisseur__no_fournisseur_fr'))
             .order_by('no_ligne_lc')
         )
@@ -587,7 +587,7 @@ class AllCmdChecker(AnomalySubCheckerMixin, AnomalyChecker):
         return [({'gest': key[0], 'level': key[1]}, value) for key, value in aggregates.items()]
 
     def __init__(self, data, **kwargs):
-        data_source, ds_created = DataSource.objects.get_or_create(
+        data_source, ds_created = DataSource.records.get_or_create(
             code='nb-orders-flaws',
             defaults=dict(
                 label=_("Nombre de commandes présentant un problème"),
@@ -611,8 +611,8 @@ class AllCmdChecker(AnomalySubCheckerMixin, AnomalyChecker):
 
     def check(self, verbosity=1):
         order_qs = (
-            # self.data.objects.filter(gest_ec__in=self.kwargs['gestionnaires'], lg_soldee_lc='N')
-            self.data.objects.filter(gest_ec__in=self.kwargs['gestionnaires'], exercice_ec=now().year)
+            # self.data.records.filter(gest_ec__in=self.kwargs['gestionnaires'], lg_soldee_lc='N')
+            self.data.records.filter(gest_ec__in=self.kwargs['gestionnaires'], exercice_ec=now().year)
             .order_by()
             .annotate(
                 lg_zero=Case(When(mt_engage_lc__gt=-0.01, mt_engage_lc__lt=0.01, then=Value(1)), default=Value(0)),
@@ -660,7 +660,7 @@ class AllCmdChecker(AnomalySubCheckerMixin, AnomalyChecker):
 
 def get_intv(nu_int: str):
     intv = None
-    intv_qs = EnCours.objects.using('gmao').filter(nu_int=nu_int).values()
+    intv_qs = EnCours.records.using('gmao').filter(nu_int=nu_int).values()
     if len(intv_qs):
         intv = intv_qs[0]
         intv['etat'] = (
@@ -674,18 +674,18 @@ def get_intv(nu_int: str):
             + " : "
             + (intv['lib_statut'] if intv['lib_statut'] else '-')
         )
-    intv_qs = BFt1996.objects.using('gmao').filter(nu_int=nu_int).values()
+    intv_qs = BFt1996.records.using('gmao').filter(nu_int=nu_int).values()
     if len(intv_qs):
         intv = intv_qs[0]
         intv['etat'] = _("Archivée")
 
     if intv:
-        eqpt_qs = BEq1996.objects.using('gmao').filter(n_imma=intv['nu_imm']).values('n_seri')
+        eqpt_qs = BEq1996.records.using('gmao').filter(n_imma=intv['nu_imm']).values('n_seri')
         if len(eqpt_qs) == 1:
             intv['n_seri'] = eqpt_qs[0]['n_seri']
         else:
             intv['n_seri'] = ''
-        docs_qs = Docliste.objects.using('gmao').filter(nu_int=nu_int).values('nom_doc').distinct()
+        docs_qs = Docliste.records.using('gmao').filter(nu_int=nu_int).values('nom_doc').distinct()
         docs = []
         if len(docs_qs):
             docs += [dict(doc) for doc in docs_qs]
@@ -792,7 +792,7 @@ class PrevAnalyser(RecordAnomalyChecker):
         code_prog_dra94 = self.data.programme.anteriorite
         if code_prog_dra94:
             # DRA saisie avec le bon programme et la bonne ligne
-            dossiers_dra94 = dra94_dossier_model.objects.filter(programme=code_prog_dra94, ligne=no_ligne_dra94)
+            dossiers_dra94 = dra94_dossier_model.records.filter(programme=code_prog_dra94, ligne=no_ligne_dra94)
 
             # DRA avec le numéro détecté dans le texte du champ 'commande'
             # TODO...
@@ -821,7 +821,7 @@ class PrevAnalyser(RecordAnomalyChecker):
                 mm3 = str(dossier_dra94.numero)[:4] + '/' + str(int(str(dossier_dra94.numero)[4:]))
                 mm4 = str(dossier_dra94.numero)[:4] + '-' + str(int(str(dossier_dra94.numero)[4:]))
                 no_commandes |= set(
-                    order_row_model.objects.filter(
+                    order_row_model.records.filter(
                         Q(bloc_note__icontains='DRA BIO ' + mm1)
                         or Q(bloc_note__icontains='DRABIO ' + mm1)
                         or Q(bloc_note__icontains='DRA BIO' + mm1)
@@ -841,7 +841,7 @@ class PrevAnalyser(RecordAnomalyChecker):
                     ).values_list('commande', flat=True)
                 )
 
-                lignes_dra94 = dra94_ligne_model.objects.filter(dossier=dossier_dra94)
+                lignes_dra94 = dra94_ligne_model.records.filter(dossier=dossier_dra94)
                 analysis['dra'][-1]['lignes'] = []
                 for ligne in lignes_dra94:
                     analysis['dra'][-1]['lignes'].append(
@@ -863,7 +863,7 @@ class PrevAnalyser(RecordAnomalyChecker):
         all_order_rows_closed = True
         for no_commande in no_commandes:
             rows_on_uf = 0
-            order_rows = order_row_model.objects.filter(commande=no_commande)
+            order_rows = order_row_model.records.filter(commande=no_commande)
             mt_engage = 0
             mt_liquide = 0
             for row in order_rows:
@@ -904,7 +904,7 @@ class PrevAnalyser(RecordAnomalyChecker):
         try:
             eqpts = []
             for no_commande in no_commandes:
-                eqpts += list(eqpt_model.objects.filter(n_order__contains=no_commande))
+                eqpts += list(eqpt_model.records.filter(n_order__contains=no_commande))
             # print(eqpts)
             analysis_eqpts = []
             analysis_eqpts_uf = []
@@ -984,7 +984,7 @@ class DemAnalyser(RecordAnomalyChecker):
 class DemAllAnalyser(AnomalyChecker):
     def check(self, verbosity=1):
         # print(f"    DemAllAnalyser... {self.data=}")
-        qs = self.data.objects.filter(previsionnel__isnull=False).order_by('prix_unitaire')
+        qs = self.data.records.filter(previsionnel__isnull=False).order_by('prix_unitaire')
         total = qs.count()
         cnt = 0
         for demande in qs:
@@ -1178,7 +1178,7 @@ class ImmoAllAnalyser(AnomalyChecker):
                     inv = pickle.load(f)
                 print("    2.1.0 - Got inventory from cache")
             else:
-                qs = BEq1996.objects.using('gmao').all().values()
+                qs = BEq1996.records.using('gmao').all().values()
                 qs._fetch_all()
                 inv = list(qs)
                 with open(inv_cache_fn, "wb") as f:
@@ -1312,7 +1312,7 @@ class ImmoAllAnalyser(AnomalyChecker):
             immo_not_found = 0
             actif_found = 0
             actif_not_found = 0
-            for immo in immo_model.objects.all():
+            for immo in immo_model.records.all():
                 ImmoAnalyser((inv_idx, inv_idx2, orders_idx, immo)).check(verbosity=verbosity)
                 if immo.fiche in inv_idx2:
                     immo_found += 1

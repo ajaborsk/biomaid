@@ -24,8 +24,8 @@ class Command(BaseCommand):
     help = """Création des codes pour les demandes historiques qui n'en ont pas"""
 
     def handle(self, *args, **options):
-        demandes = Demande.objects.filter(~Q(code__startswith='DEM-')).order_by('num_dmd')
-        all_codes = list(Demande.objects.filter(code__startswith='DEM-').order_by('num_dmd').values_list('code', flat=True))
+        demandes = Demande.records.filter(~Q(code__startswith='DEM-')).order_by('num_dmd')
+        all_codes = list(Demande.records.filter(code__startswith='DEM-').order_by('num_dmd').values_list('code', flat=True))
         for demande in demandes:
             print('Demande ', demande.num_dmd, end=' => ')
             candidate_idx = 1

@@ -29,7 +29,7 @@ def fournisseur_weak_link(view_params):
         return Value("----")
 
     return Coalesce(
-        fournisseur_model.objects.using('gmao').filter(code_four=OuterRef('n_presta')).values('fourni'),
+        fournisseur_model.records.using('gmao').filter(code_four=OuterRef('n_presta')).values('fourni'),
         Value('- #ref ? -'),
         output_field=CharField(),
     )

@@ -56,10 +56,10 @@ class CommissionSynthese(BiomAidViewMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         if programme_code == "Tout" or programme_code == "Tous" or programme_code == "Toutes":
             filtre_programme = "ATTENTION PAS DE FILTRE SUR LE PROGRAMME"
-            qs = Demande.objects.all()
+            qs = Demande.records.all()
         else:
-            filtre_programme = Programme.objects.get(code=programme_code)
-            qs = Demande.objects.filter(programme=filtre_programme)
+            filtre_programme = Programme.records.get(code=programme_code)
+            qs = Demande.records.filter(programme=filtre_programme)
 
         def format(x):
             return "{0:,.2f} €".format(x)
@@ -171,13 +171,13 @@ class ExpertSynthese(BiomAidViewMixin, TemplateView):
         dict_filtre["code_pole"] = pole_code
         # dict_filtre['decision_validateur'] = validation_cp
         dict_filtre["code_uf"] = code_uf
-        if Programme.objects.filter(code=programme_code).exists():
-            dict_filtre["programme"] = Programme.objects.get(code=programme_code)
+        if Programme.records.filter(code=programme_code).exists():
+            dict_filtre["programme"] = Programme.records.get(code=programme_code)
         else:
             dict_filtre["programme"] = "Null"
         # récupération du filtre code domaine
-        if Domaine.objects.filter(code=domaines).exists():
-            dict_filtre["domaine"] = Domaine.objects.get(code=domaines)
+        if Domaine.records.filter(code=domaines).exists():
+            dict_filtre["domaine"] = Domaine.records.get(code=domaines)
         else:
             dict_filtre["domaine"] = "Null"
 
@@ -194,9 +194,9 @@ class ExpertSynthese(BiomAidViewMixin, TemplateView):
                 del dict_filtre[cle]
 
         if not dict_filtre:
-            qs = Demande.objects.all()
+            qs = Demande.records.all()
         else:
-            qs = Demande.objects.filter(**dict_filtre)
+            qs = Demande.records.filter(**dict_filtre)
         if not qs:
             tbfinal = "pas de demandes avec ces critères"
         else:
@@ -274,9 +274,9 @@ class VueFiltreSynthese(BiomAidViewMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         programmes = [
-            {"id": str(prog.id), "code": str(prog.code), "nom": str(prog.nom)} for prog in set(Programme.objects.filter())
+            {"id": str(prog.id), "code": str(prog.code), "nom": str(prog.nom)} for prog in set(Programme.records.filter())
         ]
-        programmes_recs = dict({rec.pk: str(rec) for rec in Programme.objects.all()})
+        programmes_recs = dict({rec.pk: str(rec) for rec in Programme.records.all()})
         programmes_recs[None] = "--------"
         context['programmes'] = programmes
 
@@ -290,14 +290,14 @@ class VueFiltreSynthese2(BiomAidViewMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         programmes = [
-            {"id": str(prog.id), "code": str(prog.code), "nom": str(prog.nom)} for prog in set(Programme.objects.filter())
+            {"id": str(prog.id), "code": str(prog.code), "nom": str(prog.nom)} for prog in set(Programme.records.filter())
         ]
-        programmes_recs = dict({rec.pk: str(rec) for rec in Programme.objects.all()})
+        programmes_recs = dict({rec.pk: str(rec) for rec in Programme.records.all()})
         programmes_recs[None] = "--------"
-        pole_all = [{"code": str(pole.code), "nom": str(pole.code) + " - " + pole.nom} for pole in set(Pole.objects.filter())]
-        uf_all = [{"code": str(uf.code), "nom": str(uf.code) + " - " + uf.nom} for uf in set(Uf.objects.filter().order_by("code"))]
-        arbitrage = [{"id": str(arbi.id), "code": str(arbi.code), "nom": str(arbi.nom)} for arbi in set(Arbitrage.objects.filter())]
-        domaines = [{"id": str(dom.id), "code": str(dom.code), "nom": str(dom.nom)} for dom in set(Domaine.objects.filter())]
+        pole_all = [{"code": str(pole.code), "nom": str(pole.code) + " - " + pole.nom} for pole in set(Pole.records.filter())]
+        uf_all = [{"code": str(uf.code), "nom": str(uf.code) + " - " + uf.nom} for uf in set(Uf.records.filter().order_by("code"))]
+        arbitrage = [{"id": str(arbi.id), "code": str(arbi.code), "nom": str(arbi.nom)} for arbi in set(Arbitrage.records.filter())]
+        domaines = [{"id": str(dom.id), "code": str(dom.code), "nom": str(dom.nom)} for dom in set(Domaine.records.filter())]
 
         context["programmes"] = programmes
         context["poles"] = pole_all

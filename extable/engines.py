@@ -244,7 +244,7 @@ class FileExtableEngine(ExtableEngine, ABC):
         # pprint(self.schema)
         # print('~' * 132)
         model = self.schema['model']
-        table = Table.objects.get(table_name=model._meta.db_table)
+        table = Table.records.get(table_name=model._meta.db_table)
         # print(table, table.update_ts)
         filename: str = self.schema['parser_opts'].get('filename')
         if (
@@ -284,7 +284,7 @@ class FileExtableEngine(ExtableEngine, ABC):
                 if self.key is None or options['clear']:
                     # Empty the model/table
                     log(BiomAidCommand.FINE, _("  Emptying table..."))
-                    model.objects.all().delete()
+                    model.records.all().delete()
                 else:
                     log(BiomAidCommand.FINE, _("  Keeping table records and updating using key {}...").format(repr(self.key)))
                 log(BiomAidCommand.FINE, _("  Reading file: '{}'...").format(filename[0]))

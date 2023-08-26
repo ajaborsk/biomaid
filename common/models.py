@@ -147,8 +147,8 @@ class User(AbstractUser):
         verbose_name=_("date de modification"),
     )
 
-    objects = UserManager()  # The default manager.
-    active_objects = ActiveManagerUser()  # The active_objects manager.
+    all_records = UserManager()  # The default manager.
+    records = ActiveManagerUser()  # The active_objects manager.
 
     def __str__(self):
         return "{} {} ({})".format(self.first_name, self.last_name, self.username)
@@ -167,6 +167,12 @@ class Uf(Model):
             models.Index(fields=['service']),
             models.Index(fields=['cloture']),
         ]
+
+    class OMeta:
+        fgdfg = 545
+        config = config.get('model.Uf')
+
+    computed = {'popo': 12}
 
     lettre_budget = models.CharField(max_length=1, verbose_name='Budget')
     code = models.CharField(max_length=8, verbose_name='Code UF')
@@ -838,10 +844,10 @@ class Marque(Model):
     # def save(self, *args, **kwargs):
     #    # do this only when created
     #    try:
-    #        instance = LastUpdate.objects.get(table_in="Marque")
+    #        instance = LastUpdate.records.get(table_in="Marque")
     #        instance.date_last_update = timezone.now()
     #    except LastUpdate.DoesNotExist:
-    #        LastUpdate.objects.get_or_create(table_in="Marque", date_last_update=timezone.now())
+    #        LastUpdate.records.get_or_create(table_in="Marque", date_last_update=timezone.now())
     #    super().save(*args, **kwargs)
 
 

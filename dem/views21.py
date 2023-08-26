@@ -91,7 +91,7 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
         #   il y a au moins une demande non traitées OU avec un recensement en cours
         # Et pour lesquelles l'utilisateur est soit dispatcher, soit arbitre, soit expert.
         campagnes = (
-            Campagne.objects.order_by()
+            Campagne.records.order_by()
             .filter(
                 ~Q(code__contains='TVX')
                 & (
@@ -108,11 +108,11 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
             .order_by('code')
         )
 
-        tmp_scope = UserUfRole.objects.filter(
+        tmp_scope = UserUfRole.records.filter(
             user=self.request.user,
             role_code__in=('CHP', 'DIR'),
         )
-        a_valider_par_moi_qs = Demande.objects.filter(
+        a_valider_par_moi_qs = Demande.records.filter(
             Q(gel__isnull=True) | Q(gel=False),
             ~Q(calendrier__code__contains='TVX'),
             Q(uf__in=tmp_scope.values('uf'))
@@ -125,7 +125,7 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
         )
 
         context['campagne_rows'] = []
-        queryset = Demande.objects.filter(
+        queryset = Demande.records.filter(
             ~Q(discipline_dmd__code='TX') & (Q(gel=False) | Q(gel__isnull=True)),
         )
         for campagne in campagnes:
@@ -208,19 +208,19 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
                 }
             )
 
-        context['non_soumises_total'] = Demande.objects.filter(
+        context['non_soumises_total'] = Demande.records.filter(
             ~Q(discipline_dmd__code='TX') & (Q(decision_validateur__isnull=True)) & (Q(gel=False) | Q(gel__isnull=True)),
         ).count()
 
         context['non_soumises_total_moi'] = a_valider_par_moi_qs.count()
 
-        context['repartir_total'] = Demande.objects.filter(
+        context['repartir_total'] = Demande.records.filter(
             ~Q(discipline_dmd__code='TX')
             & (Q(programme__isnull=True) | Q(expert_metier__isnull=True) | Q(domaine__isnull=True))
             & (Q(gel=False) | Q(gel__isnull=True)),
         ).count()
 
-        context['repartir_total_moi'] = Demande.objects.filter(
+        context['repartir_total_moi'] = Demande.records.filter(
             ~Q(discipline_dmd__code='TX')
             & (Q(programme__isnull=True) | Q(expert_metier__isnull=True) | Q(domaine__isnull=True))
             & (Q(gel=False) | Q(gel__isnull=True)),
@@ -230,8 +230,8 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
         # if 'entries' in context['main_menu'][4]:
         #     context['repartir_me'] = [
         #         {
-        #             'label': Calendrier.objects.get(code=entry['url_kwargs']['campagne_code']),
-        #             'count': Demande.objects.filter(
+        #             'label': Calendrier.records.get(code=entry['url_kwargs']['campagne_code']),
+        #             'count': Demande.records.filter(
         #                 ~Q(discipline_dmd__code='TX')
         #                 & (Q(programme__isnull=True) | Q(expert_metier__isnull=True) | Q(domaine__isnull=True))
         #                 & (Q(gel=False) | Q(gel__isnull=True)),
@@ -245,7 +245,7 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
         # else:
         #     context['repartir_me'] = 0
 
-        context['expertiser_total'] = Demande.objects.filter(
+        context['expertiser_total'] = Demande.records.filter(
             ~Q(discipline_dmd__code='TX')
             & Q(expert_metier__isnull=False)
             & (Q(decision_validateur=True) | Q(decision_validateur__isnull=True))
@@ -253,7 +253,7 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
             & (Q(gel=False) | Q(gel__isnull=True)),
         ).count()
 
-        context['expertiser_total_moi'] = Demande.objects.filter(
+        context['expertiser_total_moi'] = Demande.records.filter(
             ~Q(discipline_dmd__code='TX')
             & Q(expert_metier=self.request.user)
             & (Q(decision_validateur=True) | Q(decision_validateur__isnull=True))
@@ -282,7 +282,7 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
             )
         )
 
-        context['arbitrer_total'] = Demande.objects.filter(
+        context['arbitrer_total'] = Demande.records.filter(
             ~Q(discipline_dmd__code='TX')
             & Q(programme__isnull=False)
             & Q(programme__arbitre__isnull=False)
@@ -291,7 +291,7 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
             & (Q(gel=False) | Q(gel__isnull=True)),
         ).count()
 
-        context['arbitrer_total_moi'] = Demande.objects.filter(
+        context['arbitrer_total_moi'] = Demande.records.filter(
             ~Q(discipline_dmd__code='TX')
             & Q(programme__isnull=False)
             & Q(programme__arbitre=self.request.user)
@@ -302,7 +302,7 @@ class DemCockpit(BiomAidViewMixin, TemplateView):
 
         context['toutes_total'] = queryset.count()
 
-        context['traitees_total'] = Demande.objects.filter(
+        context['traitees_total'] = Demande.records.filter(
             ~Q(discipline_dmd__code='TX') & Q(gel=True),
         ).count()
 

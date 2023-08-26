@@ -44,16 +44,16 @@ class GestionPrevisionnel(BiomAidViewMixin, TemplateView):
         self.programme = programme
 
         if self.programme == "Tous":
-            self.previsionnel = Previsionnel.objects.all()
-            self.demandesval = Demande.objects.filter(arbitrage_commission__valeur=True, gel=True, previsionnel__isnull=True)
+            self.previsionnel = Previsionnel.records.all()
+            self.demandesval = Demande.records.filter(arbitrage_commission__valeur=True, gel=True, previsionnel__isnull=True)
         else:
-            self.demandesval = Demande.objects.filter(
+            self.demandesval = Demande.records.filter(
                 arbitrage_commission__valeur=True,
                 programme=self.programme,
                 gel=True,
                 previsionnel__isnull=True,
             )
-            self.previsionnel = Previsionnel.objects.filter(programme=self.programme)
+            self.previsionnel = Previsionnel.records.filter(programme=self.programme)
 
         # Calcul de l'enveloppe validée pour chaque demande
         self.demandesval = (
@@ -114,8 +114,8 @@ class GestionPrevisionnel(BiomAidViewMixin, TemplateView):
                     if rise == 1:
                         print("ne rien faire, la demande " + str(demande.code) + " existe dejà")
                     else:
-                        prog = Programme.objects.get(pk=demande.programme.id)
-                        expert = get_user_model().objects.get(pk=demande.expert_metier.id)
+                        prog = Programme.records.get(pk=demande.programme.id)
+                        expert = get_user_model().records.get(pk=demande.expert_metier.id)
                         enveloppe = demande.enveloppe
                         p = Previsionnel(
                             num_dmd=demande,
@@ -131,20 +131,20 @@ class GestionPrevisionnel(BiomAidViewMixin, TemplateView):
                 # On relit la base pour mettre à jour la page
 
                 if self.programme == "Tous":
-                    self.previsionnel = Previsionnel.objects.all()
-                    self.demandesval = Demande.objects.filter(
+                    self.previsionnel = Previsionnel.records.all()
+                    self.demandesval = Demande.records.filter(
                         arbitrage_commission__valeur=True,
                         gel=True,
                         previsionnel__isnull=True,
                     )
                 else:
-                    self.demandesval = Demande.objects.filter(
+                    self.demandesval = Demande.records.filter(
                         arbitrage_commission__valeur=True,
                         programme=self.programme,
                         gel=True,
                         previsionnel__isnull=True,
                     )
-                    self.previsionnel = Previsionnel.objects.filter(programme=self.programme)
+                    self.previsionnel = Previsionnel.records.filter(programme=self.programme)
 
                 # Calcul de l'enveloppe validée pour chaque demande
                 self.demandesval = (

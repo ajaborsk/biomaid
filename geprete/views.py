@@ -51,7 +51,7 @@ from geprete.smart_views import GepreteSmartView, GessayeSmartView
 #
 #     """
 #     try:
-#         datefin = list(Calendrier.objects.all())[-1].fin_recensement
+#         datefin = list(Calendrier.records.all())[-1].fin_recensement
 #     except ObjectDoesNotExist:
 #         # Fallback qui permet à l'application de ne pas planter, même s'il n'y a aucun calendrier dans la base
 #         if request.user.is_staff:

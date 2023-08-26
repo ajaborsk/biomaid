@@ -29,7 +29,6 @@ class Command(BaseCommand):
     informe le demandeur via une alerte 'éphémère'."""
 
     def handle(self, *args, **options):
-
         # Le traitement se fait en deux étapes :
         # - D'abord on modifie toutes les demandes pour lesquelles un changement de campagne a été acté par le dispatcher.
         #   L'alerte d'information de l'utilisateur est générée à cette étape.
@@ -42,7 +41,7 @@ class Command(BaseCommand):
         # en cours de route (une campagne normale devenant virtuelle, etc.
 
         # 1 - Traite les redirections de campagnes
-        qs = Demande.objects.filter(campagne_redirect__isnull=False)
+        qs = Demande.records.filter(campagne_redirect__isnull=False)
         for demande in qs:
             print(
                 "Demande {} ({}) à rediriger de {} vers {}".format(
@@ -71,7 +70,6 @@ class Command(BaseCommand):
                 niveau=1,
                 date_activation=now(),
             ):
-
                 # 1.2 - Modifie la campagne de la demande
                 demande.calendrier = demande.campagne_redirect
                 demande.campagne_redirect = None
@@ -86,7 +84,7 @@ class Command(BaseCommand):
                 )
 
         # 2 - Ferme les demandes des campagnes virtuelles
-        qs = Demande.objects.filter(Q(gel__isnull=True) | Q(gel=False), calendrier__dispatcher__isnull=True)
+        qs = Demande.records.filter(Q(gel__isnull=True) | Q(gel=False), calendrier__dispatcher__isnull=True)
         for demande in qs:
             print(
                 "Demande {} ({}) à fermer car la campagne {} est virtuelle".format(
@@ -95,7 +93,7 @@ class Command(BaseCommand):
             )
             # 2.1 - S'il s'agit d'une campagne virtuelle, clos la demande avec un commentaire
             # Affecte à la demande le premier arbitrage de la liste qui ne valide pas la demande
-            demande.arbitrage_commission = Arbitrage.objects.filter(valeur=False)[0]
+            demande.arbitrage_commission = Arbitrage.records.filter(valeur=False)[0]
             demande.commentaire_definitif_commission = demande.calendrier.message
             demande.gel = True
 

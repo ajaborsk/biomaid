@@ -84,7 +84,7 @@ class DocumentInlineForm(ModelForm):
                     # For now, just delete the link. A reference counting system is needed to allow document deletion
                     self.instance.delete()
                 else:
-                    document = NewDocument.objects.get(generic_document__pk=self.instance.pk)  # noqa
+                    document = NewDocument.records.get(generic_document__pk=self.instance.pk)  # noqa
                     # print("Saving doc form...", dir(self))
                     # print("  instance", self.instance)
                     # print("  instance doc", document)
@@ -115,7 +115,6 @@ class DocumentInlineForm(ModelForm):
 
 
 class DocumentsSmartField(ComputedSmartField):
-
     formset_model = GenericDocument
     subform_template = '%s/layout/generic_document_subform.html'
     extra = 10

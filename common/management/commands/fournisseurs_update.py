@@ -22,7 +22,6 @@ from common.models import Fournisseur
 
 class Command(BiomAidCommand):
     def handle(self, *args, **options):
-
         log, progress = self.get_loggers(**options)
         # self.log(self.INFO, "Called from cmdline: " + str(self._called_from_command_line))
         log(self.FINE, "fournisseurs_update :")
@@ -38,10 +37,10 @@ class Command(BiomAidCommand):
         else:
             found = 0
             added = 0
-            qs = fournisseur_magh2_model.objects.filter()
+            qs = fournisseur_magh2_model.records.filter()
             total = qs.count()
             for count, fournisseur_magh2 in enumerate(qs):
-                fournisseur_qs = Fournisseur.objects.filter(code=str(fournisseur_magh2.no_fournisseur_fr))
+                fournisseur_qs = Fournisseur.records.filter(code=str(fournisseur_magh2.no_fournisseur_fr))
                 match fournisseur_qs.count():
                     case 0:
                         log(self.DEBUG, "Adding fournisseur : '{:s}'".format(str(fournisseur_magh2.no_fournisseur_fr)))

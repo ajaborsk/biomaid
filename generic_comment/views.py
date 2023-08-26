@@ -39,7 +39,7 @@ def _all_comments_json(model, view_params):  # NOQA (view_params is not used)
     return Concat(
         Value('['),
         Coalesce(
-            GenericComment.objects.filter(
+            GenericComment.records.filter(
                 content_type_id=model_id,
                 object_id=Cast(OuterRef('pk'), output_field=CharField()),
             )

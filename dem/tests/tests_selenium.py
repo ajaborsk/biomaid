@@ -77,7 +77,7 @@ class TestsUser1(TestsBaseTestCase):
                     kwargs=self.reverse_base,
                 )
                 + '?'
-                + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.objects.get(code='TEST').pk]})}),
+                + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.records.get(code='TEST').pk]})}),
             )
         )
 
@@ -114,7 +114,7 @@ class TestsUser1(TestsBaseTestCase):
     def test_saisie_demande_avant(self):
         "Saisie d'une demande avant le début de la campagne"
 
-        nb_dmd = Demande.objects.all().count()
+        nb_dmd = Demande.records.all().count()
 
         # On va sur la page pour faire une demande
         self.selenium.get(
@@ -125,7 +125,7 @@ class TestsUser1(TestsBaseTestCase):
                     kwargs=self.reverse_base,
                 )
                 + '?'
-                + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.objects.get(code='TEST').pk]})}),
+                + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.records.get(code='TEST').pk]})}),
             )
         )
 
@@ -165,13 +165,13 @@ class TestsUser1(TestsBaseTestCase):
         # )
 
         # Vérification qu'aucun enregistrement de demande n'a été fait
-        self.assertEqual(nb_dmd, Demande.objects.all().count())
+        self.assertEqual(nb_dmd, Demande.records.all().count())
 
     @time_machine.travel("2021-01-02 09:00 +0000")
     def test_saisie_demande_apres(self):
         "Saisie d'une demande après la fin de la campagne"
 
-        nb_dmd = Demande.objects.all().count()
+        nb_dmd = Demande.records.all().count()
         # print("Demandes dans la base avant:", nb_dmd)
 
         # On va sur la page pour faire une demande
@@ -183,7 +183,7 @@ class TestsUser1(TestsBaseTestCase):
                     kwargs=self.reverse_base,
                 )
                 + '?'
-                + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.objects.get(code='TEST').pk]})}),
+                + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.records.get(code='TEST').pk]})}),
             )
         )
 
@@ -229,8 +229,8 @@ class TestsUser1(TestsBaseTestCase):
         # )
 
         # Vérification qu'aucun enregistrement de demande n'a été fait
-        print("Demandes dans la base après:", Demande.objects.all().count())
-        self.assertEqual(nb_dmd, Demande.objects.all().count())
+        print("Demandes dans la base après:", Demande.records.all().count())
+        self.assertEqual(nb_dmd, Demande.records.all().count())
 
     @time_machine.travel("2020-09-12 18:00 +0000")
     def test_saisie_demande_complete(self):
@@ -244,7 +244,7 @@ class TestsUser1(TestsBaseTestCase):
                     kwargs=self.reverse_base,
                 )
                 + '?'
-                + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.objects.get(code='TEST').pk]})}),
+                + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.records.get(code='TEST').pk]})}),
             )
         )
 
@@ -312,7 +312,7 @@ class TestsUser1(TestsBaseTestCase):
         # Vérifie qu'il n'y a pas d'erreur ensuite
         self.assertEqual(len(self.selenium.find_elements(by=By.CLASS_NAME, value='topbar2')), 1)
 
-        document_records = Document.objects.filter().values()
+        document_records = Document.records.filter().values()
         self.assertEqual(len(document_records), 1)
         document_record = document_records[0]
 
@@ -515,7 +515,7 @@ class TestsCadrePole(TestsBaseTestCase):
         )
 
         # Vérification que la base a bien été mise à jour
-        demande = Demande.objects.get(pk=1)
+        demande = Demande.records.get(pk=1)
         self.assertTrue(demande.avis_cadre_sup)
 
         cell.click()
@@ -533,7 +533,7 @@ class TestsCadrePole(TestsBaseTestCase):
         )
 
         # Vérification que la base a bien été mise à jour
-        demande = Demande.objects.get(pk=1)
+        demande = Demande.records.get(pk=1)
         self.assertFalse(demande.avis_cadre_sup)
 
         cell.click()
@@ -551,7 +551,7 @@ class TestsCadrePole(TestsBaseTestCase):
         )
 
         # Vérification que la base a bien été mise à jour
-        demande = Demande.objects.get(pk=1)
+        demande = Demande.records.get(pk=1)
         self.assertIsNone(demande.avis_cadre_sup)
 
     def test_commentaire_cadre_pole(self):
@@ -586,7 +586,7 @@ class TestsCadrePole(TestsBaseTestCase):
 
         # Vérification que la base a bien été mise à jour
         time.sleep(0.1)
-        demande = Demande.objects.get(pk=1)
+        demande = Demande.records.get(pk=1)
         self.assertEqual(demande.commentaire_cadre_sup, "Avis tout à fait favorable")
 
     def test_validation_chef_pole(self):
@@ -785,7 +785,7 @@ class TestsChefPole(TestsBaseTestCase):
         )
 
         # Vérification que la base a bien été mise à jour
-        demande = Demande.objects.get(pk=1)
+        demande = Demande.records.get(pk=1)
         self.assertTrue(demande.decision_validateur)
 
         cell.click()
@@ -803,7 +803,7 @@ class TestsChefPole(TestsBaseTestCase):
         )
 
         # Vérification que la base a bien été mise à jour
-        demande = Demande.objects.get(pk=1)
+        demande = Demande.records.get(pk=1)
         self.assertFalse(demande.decision_validateur)
 
         cell.click()
@@ -821,7 +821,7 @@ class TestsChefPole(TestsBaseTestCase):
         )
 
         # Vérification que la base a bien été mise à jour
-        demande = Demande.objects.get(pk=1)
+        demande = Demande.records.get(pk=1)
         self.assertIsNone(demande.decision_validateur)
 
     def test_commentaire_chef_pole(self):
@@ -856,7 +856,7 @@ class TestsChefPole(TestsBaseTestCase):
 
         # Vérification que la base a bien été mise à jour
         time.sleep(0.1)
-        demande = Demande.objects.get(pk=1)
+        demande = Demande.records.get(pk=1)
         self.assertEqual(demande.decision_soumission, "Avis tout à fait favorable")
 
 
@@ -913,7 +913,7 @@ class TestsAcheteur(TestsBaseTestCase):
         "L'ajout d'un avis d'expert ne modifie pas la demande originale"
 
         # On stocke dans une variable les champs spécifiés de la demande AVANT modification
-        demande = Demande.objects.get(pk=pk)
+        demande = Demande.records.get(pk=pk)
         demande_before = {fieldname: demande._meta.get_field(fieldname).value_to_string(demande) for fieldname in fields}
         for v in demande_before.values():
             self.assertNotEqual(v, None)
@@ -951,7 +951,7 @@ class TestsAcheteur(TestsBaseTestCase):
         self.selenium.find_elements(by=By.CSS_SELECTOR, value='[value="record-then-update"]')[0].click()
 
         # On stocke dans une variable les champs spécifiés de la demande APRES modification
-        demande = Demande.objects.get(pk=pk)
+        demande = Demande.records.get(pk=pk)
         demande_after = {fieldname: demande._meta.get_field(fieldname).value_to_string(demande) for fieldname in fields}
 
         # Enregistrement OK ?
@@ -991,7 +991,7 @@ class TestsAcheteur(TestsBaseTestCase):
         ]
 
         # On stocke dans une variable les champs spécifiés de l'argumentaire AVANT modification
-        argumentaire = Demande.objects.get(num_dmd=pk)
+        argumentaire = Demande.records.get(num_dmd=pk)
         argumentaire_before = {
             fieldname: argumentaire._meta.get_field(fieldname).value_to_string(argumentaire) for fieldname in fields
         }
@@ -1036,7 +1036,7 @@ class TestsAcheteur(TestsBaseTestCase):
         self.selenium.find_element(by=By.ID, value='main-dialog-ok').click()
 
         # On stocke dans une variable les champs spécifiés de la demande APRES modification
-        argumentaires = Demande.objects.filter(num_dmd=pk)
+        argumentaires = Demande.records.filter(num_dmd=pk)
         self.assertTrue(argumentaires.exists())
         argumentaire_after = {
             fieldname: argumentaire._meta.get_field(fieldname).value_to_string(argumentaires.get()) for fieldname in fields

@@ -37,7 +37,7 @@ def check_previsionnel_sans_date(name, data):
     from common.user_settings import UserSettings
 
     alerts = []
-    previsionnels_sans_date = Previsionnel.objects.filter(date_estimative_mes__isnull=True)
+    previsionnels_sans_date = Previsionnel.records.filter(date_estimative_mes__isnull=True)
     for previsionnel in previsionnels_sans_date:
         try:
             delay_str = UserSettings(previsionnel.expert)['notifications.drachar.previsionnel-sans-date.delay']
@@ -148,7 +148,7 @@ class DracharConfig(AppConfig):
         common_config = apps.get_app_config('common')
         # Calcul de l'expression qui calcule la consommation de l'enveloppe UNIQUEMENT pour le prévisionnel (plan)
         # Toutes les lignes du plan associées à de ce programme
-        dem_qs = Previsionnel.objects.filter(programme=OuterRef('pk'))
+        dem_qs = Previsionnel.records.filter(programme=OuterRef('pk'))
         # Ajoutons les champs calculés utiles (récupération depuis la SmartView)
         for anno in ['ordered_amount', 'best_amount']:
             dem_qs = dem_qs.annotate(**{anno: getattr(PrevisionnelSmartView, anno).expression})
@@ -167,7 +167,7 @@ class DracharConfig(AppConfig):
 
         def previsionnel_par_expert(discipline):
             return (
-                Previsionnel.objects.order_by()
+                Previsionnel.records.order_by()
                 .filter(solder_ligne=False, programme__discipline__code=discipline)
                 .annotate(nom_expert=Concat(F('expert__first_name'), Value(' '), F('expert__last_name')))
                 .values('expert', 'nom_expert')
@@ -177,7 +177,7 @@ class DracharConfig(AppConfig):
 
         def montant_previsionnel_par_expert(discipline):
             return (
-                Previsionnel.objects.order_by()
+                Previsionnel.records.order_by()
                 .filter(solder_ligne=False, programme__discipline__code=discipline)
                 .annotate(nom_expert=Concat(F('expert__first_name'), Value(' '), F('expert__last_name')))
                 .values('expert', 'nom_expert')

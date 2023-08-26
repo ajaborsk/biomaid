@@ -101,11 +101,11 @@ def global_status_message_func(params: dict, campagne_cls: 'dem.campagne'):
 def user_status_message_func(params: dict, demande_cls: 'dem.demande', userufrole_cls: 'common.userufrole'):
     if params['user'].pk is None:
         return ''
-    tmp_scope = userufrole_cls.objects.filter(
+    tmp_scope = userufrole_cls.records.filter(
         user=params['user'],
         role_code__in=DEM_DEMANDE_CREATION_ROLES,
     )
-    nb = demande_cls.objects.filter(
+    nb = demande_cls.records.filter(
         Q(gel__isnull=True) | Q(gel=False),
         Q(uf__in=tmp_scope.values('uf'))
         | Q(uf__service__in=tmp_scope.values('service'))

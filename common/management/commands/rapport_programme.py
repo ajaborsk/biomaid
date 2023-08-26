@@ -74,11 +74,11 @@ class Command(BaseCommand):
 
     def get_demandes(self, programme, validees=None):
         if validees is None:
-            demandes = Demande.objects.filter(programme=programme)
+            demandes = Demande.records.filter(programme=programme)
         elif validees:
-            demandes = Demande.objects.filter(programme=programme, gel=True, arbitrage_commission__valeur=True)
+            demandes = Demande.records.filter(programme=programme, gel=True, arbitrage_commission__valeur=True)
         else:
-            demandes = Demande.objects.filter(programme=programme, gel=True, arbitrage_commission__valeur=False)
+            demandes = Demande.records.filter(programme=programme, gel=True, arbitrage_commission__valeur=False)
         return demandes
 
     def handle(self, *args, **options):
@@ -86,12 +86,12 @@ class Command(BaseCommand):
         synthese_data = {}
 
         try:
-            programme = Programme.objects.get(code=options['code_programme'])
+            programme = Programme.records.get(code=options['code_programme'])
         except Programme.DoesNotExist:
             raise CommandError(
                 _("Le programme {} n'existe pas. Liste des programmes valides :\n{}").format(
                     options['code_programme'],
-                    ', '.join(Programme.objects.all().values_list('code', flat=True)),
+                    ', '.join(Programme.records.all().values_list('code', flat=True)),
                 )
             )
 
@@ -124,7 +124,7 @@ class Command(BaseCommand):
         }
         write_qs_to_worksheet(wb, 'Demandes', demandes, ('code', 'libelle'))
 
-        previsionnel_qs = Previsionnel.objects.filter(programme=programme).annotate(
+        previsionnel_qs = Previsionnel.records.filter(programme=programme).annotate(
             libelle=F('num_dmd__libelle'), code_programme=F('programme__code')
         )
         write_qs_to_worksheet(
@@ -176,7 +176,7 @@ class Command(BaseCommand):
                 cmd_prev[commande] = cmd_prev.get(commande, []) + [instance]
         # pprint(cmd_prev)
 
-        dra_qs = Dra94Dossier.objects.filter(
+        dra_qs = Dra94Dossier.records.filter(
             programme=programme.anteriorite,
             ligne__in=previsionnel_qs.values('num_dmd_id'),
         )
@@ -411,7 +411,7 @@ class Command(BaseCommand):
             )
 
             # Commandes dans les DRA associées
-            dra_s = Dra94Dossier.objects.filter(programme=programme.anteriorite, ligne=operation.num_dmd_id)
+            dra_s = Dra94Dossier.records.filter(programme=programme.anteriorite, ligne=operation.num_dmd_id)
             commandes |= set(instance.no_commande for instance in dra_s)
 
             if commandes:

@@ -237,7 +237,7 @@ def tablefield_default(field, **kwargs):
             SmartField,
             {
                 'format': 'choice',
-                "choices": lambda view_params=None: ((v.pk, str(v)) for v in field.related_model.objects.all()),
+                "choices": lambda view_params=None: ((v.pk, str(v)) for v in field.related_model.records.all()),
             },
         )
     else:
@@ -709,7 +709,7 @@ class SmartViewMetaclass(MediaDefiningClass):
             def queryset(view_params: dict):
                 return (
                     _meta['model']
-                    .objects.using(_meta['database'])
+                    .records.using(_meta['database'])
                     .annotate(**{k: v(view_params) for k, v in annotations_fields.items()})
                 )
 
@@ -782,7 +782,7 @@ class SmartViewMetaclass(MediaDefiningClass):
                         choices = (
                             lambda view_params, base_filter_args=(), base_filter_kwargs=dict(), manager=_meta[
                                 'model'
-                            ].objects, mf=mfilter.copy(), label_expr=deepcopy(m_label_expr), sort_expr=deepcopy(
+                            ].records, mf=mfilter.copy(), label_expr=deepcopy(m_label_expr), sort_expr=deepcopy(
                                 m_sort_expr
                             ), add_null=attrs[
                                 mfilter['choices']['fieldname'].split('__')[0]
@@ -1677,7 +1677,7 @@ class SmartView(metaclass=SmartViewMetaclass):
         # annotation_fields = [sf for sf in self._meta['columns'] if getattr(self, sf).get_annotation(view_attrs)]
         # queryset = (
         #     self._meta['model']
-        #     .objects.using(self._meta['database'])
+        #     .records.using(self._meta['database'])
         #     .annotate(**{sf: getattr(self, sf).get_annotation(self._view_params) for sf in annotation_fields})
         # )
 
@@ -1730,7 +1730,7 @@ class SmartView(metaclass=SmartViewMetaclass):
         # 1 - Get state and roles for this row
         # pkf = self._meta.id_field
         # qs = (
-        #     self._meta.model.objects.filter(**{pkf: updater["where"][pkf]})
+        #     self._meta.model.records.filter(**{pkf: updater["where"][pkf]})
         #     .annotate(
         #         **{
         #             sf: getattr(self, sf).get_annotation(request)
@@ -1772,7 +1772,7 @@ class SmartView(metaclass=SmartViewMetaclass):
 
         # 3 - Update the row(s)
 
-        # record = self._meta.model.objects.filter(**{pkf: updater["where"][pkf]}).get()
+        # record = self._meta.model.records.filter(**{pkf: updater["where"][pkf]}).get()
 
         # Liste des champs qui vont devoir être sauvés dans la base : champs modifiés et dépendances
         fields_to_save = []
@@ -1813,7 +1813,7 @@ class SmartView(metaclass=SmartViewMetaclass):
                         setattr(
                             record,
                             model_fieldname,
-                            getattr(self._meta['model'], model_fieldname).field.related_model.objects.get(pk=int(value)),
+                            getattr(self._meta['model'], model_fieldname).field.related_model.records.get(pk=int(value)),
                         )
                     # if value = '' ==> do nothing (returned by tabulator.js if user click out of the list)
                 # Cas des valeurs numériques (une chaîne vide peut signifier 'null')

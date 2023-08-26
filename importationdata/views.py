@@ -50,7 +50,7 @@ class BddImportation(ConnectorAssetPlus):
                 app_label=self.app_bdd,
                 model_name=settings.CORRESPONDANCEASSETPLUS[self.model.__name__],
             )
-            m = model.objects.using(self.bdd).all()  # queryset en attente de transaction
+            m = model.records.using(self.bdd).all()  # queryset en attente de transaction
             return m
 
     def update_def(self, request, *args, **kwargs):
@@ -98,7 +98,7 @@ class FileImportation:
                         if self.model_update == "Compte":
                             start_time = timezone.now()
                             file_info = self.fichier.split("_")
-                            etablissement_id = Etablissement.objects.get(prefix=file_info[0])
+                            etablissement_id = Etablissement.records.get(prefix=file_info[0])
                             fichier = 'fixtures/' + str(self.fichier)
                             with open(fichier, newline='') as csvfile:
                                 filereader = csv.DictReader(
@@ -116,18 +116,18 @@ class FileImportation:
                                 next(filereader)  # supprime la première ligne
                                 """cas BDD non vide : mise a jour"""
                                 # TODO : gérer cette notion de multi établissement et multifichier
-                                if self.model.objects.filter(etablissement=etablissement_id).exists():
-                                    bdd_data = self.model.objects.filter(etablissement=etablissement_id)
+                                if self.model.records.filter(etablissement=etablissement_id).exists():
+                                    bdd_data = self.model.records.filter(etablissement=etablissement_id)
                                     for row in filereader:
                                         row["exercice"] = row["exercice"] + "-" + "01" + "-" + "01"
                                         for item in bdd_data:
-                                            # instance = self.model.objects.get(id=item.id)
+                                            # instance = self.model.records.get(id=item.id)
                                             if (
                                                 item.lettre_budgetaire == row["lettre_budgetaire"]
                                                 and item.code == row["code"]
                                                 and row["exercice"] == str(item.exercice)
                                             ):
-                                                instance = self.model.objects.get(id=item.id)
+                                                instance = self.model.records.get(id=item.id)
                                                 if item.nom != row["nom"]:
                                                     instance.nom = row["nom"]
                                                 if item.budget_montant != row["budget_montant"]:
@@ -145,13 +145,13 @@ class FileImportation:
                                                 ):
                                                     row["etablissement"] = etablissement_id
                                                     try:
-                                                        discipline_id = Discipline.objects.get(
+                                                        discipline_id = Discipline.records.get(
                                                             code=settings.COMPTEDISCPLINE[
                                                                 row["lettre_budgetaire"].lower() + row["code"]
                                                             ]
                                                         )
                                                     except Exception:
-                                                        discipline_id = Discipline.objects.get(code='XX')
+                                                        discipline_id = Discipline.records.get(code='XX')
                                                     row["discipline"] = discipline_id
                                                     print("exercice")
                                                     print(row["exercice"])
@@ -172,11 +172,11 @@ class FileImportation:
                                         if row["lettre_budgetaire"].lower() + row["code"] in settings.COMPTEDISCPLINE.keys():
                                             row["etablissement"] = etablissement_id
                                             try:
-                                                discipline_id = Discipline.objects.get(
+                                                discipline_id = Discipline.records.get(
                                                     code=settings.COMPTEDISCPLINE[row["lettre_budgetaire"].lower() + row["code"]]
                                                 )
                                             except Exception:
-                                                discipline_id = Discipline.objects.get(code='XX')
+                                                discipline_id = Discipline.records.get(code='XX')
                                             row["discipline"] = discipline_id
                                             row["exercice"] = row["exercice"]
                                             if row["budget_montant"] is None:
@@ -202,8 +202,8 @@ class FileImportation:
                             start_time = timezone.now()
                             print("start_time = " + str(start_time))
                             # file_info = self.fichier.split("_")
-                            # etablissement_id = Etablissement.objects.get(prefix=file_info[0])
-                            etablissement_id = Etablissement.objects.get(prefix=self.etabprefix)
+                            # etablissement_id = Etablissement.records.get(prefix=file_info[0])
+                            etablissement_id = Etablissement.records.get(prefix=self.etabprefix)
                             fichier = str(self.fichier)
 
                             def code_converter(v):
@@ -262,11 +262,11 @@ class FileImportation:
                                 .groupby('code_uf', as_index=False)
                                 .first()
                             )
-                            bdd_data_uf = Uf.objects.filter(Q(etablissement=etablissement_id) & (Q(cloture=None)))
-                            bdd_data_pole = Pole.objects.filter(etablissement=etablissement_id, cloture=None)
-                            bdd_data_cr = CentreResponsabilite.objects.filter(etablissement=etablissement_id, cloture=None)
-                            bdd_data_site = Site.objects.filter(etablissement=etablissement_id, cloture=None)
-                            bdd_data_service = Service.objects.filter(etablissement=etablissement_id, cloture=None)
+                            bdd_data_uf = Uf.records.filter(Q(etablissement=etablissement_id) & (Q(cloture=None)))
+                            bdd_data_pole = Pole.records.filter(etablissement=etablissement_id, cloture=None)
+                            bdd_data_cr = CentreResponsabilite.records.filter(etablissement=etablissement_id, cloture=None)
+                            bdd_data_site = Site.records.filter(etablissement=etablissement_id, cloture=None)
+                            bdd_data_service = Service.records.filter(etablissement=etablissement_id, cloture=None)
                             with transaction.atomic():
                                 """#########check de la BDD SITE###########"""
                                 """ ___________________Code de mise a jour et suppression dans la bdd_____________"""
@@ -297,7 +297,7 @@ class FileImportation:
                                                 """________________________test intégrité csv_______________________"""
                                                 found_row = found_row + [row.code]
                                                 if not found_element:  # suppression de la BDD car absent du CSV
-                                                    instance = Site.objects.get(id=row.id)
+                                                    instance = Site.records.get(id=row.id)
                                                     instance.cloture = timezone.now()
                                                     instance.save()
                                                 # tests d'erreur elements du CSV
@@ -310,7 +310,7 @@ class FileImportation:
                                                 # suppression en allant des doublons de la BDD
                                                 if found_row.count(row.code) > 1:
                                                     deleted_id = (
-                                                        Site.objects.filter(
+                                                        Site.records.filter(
                                                             code=row.code,
                                                             etablissement_id=etablissement_id,
                                                             cloture=None,
@@ -319,7 +319,7 @@ class FileImportation:
                                                         .first()
                                                         .id
                                                     )
-                                                    s = Site.objects.get(id=deleted_id)
+                                                    s = Site.records.get(id=deleted_id)
                                                     s.cloture = timezone.now()
                                                     s.save()
                                                 # tests d'erreur elements du CSV
@@ -364,7 +364,7 @@ class FileImportation:
                                         """________________________test intégrité csv________________________________"""
                                         found_row = found_row + [row.code]
                                         if not found_element:  # suppression de la BDD car absent du CSV
-                                            instance = Pole.objects.get(id=row.id)
+                                            instance = Pole.records.get(id=row.id)
                                             instance.cloture = timezone.now()
                                             instance.save()
                                         # tests d'erreur elements du CSV
@@ -376,7 +376,7 @@ class FileImportation:
                                         # suppression en allant des doublons de la BDD
                                         if found_row.count(row.code) > 1:
                                             deleted_id = (
-                                                Pole.objects.filter(
+                                                Pole.records.filter(
                                                     code=row.code,
                                                     etablissement_id=etablissement_id,
                                                     cloture=None,
@@ -385,7 +385,7 @@ class FileImportation:
                                                 .first()
                                                 .id
                                             )
-                                            p = Pole.objects.get(id=deleted_id)
+                                            p = Pole.records.get(id=deleted_id)
                                             p.cloture = timezone.now()
                                             p.save()
                                         # tests d'erreur elements du CSV
@@ -429,7 +429,7 @@ class FileImportation:
                                             """________________________test intégrité csv____________________________"""
                                             found_row = found_row + [row.code]
                                             if not found_element:  # suppression de la BDD car absent du CSV
-                                                instance = CentreResponsabilite.objects.get(id=row.id)
+                                                instance = CentreResponsabilite.records.get(id=row.id)
                                                 instance.cloture = timezone.now()
                                                 instance.save()
                                             # tests d'erreur elements du CSV
@@ -441,7 +441,7 @@ class FileImportation:
                                             if found_row.count(row.code) > 1:
                                                 # suppression en allant des doublons de la BDD
                                                 deleted_id = (
-                                                    CentreResponsabilite.objects.filter(
+                                                    CentreResponsabilite.records.filter(
                                                         code=row.code,
                                                         etablissement_id=etablissement_id,
                                                         cloture=None,
@@ -450,7 +450,7 @@ class FileImportation:
                                                     .first()
                                                     .id
                                                 )
-                                                p = CentreResponsabilite.objects.get(id=deleted_id)
+                                                p = CentreResponsabilite.records.get(id=deleted_id)
                                                 p.cloture = timezone.now()
                                                 p.save()
                                             # tests d'erreur elements du CSV
@@ -495,7 +495,7 @@ class FileImportation:
                                             """______________________test intégrité csv______________________________"""
                                             found_row = found_row + [row.code]
                                             if not found_element:  # suppression de la BDD car absent du CSV
-                                                instance = Service.objects.get(id=row.id)
+                                                instance = Service.records.get(id=row.id)
                                                 instance.cloture = timezone.now()
                                                 instance.save()
                                             # tests d'erreur elements du CSV
@@ -507,7 +507,7 @@ class FileImportation:
                                             if found_row.count(row.code) > 1:
                                                 # suppression en allant des doublons de la BDD
                                                 deleted_id = (
-                                                    Service.objects.filter(
+                                                    Service.records.filter(
                                                         code=row.code,
                                                         etablissement_id=etablissement_id,
                                                         cloture=None,
@@ -516,7 +516,7 @@ class FileImportation:
                                                     .first()
                                                     .id
                                                 )
-                                                p = Service.objects.get(id=deleted_id)
+                                                p = Service.records.get(id=deleted_id)
                                                 p.cloture = timezone.now()
                                                 p.save()
                                             # tests d'erreur elements du CSV
@@ -547,22 +547,22 @@ class FileImportation:
                                             item['lettre_budget'] = csv_uf['budget'][element]
                                             # TODO : créer une table des lettre Budgétaire ?
                                             #  ok, mais prévoir l modif de models + modif bdd actuelle
-                                            item['site'] = Site.objects.get(
+                                            item['site'] = Site.records.get(
                                                 code=csv_uf["code_etablisssement"][element],
                                                 etablissement_id=etablissement_id,
                                                 cloture=None,
                                             )
-                                            item['pole'] = Pole.objects.get(
+                                            item['pole'] = Pole.records.get(
                                                 code=csv_uf['code_pole'][element],
                                                 etablissement_id=etablissement_id,
                                                 cloture=None,
                                             )
-                                            item['centre_responsabilite'] = CentreResponsabilite.objects.get(
+                                            item['centre_responsabilite'] = CentreResponsabilite.records.get(
                                                 code=csv_uf['code_ccr'][element],
                                                 etablissement_id=etablissement_id,
                                                 cloture=None,
                                             )
-                                            item['service'] = Service.objects.get(
+                                            item['service'] = Service.records.get(
                                                 code=csv_uf['code_service'][element],
                                                 etablissement_id=etablissement_id,
                                                 cloture=None,
@@ -602,28 +602,28 @@ class FileImportation:
                                                             row.lettre_budget = csv_uf['budget'][element]
                                                             row.save()
                                                         if csv_uf["code_etablisssement"][element] != row.site:
-                                                            row.site = Site.objects.get(
+                                                            row.site = Site.records.get(
                                                                 code=csv_uf["code_etablisssement"][element],
                                                                 etablissement_id=etablissement_id,
                                                                 cloture=None,
                                                             )
                                                             row.save()
                                                         if csv_uf["code_pole"][element] != row.pole:
-                                                            row.pole = Pole.objects.get(
+                                                            row.pole = Pole.records.get(
                                                                 code=csv_uf["code_pole"][element],
                                                                 etablissement_id=etablissement_id,
                                                                 cloture=None,
                                                             )
                                                             row.save()
                                                         if csv_uf["code_ccr"][element] != row.centre_responsabilite:
-                                                            row.centre_responsabilite = CentreResponsabilite.objects.get(
+                                                            row.centre_responsabilite = CentreResponsabilite.records.get(
                                                                 code=csv_uf["code_ccr"][element],
                                                                 etablissement_id=etablissement_id,
                                                                 cloture=None,
                                                             )
                                                             row.save()
                                                         if csv_uf["code_service"][element] != row.service:
-                                                            row.service = Service.objects.get(
+                                                            row.service = Service.records.get(
                                                                 code=csv_uf["code_service"][element],
                                                                 etablissement_id=etablissement_id,
                                                                 cloture=None,
@@ -633,7 +633,7 @@ class FileImportation:
                                             """______________________test intégrité csv______________________________"""
                                             found_row = found_row + [row.code]
                                             if not found_element:  # suppression de la BDD car absent du CSV
-                                                instance = Uf.objects.get(id=row.id)
+                                                instance = Uf.records.get(id=row.id)
                                                 instance.cloture = timezone.now()
                                                 instance.save()
                                             # tests d'erreur elements du CSV
@@ -645,7 +645,7 @@ class FileImportation:
                                             if found_row.count(row.code) > 1:
                                                 # suppression en allant des doublons de la BDD
                                                 deleted_id = (
-                                                    Uf.objects.filter(
+                                                    Uf.records.filter(
                                                         code=row.code,
                                                         etablissement_id=etablissement_id,
                                                         cloture=None,
@@ -654,7 +654,7 @@ class FileImportation:
                                                     .first()
                                                     .id
                                                 )
-                                                p = Uf.objects.get(id=deleted_id)
+                                                p = Uf.records.get(id=deleted_id)
                                                 p.cloture = timezone.now()
                                                 p.save()
                                             # tests d'erreur elements du CSV
@@ -678,22 +678,22 @@ class FileImportation:
                                                 item['lettre_budget'] = csv_uf['budget'][element]
                                                 # TODO : créer une table des lettre Budgétaire ?
                                                 #  ok, mais prévoir l modif de models + modif bdd actuelle
-                                                item['site'] = Site.objects.get(
+                                                item['site'] = Site.records.get(
                                                     code=csv_uf["code_etablisssement"][element],
                                                     etablissement_id=etablissement_id,
                                                     cloture=None,
                                                 )
-                                                item['pole'] = Pole.objects.get(
+                                                item['pole'] = Pole.records.get(
                                                     code=csv_uf['code_pole'][element],
                                                     etablissement_id=etablissement_id,
                                                     cloture=None,
                                                 )
-                                                item['centre_responsabilite'] = CentreResponsabilite.objects.get(
+                                                item['centre_responsabilite'] = CentreResponsabilite.records.get(
                                                     code=csv_uf['code_ccr'][element],
                                                     etablissement_id=etablissement_id,
                                                     cloture=None,
                                                 )
-                                                item['service'] = Service.objects.get(
+                                                item['service'] = Service.records.get(
                                                     code=csv_uf['code_service'][element],
                                                     etablissement_id=etablissement_id,
                                                     cloture=None,

@@ -51,7 +51,7 @@ class TestsTvxBaseTestsConcrete(TestsTvxBaseTests):
         url = (
             reverse(url_name, kwargs=self.reverse_base)
             + '?'
-            + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.objects.get(code='TVXCT').pk]})})
+            + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.records.get(code='TVXCT').pk]})})
         )
         # Login comme cadre de pôle
         self.login('enbaveyv')
@@ -72,7 +72,7 @@ class TestsTvxBaseTestsConcrete(TestsTvxBaseTests):
         url = (
             reverse(url_name, kwargs=self.reverse_base)
             + '?'
-            + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.objects.get(code='TVXCT').pk]})})
+            + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.records.get(code='TVXCT').pk]})})
         )
         # Login comme cadre de pôle
         self.login('cekilesy')
@@ -89,7 +89,7 @@ class TestsTvxBaseTestsConcrete(TestsTvxBaseTests):
                 kwargs=self.reverse_base,
             )
             + '?'
-            + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.objects.get(code='TVXCT').pk]})})
+            + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.records.get(code='TVXCT').pk]})})
         )
 
         self.login('cekilesy')
@@ -136,7 +136,7 @@ class TestsTvxBaseTestsConcrete(TestsTvxBaseTests):
                 kwargs=self.reverse_base,
             )
             + '?'
-            + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.objects.get(code='TVXCT').pk]})})
+            + urllib.parse.urlencode({'choices': json.dumps({'calendrier': [Campagne.records.get(code='TVXCT').pk]})})
         )
         self.login('cekilesy')
         self.selenium.get("{}{}".format(self.live_server_url, url))

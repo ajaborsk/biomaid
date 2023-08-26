@@ -60,8 +60,8 @@ class Command(BaseCommand):
         print(all[0][0].split('.'), end='')
         print(all[0][1].split('.'))
         # pprint(all[1:])
-        # left_qs = apps.get_model('extable', "ExtCommande").objects.all()
-        # right_qs = apps.get_model('assetplusconnect', 'BFt1996').objects.using('gmao').all()
+        # left_qs = apps.get_model('extable', "ExtCommande").records.all()
+        # right_qs = apps.get_model('assetplusconnect', 'BFt1996').records.using('gmao').all()
 
         left_record_fetcher = RecordFetcher(models='extable.ExtCommande', key_builder=splitter)
         right_record_fetcher = RecordFetcher(

@@ -43,7 +43,6 @@ models_initialized = False
 
 
 def update_models():
-
     schemas = {}
 
     # print(f"Databases {connections.databases}, DEFAULT:{DEFAULT_DB_ALIAS}, {conn._alias}")
@@ -157,7 +156,7 @@ def update_models():
                 with connection.schema_editor(atomic=migration.atomic) as schema_editor:
                     print(_("  Deleting table: {} from database").format(table_name))
                     schema_editor.execute(schema_editor.sql_delete_table % {'table': table_name})
-                    instances = extable.models.Table.objects.filter(table_name=table_name)
+                    instances = extable.models.Table.records.filter(table_name=table_name)
                     if instances.exists():
                         instances.delete()
             # And if it's in ContentType, remove it too
@@ -173,7 +172,7 @@ def update_models():
                     with connection.schema_editor(atomic=migration.atomic) as schema_editor:
                         print(_("  Deleting & recreating table: {}").format(table_name))
                         schema_editor.execute(schema_editor.sql_delete_table % {'table': table_name})
-                        instances = extable.models.Table.objects.filter(table_name=table_name)
+                        instances = extable.models.Table.records.filter(table_name=table_name)
                         if instances.exists():
                             instances.delete()
                         extable.models.Table(
@@ -195,7 +194,7 @@ def update_models():
                     # Table in db and cfg and identical in db and cfg
                     # Only ensure table is in Table() model (only useful if table is corrupted)
                     # print(_("  Only checking: {}").format(table_name))
-                    instances = extable.models.Table.objects.filter(table_name=table_name)
+                    instances = extable.models.Table.records.filter(table_name=table_name)
                     if not instances.exists():
                         extable.models.Table(table_name=table_name, definition={}).save()
                     # same for content_type

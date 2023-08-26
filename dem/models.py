@@ -56,7 +56,7 @@ def increment_code_number():
     En cas de changement d'année, en se basant sur le code de la dernière demande classée par id,
     le compteur se remet à 00000 (sécurisé par champs unique et non editable et par un blocage de la transaction SQL),
     """
-    last_demande = Demande.objects.all().order_by('num_dmd').last()
+    last_demande = Demande.records.all().order_by('num_dmd').last()
     if not last_demande:  # initialisation condition zéro
         new_demande_id = 'DEM-' + str(timezone.now().strftime('%Y')) + '-00000'
     else:

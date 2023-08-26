@@ -27,7 +27,7 @@ def roles_demandes_possibles(user):
     Fonction qui retourne, pour un utilisateur donné, les UF pour lesquelles il est autorisé
     à faire des demandes.
     """
-    return UserUfRole.objects.filter(
+    return UserUfRole.records.filter(
         user=user,
         role_code__in=config.settings.DEM_DEMANDE_CREATION_ROLES,
     )
@@ -45,7 +45,7 @@ def user_campagnes(view_params: dict, tvx=False):
     if not campaigns_pk_list:
         # Not in cache ==> compute the available campaigns list
         # print("  ==> Not in cache")
-        f_role = UserUfRole.objects.filter(user=view_params['user'], role_code__in=config.settings.DEM_DEMANDE_CREATION_ROLES)
+        f_role = UserUfRole.records.filter(user=view_params['user'], role_code__in=config.settings.DEM_DEMANDE_CREATION_ROLES)
 
         if tvx is False:
             tvx_condition = ~Q(code__contains='TVX')
@@ -55,7 +55,7 @@ def user_campagnes(view_params: dict, tvx=False):
             tvx_condition = Q()
 
         campaigns_pk_list = (
-            Campagne.objects.order_by()
+            Campagne.records.order_by()
             .filter(
                 tvx_condition
                 & (
@@ -97,6 +97,6 @@ def user_campagnes(view_params: dict, tvx=False):
         # print(f"  In cache: {campaigns_pk_list=}")
         pass
 
-    # result = Campagne.objects.filter(pk=3)
+    # result = Campagne.records.filter(pk=3)
 
-    return Campagne.objects.filter(pk__in=campaigns_pk_list)
+    return Campagne.records.filter(pk__in=campaigns_pk_list)

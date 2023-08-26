@@ -210,7 +210,7 @@ class DemandeSmartView(SmartView):
             #     print('Looking for {}'.format(repr(keyword)))
             tmp_scope = roles_demandes_possibles(view_params['user'])
             return (
-                Uf.objects.filter(
+                Uf.records.filter(
                     Q(pk__in=tmp_scope.values('uf'))
                     | Q(service__in=tmp_scope.values('service'))
                     | Q(centre_responsabilite__in=tmp_scope.values('centre_responsabilite'))
@@ -2256,16 +2256,16 @@ class DemandeSmartView(SmartView):
             'calendrier': {
                 'title': 'Campagne de recensement (H)',
                 'table.hidden': True,
-                'lookup': lambda view_params: [(campagne.pk, campagne.nom) for campagne in Campagne.objects.all()],
+                'lookup': lambda view_params: [(campagne.pk, campagne.nom) for campagne in Campagne.records.all()],
                 'choices': lambda view_params: [(campagne.pk, campagne.nom) for campagne in user_campagnes(view_params)],
             },
             'campagne_redirect': {
                 'title': 'Campagne',
                 'format': 'coalesce_choice',
                 'fields': ['calendrier'],
-                'lookup': lambda view_params: [(campagne.pk, campagne.nom) for campagne in Campagne.objects.all()],
+                'lookup': lambda view_params: [(campagne.pk, campagne.nom) for campagne in Campagne.records.all()],
                 'choices': lambda view_params: [(campagne.pk, campagne.nom) for campagne in user_campagnes(view_params)]
-                + [(campagne.pk, '>> ' + campagne.nom) for campagne in Campagne.objects.filter(programme__isnull=True)],
+                + [(campagne.pk, '>> ' + campagne.nom) for campagne in Campagne.records.filter(programme__isnull=True)],
             },
             'code': {
                 'title': _("N°"),
@@ -2278,7 +2278,7 @@ class DemandeSmartView(SmartView):
                     (
                         view_params['user'].pk,
                         get_user_model()
-                        .objects.filter(pk=view_params['user'].pk)
+                        .records.filter(pk=view_params['user'].pk)
                         .annotate(full_name=Concat('first_name', Value(" "), 'last_name'))
                         .order_by('full_name')
                         .get()
@@ -2327,7 +2327,7 @@ class DemandeSmartView(SmartView):
                 "title": _("Unité Fonctionnelle"),
                 'help_text': _("Commencez à saisir un code ou un nom et choisissez l'UF dans la liste proposée."),
                 'width': 100,
-                'lookup': lambda view_params: Uf.objects.values_list('pk', 'nom'),
+                'lookup': lambda view_params: Uf.records.values_list('pk', 'nom'),
                 'choices': uf_demandes_possibles,
                 'autocomplete': True,
                 'table.hidden': True,
@@ -2555,7 +2555,7 @@ class DemandeSmartView(SmartView):
             },
             'programme': {
                 'autocomplete': True,
-                'lookup': lambda view_params: list(Programme.objects.all().values_list('id', 'nom')) + [(None, '-- Indéfini --')],
+                'lookup': lambda view_params: list(Programme.records.all().values_list('id', 'nom')) + [(None, '-- Indéfini --')],
                 'choices': lambda view_params: tuple(Programme.active_objects.all().values_list('id', 'nom').order_by('code')),
                 "width": 150,
             },
@@ -2571,7 +2571,7 @@ class DemandeSmartView(SmartView):
                 'autocomplete': True,
                 'lookup': user_lookup,
                 'choices': lambda view_params=None: tuple(
-                    UserUfRole.objects.order_by()
+                    UserUfRole.records.order_by()
                     .filter(role_code='EXP', user__is_active=True)
                     .annotate(
                         libelle=ExpressionWrapper(
@@ -2597,7 +2597,7 @@ class DemandeSmartView(SmartView):
             'arbitrage_commission': {
                 'title': _("Arbitrage"),
                 'width': 100,
-                'choices': lambda view_params: Arbitrage.objects.filter(
+                'choices': lambda view_params: Arbitrage.records.filter(
                     Q(cloture__isnull=True) | Q(cloture__gt=timezone.now()),
                     discipline__code='EQ',
                 )
@@ -2742,7 +2742,7 @@ class DemandeSmartView(SmartView):
             if choices:
                 choices = json.loads(choices)
                 if 'calendrier' in choices and len(choices['calendrier']) == 1:
-                    qs = Campagne.objects.filter(pk=int(choices['calendrier'][0]))
+                    qs = Campagne.records.filter(pk=int(choices['calendrier'][0]))
                     if len(qs) == 1:
                         return qs[0].message
             return None
@@ -2759,7 +2759,7 @@ class DemandeSmartView(SmartView):
             'data': lambda view_params: Concat(
                 Value('['),
                 Coalesce(
-                    Campagne.objects.annotate(natures_str=Cast('natures', output_field=CharField()), reff=Value('o'))
+                    Campagne.records.annotate(natures_str=Cast('natures', output_field=CharField()), reff=Value('o'))
                     .filter(
                         natures_str__contains=OuterRef('nature'),
                         debut_recensement__lt=view_params['now'],
@@ -2813,7 +2813,7 @@ class DemandeSmartView(SmartView):
             'data': Concat('uf__service__code', Value(' - '), 'uf__service__nom'),
             'form.data': {
                 'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'service__nom')},
+                'choices': lambda view_params: {id: name for id, name in Uf.records.all().values_list('pk', 'service__nom')},
             },
             'depends': ['uf'],
         },
@@ -2829,7 +2829,7 @@ class DemandeSmartView(SmartView):
             'form.data': {
                 'source': 'uf',
                 'choices': lambda view_params: {
-                    id: name for id, name in Uf.objects.all().values_list('pk', 'centre_responsabilite__nom')
+                    id: name for id, name in Uf.records.all().values_list('pk', 'centre_responsabilite__nom')
                 },
             },
             'depends': ['uf'],
@@ -2845,7 +2845,7 @@ class DemandeSmartView(SmartView):
             'data': Concat('uf__pole__code', Value(' - '), 'uf__pole__nom'),
             'form.data': {
                 'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'pole__nom')},
+                'choices': lambda view_params: {id: name for id, name in Uf.records.all().values_list('pk', 'pole__nom')},
             },
             'depends': ['uf'],
         },
@@ -2860,7 +2860,7 @@ class DemandeSmartView(SmartView):
             'data': Concat('uf__site__code', Value(' - '), 'uf__site__nom'),
             'form.data': {
                 'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'site__nom')},
+                'choices': lambda view_params: {id: name for id, name in Uf.records.all().values_list('pk', 'site__nom')},
             },
             'depends': ['uf'],
         },
@@ -2875,7 +2875,7 @@ class DemandeSmartView(SmartView):
             'data': Concat('uf__etablissement__code', Value(' - '), 'uf__etablissement__nom'),
             'form.data': {
                 'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.objects.all().values_list('pk', 'etablissement__nom')},
+                'choices': lambda view_params: {id: name for id, name in Uf.records.all().values_list('pk', 'etablissement__nom')},
             },
             'depends': ['uf'],
         },
@@ -3390,7 +3390,7 @@ class DemandeSmartView(SmartView):
             "max_width": 120,
             'data': F('programme__limit')
             - Subquery(
-                Demande.objects.filter(programme=OuterRef('programme'))
+                Demande.records.filter(programme=OuterRef('programme'))
                 .values('programme')
                 .annotate(
                     total=Sum(  # Recompute 'enveloppe_finale' from primary fields
@@ -3739,7 +3739,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             },
             'discipline_dmd': {
                 'hidden': True,
-                'initial': lambda params: Discipline.objects.filter(code='EQ')[0],
+                'initial': lambda params: Discipline.records.filter(code='EQ')[0],
             },
             'quantite': {
                 'title': 'Qté',

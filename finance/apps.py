@@ -40,7 +40,7 @@ def get_intv_from_order(order, rows=[]):
         nu_intv_bn.update(set(no_interv_re.findall(row['libelle'])))
 
     interventions_qs = (
-        EnCours.objects.using('gmao')
+        EnCours.records.using('gmao')
         .filter(Q(nu_int__in=nu_intv_bn) | Q(nu_bon_c=order['commande']))
         .values('nu_int', 'nu_imm', 'nu_bon_c', 'n_uf', 'code_four')
     )
@@ -48,7 +48,7 @@ def get_intv_from_order(order, rows=[]):
         interventions_qs._fetch_all()
         interventions.update({i['nu_int']: i for i in interventions_qs})
     interventions_qs = (
-        BFt1996.objects.using('gmao')
+        BFt1996.records.using('gmao')
         .filter(Q(nu_int__in=nu_intv_bn) | Q(nu_bon_c=order['commande']))
         .values('nu_int', 'nu_imm', 'nu_bon_c', 'n_uf', 'code_four')
     )
@@ -57,7 +57,7 @@ def get_intv_from_order(order, rows=[]):
         interventions.update({i['nu_int']: i for i in interventions_qs})
 
     for intv in interventions.values():
-        eqpt = BEq1996.objects.using('gmao').filter(n_imma=intv['nu_imm'])
+        eqpt = BEq1996.records.using('gmao').filter(n_imma=intv['nu_imm'])
         if len(eqpt):
             intv.update({'n_seri': eqpt[0].n_seri})
             intv.update({'marque': eqpt[0].marque})
@@ -89,7 +89,7 @@ def commande_non_soldee_interventions_archivees(name, data):
     alerts = []
     ext_commande_model = apps.get_model('extable', 'ExtCommande')
     order_ids = (
-        ext_commande_model.objects.filter(gest_ec='IF', lg_soldee_lc='N')
+        ext_commande_model.records.filter(gest_ec='IF', lg_soldee_lc='N')
         .order_by()
         .values('commande', 'bloc_note')
         .distinct()

@@ -44,7 +44,7 @@ def register_data_processor(*args, **kwargs) -> bool:
 #         return False
 
 #     # return False
-#     datasource, created = DataSource.objects.get_or_create(code=code)
+#     datasource, created = DataSource.records.get_or_create(code=code)
 #     datasource.label = label or ''
 #     datasource.parameters = parameters or {}
 #     datasource.auto = auto or []
@@ -105,11 +105,11 @@ def put_data(source, data, timestamp=None, parameters=None, link=None, context=N
 
 def get_last_data(code: str, parameters=None):
     if parameters is not None:
-        qs = DataSource.objects.filter(code=code)
+        qs = DataSource.records.filter(code=code)
     else:
-        qs = DataSource.objects.filter(code=code)
+        qs = DataSource.records.filter(code=code)
     if qs.exists():
-        dqs = Data.objects.filter(source=qs[0].pk, parameters=parameters).order_by('-timestamp')
+        dqs = Data.records.filter(source=qs[0].pk, parameters=parameters).order_by('-timestamp')
         if dqs.exists():
             return dqs[0]
         else:
@@ -122,7 +122,7 @@ def get_data(code: str, parameters=None, all_params=None):
     """code is the datasource code, parameters"""
     all_params = all_params or {}
     data = None
-    qs = DataSource.objects.filter(code=code)
+    qs = DataSource.records.filter(code=code)
     if qs.exists():
         data_source = qs[0]
         # Is there a last data with this parameters ?

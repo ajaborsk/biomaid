@@ -201,7 +201,7 @@ def check_useless_role_entry(name, data):
     from common.models import User
 
     timer1 = time.time()
-    rsqs = UserUfRole.objects.raw(
+    rsqs = UserUfRole.records.raw(
         'SELECT u.id,'
         '  g.id AS "other",'
         '  u.user_id,'
@@ -255,11 +255,11 @@ def check_useless_role_entry(name, data):
 
     timer2 = time.time()
     alerts = []
-    user_uf_roles = UserUfRole.objects.filter(Q(cloture__isnull=True) | Q(cloture__gt=now()), uf__isnull=True)
+    user_uf_roles = UserUfRole.records.filter(Q(cloture__isnull=True) | Q(cloture__gt=now()), uf__isnull=True)
     for user_uf_role in user_uf_roles:
         role_code = user_uf_role.role_code
         user = user_uf_role.user
-        others = UserUfRole.objects.filter(
+        others = UserUfRole.records.filter(
             Q(cloture__isnull=True) | Q(cloture__gt=now()),
             Q(uf__service=user_uf_role.service)
             | Q(uf__centre_responsabilite=user_uf_role.centre_responsabilite)
@@ -523,12 +523,12 @@ class CommonConfig(AppConfig):
         def user_alerts(user):
             from common.models import Alert
 
-            return Alert.objects.filter(destinataire=user, cloture__isnull=True).count()
+            return Alert.records.filter(destinataire=user, cloture__isnull=True).count()
 
         def user_counter():
             from common.models import User
 
-            return User.objects.filter(last_login__gt=now() - datetime.timedelta(days=7), is_active=True).count()
+            return User.records.filter(last_login__gt=now() - datetime.timedelta(days=7), is_active=True).count()
 
         apps.get_app_config('analytics').register_data_processor('user_alerts', user_alerts)
         apps.get_app_config('analytics').register_data_processor('user_counter', user_counter)
@@ -544,14 +544,14 @@ class CommonConfig(AppConfig):
         program = kwargs['instance'].programme
         if program:
             # print(f"Program update fired ! {sender=} {program=}")
-            Programme.objects.filter(pk=program.pk).update(consumed=self.program_consumers_expr)
+            Programme.records.filter(pk=program.pk).update(consumed=self.program_consumers_expr)
 
     # def server_ready(self):
     #     # Setup analytics (if needed)
     #     from analytics import data
 
     #     data.set_datasource(
-    #         'common.users-count', processor=lambda: User.objects.filter(last_login__isnull=False, is_active=True).count()
+    #         'common.users-count', processor=lambda: User.records.filter(last_login__isnull=False, is_active=True).count()
     #     )
     #     data.set_datasource('common.users-count-lastweek', processor='user_counter')
     #     data.set_datasource('common.user-active-alerts', processor='user_alerts')

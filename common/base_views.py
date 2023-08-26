@@ -171,10 +171,10 @@ class BiomAidViewMixin(UserPassesTestMixin, metaclass=BiomAidViewMixinMetaclass)
         if request.user.is_staff:
             roles.append('MAN')
         if isinstance(request.user, get_user_model()):
-            if Programme.objects.filter(arbitre=request.user).exists():
+            if Programme.records.filter(arbitre=request.user).exists():
                 roles.append('ARB')
                 roles.append('P-ARB')
-            if Campagne.objects.filter(dispatcher=request.user).exists():
+            if Campagne.records.filter(dispatcher=request.user).exists():
                 roles.append('DIS')
                 roles.append('P-DIS')
             roles += list(UserUfRole.active_objects.filter(user=request.user).values_list('role_code', flat=True).distinct())
@@ -224,7 +224,7 @@ class BiomAidViewMixin(UserPassesTestMixin, metaclass=BiomAidViewMixinMetaclass)
                 if isinstance(agg_filters, dict):
                     agg_filters = Q(**agg_filters)
                 queryset = (
-                    model.objects.order_by()
+                    model.records.order_by()
                     .annotate(**annotations)
                     .filter(filters)
                     .annotate(**aggregates)
@@ -433,7 +433,7 @@ class BiomAidViewMixin(UserPassesTestMixin, metaclass=BiomAidViewMixinMetaclass)
 
         # Menu utilisateur :
         if isinstance(self.request.user, get_user_model()):
-            current_alerts = Alert.objects.filter(destinataire=self.request.user, cloture__isnull=True)
+            current_alerts = Alert.records.filter(destinataire=self.request.user, cloture__isnull=True)
             context['nb_alerts'] = current_alerts.count()
             context['nb_unread_alerts'] = current_alerts.filter(date_lecture__isnull=True).count()
             context['user_menu'] = (

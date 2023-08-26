@@ -144,7 +144,7 @@ def user_lookup(*args, **kwargs):
     """Fonction qui retourne une liste avec tous les utilisateurs, sous forme de fonction Django"""
     return (
         get_user_model()
-        .objects.all()
+        .records.all()
         .order_by('last_name')
         .values_list(
             'pk',
@@ -164,7 +164,7 @@ def user_choices(*args, **kwargs):
     """Méthode qui retourne une liste de choix avec tous les utilisateurs ACTIFS, sous forme de fonction Django"""
     return (
         get_user_model()
-        .objects.filter(is_active=True)
+        .records.filter(is_active=True)
         .order_by('last_name')
         .values_list(
             'pk',
@@ -185,7 +185,7 @@ def uf_choices(*args, only_active=False, **kwargs):
     if only_active:
         return get_user_model().active_objects.order_by('code').values_list('pk', Concat(F('code'), Value(' '), F('nom')))
     else:
-        return get_user_model().objects.all().order_by('code').values_list('pk', Concat(F('code'), Value(' '), F('nom')))
+        return get_user_model().records.all().order_by('code').values_list('pk', Concat(F('code'), Value(' '), F('nom')))
 
 
 def filter_choices_from_column_values(klass, fieldname, label_expr=None, order_by=None):
@@ -205,7 +205,7 @@ def filter_choices_from_column_values(klass, fieldname, label_expr=None, order_b
     def choices(request, *args, **kwargs):
         return [{'value': '{}', 'label': 'Tous'}] + [
             {'value': json.dumps({fieldname: item[0]}), 'label': '{}'.format(item[1])}
-            for item in klass.objects.all()
+            for item in klass.records.all()
             .order_by()
             .distinct()
             .order_by(order_by)
@@ -305,7 +305,7 @@ def class_roles_expression(
         # L'utilisateur est-il expert potentiel ?
         # TODO: Grosse bidouille à corriger avec une vraie gestion des rôles potentiels
         #       En particulier ici, tenir compte de l'axe 'structure' (UF, pôle, etc.) voire de la discipline...
-        # args.append(Value('P-EXP,')if UserUfRole.objects.filter(user=view_attrs['user'], role_code='EXP').exists() else Value(''))
+        # args.append(Value('P-EXP,')if UserUfRole.records.filter(user=view_attrs['user'], role_code='EXP').exists() else Value(''))
         args += [Value('P-' + role_code + ',') for role_code in view_attrs['user_roles'] if role_code != 'ADM']
 
         # L'enregistrement possède-t-il la notion de 'propriétaire' (fournir le paramètre 'owner_field') ?
@@ -599,11 +599,11 @@ def get_uf_list(structure, closed=False):
     """
     ufs = None
     if isinstance(structure, Uf):
-        ufs = Uf.objects.filter(pk=structure.id)
+        ufs = Uf.records.filter(pk=structure.id)
 
     for level, klass in STRUCTURE_LEVELS.items():
         if isinstance(structure, klass):
-            ufs = Uf.objects.filter(**{level: structure.id})
+            ufs = Uf.records.filter(**{level: structure.id})
 
     if ufs is None:
         raise Exception("Structure invalide", structure)
@@ -615,7 +615,7 @@ def get_uf_list(structure, closed=False):
 
 
 def get_uf_role_user(uf, role_code):
-    return UserUfRole.objects.filter(uf=uf, role_code=role_code)
+    return UserUfRole.records.filter(uf=uf, role_code=role_code)
 
 
 def get_uf_roles(src, obj):
@@ -624,8 +624,8 @@ def get_uf_roles(src, obj):
     if isinstance(src, get_user_model()):
         user = src.user
     elif isinstance(src, str):
-        if get_user_model().objects.get(username=src).exists():
-            user = get_user_model().objects.get(username=src)
+        if get_user_model().records.get(username=src).exists():
+            user = get_user_model().records.get(username=src)
         else:
             return set()  # If user has no ext user has no role !
     elif isinstance(src, get_user_model()):
@@ -640,13 +640,13 @@ def get_uf_roles(src, obj):
     if isinstance(obj, Uf):
         uf = obj
     elif isinstance(obj, str):
-        uf = Uf.objects.get(code=obj)
+        uf = Uf.records.get(code=obj)
     elif isinstance(obj, Demande):
         uf = obj.uf
     else:
         raise RuntimeError("obj should be a Uf, Uf code (as str) or a Demande.")
 
-    roles_query = UserUfRole.objects.filter(user=user, uf=uf)
+    roles_query = UserUfRole.records.filter(user=user, uf=uf)
 
     role_codes = set(roles_query.values_list("role_code", flat=True))
     return role_codes
@@ -660,7 +660,7 @@ def get_roles(src, obj=None):
     if isinstance(src, User):
         user = src
     elif isinstance(src, str):
-        user = get_user_model().objects.get(username=src)
+        user = get_user_model().records.get(username=src)
     elif isinstance(src, get_user_model()):
         user = src
     elif isinstance(src, WSGIRequest):
@@ -671,75 +671,75 @@ def get_roles(src, obj=None):
     # debug("AJA obj:", obj, type(obj))
 
     if obj is None:
-        # roles_query = UserUfRole.objects.filter(extension_user=ext_user)
+        # roles_query = UserUfRole.records.filter(extension_user=ext_user)
         uf_filter = [Q(cloture__isnull=True)]
     else:
         if isinstance(obj, Uf):
             # uf = [obj]
             uf_filter = [Q(pk=obj)]
         elif isinstance(obj, str):
-            # uf = Uf.objects.filter(code=obj)
+            # uf = Uf.records.filter(code=obj)
             uf_filter = [Q(code=obj)]
         elif isinstance(obj, Demande):
             # uf = [obj.uf]
             uf_filter = [Q(pk=obj.uf), Q(cloture__isnull=True)]
         elif isinstance(obj, Etablissement):
-            # uf = Uf.objects.filter(etablissement=obj)
+            # uf = Uf.records.filter(etablissement=obj)
             uf_filter = [Q(etablissement=obj), Q(cloture__isnull=True)]
         elif isinstance(obj, Site):
-            # uf = Uf.objects.filter(site=obj)
+            # uf = Uf.records.filter(site=obj)
             uf_filter = [Q(site=obj), Q(cloture__isnull=True)]
         elif isinstance(obj, Pole):
-            # uf = Uf.objects.filter(pole=obj)
+            # uf = Uf.records.filter(pole=obj)
             uf_filter = [Q(pole=obj), Q(cloture__isnull=True)]
         elif isinstance(obj, Service):
-            # uf = Uf.objects.filter(service=obj)
+            # uf = Uf.records.filter(service=obj)
             uf_filter = [Q(service=obj), Q(cloture__isnull=True)]
         else:
             raise RuntimeError("obj should be None, a structure, a Uf, Uf code (str) or a Demande.")
-        # roles_query = UserUfRole.objects.filter(extension_user=ext_user, uf__in=uf)
+        # roles_query = UserUfRole.records.filter(extension_user=ext_user, uf__in=uf)
 
     new_qs = (
-        Uf.objects.filter(cloture__isnull=True)
+        Uf.records.filter(cloture__isnull=True)
         .annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
         .filter(*uf_filter, u=user.pk)
         .values(mcode=F('pk'), r=F('r'))
         .union(
-            Service.objects.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
+            Service.records.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
             .filter(u=user.pk)
             .values(mcode=F('uf__pk'), r=F('r'))
-            .filter(mcode__in=Uf.objects.filter(*uf_filter))
+            .filter(mcode__in=Uf.records.filter(*uf_filter))
         )
         .union(
-            CentreResponsabilite.objects.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
+            CentreResponsabilite.records.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
             .filter(u=user.pk)
             .values(mcode=F('uf__pk'), r=F('r'))
-            .filter(mcode__in=Uf.objects.filter(*uf_filter))
+            .filter(mcode__in=Uf.records.filter(*uf_filter))
         )
         .union(
-            Pole.objects.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
+            Pole.records.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
             .filter(u=user.pk)
             .values(mcode=F('uf__pk'), r=F('r'))
-            .filter(mcode__in=Uf.objects.filter(*uf_filter))
+            .filter(mcode__in=Uf.records.filter(*uf_filter))
         )
         .union(
-            Site.objects.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
+            Site.records.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
             .filter(u=user.pk)
             .values(mcode=F('uf__pk'), r=F('r'))
-            .filter(mcode__in=Uf.objects.filter(*uf_filter))
+            .filter(mcode__in=Uf.records.filter(*uf_filter))
         )
         .union(
-            Etablissement.objects.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
+            Etablissement.records.annotate(r=F('userufrole__role_code'), u=F('userufrole__user'))
             .filter(u=user.pk)
             .values(mcode=F('uf__pk'), r=F('r'))
-            .filter(mcode__in=Uf.objects.filter(*uf_filter))
+            .filter(mcode__in=Uf.records.filter(*uf_filter))
         )
         .order_by('mcode')
         .values_list('mcode', 'r')
     )
 
     # print("AJA> new_qs", new_qs)
-    return [(Uf.objects.get(pk=role[0]), {'role': role[1]}) for role in new_qs]
+    return [(Uf.records.get(pk=role[0]), {'role': role[1]}) for role in new_qs]
 
     # return [(role.uf, {"role": role.role_code}) for role in roles_query]
 
@@ -783,15 +783,15 @@ def group_by_entities(uf_datalist, class_list=(Pole, Service)):
     # entities_uf_sets = []
     for klass in class_list:
         # Toutes les structures actives de ce type/niveau
-        all_entities = klass.objects.filter(cloture__isnull=True)
+        all_entities = klass.records.filter(cloture__isnull=True)
         for entity in all_entities:
             # Récupère la liste de toutes les UF actives de la structure
             ent_uf_set = set(entity.uf_set.filter(cloture__isnull=True))
             # Remplace :
             # if klass == Pole:
-            #     ent_uf_set = set(Uf.objects.filter(pole=entity))
+            #     ent_uf_set = set(Uf.records.filter(pole=entity))
             # elif klass == Service:
-            #     ent_uf_set = set(Uf.objects.filter(service=entity))
+            #     ent_uf_set = set(Uf.records.filter(service=entity))
 
             # balaye les listes d'UF en entrée pour voir si elle contient les
             # UF de la structure
@@ -821,6 +821,6 @@ class MyAlertsWidget(LightAndTextWidget):
     label = _("Mes alertes")
 
     def params_process(self):
-        qs = Alert.objects.filter(destinataire=self.params['user'], cloture__isnull=True)
+        qs = Alert.records.filter(destinataire=self.params['user'], cloture__isnull=True)
         self.params['color'] = 'red'
         self.params['text'] = 'Yop ' + str(qs.count())

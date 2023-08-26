@@ -76,7 +76,7 @@ class MyAuthBackend(ModelBackend):
         if self._is_ldap_backend_activated() and config.settings.DEBUG is False:
             user_model = get_user_model()
             try:
-                user_model.objects.get(username=username, from_ldap=False)
+                user_model.records.get(username=username, from_ldap=False)
             except user_model.DoesNotExist:
                 return None
 

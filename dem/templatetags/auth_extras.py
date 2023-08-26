@@ -21,7 +21,7 @@ register = template.Library()
 
 @register.filter(name='has_group')
 def has_group(user, group_name):
-    # group = Group.objects.get(name=group_name)
+    # group = Group.records.get(name=group_name)
     # group2 = str(group)
     # test = 'test'
     # print(group2)

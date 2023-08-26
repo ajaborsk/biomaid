@@ -40,12 +40,12 @@ class ConnectorAssetPlus:
                 'ma_nom'
             )  # TODO : utiliser une table gérant les dates de dernières MAJ pour optimiser le code ici
             # TODO : ligne de code pour sauvegarder la date de l'Update dans le model common.updates_monitor
-            # data_biom_aid = self.model.objects.all() UNUSED, comment by AJA
+            # data_biom_aid = self.model.records.all() UNUSED, comment by AJA
             # TODO : attention, cette partie est a extraire et a mettre en automatisme : fonctionnalité uniquement lié à Asset+
             for item in data:
                 try:
-                    # instance = self.model.objects.get(**self.fields_to_get(item))
-                    instance = self.model.objects.get(id_gmao=item.auto_id)
+                    # instance = self.model.records.get(**self.fields_to_get(item))
+                    instance = self.model.records.get(id_gmao=item.auto_id)
                     if instance.nom == item.ma_nom:
                         pass
                     else:
@@ -57,7 +57,7 @@ class ConnectorAssetPlus:
                         instance.cloture = item.date_refor
                         instance.save()
                 except self.model.DoesNotExist:
-                    new = self.model.objects.create(nom=item.ma_nom, id_gmao=item.auto_id)
+                    new = self.model.records.create(nom=item.ma_nom, id_gmao=item.auto_id)
                     new.save()
                     pass
             elapsed_time = timezone.now() - start_time
@@ -78,7 +78,7 @@ class ConnectorAssetPlus:
                 for item in data:
                     try:
                         '''chargement de l'instance__________________________________________________________________'''
-                        instance = self.model.objects.get(id_gmao=item.auto_id)
+                        instance = self.model.records.get(id_gmao=item.auto_id)
                         # print(" instance : " + str(instance))
                         '''check sur type____________________________________________________________________________'''
                         if instance.type == item.tp_type:
@@ -99,7 +99,7 @@ class ConnectorAssetPlus:
                                     pass
                                 else:
                                     try:
-                                        marque_selected = Marque.objects.get(nom=item.marque)
+                                        marque_selected = Marque.records.get(nom=item.marque)
                                         instance.marque = marque_selected
                                         # print('instance.marque : ' + str(instance.marque))
                                         # instance.save()
@@ -124,7 +124,7 @@ class ConnectorAssetPlus:
                                     pass
                                 else:
                                     try:
-                                        id_cneh = Cnehs.objects.get(code=item.cneh_type)
+                                        id_cneh = Cnehs.records.get(code=item.cneh_type)
                                         # print('id_cneh : ' + str(id_cneh))
                                         instance.cneh_code = id_cneh
                                         # print("modif cneh_type")
@@ -144,7 +144,7 @@ class ConnectorAssetPlus:
                         else:
                             # print("non renseigné, donc modif CNEH")
                             try:
-                                instance.cneh_code = Cnehs.objects.get(code=item.cneh_type)
+                                instance.cneh_code = Cnehs.records.get(code=item.cneh_type)
                                 # print('modif instance.cneh_code par : ' + str(instance.cneh_code))
                                 # instance.save()
                             except Exception:
@@ -173,7 +173,7 @@ class ConnectorAssetPlus:
                                     pass
                                 else:
                                     try:
-                                        id_classe = ClasseCode.objects.get(code=item.classe_eqp)
+                                        id_classe = ClasseCode.records.get(code=item.classe_eqp)
                                         # print('id_classe : ' + str(id_classe))
                                         instance.classe_code = id_classe
                                         # print("modif Classe")
@@ -191,7 +191,7 @@ class ConnectorAssetPlus:
                         else:
                             # print("non renseigné, donc modif classe_code")
                             try:
-                                instance.classe_code = ClasseCode.objects.get(code=item.classe_eqp)
+                                instance.classe_code = ClasseCode.records.get(code=item.classe_eqp)
                                 # print('modif instance.classe_code : ' + str(instance.classe_code))
                                 # instance.save()
                             except Exception:
@@ -206,7 +206,7 @@ class ConnectorAssetPlus:
                                 # print("pas de modif discipline")
                                 pass
                             else:
-                                instance.discipline = Discipline.objects.get(code=settings.LOCALDISCIPLINE[str(item.voc_fonc)])
+                                instance.discipline = Discipline.records.get(code=settings.LOCALDISCIPLINE[str(item.voc_fonc)])
                                 # print("modif discipline : " + str(instance.discipline.code))
                                 # instance.save()
                         elif item.voc_fonc is None or not item.voc_fonc:
@@ -215,7 +215,7 @@ class ConnectorAssetPlus:
                         else:
                             # print("non renseigné, donc modif Discipline")
                             try:
-                                instance.discipline = Discipline.objects.get(code=settings.LOCALDISCIPLINE[str(item.voc_fonc)])
+                                instance.discipline = Discipline.records.get(code=settings.LOCALDISCIPLINE[str(item.voc_fonc)])
                                 # print('modif instance.classe_code : ' + str(instance.discipline))
                                 # instance.save()
                             except Exception:
@@ -240,27 +240,27 @@ class ConnectorAssetPlus:
                         add_ok = True
                         '''Objet marque_____________________________________________________________________________'''
                         try:
-                            obj_marque = Marque.objects.get(nom=item.marque)
+                            obj_marque = Marque.records.get(nom=item.marque)
                         except Exception:
                             add_ok = False
                             message = message + "marque manquante : " + str(item.marque) + " "
                         '''Objet Classe_____________________________________________________________________________'''
                         try:
-                            obj_classe = ClasseCode.objects.get(code=item.classe_eqp)
+                            obj_classe = ClasseCode.records.get(code=item.classe_eqp)
                         except Exception:
                             obj_classe = None
                             message = message + "Classe équipement manquante : " + str(item.classe_eqp) + " "
                             pass
                         '''Objet CNEH_____________________________________________________________________________'''
                         try:
-                            obj_cneh = Cnehs.objects.get(code=item.cneh_type)
+                            obj_cneh = Cnehs.records.get(code=item.cneh_type)
                         except Exception:
                             obj_cneh = None
                             message = message + "Discipline manquante : " + str(item.cneh_type) + " "
                             pass
                         '''Objet Discipline__________________________________________________________________________'''
                         try:
-                            obj_discipline = Discipline.objects.get(code=settings.LOCALDISCIPLINE[str(item.voc_fonc)])
+                            obj_discipline = Discipline.records.get(code=settings.LOCALDISCIPLINE[str(item.voc_fonc)])
                         except Exception:
                             obj_discipline = None
                             message = message + "Discipline manquante : " + str(item.voc_fonc) + " "
@@ -297,10 +297,10 @@ class ConnectorAssetPlus:
                 '''le système regarde l'ensemble des types qui n'ont pas de '''
                 '''id_gmao et les supprimes si le même type pour une marque existe'''
                 print('Check des doublons, veuillez patienter...')
-                types_noidgmao = Type.objects.filter(
+                types_noidgmao = Type.records.filter(
                     Q(cloture__isnull=True) & (Q(id_gmao__exact='') | Q(id_gmao=None) | Q(id_gmao__isnull=True))
                 )
-                types_withidgmao = Type.objects.filter(Q(id_gmao__isnull=False) & Q(cloture__isnull=True))
+                types_withidgmao = Type.records.filter(Q(id_gmao__isnull=False) & Q(cloture__isnull=True))
                 if (types_noidgmao is not None or not types_noidgmao) and types_noidgmao != 0:
                     with Bar('Processing', max=len(types_noidgmao)) as bar:
                         for typewithout in types_noidgmao:

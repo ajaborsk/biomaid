@@ -22,13 +22,12 @@ from document.models import Document
 
 
 def document_get_or_create(file_data, owner, doc_type, description=None):
-
     hash = md5()
     for chunk in file_data.chunks():
         hash.update(chunk)
 
     # TODO : Check if a index is needed on 'hash' field => checked on 2022/05/26 : Yes, it's needed !!
-    qs = Document.objects.filter(hash=hash.hexdigest())
+    qs = Document.records.filter(hash=hash.hexdigest())
     if qs.exists():
         physical_path = qs[0].physical_path
         file_exists = True

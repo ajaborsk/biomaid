@@ -32,7 +32,7 @@ class Job(BaseJob):
         count = 0
         logger.info(_("Contrôle la cohérence de la base de données des demandes..."))
 
-        demandes = Demande.objects.all()
+        demandes = Demande.records.all()
 
         for demande in demandes:
             count += 1

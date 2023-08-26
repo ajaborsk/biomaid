@@ -42,7 +42,6 @@ logger = logging.getLogger(__name__)
 
 
 class NouveauDossierForm(ModelForm, LoginRequiredMixin):
-
     participants = forms.ModelMultipleChoiceField(
         widget=FilteredSelectMultiple(_('participants'), False),
         queryset=get_user_model().objects.all(),
@@ -81,19 +80,19 @@ class NouveauDossierForm(ModelForm, LoginRequiredMixin):
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.fields['document'].queryset = Document.objects.filter(createur=user, status=False)
+        # self.fields['document'].queryset = Document.records.filter(createur=user, status=False)
 
-    #    Roles = UserUfRole.objects.filter(role_code='EXP').values_list("id", flat=True)
+    #    Roles = UserUfRole.records.filter(role_code='EXP').values_list("id", flat=True)
     #    print(Roles)
     #    c = []
     #    for role in Roles:
-    #        pk = UserUfRole.objects.get(pk=role).extension_user_id
+    #        pk = UserUfRole.records.get(pk=role).extension_user_id
     #        c.append(pk)
     #    print(c)
-    #    self.fields['proprietaire'].queryset = ExtensionUser.objects.filter(pk__in=pk)
+    #    self.fields['proprietaire'].queryset = ExtensionUser.records.filter(pk__in=pk)
     """solution à étudier :"""
-    #    all_experts = ExtensionUser.objects.filter(
-    #        pk__in=Domaine.objects.all().values_list("expert").distinct()
+    #    all_experts = ExtensionUser.records.filter(
+    #        pk__in=Domaine.records.all().values_list("expert").distinct()
     #    )
     #    experts = [
     #        {"id": str(expert.pk), "code": str(expert.initiales), "nom": str(expert)}

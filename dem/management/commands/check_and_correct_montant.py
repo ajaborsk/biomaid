@@ -23,7 +23,7 @@ class Command(BaseCommand):
     help = """Contrôle et correction des montants de demande (en vue de leur suppression)"""
 
     def handle(self, *args, **options):
-        demandes = Demande.objects.all().order_by('num_dmd')
+        demandes = Demande.records.all().order_by('num_dmd')
         for demande in demandes:
             if (
                 (demande.prix_unitaire is not None and demande.montant_bak is None)

@@ -226,9 +226,9 @@ class AllAssetsView(BiomAidViewMixin, TemplateView):
             widget_params = {'w_settings': {}}
 
         widget_params['title'] = ''
-        uf_dict = dict(Uf.objects.all().values_list('code', 'pole__nom'))
+        uf_dict = dict(Uf.records.all().values_list('code', 'pole__nom'))
         qs = (
-            BEq1996.objects.using('gmao')
+            BEq1996.records.using('gmao')
             .filter(date_refor__isnull=True, v_fonc='BM')
             .values('n_uf')
             .annotate(mon_total=Sum(Cast('prix', IntegerField())))

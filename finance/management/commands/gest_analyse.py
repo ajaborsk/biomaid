@@ -84,7 +84,6 @@ class Command(BaseCommand):
     help = """Analyse de l'état des commandes"""
 
     def handle(self, *args, **options):
-
         try:
             gests = ['IF', 'II', 'IM']
             # order_anomalies = []
@@ -95,7 +94,7 @@ class Command(BaseCommand):
             AllCmdChecker(ext_commande_model, gestionnaires=gests).check(verbosity=options['verbosity'])
 
             # order_qs = (
-            #     ext_commande_model.objects.filter(gest_ec__in=gests, lg_soldee_lc='N')
+            #     ext_commande_model.records.filter(gest_ec__in=gests, lg_soldee_lc='N')
             #     .order_by()
             #     .annotate(lg_zero=Case(When(mt_engage_lc__gt=-0.01,
             #           mt_engage_lc__lt=0.01, then=Value(1))), default=Value(0))
@@ -118,7 +117,7 @@ class Command(BaseCommand):
             # print(f"Commandes avec des lignes non soldées : {order_qs.count()}")
             # lc_count = 0
             # for order in order_qs:
-            #     order_rows = ext_commande_model.objects.filter(commande=order['commande']).order_by('no_ligne_lc')
+            #     order_rows = ext_commande_model.records.filter(commande=order['commande']).order_by('no_ligne_lc')
             #
             #     rows = [
             #         dict(row, **{'interv': no_interv_re.findall(row['libelle'])})

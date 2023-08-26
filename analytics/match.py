@@ -100,7 +100,7 @@ class RecordFetcher:
     def get(self, key):
         results = []
         for model in self.models:
-            qs = model.objects.using(self.using).filter(self.key_filter(key)).values(*list(self.fieldnames))
+            qs = model.records.using(self.using).filter(self.key_filter(key)).values(*list(self.fieldnames))
             qs._fetch_all()
             results += list(qs)
         if len(results) == 1:

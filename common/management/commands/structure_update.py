@@ -146,7 +146,7 @@ class Command(BaseCommand):
 
     def structure_update(self, code_etablissement, uf_list):
         today = datetime.datetime.now(tz=timezone.pytz.timezone(settings.TIME_ZONE))
-        etablissement = Etablissement.objects.get(code=code_etablissement)
+        etablissement = Etablissement.records.get(code=code_etablissement)
         self.stdout.write(_("Mise à jour de la structure de l'établissement : {:s}...").format(str(etablissement)))
 
         # Etape 1 : On ajoute les structures (hors UF) nécessaires, si besoin
@@ -155,8 +155,8 @@ class Command(BaseCommand):
             self.stdout.write(_("  Ajout/mise à jour des structures de niveau : {}...").format(level))
             structures = dict({(uf['code_' + level], uf['nom_' + level]) for uf in uf_list})
             for code, nom in structures.items():
-                qs = klass.objects.filter(code=etablissement.prefix + "{:04d}".format(code)).union(
-                    klass.objects.filter(code=etablissement.prefix + "{:d}".format(code))
+                qs = klass.records.filter(code=etablissement.prefix + "{:04d}".format(code)).union(
+                    klass.records.filter(code=etablissement.prefix + "{:d}".format(code))
                 )
                 if qs.exists():
                     # Bizarrement, la mise à jour directe par qs.update(...)
@@ -173,7 +173,6 @@ class Command(BaseCommand):
 
         self.stdout.write(_("  Ajout/mise à jour des Uf..."))
         for uf in uf_list:
-
             if uf['fin_uf'] and uf['fin_uf'] <= today:
                 cloture_uf = uf['fin_uf']
             elif uf['nom_uf'].startswith('XX'):
@@ -182,13 +181,13 @@ class Command(BaseCommand):
                 cloture_uf = None
 
             qs = (
-                Uf.objects.filter(code=etablissement.prefix + "{:04d}".format(uf['code_uf']))
+                Uf.records.filter(code=etablissement.prefix + "{:04d}".format(uf['code_uf']))
                 .order_by()
-                .union(Uf.objects.filter(code=etablissement.prefix + "{:d}".format(uf['code_uf'])).order_by())
+                .union(Uf.records.filter(code=etablissement.prefix + "{:d}".format(uf['code_uf'])).order_by())
             )
             structs = {}
             for level, klass in STRUCTURE_LEVELS.items():
-                structs[level] = klass.objects.get(code=etablissement.prefix + "{:04d}".format(uf['code_' + level]))
+                structs[level] = klass.records.get(code=etablissement.prefix + "{:04d}".format(uf['code_' + level]))
             if qs.exists():
                 structs['code'] = etablissement.prefix + "{:04d}".format(uf['code_uf'])
                 structs['nom'] = uf['nom_uf']
@@ -218,10 +217,10 @@ class Command(BaseCommand):
                 roles = set()
                 if not cloture_uf:
                     for level, klass in STRUCTURE_LEVELS.items():
-                        structure = klass.objects.get(code='{}{:04d}'.format(etablissement.prefix, uf['code_' + level]))
+                        structure = klass.records.get(code='{}{:04d}'.format(etablissement.prefix, uf['code_' + level]))
                         ufs = get_uf_list(structure)
                         responsabilites = (
-                            UserUfRole.objects.select_related('extension_user')
+                            UserUfRole.records.select_related('extension_user')
                             .filter(uf__in=ufs, uf__cloture__isnull=True)
                             .values('role_code', 'extension_user')
                             .annotate(c=Count('uf'))
@@ -230,7 +229,7 @@ class Command(BaseCommand):
                         for responsabilite in responsabilites:
                             role = frozenset(
                                 {
-                                    'extension_user': ExtensionUser.objects.get(id=responsabilite['extension_user']),
+                                    'extension_user': ExtensionUser.records.get(id=responsabilite['extension_user']),
                                     'role_code': responsabilite['role_code'],
                                 }.items()
                             )
@@ -262,11 +261,11 @@ class Command(BaseCommand):
         self.stdout.write(_("  Fermeture des Uf..."))
 
         file_uf_codes = set(['{}{:04d}'.format(etablissement.prefix, uf['code_uf']) for uf in uf_list])
-        db_uf_list = set(Uf.objects.filter(code__regex=r"^" + etablissement.prefix + r"\d+$").values_list('code', flat=True))
+        db_uf_list = set(Uf.records.filter(code__regex=r"^" + etablissement.prefix + r"\d+$").values_list('code', flat=True))
 
         uf_to_close = db_uf_list - file_uf_codes
         for code_uf in uf_to_close:
-            db_uf = Uf.objects.filter(code=code_uf)
+            db_uf = Uf.records.filter(code=code_uf)
             if db_uf.exists():
                 db_uf.update(cloture=today)
 
@@ -277,10 +276,10 @@ class Command(BaseCommand):
             self.stdout.write(_("  Fermeture des structures de niveau : {}...").format(level))
             structures = dict({(uf['code_' + level], uf['nom_' + level]) for uf in uf_list})
             # Liste de tous les codes de la base qui ont la forme du préfixe suivi de chiffres ensuite :
-            codes = set(klass.objects.filter(code__regex=r"^" + etablissement.prefix + r"\d+$").values_list('code', flat=True))
+            codes = set(klass.records.filter(code__regex=r"^" + etablissement.prefix + r"\d+$").values_list('code', flat=True))
             # codes qui sont dans la base mais pas dans le tableau :
             unused_codes = set(codes) - set({etablissement.prefix + "{:04d}".format(code) for code in structures.keys()})
-            klass.objects.filter(code__in=list(unused_codes)).update(cloture=today)
+            klass.records.filter(code__in=list(unused_codes)).update(cloture=today)
 
         # Etape 4.2 : Fermeture des structures dont toutes les UF sont fermées
         # TODO

@@ -117,7 +117,7 @@ class MarcheSmartView(SmartView):
                 'format': 'choice',
                 'editor': 'autocomplete',
                 'choices': lambda view_params: tuple(
-                    UserUfRole.objects.order_by()
+                    UserUfRole.records.order_by()
                     .filter(role_code='ACH')
                     .annotate(
                         libelle=ExpressionWrapper(
@@ -136,7 +136,7 @@ class MarcheSmartView(SmartView):
                 'format': 'choice',
                 'editor': 'autocomplete',
                 'choices': lambda view_params: tuple(
-                    UserUfRole.objects.order_by()
+                    UserUfRole.records.order_by()
                     .filter(role_code='EXP')
                     .annotate(
                         libelle=ExpressionWrapper(
@@ -272,7 +272,7 @@ def fournisseur_weak_link(view_params):
         return Value("----")
 
     return Coalesce(
-        fournisseur_model.objects.filter(no_fournisseur_fr=OuterRef('code_fournisseur')).values('intitule_fournisseur_fr'),
+        fournisseur_model.records.filter(no_fournisseur_fr=OuterRef('code_fournisseur')).values('intitule_fournisseur_fr'),
         Value('- #ref ? -'),
         output_field=CharField(),
     )
@@ -404,7 +404,7 @@ class ExceptionMarcheSmartView(SmartView):
             orders_model = apps.get_model('extable.extcommande')
 
             return Subquery(
-                orders_model.objects.filter(
+                orders_model.records.filter(
                     fournisseur__no_fournisseur_fr=OuterRef('code_fournisseur'),
                     no_marche_ma=0,
                     objet_depense_ec__contains=OuterRef('code_hm'),
@@ -435,7 +435,7 @@ class ExceptionMarcheSmartView(SmartView):
             orders_model = apps.get_model('extable.extcommande')
 
             return Subquery(
-                orders_model.objects.filter(
+                orders_model.records.filter(
                     fournisseur__no_fournisseur_fr=OuterRef('code_fournisseur'),
                     no_marche_ma=0,
                     objet_depense_ec__contains=OuterRef('code_hm'),

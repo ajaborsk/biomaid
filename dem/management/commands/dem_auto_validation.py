@@ -30,12 +30,11 @@ class Command(BaseCommand):
         demandes d'un pôle pour lequel un chef donne délégation au cadre sup"""
 
     def handle(self, *args, **options):
-
         # Première partie : Donner un avis favorable CSP pour les demandes dont le rédacteur est aussi cadre superieur du pôle
-        demandes = Demande.objects.filter(~Q(discipline_dmd__code='TX'), Q(state_code='NOUVELLE'))
+        demandes = Demande.records.filter(~Q(discipline_dmd__code='TX'), Q(state_code='NOUVELLE'))
         for demande in demandes:
             redacteur_roles = set(
-                UserUfRole.objects.filter(
+                UserUfRole.records.filter(
                     Q(uf=demande.uf)
                     | Q(service=demande.uf.service)
                     | Q(centre_responsabilite=demande.uf.centre_responsabilite)
@@ -61,13 +60,13 @@ class Command(BaseCommand):
                 # print(demande.code, _("Avis favorable car le rédacteur est cadre sup."))
 
         # Seconde partie : valider les demandes dont le rédacteur est aussi chef de pôle ou directeur
-        demandes = Demande.objects.filter(
+        demandes = Demande.records.filter(
             ~Q(discipline_dmd__code='TX'),
             Q(state_code='NOUVELLE') | Q(state_code='AVFAV_CSP'),
         )
         for demande in demandes:
             redacteur_roles = set(
-                UserUfRole.objects.filter(
+                UserUfRole.records.filter(
                     Q(uf=demande.uf)
                     | Q(service=demande.uf.service)
                     | Q(centre_responsabilite=demande.uf.centre_responsabilite)
@@ -93,7 +92,7 @@ class Command(BaseCommand):
                 # print(demande.code, _("validée car le rédacteur peut aussi valider."))
 
         # Troisième partie : valider les demandes dont la valeur, si elle existe, est inférieure au seuil défini par le chef de pôle
-        demandes = Demande.objects.filter(
+        demandes = Demande.records.filter(
             ~Q(discipline_dmd__code='TX'),
             Q(state_code='NOUVELLE') | Q(state_code='AVFAV_CSP'),
         )
@@ -106,9 +105,9 @@ class Command(BaseCommand):
                 montant = None
 
             if montant is not None:
-                validateurs = User.objects.filter(
+                validateurs = User.records.filter(
                     pk__in=(
-                        UserUfRole.objects.filter(
+                        UserUfRole.records.filter(
                             Q(uf=demande.uf)
                             | Q(service=demande.uf.service)
                             | Q(centre_responsabilite=demande.uf.centre_responsabilite)

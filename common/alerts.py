@@ -69,7 +69,7 @@ class AlertsManager:
             return None
 
         # Y a-t-il déjà une alerte pour l'utilisateur *en cours* de cette catégorie avec les mêmes paramètres ?
-        alerts = Alert.objects.filter(
+        alerts = Alert.records.filter(
             destinataire=destinataire,
             categorie=categorie,
             donnees=donnees,
@@ -171,7 +171,10 @@ class AlertsManager:
 
             # Cloture toutes les alertes en cours qui ne sont pas/plus dans une catégorie
             # active (par exemple désactivée dans le fichier de configuration)
-            Alert.objects.filter(~Q(categorie__in=alerts_manager.alert_categories.keys()), cloture__isnull=True,).update(  # noqa
+            Alert.records.filter(
+                ~Q(categorie__in=alerts_manager.alert_categories.keys()),
+                cloture__isnull=True,
+            ).update(  # noqa
                 date_modification=now(),
                 cloture=now(),
                 commentaire=_("Catégorie d'alerte désactivée."),
@@ -179,7 +182,7 @@ class AlertsManager:
 
             # Types/catégories d'alarme qui ont au moins une alarme active à destination de cet utilisateur
             categories = (
-                Alert.objects.order_by()  # noqa
+                Alert.records.order_by()  # noqa
                 .filter(cloture__isnull=True, destinataire=user)
                 .values_list('categorie', flat=True)
                 .distinct()
@@ -196,7 +199,7 @@ class AlertsManager:
                 # category_email_delay = email_delay
 
                 # Queryset de la liste des alarmes actives
-                active_alerts = Alert.objects.filter(cloture__isnull=True, destinataire=user, categorie=category)  # noqa
+                active_alerts = Alert.records.filter(cloture__isnull=True, destinataire=user, categorie=category)  # noqa
                 count = 0
                 for alert in active_alerts:
                     alert.intitule_txt = HTMLFilter.convert_html_to_text(alert.intitule)
@@ -264,13 +267,13 @@ class AlertsManager:
 
                 # Pour toutes les alertes du 'périmètre' (scope) qui sont dans la base, mais qui n'ont pas été détectées à nouveau
                 # => les marquer comme terminées (cloture = maintenant)
-                undetected_alerts = Alert.objects.filter(cloture__isnull=True, **scope).exclude(pk__in=detected)
+                undetected_alerts = Alert.records.filter(cloture__isnull=True, **scope).exclude(pk__in=detected)
                 undetected_alerts.update(cloture=timezone.now())
 
             # Deactivate alerts that are out of time
             if 'timeout' in alert_type:
                 timeout = alert_type['timeout']
-                alerts = Alert.objects.filter(
+                alerts = Alert.records.filter(
                     cloture__isnull=True,
                     date_activation__lt=now() - timedelta(seconds=timeout),
                 )
