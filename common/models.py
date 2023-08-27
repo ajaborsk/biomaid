@@ -23,7 +23,8 @@ from django.contrib.auth.models import AbstractUser, UserManager
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
-from django.db.models import Q
+from django.db.models import Q, F, Value
+from django.db.models.functions import Concat
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
@@ -31,7 +32,7 @@ from document.models import GenericDocument
 from generic_comment.models import GenericComment
 
 from common import config
-from overoly.base import OverolyModel as Model
+from overoly.base import OField, ORolesMapper, OverolyModel as Model
 
 # les tables ci-dessous sont mise à jour par des scripts
 # qui vont chercher dans ASSETPLUS les infos :
@@ -169,10 +170,11 @@ class Uf(Model):
         ]
 
     class OMeta:
-        fgdfg = 545
+        permissions = 545
         config = config.get('model.Uf')
+        attributes = {}
 
-    computed = {'popo': 12}
+    computed = OField(value=Value('12'))
 
     lettre_budget = models.CharField(max_length=1, verbose_name='Budget')
     code = models.CharField(max_length=8, verbose_name='Code UF')
@@ -392,6 +394,17 @@ class Etablissement(Model):
 class Discipline(Model):
     """il s'agit d'un SERVICE ACHETEUR/EXPERT METIER et qui sera référent de la demande"""
 
+    class OMeta:
+        config = config.get('model.Discipline', default={})
+        attributes = {}
+        permissions = None
+        time_fields = 'user'  # The default
+        ctime_field = 'date_creation'
+        mtime_field = 'date_modification'
+        atime_field = None
+        dtime_field = 'cloture'
+        roles_mapper = ORolesMapper()
+
     code = models.CharField(max_length=3)  # code du service concerné par la demande
     nom = models.CharField(max_length=30, null=True)  # nom du service concerné par la demande
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name='date de création', null=True)
@@ -400,6 +413,13 @@ class Discipline(Model):
 
     objects = models.Manager()  # The default manager.
     active_objects = ActiveManagerCloture()  # The active_objects manager.
+
+    # OField examples
+    constring = OField(value=Value('constant string'))
+    parametric = OField(value=lambda params: Value(str(params.get('now_ts').ctime() if 'now_ts' in params else 0)))
+    full_name = OField(value=Concat(F('code'), Value(' - '), F('nom')))
+
+    o_roles = OField(special='roles')
 
     def __str__(self):
         return "{0} - {1}".format(self.code, self.nom)
