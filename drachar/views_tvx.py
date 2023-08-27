@@ -211,7 +211,7 @@ class SingleDemandeTvxSmartView(DemTvxSmartView):
         columns = (
             'num_dmd',
             'roles',
-            'state_code',
+            # 'state_code',
             # 'date_premiere_demande',
             'pole_nom',
             'uf_code',

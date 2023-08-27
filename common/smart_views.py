@@ -52,42 +52,7 @@ from smart_view.smart_view import (
 class RoleScopeSmartView(SmartView):
     class Meta:
         model = UserUfRole
-        permissions = {
-            'create': ('ADM',),
-            'write': {
-                None: {
-                    'ADM': {
-                        'role_code': True,
-                        'user': True,
-                        'uf': True,
-                        'service': True,
-                        'centre_responsabilite': True,
-                        'pole': True,
-                        'site': True,
-                        'etablissement': True,
-                        'discipline': True,
-                        'domaine_prefix': True,
-                    },
-                },
-                'EDITABLE': {
-                    'ADM': {
-                        'role_code': True,
-                        'user': True,
-                        'uf': True,
-                        'service': True,
-                        'centre_responsabilite': True,
-                        'pole': True,
-                        'site': True,
-                        'etablissement': True,
-                        'discipline': True,
-                        'domaine_prefix': True,
-                    },
-                },
-            },
-            'delete': {
-                'EDITABLE': ('ADM',),
-            },
-        }
+        workflow = 'role_scope'
         columns = (
             'role_code',
             'user',
@@ -101,7 +66,6 @@ class RoleScopeSmartView(SmartView):
             'domaine_prefix',
             'id',
             'roles',
-            'state_code',
             'tools',
         )
         settings = {
@@ -171,14 +135,6 @@ class RoleScopeSmartView(SmartView):
                 'url_name': 'common:role-create',
             },
         )
-
-    state_code = (
-        ComputedSmartField,
-        {
-            'special': 'state',
-            'data': lambda view_params: ExpressionWrapper(Value('EDITABLE'), output_field=TextField()),
-        },
-    )
 
     roles = (
         ComputedSmartField,

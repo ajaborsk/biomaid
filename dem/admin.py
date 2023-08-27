@@ -84,9 +84,8 @@ class DemandeAdmin(admin.ModelAdmin):
         'cause',
         'uf',
         'date',
-        'state_code',
     )
-    list_filter = ('discipline_dmd', 'cause', 'date', 'state_code', 'gel')
+    list_filter = ('discipline_dmd', 'cause', 'date', 'gel')
     search_fields = (
         'libelle',
         'nom_projet',
