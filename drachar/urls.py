@@ -33,6 +33,7 @@ Including another URLconf
 from django.urls import path
 from django.contrib import admin
 from . import views, views21, views_tvx
+from common.base_views import get_view_url_patterns
 
 admin.autodiscover()
 
@@ -76,8 +77,10 @@ urlpatterns = [
     ),
     # re_path('gestion_contact_liv/', views.gestion_contact_liv, name='gestioncontactlivraison22'),
     path(
-        'gestion_contact_liv/',
-        views.GestionContactLivraison.as_view(),
+        'contactlivraison/',
+        views.GestionContactLivraison22.as_view(),
         name='gestioncontactlivraison22',
     ),
 ]
+urlpatterns.extend(get_view_url_patterns(views.GestionContactLivraison22))
+

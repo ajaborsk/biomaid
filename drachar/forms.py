@@ -220,7 +220,7 @@ class ContactLivForm(forms.ModelForm, LoginRequiredMixin):
         model = ContactLivraison
         # ici placer les champs du model à traiter dans le formulaire : les champs automatiques ne doivent pas être /
         # inscrits
-        fields = ['id', 'etablissement', 'code', 'nom', 'prenom', 'coordonnees']
+        fields = '__all__'
         widgets = {
             # ici placer les surcharge des champs par défaut
             # 'proprietaire': forms.HiddenInput(),

@@ -20,10 +20,14 @@ from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
 from common.base_views import BiomAidViewMixin
-from drachar.forms import NouveauDossierForm
+from drachar.forms import NouveauDossierForm, ContactLivForm
 from django.db.models import F, When, Case, DecimalField, IntegerField
-
+from smart_view.smart_page import SmartPage
+from drachar.smart_views import (
+    ContactLivraisonSmartView,
+)
 from common.models import Programme
+
 
 from drachar.models import Previsionnel
 from dem.models import Demande
@@ -192,6 +196,7 @@ class GestionPrevisionnel(BiomAidViewMixin, TemplateView):
         return context
 
 
+"""CREER UNE SMARTVIEW à la place appellée gestioncontactlivraison22"""
 class GestionContactLivraison(BiomAidViewMixin, TemplateView):
     permissions = {'EXP', 'ADM'}
     template_name = 'drachar/gestion_contact_liv.html'
@@ -205,6 +210,12 @@ class GestionContactLivraison(BiomAidViewMixin, TemplateView):
         context.update(title=_("GESTION DES CONTACTS DE LIVRAISON"))
         return context
 
+class GestionContactLivraison22(SmartPage):
+    application = 'common'
+    name = 'contactlivraison'
+    permissions = {'ADM', 'MAN', 'EXP'}
+    smart_view_class = ContactLivraisonSmartView
+    title = "Contact Livraison"
 
 class NouveauDossier(BiomAidViewMixin, TemplateView):
     permissions = {'EXP', 'ADM'}

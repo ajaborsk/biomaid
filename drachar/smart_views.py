@@ -26,7 +26,7 @@ from dem.apps import DRACHAR_DELAI_DEMANDE_TERMINEE
 from dem.utils import roles_demandes_possibles
 from smart_view.smart_fields import ConditionnalSmartField, ToolsSmartField
 from smart_view.smart_view import SmartView, ComputedSmartField
-from .models import Previsionnel, Dossier, LigneCommande, Dra
+from .models import Previsionnel, Dossier, LigneCommande, Dra, ContactLivraison
 
 
 class DossierSmartView(SmartView):
@@ -1483,3 +1483,120 @@ class DraSmartView(SmartView):
                 'filename': "Demandes en cours.xlsx",
             }
         }
+
+class ContactLivraisonSmartView(SmartView):
+    class Meta:
+        model = ContactLivraison
+        permissions = {
+            'create': ('ADM', 'MAN', 'EXP'),
+            'delete': ('ADM', 'MAN', 'EXP'),
+            'write': {
+                None: {
+                    'ADM': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                    'MAN': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                    'EXP': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                },
+                'EDITABLE': {
+                    'ADM': {
+                        'code': True,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                    'MAN': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                    'EXP': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                },
+            },
+        }
+        columns = (
+            'id',
+            'roles',
+            'state_code',
+            'code',
+            'nom',
+            'prenom',
+            'coordonnees',
+            'etablissement',
+        )
+        user_filters = {
+            'contient': {
+                'type': 'contains',
+                'fields': ['code', 'nom', 'prenom', 'coordonnees'],
+            },
+            'etablissement': {'type': 'select'},
+        }
+        menu_left = ({'label': "Ajouter un Contact de livraison", 'url_name': 'drachar:contactlivraison-create'},)
+        form_layout = """
+        #
+            # Contact Livraison
+                <code> <etablissement>
+                <prenom> <nom>
+                <coordonnees>
+        """
+    roles = (
+        ComputedSmartField,
+        {
+            'hidden': True,
+            'special': 'roles',
+            'data': class_roles_expression(ContactLivraison),
+        },
+    )
+    state_code = (
+        ComputedSmartField,
+        {
+            'special': 'state',
+            'hidden': True,
+            'data': lambda vc: Value('EDITABLE'),
+        },
+    )
+    tools = (
+        ToolsSmartField,
+        {
+            'title': _("Actions"),
+            'tools': [
+                {
+                    'tool': 'open',
+                    'url_name': 'drachar:contactlivraison-update',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Ouvrir la fiche de contact livraison"),
+                },
+                {
+                    'tool': 'delete',
+                    'url_name': 'drachar:contactlivraison-ask-delete',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Supprimer la fiche de contact livraison"),
+                },
+            ],
+        },
+    )
