@@ -275,7 +275,6 @@ class DemandeSmartView(SmartView):
             "write": {
                 None: {  # L'Etat 'None' correspond à un enregistrement en cours de création
                     'ADM': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         "discipline_dmd": True,
@@ -348,7 +347,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'CAP': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         "discipline_dmd": True,
@@ -420,7 +418,6 @@ class DemandeSmartView(SmartView):
                         "autre_argumentaire": True,
                     },
                     'AMAR': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         "discipline_dmd": True,
@@ -492,7 +489,6 @@ class DemandeSmartView(SmartView):
                         'autre_argumentaire': True,
                     },
                     'RMA': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         'discipline_dmd': True,
@@ -542,7 +538,6 @@ class DemandeSmartView(SmartView):
                         'autre_argumentaire': True,
                     },
                     'CAD': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         'discipline_dmd': True,
@@ -614,7 +609,6 @@ class DemandeSmartView(SmartView):
                         'autre_argumentaire': True,
                     },
                     'CSP': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         'discipline_dmd': True,
@@ -688,7 +682,6 @@ class DemandeSmartView(SmartView):
                         "autre_argumentaire": True,
                     },
                     'CHP': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         "discipline_dmd": True,
@@ -760,7 +753,6 @@ class DemandeSmartView(SmartView):
                         "autre_argumentaire": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         "discipline_dmd": True,
@@ -830,7 +822,6 @@ class DemandeSmartView(SmartView):
                         "autre_argumentaire": True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         "discipline_dmd": True,
@@ -907,7 +898,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'CHS': {
-                        'state_code': True,
                         'calendrier': True,
                         'nature': True,
                         'discipline_dmd': True,
@@ -980,7 +970,6 @@ class DemandeSmartView(SmartView):
                 },
                 "NOUVELLE": {
                     "OWN": {
-                        'state_code': True,
                         "referent": True,
                         "uf": True,
                         "priorite": True,
@@ -1026,22 +1015,18 @@ class DemandeSmartView(SmartView):
                         "localisation": True,
                     },
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CSP": {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1050,7 +1035,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1061,7 +1045,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'ARB': {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1073,22 +1056,18 @@ class DemandeSmartView(SmartView):
                 },
                 "AVFAV_CSP": {
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CSP": {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1097,7 +1076,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1108,7 +1086,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'ARB': {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1120,22 +1097,18 @@ class DemandeSmartView(SmartView):
                 },
                 "AVDEF_CSP": {
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CSP": {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1144,7 +1117,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1155,7 +1127,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'ARB': {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1167,17 +1138,14 @@ class DemandeSmartView(SmartView):
                 },
                 "VALIDE_CP": {
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1186,7 +1154,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     "ARB": {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1196,7 +1163,6 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1209,17 +1175,14 @@ class DemandeSmartView(SmartView):
                 },
                 "NONVAL_CP": {
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1228,7 +1191,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'ARB': {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1240,7 +1202,6 @@ class DemandeSmartView(SmartView):
                 },
                 "NONVAL_CP_DEF": {
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1249,7 +1210,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'ARB': {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1261,17 +1221,14 @@ class DemandeSmartView(SmartView):
                 },
                 "INSTRUCTION": {
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1280,7 +1237,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'ARB': {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1290,7 +1246,6 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1303,17 +1258,14 @@ class DemandeSmartView(SmartView):
                 },
                 "INSTR_OK": {
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "ARB": {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1323,7 +1275,6 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1332,7 +1283,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1345,7 +1295,6 @@ class DemandeSmartView(SmartView):
                 },
                 'ERR_VAL_EXP': {
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1354,7 +1303,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     "ARB": {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1364,7 +1312,6 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1377,17 +1324,14 @@ class DemandeSmartView(SmartView):
                 },
                 "AVFAV_EXP": {
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1396,7 +1340,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     "ARB": {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1406,7 +1349,6 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1419,17 +1361,14 @@ class DemandeSmartView(SmartView):
                 },
                 "AVDEF_EXP": {
                     "DIR": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     "CHP": {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1438,7 +1377,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     "ARB": {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1448,7 +1386,6 @@ class DemandeSmartView(SmartView):
                         'gel': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1461,7 +1398,6 @@ class DemandeSmartView(SmartView):
                 },
                 "VALIDE_ARB": {
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1470,7 +1406,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     "ARB": {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1482,7 +1417,6 @@ class DemandeSmartView(SmartView):
                 },
                 "NONVAL_ARB": {
                     'DIS': {
-                        'state_code': True,
                         'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
@@ -1491,7 +1425,6 @@ class DemandeSmartView(SmartView):
                         'workflow_alert': True,
                     },
                     "ARB": {
-                        'state_code': True,
                         'workflow_alert': True,
                         "arbitrage_commission": True,
                         "commentaire_provisoire_commission": True,
@@ -1503,14 +1436,12 @@ class DemandeSmartView(SmartView):
                 },
                 "VALIDE_DEF": {
                     "ARB": {
-                        'state_code': True,
                         'workflow_alert': True,
                         'gel': True,
                     },
                 },
                 "NONVAL_DEF": {
                     "ARB": {
-                        'state_code': True,
                         'workflow_alert': True,
                         'gel': True,
                     },
@@ -1732,26 +1663,20 @@ class DemandeSmartView(SmartView):
                 },
                 # These are states for dyn_state fields
                 'AAP': {
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'CSP': {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1768,7 +1693,6 @@ class DemandeSmartView(SmartView):
                 },
                 'AAP_AREP': {
                     'OWN': {
-                        'state_code': True,
                         "referent": True,
                         "uf": True,
                         "priorite": True,
@@ -1813,58 +1737,45 @@ class DemandeSmartView(SmartView):
                         "description": True,
                         "localisation": True,
                     },
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'CSP': {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                 },
                 'AAP_AEXP': {
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'CSP': {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1885,32 +1796,25 @@ class DemandeSmartView(SmartView):
                     },
                 },
                 'AAP_AREP_AEXP': {
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'CSP': {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1922,32 +1826,25 @@ class DemandeSmartView(SmartView):
                     },
                 },
                 'AAP_AARB': {
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'CSP': {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
@@ -1964,32 +1861,25 @@ class DemandeSmartView(SmartView):
                 'AAP_BLK': {
                     # A approuver, bloqué (budget insuffisant)
                     # TODO
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'CSP': {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
@@ -2005,32 +1895,25 @@ class DemandeSmartView(SmartView):
                 'BLK': {
                     # Bloqué (budget insuffisant)
                     # TODO
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'CSP': {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
@@ -2044,32 +1927,25 @@ class DemandeSmartView(SmartView):
                     },
                 },
                 'AARB': {
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'CSP': {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
@@ -2085,32 +1961,25 @@ class DemandeSmartView(SmartView):
                 },
                 'AEXP': {
                     # A expertiser
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'CSP': {
-                        'state_code': True,
                         "avis_cadre_sup": True,
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -2131,38 +2000,29 @@ class DemandeSmartView(SmartView):
                     },
                 },
                 'AREP': {
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'CHP': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIR': {
-                        'state_code': True,
                         "decision_validateur": True,
                         "decision_soumission": True,
                     },
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                 },
                 'AREP_AEXP': {
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -2175,47 +2035,37 @@ class DemandeSmartView(SmartView):
                 },
                 'ANNULE': {
                     'ADM': {
-                        'state_code': True,
                         'gel': True,
                     },
                     'ARB': {
-                        'state_code': True,
                         'gel': True,
                     },
                 },
                 'REFUSE': {
                     'ADM': {
-                        'state_code': True,
                         'gel': True,
                     },
                     'ARB': {
-                        'state_code': True,
                         'gel': True,
                     },
                 },
                 'A_BASCULER': {
                     'ADM': {
-                        'state_code': True,
                         'gel': True,
                     },
                     'ARB': {
-                        'state_code': True,
                         'gel': True,
                     },
                 },
                 'WAIT': {
                     # En attente (programme non actif)
-                    'ADM': {
-                        'state_code': True,
-                    },
+                    'ADM': {},
                     'DIS': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
                     },
                     'EXP': {
-                        'state_code': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -2296,24 +2146,6 @@ class DemandeSmartView(SmartView):
                 'default': '2018',
                 'form.html.show-if': 'if ((args[0]!=6)&&(args[0]!=17)) {return true;} else {return false;}',
                 'form.html.show-depends': ['calendrier'],
-            },
-            'state_code': {
-                'title': _("Etat (debug)"),
-                'hidden': not (hasattr(config.settings, 'SMARTVIEW_DEBUG') and config.settings.SMARTVIEW_DEBUG),
-                # 'special': 'state',
-                'depends': [
-                    'avis_cadre_sup',
-                    'decision_validateur',
-                    'expert_metier',
-                    'avis_biomed',
-                    # "montant",
-                    'quantite',
-                    'prix_unitaire',
-                    'montant_unitaire_expert_metier',
-                    # "montant_total_expert_metier",
-                    'arbitrage_commission',
-                    'gel',
-                ],
             },
             'quantite': {
                 'table.title': _("Qté"),
@@ -2658,7 +2490,6 @@ class DemandeSmartView(SmartView):
                         'same_field': 'programme',
                         # Will have its field 'dyn_state' changed
                         'fields': [
-                            'state_code',
                             'dyn_state',
                             'tmp_available',
                         ],
@@ -3579,7 +3410,6 @@ class DemandeEqptSmartView(DemandeSmartView):
             'campagne_redirect',
             'can_copy_to_campagnes',
             'roles',
-            'state_code',
             'redacteur',
             'redacteur_view',
             'contact',
@@ -4117,27 +3947,6 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
 class DemandesEtudeSmartView(DemandeEqptSmartView):
     class Meta:
         help_text = _("Ce tableau regroupe les demandes qui ont été approuvées (ou non) par le chef de pôle et qui sont à l'étude.")
-        user_filters__update = {
-            'state_code': {
-                'type': 'select',
-                'label': _('Validation chef de pôle / directeur'),
-                'choices': '__STYLES__',
-                'position': 'bar',
-            },
-        }
-        row_styler = {
-            'fieldname': 'state_code',
-            'styles': {
-                ('VALIDE_CP', 'INSTR_OK', 'ERR_VAL_EXP', 'AVFAV_EXP'): (
-                    "background-color:#efe",
-                    _("Demande approuvée par le chef de pôle<br>son instruction va pouvoir continuer"),
-                ),
-                'NONVAL_CP': (
-                    "background-color:#fdd",
-                    _("Demande non approuvée par le chef de pôle<br>elle ne sera pas arbitrée"),
-                ),
-            },
-        }
         columns__remove = (
             'arbitrage',
             'quantite_validee',
@@ -4202,34 +4011,6 @@ class DemandesArbitrageSmartView(DemandeEqptSmartView):
             'avis_biomed': {'label': _("Avis de l'expert"), 'type': 'select'},
             'domaine': {'type': 'select'},
             'arbitrage_commission': {'label': _("Arbitrage"), 'type': 'select'},
-        }
-        row_styler = {
-            'fieldname': 'state_code',
-            'styles': {
-                'NONVAL_CP': (
-                    "background:#fdd",
-                    "Demande non validée par le Chef de pôle (provisoire)",
-                ),
-                'INSTRUCTION': ("background:#eef", "Demande prête pour l'instruction"),
-                'INSTR_OK': ("background:#eee", "Demande instruite (mais sans avis)"),
-                'AVFAV_EXP': ("background:#efe", "Avis favorable de l'expert-métier"),
-                'AVDEF_EXP': ("background:#fee", "Avis défavorable de l'expert-métier"),
-                'ERR_VAL_EXP': ("background:#fed", "Erreur (pas de prix/montant)"),
-                'VALIDE_ARB': ("background:#cfc", "Demande validée par l'arbitre"),
-                'NONVAL_ARB': ("background:#fcc", "Demande non validée par l'arbitre"),
-                'VALIDE_DEF': (
-                    "color:#888;background:#cfc",
-                    "Demande validée définitvement",
-                ),
-                'NONVAL_CP_DEF': (
-                    "color:#888;background:#fcc",
-                    "Demande non validée par le Chef de pôle (définitif)",
-                ),
-                'NONVAL_DEF': (
-                    "color:#888;background:#fcc",
-                    "Demande non validée définitivement",
-                ),
-            },
         }
         exports = {
             'xlsx': {
@@ -4364,7 +4145,6 @@ class DemandesRepartitionSmartView(DemandeEqptSmartView):
         columns = (
             'num_dmd',
             'code',
-            'state_code',
             'roles',
             'calendrier',
             'campagne_redirect',
@@ -4482,11 +4262,6 @@ class DemandesArchiveesExpertSmartView(DemandesArchiveesSmartView):
         # Cette redéfinition des filtres ne sert qu'à reforcer le calcul lors de l'héritage pour obliger la SmartView
         # à prendre en compte la modification de row_styler dans le filtre (le '__STYLES__' n'est pas dynamique :-( )
         user_filters__update = {
-            'state_code': {
-                'type': 'select',
-                'choices': '__STYLES__',
-                'position': 'bar',
-            },
             'programme': {
                 'type': 'select',
             },
@@ -4620,7 +4395,6 @@ class DemandesEnCoursTable(SmartTable):
         'calendrier',
         'campagne_redirect',
         'roles',
-        'state_code',
         'redacteur',
         'contact',
         'dect_contact',

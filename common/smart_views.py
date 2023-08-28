@@ -52,7 +52,43 @@ from smart_view.smart_view import (
 class RoleScopeSmartView(SmartView):
     class Meta:
         model = UserUfRole
-        workflow = 'role_scope'
+        # workflow = 'role_scope'
+        permissions = {
+            'create': ('ADM',),
+            'write': {
+                None: {
+                    'ADM': {
+                        'role_code': True,
+                        'user': True,
+                        'uf': True,
+                        'service': True,
+                        'centre_responsabilite': True,
+                        'pole': True,
+                        'site': True,
+                        'etablissement': True,
+                        'discipline': True,
+                        'domaine_prefix': True,
+                    },
+                },
+                'EDITABLE': {
+                    'ADM': {
+                        'role_code': True,
+                        'user': True,
+                        'uf': True,
+                        'service': True,
+                        'centre_responsabilite': True,
+                        'pole': True,
+                        'site': True,
+                        'etablissement': True,
+                        'discipline': True,
+                        'domaine_prefix': True,
+                    },
+                },
+            },
+            'delete': {
+                'EDITABLE': ('ADM',),
+            },
+        }
         columns = (
             'role_code',
             'user',

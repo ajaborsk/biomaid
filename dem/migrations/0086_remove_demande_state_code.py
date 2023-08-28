@@ -4,9 +4,8 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('dem', '0081_alter_demande_nom_organisation_and_more'),
+        ('dem', '0085_alter_campagne_dispatcher'),
     ]
 
     operations = [

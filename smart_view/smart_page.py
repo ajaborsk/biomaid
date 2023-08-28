@@ -55,7 +55,6 @@ def deep_update(src, updater):
 
 class SmartPageMetaclass(BiomAidViewMixinMetaclass):
     def __new__(mcs: type, name: str, bases: tuple, attrs: dict):
-
         if name != 'SmartPage' and 'name' not in attrs:
             raise RuntimeError(_("La SpartPage '{}' n'a pas d'attribut 'name' !").format(name))
 
@@ -63,7 +62,6 @@ class SmartPageMetaclass(BiomAidViewMixinMetaclass):
         # Dynamic SmartView handling
         if 'smart_view_class' not in attrs:
             if 'smart_view_config' in attrs:
-
                 if isinstance(attrs['smart_view_config'], str):
                     cfg = None
                     smart_views = config.get('smart_views', [])
@@ -351,7 +349,6 @@ class SmartPage(BiomAidViewMixin, TemplateView, metaclass=SmartPageMetaclass):
         return url_name
 
     def dispatch(self, request, *args, **kwargs):
-
         # Test for permission BEFORE instancing SmartViews
         user_test_result = self.get_test_func()()
         if not user_test_result:
@@ -777,6 +774,8 @@ class SmartPage(BiomAidViewMixin, TemplateView, metaclass=SmartPageMetaclass):
                 + '</li><li>'.join(
                     [
                         self.main_smart_view._meta['smartfields_dict'][field].get('title', context='html.form')
+                        if field != '__all__'
+                        else _("Globalement")
                         + '&nbsp;:<ul><li>'
                         + '</li><li>'.join([str(error.args[0]) for error in errors])
                         + '</li></ul>'
