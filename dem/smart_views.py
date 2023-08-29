@@ -1756,6 +1756,11 @@ class DemandeSmartView(SmartView):
                         'domaine': True,
                         'expert_metier': True,
                     },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
                     'ARB': {
                         'campagne_redirect': True,
                         "arbitrage_commission": True,
