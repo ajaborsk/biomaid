@@ -3759,6 +3759,9 @@ class DemandeEqptSmartView(DemandeSmartView):
                 'format': 'boolean',
                 'tristate': True,
             },
+            'workflow_alert': {
+                'hidden': True,
+            },
         }
         # Exclusion des demandes de travaux (kind of hack...)
         base_filter = Q(discipline_dmd__isnull=True) | ~Q(discipline_dmd__code='TX')
