@@ -1681,6 +1681,11 @@ class DemandeSmartView(SmartView):
                         'domaine': True,
                         'expert_metier': True,
                     },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
                     'ARB': {
                         'campagne_redirect': True,
                         "arbitrage_commission": True,
@@ -3591,6 +3596,9 @@ class DemandeEqptSmartView(DemandeSmartView):
             'decision_validateur': {
                 'format': 'boolean',
                 'tristate': True,
+            },
+            'workflow_alert': {
+                'hidden': True,
             },
         }
         # Exclusion des demandes de travaux (kind of hack...)
