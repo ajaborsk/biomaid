@@ -20,18 +20,39 @@ Almost all features are implemented via metaclasses, thus computed at launch, wi
 
 from copy import deepcopy
 from functools import partial
+from logging import warning
 
 from django.db.models import Model, Manager, Expression, Value
 from django.db.models.base import ModelBase
 
 
 class ORolesMapper:
-    def __init__(self, **kwargs):
-        self.table_roles_map = {}
-        self.row_roles_map = {}
+    """
+    Table roles sources :
+      - constant (useless ?)
+      - admin (from 'super_user' Django user attribute)
+      - manager (from 'is_staff' Django user attribute)
+      - global database query (typically : user has a particular role for at least one object in the database)
+    """
 
-    def row_roles_expression(self):
-        return Value(',')
+    def __init__(self, const_roles=None, table_roles_map=None, row_roles_map=None):
+        # TODO : Check parameters validity
+        self.const_roles = const_roles or list()
+        self.table_roles_map = table_roles_map or {}
+        self.row_roles_map = row_roles_map or {}
+
+    def table_roles_list(self, query_parameters: dict):
+        return self.const_roles + list(code for code, expr in self.table_roles_map.items() if expr(query_parameters))
+
+    def row_roles_expression(self, query_parameters: dict):
+        """
+        Returns a Django expression (to be used as a annotation value) that compute for every row a list of the user roles,
+        as a string with a comma separated list of roles and starting and ending with a comma ','.
+        eg : ',ADM,MAN,OWN,EDT,'
+        To determine if the current user has a role (eg. Manager, code 'MAN'), one can test if the comma bracketed role code string (',MAN,') is
+        a substring of this roles string
+        """
+        return Value(',' + ','.join(self.table_roles_list(query_parameters)) + ',')
 
 
 class OField:
@@ -86,23 +107,55 @@ class OverolyModelMetaclass(ModelBase):
 
         print(f"Overoly: Creating class {name}")
 
-        if 'OMeta' in attrs:
-            for overoly_attrs in attrs['OMeta'].__dict__:
-                if not overoly_attrs.startswith('__'):
-                    print(f"  {overoly_attrs=}")
+        if 'OMeta' not in attrs:
+            attrs['OMeta'] = type('OMeta', tuple(), {})
+
+        attrs['OMeta']._config = None
+        attrs['OMeta']._attributes = None
+        attrs['OMeta']._roles_mapper = None
+
+        for overoly_attrs in list(attrs['OMeta'].__dict__.keys()):
+            if not overoly_attrs.startswith('_'):
+                print(f"  {overoly_attrs=}")
+                if overoly_attrs == 'config':
+                    print("    " + repr(attrs['OMeta'].config))
+                    attrs['OMeta']._config = attrs['OMeta'].config
+                    del attrs['OMeta'].config
+                elif overoly_attrs == 'roles_mapper':
+                    if not hasattr(attrs['OMeta'], 'roles_field'):
+                        attrs['OMeta'].roles_field = 'o_roles'
+                    roles_mapper = attrs['OMeta'].roles_mapper
+                    print("    " + repr(attrs['OMeta'].roles_mapper))
+                    if isinstance(roles_mapper, ORolesMapper):
+                        # This is a 'hard' definied roles mapper. Use it as it is
+                        attrs['OMeta']._roles_mapper = attrs['OMeta'].roles_mapper
+                        del attrs['OMeta'].roles_mapper
+                    elif isinstance(roles_mapper, dict):
+                        attrs['OMeta']._roles_mapper = ORolesMapper(**attrs['OMeta'].roles_mapper)
+                        del attrs['OMeta'].roles_mapper
+                    else:
+                        warning()
+                        pass
+                    if attrs['OMeta'].roles_field is not None:
+                        attrs[attrs['OMeta'].roles_field] = OField(value=attrs['OMeta']._roles_mapper.row_roles_expression)
+                elif overoly_attrs == 'attributes':
+                    attrs['OMeta']._attributes = attrs['OMeta'].attributes
+                    del attrs['OMeta'].attributes
+                else:
+                    warning(f"Unknown OMeta attribute : {overoly_attrs}")
 
         def parametrize(formulae, params):
             return formulae
 
         annotations = {}
-        for attr, val in attrs.items():
-            if isinstance(val, OField):
+        for attr_name, attr_value in attrs.items():
+            if isinstance(attr_value, OField):
                 # print(f"  overoly_field: {attr} => {val}")
-                formulae = val.value
+                formulae = attr_value.value
                 if isinstance(formulae, Expression):
-                    annotations[attr] = partial(parametrize, formulae)
+                    annotations[attr_name] = partial(parametrize, formulae)
                 elif callable(formulae):
-                    annotations[attr] = formulae
+                    annotations[attr_name] = formulae
                 elif isinstance(formulae, str):
                     pass
                 else:
@@ -110,17 +163,12 @@ class OverolyModelMetaclass(ModelBase):
 
         def annotations_function_factory(things):
             def f(things, query_parameters):
-                # Fake example for testing
-                # annotations_dict = query_parameters
-                # annotations_dict.update(things)
                 return {name: val_func(query_parameters) for name, val_func in things.items()}
 
             return partial(f, things)
 
         if 'records' not in attrs:
             # Add the default Manager (see Django documentation)
-            # if annotations:
-            #     print(f"  {annotations=}")
             attrs['records'] = OverolyRecordsManager(annotations=annotations_function_factory(annotations))
         else:
             raise RuntimeError("Overoly Model cannot define a 'records' attribute (reserved for default manager)")

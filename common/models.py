@@ -32,7 +32,7 @@ from document.models import GenericDocument
 from generic_comment.models import GenericComment
 
 from common import config
-from overoly.base import OField, ORolesMapper, OverolyModel as Model
+from overoly.base import OField, OverolyModel as Model
 
 # les tables ci-dessous sont mise à jour par des scripts
 # qui vont chercher dans ASSETPLUS les infos :
@@ -395,15 +395,21 @@ class Discipline(Model):
     """il s'agit d'un SERVICE ACHETEUR/EXPERT METIER et qui sera référent de la demande"""
 
     class OMeta:
+        ctime_field = 'date_creation'
+        mtime_field = 'date_modification'
+        dtime_field = 'cloture'
+        atime_field = None
+        # roles_field = None
+        id_field = None
+        state_field = None
         config = config.get('model.Discipline', default={})
         attributes = {}
         permissions = None
         time_fields = 'user'  # The default
-        ctime_field = 'date_creation'
-        mtime_field = 'date_modification'
-        atime_field = None
-        dtime_field = 'cloture'
-        roles_mapper = ORolesMapper()
+        roles_mapper = {
+            'ADM': 'is_super_user',
+            'MAN': 'is_staff',
+        }
 
     code = models.CharField(max_length=3)  # code du service concerné par la demande
     nom = models.CharField(max_length=30, null=True)  # nom du service concerné par la demande
@@ -419,7 +425,7 @@ class Discipline(Model):
     parametric = OField(value=lambda params: Value(str(params.get('now_ts').ctime() if 'now_ts' in params else 0)))
     full_name = OField(value=Concat(F('code'), Value(' - '), F('nom')))
 
-    o_roles = OField(special='roles')
+    # o_roles = OField(special='roles')
 
     def __str__(self):
         return "{0} - {1}".format(self.code, self.nom)

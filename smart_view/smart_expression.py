@@ -233,7 +233,7 @@ class SmartExpression:
         ...
         return {}
 
-    def python_eval(self, expr_vars: dict = None) -> Any:
+    def python_eval(self, expr_vars: dict = {}) -> Any:
         """
         Safely evaluate the expression as a python expression, using vars (= record fields)
         """
