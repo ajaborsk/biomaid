@@ -628,12 +628,23 @@ class FournisseurSmartView(SmartView):
             'state_code',
             'code',
             'nom',
+            'cloture',
             'tools',
         )
         user_filters = {
             'contient': {
                 'type': 'contains',
                 'fields': ['code', 'nom'],
+            },
+            'actif': {
+                'label': _("Actif"),
+                'fieldname': 'cloture',
+                'type': 'select',
+                'choices': [
+                    {'label': _("Tous"), 'value': '{}'},
+                    {'label': _("Ouverts"), 'value': '{"cloture__isnull":true}'},
+                    {'label': _("Fermés"), 'value': '{"cloture__isnull":false}'},
+                ],
             },
         }
         menu_left = ({'label': 'Ajouter un fournisseur', 'url_name': 'common:fournisseur-create'},)
@@ -709,6 +720,7 @@ class FournisseurEtablissementSmartView(SmartView):
             'code',
             'etablissement',
             'fournisseur',
+            'cloture',
             'tools',
         )
         user_filters = {
@@ -718,6 +730,16 @@ class FournisseurEtablissementSmartView(SmartView):
             },
             'etablissement': {'type': 'select'},
             'fournisseur': {'type':'select'},
+            'actif': {
+                'label': _("Actif"),
+                'fieldname': 'cloture',
+                'type': 'select',
+                'choices': [
+                    {'label': _("Tous"), 'value': '{}'},
+                    {'label': _("Ouverts"), 'value': '{"cloture__isnull":true}'},
+                    {'label': _("Fermés"), 'value': '{"cloture__isnull":false}'},
+                ],
+            },
         }
         menu_left = ({'label': "Ajouter un fournisseur d'établissement", 'url_name': 'common:fournisseuretablissement-create'},)
         form_layout = """
