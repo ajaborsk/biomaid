@@ -16,18 +16,20 @@
 #
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Q, F, Case, Value, When
+from django.db.models import Q, F, Case, Value, When, ExpressionWrapper, TextField
+from django.db.models.functions import Cast, Coalesce, Concat
+
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 
 from common.base_views import BiomAidViewMixin
 
-from common.models import Fournisseur, ContactFournisseur
+from common.models import Fournisseur, ContactFournisseur, UserUfRole, User
 from dem.smart_views import DemandeSmartView
 from drachar.smart_views import PrevisionnelSmartView, DraSmartView, PrevisionnelSmartView21, PrevisionnelUtilisateursSmartView
 
 from drachar.models import Previsionnel, ContactLivraison, Dra, Dossier
-from drachar.forms import NouvelleDra, LigneForm
+from drachar.forms import NouvelleDraForm, LigneForm
 from smart_view.smart_page import SmartPage
 from smart_view.smart_view import ComputedSmartField
 from smart_view.smart_widget import BarChartWidget
@@ -130,9 +132,7 @@ class DraData:
             "marche_list": Marche.objects.filter(Q(cloture__isnull=True)),
             "dossier_list": Dossier.objects.filter(Q(cloture__isnull=True)),
             "contact_liv_list": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
-            "expert_metier_list": get_user_model().objects.filter(
-                # vocation_fonctionnelle=ExtensionUser.objects.get(user=self.request.user).vocation_fonctionnelle
-            ),
+            "expert_metier_list": User.objects.filter(Q(userufrole__role_code='EXP')).exclude(username='arbitre_biomed')
         }
         form_dra = self.formulaire_dra(request.user, request.GET, **data)
         self.message = _("""ajout d'une DRA""")
@@ -144,7 +144,7 @@ class Nouvelle_draView(DracharView, DraData):
     name = 'new-dra'
     template_name = 'drachar/nouvelledra.html'
     title = _("Nouvelle DRA")
-    formulaire_dra = NouvelleDra
+    formulaire_dra = NouvelleDraForm
     dra = DraData
     dra_id = None
 

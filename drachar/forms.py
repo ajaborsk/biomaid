@@ -116,7 +116,7 @@ class NouveauDossierForm(ModelForm, LoginRequiredMixin):
     #    return super(NouveauDossier, self).save(commit=commit)
 
 
-class NouvelleDra(forms.ModelForm, LoginRequiredMixin):
+class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
     class Meta:
         model = Dra
         # ici placer les champs du model à traiter dans le formulaire : les champs automatiques ne doivent pas être /
@@ -150,7 +150,7 @@ class NouvelleDra(forms.ModelForm, LoginRequiredMixin):
         _contact_liv_list = kwargs.pop('contact_liv_list', None)
         _expert_metier_list = kwargs.pop('expert_metier_list', None)
         _dossier_list = kwargs.pop('dossier_list', None)
-        super(NouvelleDra, self).__init__(*args, user, **kwargs)
+        super(NouvelleDraForm, self).__init__(*args, user, **kwargs)
         self.initial['num_devis'] = "num_devis"
         if _fournisseurs_list is not None:
             self.fields['fournisseur'].widget = ListTextWidget(data_list=_fournisseurs_list, name='fournisseurs-list')
