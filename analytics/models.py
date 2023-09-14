@@ -9,10 +9,10 @@ from django.db.models import (
 )
 from django.utils.translation import gettext as _
 
-from overoly.base import OverolyModel as Model
+from overoly.base import OverolyModel as OModel
 
 
-class DataSource(Model):
+class DataSource(OModel):
     class Meta:
         constraints = [UniqueConstraint(name='data_source_code_is_unique', fields=['code'])]
 
@@ -62,7 +62,7 @@ class DataSource(Model):
         return f'Datasource {self.code}: {self.label}'
 
 
-class Data(Model):
+class Data(OModel):
     class Meta:
         pass
 

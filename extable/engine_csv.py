@@ -10,7 +10,7 @@ from numpy import dtype
 from pandas import read_csv
 
 from extable.engine_pandas import DataFrameExtableEngine
-from overoly.base import OverolyModel as Model
+from overoly.base import OverolyModel as OModel
 
 
 class CsvEngine(DataFrameExtableEngine):
@@ -47,7 +47,7 @@ class CsvEngine(DataFrameExtableEngine):
             warning(_("File not found: '{}'. No schema guessing.").format(filename))
         return {}
 
-    def read_into_model(self, filename: str, model: Type[Model], log, progress, **kwargs) -> int:
+    def read_into_model(self, filename: str, model: Type[OModel], log, progress, **kwargs) -> int:
         separator = self.schema['parser_opts'].get('separator', ',')
 
         # A dict that associate src_columns (= CSV columns headers) to columns id

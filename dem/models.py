@@ -28,7 +28,7 @@ from django_pandas.managers import DataFrameManager
 
 from common.models import Discipline
 from common import config
-from overoly.base import OverolyModel as Model
+from overoly.base import OverolyModel as OModel
 
 # les tables ci-dessous sont mise à jour par des scripts
 # qui vont chercher dans ASSETPLUS les infos :
@@ -71,7 +71,7 @@ def increment_code_number():
     return new_demande_id
 
 
-class Campagne(Model):
+class Campagne(OModel):
     class Meta:
         verbose_name = _('campagne recensement demandes')
         verbose_name_plural = _('campagne recensement demandes')
@@ -128,7 +128,7 @@ class Campagne(Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Arbitrage(Model):
+class Arbitrage(OModel):
     class Meta:
         verbose_name = 'Arbitrage'
         verbose_name_plural = 'Arbitrages'
@@ -287,7 +287,7 @@ NATURE_CHOICES = (
 )
 
 
-class Demande(Model):
+class Demande(OModel):
     """table renseignée par les utilisateurs"""
 
     class Meta:
@@ -1154,7 +1154,7 @@ class Demande(Model):
         return reverse('dem:demande', kwargs={'pk': self.pk})
 
 
-class CoutComplementaire(Model):
+class CoutComplementaire(OModel):
     """table des surcout liés à chaque demande"""
 
     class Meta:

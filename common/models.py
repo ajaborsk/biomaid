@@ -32,7 +32,7 @@ from document.models import GenericDocument
 from generic_comment.models import GenericComment
 
 from common import config
-from overoly.base import OField, OverolyModel as Model
+from overoly.base import OField, OverolyModel as OModel
 
 # les tables ci-dessous sont mise à jour par des scripts
 # qui vont chercher dans ASSETPLUS les infos :
@@ -155,7 +155,7 @@ class User(AbstractUser):
         return "{} {} ({})".format(self.first_name, self.last_name, self.username)
 
 
-class Uf(Model):
+class Uf(OModel):
     class Meta:
         unique_together = (('etablissement', 'code', 'cloture'),)
         ordering = ['code']
@@ -220,7 +220,7 @@ class Uf(Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Service(Model):
+class Service(OModel):
     class Meta:
         verbose_name = _("service")
 
@@ -256,7 +256,7 @@ class Service(Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class CentreResponsabilite(Model):
+class CentreResponsabilite(OModel):
     class Meta:
         verbose_name = _("centre de responsabilité")
         verbose_name_plural = _("centres de responsabilité")
@@ -293,7 +293,7 @@ class CentreResponsabilite(Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Pole(Model):
+class Pole(OModel):
     class Meta:
         verbose_name = _("pôle")
 
@@ -326,7 +326,7 @@ class Pole(Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Site(Model):
+class Site(OModel):
     code = models.CharField(max_length=8)
     nom = models.CharField(max_length=50)
     intitule = models.CharField(
@@ -355,7 +355,7 @@ class Site(Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Etablissement(Model):
+class Etablissement(OModel):
     """terme employé dans AssetPlus pour désigner les Centres du GHT : CHD, CHUAP, CHAM, CHABB..."""
 
     class Meta:
@@ -391,7 +391,7 @@ class Etablissement(Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Discipline(Model):
+class Discipline(OModel):
     """il s'agit d'un SERVICE ACHETEUR/EXPERT METIER et qui sera référent de la demande"""
 
     class OMeta:
@@ -407,8 +407,8 @@ class Discipline(Model):
         permissions = None
         time_fields = 'user'  # The default
         roles_mapper = {
-            'ADM': 'is_super_user',
-            'MAN': 'is_staff',
+            'ADM': 'is_superuser(USER)',
+            'MAN': 'is_staff(USER)',
         }
 
     code = models.CharField(max_length=3)  # code du service concerné par la demande
@@ -417,8 +417,8 @@ class Discipline(Model):
     cloture = models.DateField(verbose_name='date de fin', null=True, blank=True)
     date_modification = models.DateTimeField(auto_now=True, verbose_name='date de modification', null=True)
 
-    objects = models.Manager()  # The default manager.
-    active_objects = ActiveManagerCloture()  # The active_objects manager.
+    # objects = models.Manager()  # The default manager.
+    # active_objects = ActiveManagerCloture()  # The active_objects manager.
 
     # OField examples
     constring = OField(value=Value('constant string'))
@@ -457,7 +457,7 @@ class Discipline(Model):
 # return "{0} - {1}".format(self.code, self.nom)
 
 
-class Domaine(Model):
+class Domaine(OModel):
     """Il s'agit d'une domaine technique : Imagerie, Endoscopie, Perfusion..."""
 
     class Meta:
@@ -496,11 +496,27 @@ class Domaine(Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Programme(Model):
+class Programme(OModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['code'], name='programme_code_is_unique'),
         ]
+
+    class OMeta:
+        ctime_field = 'date_creation'
+        mtime_field = 'date_modification'
+        dtime_field = 'cloture'
+        atime_field = None
+        config = config.get('model.Programme', default={})
+        attributes = {}
+        permissions = None
+        time_fields = 'user'  # The default
+        roles_mapper = {
+            'ADM': 'is_superuser(USER)',
+            'MAN': 'is_staff(USER)',
+            'ARB': 'is_staff(USER) or arbitre==USER',
+            'TST': 'True',
+        }
 
     code = models.CharField(max_length=16, null=False, blank=False)  # N° de programme
     nom = models.CharField(max_length=64, null=False, blank=False)  # Nom du programme
@@ -538,14 +554,14 @@ class Programme(Model):
     cloture = models.DateField(verbose_name='date de fin', null=True, blank=True)
     date_modification = models.DateTimeField(auto_now=True, verbose_name='date de modification')
 
-    objects = models.Manager()  # The default manager.
-    active_objects = ActiveManagerCloture()  # The active_objects manager.
+    # objects = models.Manager()  # The default manager.
+    # active_objects = ActiveManagerCloture()  # The active_objects manager.
 
     def __str__(self):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Fournisseur(Model):
+class Fournisseur(OModel):
     """Table des fournisseurs de base dans BiomAid.
     Pour les établissements, il est nécessaire d'avoir une table supplémentaire FournisseurEtablissement
     qui fait le lien entre la codification propre de l'établissement (dans sa GEF) et cette table.
@@ -601,7 +617,7 @@ class FournisseurEtablissement:
         return "{0} - {1} ({2})".format(self.code, self.fournisseur.nom, self.etablissement.nom)
 
 
-class ContactFournisseur(Model):
+class ContactFournisseur(OModel):
     """ajouter class ContactFournisseur avec FK sur Fournisseur"""
 
     DIVISION = (
@@ -685,7 +701,7 @@ class ContactFournisseur(Model):
         return "{0} - {1} - {2}".format(self.nom, self.prenom, self.societe)
 
 
-class DataFournisseurGEF(Model):  # quid du code vis a vis des différents établissements. comment les gérer
+class DataFournisseurGEF(OModel):  # quid du code vis a vis des différents établissements. comment les gérer
     code_gef = models.CharField(
         max_length=60,
         null=False,
@@ -768,7 +784,7 @@ class DataFournisseurGEF(Model):  # quid du code vis a vis des différents étab
         return "{0} - {1}".format(self.id, self.intitule_fournisseur)
 
 
-class Compte(Model):
+class Compte(OModel):
     LETTRE_BUDGETAIRE = (
         ('A', 'DOTATION NON AFFECTEE'),
         ('B', 'LONG SEJOUR'),
@@ -812,7 +828,7 @@ class Compte(Model):
         return "{0} - {1} - {2}".format(self.lettre_budgetaire, self.code, self.nom)
 
 
-class ClasseCode(Model):
+class ClasseCode(OModel):
     code = models.CharField(
         max_length=90,
         default=None,
@@ -846,7 +862,7 @@ class ClasseCode(Model):
         return "{0} - {1}".format(self.code, self.nom)
 
 
-class Marque(Model):
+class Marque(OModel):
     nom = models.CharField(
         max_length=90,
         default=None,
@@ -877,7 +893,7 @@ class Marque(Model):
     #    super().save(*args, **kwargs)
 
 
-class Type(Model):
+class Type(OModel):
     CLASSE_CHOICES = (
         ('1', 'Classe 1'),
         ('2a', 'Classe 2a'),
@@ -911,7 +927,7 @@ class Type(Model):
         return "{0} - {1}".format(self.type, self.marque)
 
 
-class Cneh(Model):
+class Cneh(OModel):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=90, default=None, verbose_name="Code CNEH", blank=False, null=False)
     intitule = models.CharField(max_length=90, default=None, verbose_name="Nom du CNEH", blank=False, null=False)
@@ -923,7 +939,7 @@ class Cneh(Model):
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class Cnehs(Model):  # Table pour complément des codes CNEH
+class Cnehs(OModel):  # Table pour complément des codes CNEH
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=90, default=None, blank=False, null=False)
     intitule = models.CharField(max_length=90, default=None, blank=False, null=False)
@@ -945,7 +961,7 @@ class Cnehs(Model):  # Table pour complément des codes CNEH
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class Role(Model):
+class Role(OModel):
     """
     Ce modèle décrit la liste des rôles utilisés dans cette instance de BIOM_AID.
 
@@ -957,7 +973,7 @@ class Role(Model):
     note = models.TextField(null=True, blank=True)
 
 
-class UserUfRole(Model):
+class UserUfRole(OModel):
     """
     Ce modèle sert à déterminer la portée d'un rôle pour un utilisateur (il pourrait donc s'intituler "UserRoleScope")
 
@@ -1074,7 +1090,7 @@ class UserUfRole(Model):
         )
 
 
-class LastUpdate(Model):
+class LastUpdate(OModel):
     id = models.AutoField(primary_key=True)
     table_in = models.CharField(
         verbose_name=_("Table BIOM_AID"),
@@ -1094,7 +1110,7 @@ class LastUpdate(Model):
         return "{0} - {1}".format(self.table_in, self.date_last_update)
 
 
-class Alert(Model):
+class Alert(OModel):
     class Meta:
         verbose_name = _("Alerte")
 
@@ -1192,7 +1208,7 @@ class Alert(Model):
     active_objects = ActiveManagerCloture()  # The active_objects manager.
 
 
-class GenericRole(Model):
+class GenericRole(OModel):
     class Meta:
         indexes = [
             models.Index(fields=['cloture'], name='gen_role_end_idx'),

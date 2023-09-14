@@ -12,7 +12,7 @@ from django.utils.translation import gettext as _
 
 from common import config
 from common.command import BiomAidCommand
-from overoly.base import OverolyModel as Model
+from overoly.base import OverolyModel as OModel
 
 
 from extable.engines import FileExtableEngine, ExtableEngine
@@ -58,7 +58,7 @@ class DataFrameExtableEngine(FileExtableEngine, ABC):
             schema[column] = {'type': guessed_type, 'src_column': src_column}
         return schema
 
-    def dataframe_to_model(self, df: DataFrame, model: Type[Model], log, progress, **kwargs) -> int:
+    def dataframe_to_model(self, df: DataFrame, model: Type[OModel], log, progress, **kwargs) -> int:
         """Read pandas DataFrame and records every line as a record in the given (Django) model. Returns the number of rows
         recorded.
         """

@@ -23,10 +23,10 @@ from django.utils.translation import gettext as _
 
 from generic_comment.models import GenericComment
 from document.models import GenericDocument
-from overoly.base import OverolyModel as Model
+from overoly.base import OverolyModel as OModel
 
 
-class Marche(Model):
+class Marche(OModel):
     """
     Liste des marchés disponible
     """
@@ -132,7 +132,7 @@ class Marche(Model):
 
 
 # type de procédure disponible dans le CMP
-class TypeProcedure(Model):
+class TypeProcedure(OModel):
     id = models.AutoField(primary_key=True)
     code = models.CharField(max_length=200)  # 30-1-3, AO, MAPA, UGAP, UNIHA, RESAH...
     intitule = models.TextField(
@@ -148,7 +148,7 @@ class TypeProcedure(Model):
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class Procedure(Model):
+class Procedure(OModel):
     """Procédure de marché public"""
 
     id = models.AutoField(primary_key=True)
@@ -166,7 +166,7 @@ class Procedure(Model):
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class Lot(Model):
+class Lot(OModel):
     RECONDUCTION_CHOICES = (
         ('Tacite', 'TACITE'),
         ('Expresse', 'EXPRESSE'),
@@ -209,7 +209,7 @@ class Lot(Model):
         return "{0} - {1}".format(self.code, self.intitule)
 
 
-class FamilleAchat(Model):
+class FamilleAchat(OModel):
     id = models.AutoField(primary_key=True)
     code = models.IntegerField()
 
@@ -217,7 +217,7 @@ class FamilleAchat(Model):
         return "{0}".format(self.code)
 
 
-class Suivi(Model):
+class Suivi(OModel):
     id = models.AutoField(primary_key=True)
     code = models.IntegerField()
 
@@ -258,7 +258,7 @@ HM6	Avenant à prévoir
 """
 
 
-class ExceptionMarche(Model):
+class ExceptionMarche(OModel):
     CODE_HM_CHOICES = (
         ('HM1', 'HM1 - Procédure en cours'),
         ('HM2', 'HM2 - Procédure à prévoir'),

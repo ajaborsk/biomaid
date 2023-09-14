@@ -27,10 +27,10 @@ import functools
 from common.db_utils import StringAgg
 from document.models import GenericDocument
 
-from overoly.base import OverolyModel as Model
+from overoly.base import OverolyModel as OModel
 
 
-def _all_documents_json(model: Model, name: str | None, view_params: dict) -> Expression:
+def _all_documents_json(model: OModel, name: str | None, view_params: dict) -> Expression:
     """
     Django expression to get generic documents data in a json strings
 
@@ -89,5 +89,5 @@ def _all_documents_json(model: Model, name: str | None, view_params: dict) -> Ex
     )
 
 
-def all_documents_json_partial(model: Model, name: str | None = None) -> Callable[dict, Expression]:
+def all_documents_json_partial(model: OModel, name: str | None = None) -> Callable[dict, Expression]:
     return functools.partial(_all_documents_json, model, name)

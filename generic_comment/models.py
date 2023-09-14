@@ -20,9 +20,10 @@ from django.utils.translation import gettext as _
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
-from overoly.base import OverolyModel as Model
+from overoly.base import OverolyModel as OModel
 
-class GenericComment(Model):
+
+class GenericComment(OModel):
     # If not null, the comment of wich it's a reply
     reply = models.ForeignKey(
         'generic_comment.GenericComment',

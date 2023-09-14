@@ -40,10 +40,10 @@ from common import config
     --------------
 """
 
-from overoly.base import OverolyModel as Model
+from overoly.base import OverolyModel as OModel
 
 
-class Previsionnel(Model):
+class Previsionnel(OModel):
     # id = models.AutoField()
     num = models.AutoField(primary_key=True)  # numero de demande validée
     uf = models.ForeignKey(
@@ -312,7 +312,7 @@ class Previsionnel(Model):
         return "{0} - {1}".format(self.num, self.num_dmd)
 
 
-class Dra(Model):
+class Dra(OModel):
     num_dra = models.AutoField(primary_key=True)  # numero de la demande de réalisation d'achat
     intitule = models.TextField(
         default=None,
@@ -418,7 +418,7 @@ class Dra(Model):
 #         return "{0} {1}".format(self.document, self.dra)
 
 
-class ContactLivraison(Model):
+class ContactLivraison(OModel):
     code = models.CharField(max_length=50, blank=True, null=True, help_text="Champs automatique")
     nom = models.CharField(
         verbose_name="Nom contact livraison",
@@ -460,7 +460,7 @@ class ContactLivraison(Model):
         return "{0} - {1} - {2}".format(self.code, self.nom, self.prenom)
 
 
-class LigneCommande(Model):
+class LigneCommande(OModel):
     CLASSE_EQT = (
         ('1', '1'),
         ('2A', '2A'),
@@ -605,7 +605,7 @@ class LigneCommande(Model):
         return "{0} - {1}".format(self.num_ligne, self.num_previsionnel)
 
 
-class Dossier(Model):
+class Dossier(OModel):
     PRIO_CHOICES = (
         ('1', 'Haute'),
         ('2', 'Normale'),
@@ -684,7 +684,7 @@ class Dossier(Model):
 #         return "{0} {1}".format(self.document, self.dossier)
 
 
-class AffiliationDossierParticipants(Model):
+class AffiliationDossierParticipants(OModel):
     class Meta:
         indexes = [
             models.Index(fields=['dossier']),
@@ -720,7 +720,7 @@ class AffiliationDossierParticipants(Model):
         return "{0} {1}".format(self.dossier, self.participant)
 
 
-class Execution(Model):  # à remplacer par un outil de Workflow
+class Execution(OModel):  # à remplacer par un outil de Workflow
     ID = (
         ('0', 'NA'),
         ('1', 'OK'),

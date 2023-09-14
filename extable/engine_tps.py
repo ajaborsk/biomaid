@@ -12,7 +12,7 @@ from django.apps import apps
 
 from extable.engines import FileExtableEngine
 from common.command import BiomAidCommand
-from overoly.base import OverolyModel as Model
+from overoly.base import OverolyModel as OModel
 
 locale.setlocale(locale.LC_ALL, 'fr_FR.UTF-8')
 
@@ -95,7 +95,7 @@ class TpsEngine(FileExtableEngine):
                     schema[k] = {'type': guessed_type, 'src_column': k}
                 return schema
 
-    def read_into_model(self, filename: str, model: Type[Model], log, progress, **kwargs) -> int:
+    def read_into_model(self, filename: str, model: Type[OModel], log, progress, **kwargs) -> int:
         n_records = 0
 
         records = get_tps_data(filename)
