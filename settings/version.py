@@ -14,6 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-DEM_VERSION = '0.14.5'
-DEM_VERSION_DATE = '25 septembre 2023'
-DEM_VERSION_NAME = 'stable + bugfix #5'
+DEM_VERSION = '0.14.6'
+DEM_VERSION_DATE = '26 septembre 2023'
+DEM_VERSION_NAME = 'stable + bugfix KOS #6'
