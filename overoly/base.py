@@ -18,12 +18,11 @@ Future (or optional ?):
 Almost all features are implemented via metaclasses, thus computed at launch, without runnning overload
 """
 
-import ast
 from copy import deepcopy
 from functools import partial
 from logging import warning
 
-from django.db.models import Model, Manager, Expression, Value, When, Case, Field
+from django.db.models import Model, Manager, Expression, Value, When, Case, Field, Q
 from django.db.models.functions import Concat
 from django.db.models.base import ModelBase
 
@@ -39,9 +38,28 @@ class ORolesMapper:
       - global database query (typically : user has a particular role for at least one object in the database)
     """
 
+    @staticmethod
+    def is_superuser(u):
+        try:
+            return u.is_superuser
+        except AttributeError:
+            return False
+
+    @staticmethod
+    def is_staff(u):
+        try:
+            return u.is_staff
+        except AttributeError:
+            return False
+
+    @staticmethod
+    def q(*args, **kwargs):
+        return Q(*args, **kwargs)
+
     builtins = {
-        'is_superuser': {'django': lambda a: False},
-        'is_staff': {'django': lambda a: False},
+        'is_superuser': {'django': is_superuser},
+        'is_staff': {'django': is_staff},
+        'q': {'django': Q},
     }
 
     def __init__(self, field_names: set, const_roles: set = None, **kwargs):
@@ -55,14 +73,14 @@ class ORolesMapper:
         for kwarg, kwval in kwargs.items():
             if isinstance(kwval, str):
                 role_expression = PolyExpr(kwval, builtins=self.builtins)
-                print(f" e:{ast.unparse(role_expression.tree)}")
+                # print(f" e:{ast.unparse(role_expression.tree)}")
                 expr_names = set(role_expression.names())
-                print(f"  1-{expr_names=}")
+                # print(f"  1-{expr_names=}")
                 expr_names -= set(self.builtins.keys())
-                print(f"  2-{expr_names=}")
+                # print(f"  2-{expr_names=}")
                 expr_names -= set(self.field_names)
-                print(f"  3-{expr_names=}")
-                self.parameters = expr_names
+                # print(f"  3-{expr_names=}")
+                self.parameters |= expr_names
                 self.row_roles_map[kwarg] = role_expression
 
     def table_roles_list(self, query_parameters: dict):
@@ -79,7 +97,7 @@ class ORolesMapper:
         # Get all the needed parameters from query_parameters (setting at None if not found)
         parameters = {param: query_parameters.get(param) for param in self.parameters}
 
-        print(f"   {query_parameters=} {self.field_names=}")
+        # print(f"   {query_parameters=} {self.field_names=}")
         return Concat(
             *(
                 [Value(',')]
@@ -164,7 +182,7 @@ class OverolyModelMetaclass(ModelBase):
         if 'Meta' in attrs and getattr(attrs['Meta'], 'abstract', False) == True:
             return super().__new__(cls, name, bases, attrs, **kwargs)
 
-        print(f"Overoly: Creating class {name}")
+        # print(f"Overoly: Creating class {name}")
 
         if 'OMeta' not in attrs:
             attrs['OMeta'] = type('OMeta', tuple(), {})
@@ -181,7 +199,7 @@ class OverolyModelMetaclass(ModelBase):
         # 1 - Configure the model using OMeta attributes
         for overoly_attrs in list(attrs['OMeta'].__dict__.keys()):
             if not overoly_attrs.startswith('_'):
-                print(f"  {overoly_attrs=}")
+                # print(f"  {overoly_attrs=}")
                 if overoly_attrs == 'config':
                     print("    " + repr(attrs['OMeta'].config))
                     attrs['OMeta']._config = attrs['OMeta'].config
@@ -257,15 +275,16 @@ class OverolyModelMetaclass(ModelBase):
                 # These are the field names that are available in value expression
 
                 attrs['OMeta']._annotation_names.add(attr_name)
+                formulae = attr_value.value
                 if attr_value.special == 'id':
                     pass
                 elif attr_value.special == 'state':
                     pass
                 elif attr_value.special == 'roles':
                     if attr_value.value is None and roles_mapper is not None:
-                        attr_value.value = ORolesMapper(field_names, **roles_mapper).row_roles_expression
+                        formulae = ORolesMapper(field_names, **roles_mapper).row_roles_expression
                 # print(f"  overoly_field: {attr} => {val}")
-                formulae = attr_value.value
+
                 if isinstance(formulae, Expression):
                     annotations[attr_name] = partial(parametrize, formulae)
                 elif callable(formulae):
