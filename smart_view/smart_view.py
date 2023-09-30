@@ -81,6 +81,7 @@ from common.utils import DataWorksheet, HTMLFilter
 from common import config
 from common.workflow import toml_to_dict, Workflow
 from document.smart_fields import DocumentsSmartField
+from overoly.base import OverolyModel
 from smart_view.smart_expression import SmartExpression
 from generic_comment.smart_fields import CommentsSmartField
 from smart_view.smart_fields import (
@@ -389,6 +390,8 @@ class SmartViewMetaclass(MediaDefiningClass):
 
         _meta = dict()
 
+        overoly_fields = []
+
         # print("Step 0 "+"-"*100+"\n", name)
         # pprint(_meta)
 
@@ -441,11 +444,21 @@ class SmartViewMetaclass(MediaDefiningClass):
 
                     # print(" (Model)   ", _meta.settings[f.name])
 
+            # List of Overoly OFields
+            print(f"{model=}")
+            if issubclass(model, OverolyModel):
+                overoly_fields = list(model.OMeta._annotation_names)
+            else:
+                overoly_fields = []
+            print(f"  {overoly_fields=}")
+            for fname in overoly_fields:
+                model_all_fields.append(fname)
+
             # Update fields with model fields
             if model_fields == ALL_FIELDS:
                 _meta["fields"] = model_all_fields
             else:
-                _meta['fields'] += list(_meta['fields']) + list(model_fields)
+                _meta['fields'] += list(_meta['fields']) + overoly_fields + list(model_fields)
 
             _meta['permissions'] = {}
 
@@ -746,14 +759,15 @@ class SmartViewMetaclass(MediaDefiningClass):
             def queryset(view_params: dict):
                 return (
                     _meta['model']
-                    .records.using(_meta['database'])
+                    .records.setup(**{n.upper(): v for n, v in view_params.items()})
+                    .using(_meta['database'])
                     .annotate(**{k: v(view_params) for k, v in annotations_fields.items()})
                 )
 
             _meta['queryset'] = queryset
 
             # All fieldnames that should be passed to values() Queryset method to mimic a values() without arg
-            _meta['values_fields'] = _meta['data_fields'] + list(annotations_fields.keys())
+            _meta['values_fields'] = _meta['data_fields'] + list(overoly_fields) + list(annotations_fields.keys())
 
         # Step 7 : Process filters
 

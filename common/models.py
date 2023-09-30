@@ -514,8 +514,7 @@ class Programme(OModel):
         roles_mapper = {
             'ADM': 'is_superuser(USER)',
             'MAN': 'is_staff(USER)',
-            'ARB': 'is_staff(USER) or arbitre==USER',
-            'TST': 'True',
+            'ARB': 'q(arbitre__isnull=False, arbitre=USER)',
         }
 
     code = models.CharField(max_length=16, null=False, blank=False)  # N° de programme

@@ -39,6 +39,7 @@ from dem.models import Demande
 from document.views import all_documents_json_partial
 from drachar.models import Previsionnel
 from generic_comment.views import all_comments_json_partial
+from settings import DEBUG
 
 from smart_view.smart_view import (
     SmartView,
@@ -274,6 +275,9 @@ class ProgrammeSmartView(SmartView):
             'calendrier': {
                 'title': _("Campagne"),
             },
+            'o_roles': {
+                'hidden': not DEBUG,
+            },
             'nom': {
                 'format': 'string',
             },
@@ -331,6 +335,7 @@ class ProgrammeSmartView(SmartView):
         columns = (
             'id',
             'roles',
+            'o_roles',
             'state_code',
             'calendrier',
             'etablissement',
