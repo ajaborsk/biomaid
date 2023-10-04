@@ -142,6 +142,15 @@ h1 {
     font-weight: bold;
 }
 
+.smart-view-form .smart-multichoices label {
+    display: flex;
+}
+
+.smart-view-form .smart-multichoices input {
+    width: auto;
+    margin: 0 3px 3px 0;
+}
+
 /* To (almost) avoid little arrows on number inputs */
 /* Chrome, Safari, Edge, Opera */
 input.no-arrows::-webkit-outer-spin-button,

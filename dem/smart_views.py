@@ -121,6 +121,14 @@ class CampagneSmartView(SmartView):
                 'lookup': user_lookup,
                 'choices': user_choices,
             },
+            'natures': {
+                'format': 'multichoice',
+                'choices': (
+                    ('EQ', 'Equipements'),
+                    ('SW', 'Logiciels'),
+                    ('TX', 'Travaux'),
+                ),
+            },
             'debut_recensement': {
                 'editor': 'dateEditor',
             },
@@ -1748,6 +1756,11 @@ class DemandeSmartView(SmartView):
                         'domaine': True,
                         'expert_metier': True,
                     },
+                    'EXP': {
+                        'state_code': True,
+                        'avis_biomed': True,
+                        'workflow_alert': True,
+                    },
                     'ARB': {
                         'campagne_redirect': True,
                         "arbitrage_commission": True,
@@ -2103,6 +2116,12 @@ class DemandeSmartView(SmartView):
                     },
                     'EXP': {
                         'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
@@ -3747,6 +3766,9 @@ class DemandeEqptSmartView(DemandeSmartView):
             'decision_validateur': {
                 'format': 'boolean',
                 'tristate': True,
+            },
+            'workflow_alert': {
+                'hidden': True,
             },
         }
         # Exclusion des demandes de travaux (kind of hack...)

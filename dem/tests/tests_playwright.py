@@ -10,6 +10,36 @@ from dem.models import Demande
 recorded_dialog_text_re = re.compile(r"Demande (DEM-\d\d\d\d-\d\d\d\d\d) enregistrée avec succès")
 
 
+def test_new_campaign(biomaid_page: Callable):
+    code = 'CPN'
+    name = "New Campaign"
+
+    page: Page = biomaid_page('dem:home', username='root', password='introuvable')
+    page.get_by_role("listitem").filter(
+        has_text="Outils du Manager Gestion des demandes de matériel Demandes Réalisation ACHAts ("
+    ).locator("i").click()
+    page.get_by_role("link", name="Outils du Manager").click()
+    page.get_by_role("link", name="Gestion des calendriers/campagnes").click()
+    page.get_by_role("link", name="Ajouter une campagne").click()
+    page.get_by_label("Code").click()
+    page.get_by_label("Code").fill(code)
+    page.get_by_label("Nom").click()
+    page.get_by_label("Nom").fill(name)
+    page.get_by_label("Description").click()
+    page.get_by_label("Description").fill("Description")
+    page.get_by_label("Message à l'utilisateur").click()
+    page.get_by_label("Message à l'utilisateur").fill("message")
+    page.get_by_label("Equipements").check()
+    page.get_by_label("Logiciels").check()
+    page.get_by_role("combobox", name="Répartisseur").select_option("10")
+    page.get_by_label("Date début des demandes").click()
+    page.get_by_label("Date début des demandes").fill("01/01/2021")
+    page.get_by_label("Date de fin des demandes").click()
+    page.get_by_label("Date de fin des demandes").fill("31/12/2023")
+    page.get_by_role("button", name="Ajouter et retour à la liste").click()
+    page.get_by_role("button", name="C'est noté").click()
+
+
 @time_machine.travel("2020-08-15 09:00 +0000")
 @pytest.mark.parametrize(
     ('user', 'uf_code', 'failure_point'),

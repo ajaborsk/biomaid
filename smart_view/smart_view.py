@@ -118,7 +118,7 @@ from smart_view.layout import (
     SmartLayoutHtml,
     SmartLayoutTemplate,
 )
-from smart_view.smart_form import AutocompleteWidget, BaseSmartModelForm, EurosField
+from smart_view.smart_form import AutocompleteInputWidget, BaseSmartModelForm, EurosField, MultiChoiceField
 from common import config as main_config
 
 logger = logging.getLogger(__name__)
@@ -1245,7 +1245,7 @@ def _form__init__(
     # Indique aux widgets AutocompleteWidget quel est l'utilisateur
     # pour permettre le calcul dynamique des listes de choix
     for field in self.fields.values():
-        if isinstance(field.widget, AutocompleteWidget):
+        if isinstance(field.widget, AutocompleteInputWidget):
             field.widget._request = request
 
 
@@ -1402,6 +1402,8 @@ class SmartView(metaclass=SmartViewMetaclass):
                 exclude.append(smartfield.get('fieldname'))
             if smartfield.get('format') == 'money':
                 field_classes[field_name] = EurosField
+            elif smartfield.get('format') == 'multichoice':
+                field_classes[field_name] = MultiChoiceField
 
         form_class = new_class(
             'SmartViewForm',

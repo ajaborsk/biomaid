@@ -180,19 +180,19 @@ class Uf(models.Model):
 
     etablissement = models.ForeignKey(
         'Etablissement',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     site = models.ForeignKey(
         'Site',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     pole = models.ForeignKey(
         'Pole',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     centre_responsabilite = models.ForeignKey(
         'CentreResponsabilite',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     service = models.ForeignKey(
         'Service',
@@ -235,7 +235,7 @@ class Service(models.Model):
         default=None,
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
 
     objects = models.Manager()  # The default manager.
@@ -272,7 +272,7 @@ class CentreResponsabilite(models.Model):
         default=None,
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
 
     objects = models.Manager()  # The default manager.
@@ -305,7 +305,7 @@ class Pole(models.Model):
         default=None,
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
 
     objects = models.Manager()  # The default manager.
@@ -334,7 +334,7 @@ class Site(models.Model):
         default=None,
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
 
     objects = models.Manager()  # The default manager.
@@ -444,7 +444,7 @@ class Domaine(models.Model):
         null=True,
         on_delete=models.PROTECT,
     )
-    # expert = models.ForeignKey(ExtensionUser, null=True, blank=True, default=None, on_delete=models.CASCADE)
+    # expert = models.ForeignKey(ExtensionUser, null=True, blank=True, default=None, on_delete=models.PROTECT)
     discipline = models.ForeignKey(  # DISCIPLINE (Bio, ST, Travaux, DSN...
         'Discipline',
         default=None,
@@ -488,7 +488,7 @@ class Programme(models.Model):
         on_delete=models.PROTECT,
     )
     debut_arbitrage = models.DateField(verbose_name="date de début d'arbitrage", null=True, blank=True)
-    # arbitre_ext = models.ForeignKey(ExtensionUser, null=True, blank=True, default=None, on_delete=models.CASCADE)
+    # arbitre_ext = models.ForeignKey(ExtensionUser, null=True, blank=True, default=None, on_delete=models.PROTECT)
     calendrier = models.ForeignKey('dem.Campagne', null=True, blank=True, default=None, on_delete=models.PROTECT)
     discipline = models.ForeignKey('Discipline', default=None, on_delete=models.PROTECT)  # discipline rattachée au programme
     anteriorite = models.CharField(  # N° de programme de DRA 94
@@ -1002,16 +1002,16 @@ class UserUfRole(models.Model):
         ('TECH', _("Technicien")),
     )
 
-    # extension_user = models.ForeignKey(ExtensionUser, on_delete=models.CASCADE)
+    # extension_user = models.ForeignKey(ExtensionUser, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    uf = models.ForeignKey(Uf, null=True, blank=True, on_delete=models.CASCADE)
-    service = models.ForeignKey(Service, null=True, blank=True, on_delete=models.CASCADE)
-    centre_responsabilite = models.ForeignKey(CentreResponsabilite, null=True, blank=True, on_delete=models.CASCADE)
-    pole = models.ForeignKey(Pole, null=True, blank=True, on_delete=models.CASCADE)
-    site = models.ForeignKey(Site, null=True, blank=True, on_delete=models.CASCADE)
-    etablissement = models.ForeignKey(Etablissement, null=True, blank=True, on_delete=models.CASCADE)
+    uf = models.ForeignKey(Uf, null=True, blank=True, on_delete=models.PROTECT)
+    service = models.ForeignKey(Service, null=True, blank=True, on_delete=models.PROTECT)
+    centre_responsabilite = models.ForeignKey(CentreResponsabilite, null=True, blank=True, on_delete=models.PROTECT)
+    pole = models.ForeignKey(Pole, null=True, blank=True, on_delete=models.PROTECT)
+    site = models.ForeignKey(Site, null=True, blank=True, on_delete=models.PROTECT)
+    etablissement = models.ForeignKey(Etablissement, null=True, blank=True, on_delete=models.PROTECT)
 
-    discipline = models.ForeignKey(Discipline, null=True, blank=True, on_delete=models.CASCADE)
+    discipline = models.ForeignKey(Discipline, null=True, blank=True, on_delete=models.PROTECT)
     domaine_prefix = models.CharField(max_length=16, null=True, blank=True)
 
     role_code = models.CharField(max_length=8, choices=NAME_CHOICES)
@@ -1067,7 +1067,7 @@ class Alert(models.Model):
 
     id = models.AutoField(primary_key=True)
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.PROTECT, null=True)
     object_id = models.CharField(max_length=64, null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
@@ -1185,7 +1185,7 @@ class GenericRole(models.Model):
     modification_datetime: models.DateTimeField = models.DateTimeField(auto_now=True, verbose_name=_("date de modification"))
     cloture: models.DateTimeField = models.DateTimeField(null=True, blank=True)
 
-    content_type: models.ForeignKey = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    content_type: models.ForeignKey = models.ForeignKey(ContentType, on_delete=models.PROTECT)
     object_id: models.CharField = models.CharField(max_length=64)
     content_object = GenericForeignKey('content_type', 'object_id')
     role_code: models.CharField = models.CharField(

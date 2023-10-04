@@ -1,3 +1,4 @@
+import os
 from typing import Any
 from django.urls import reverse
 from django.core.management import call_command
@@ -91,5 +92,9 @@ def biomaid_page(live_server, page: Page) -> Page:
         )
         biomaid_page.goto_name(url_name)
         return biomaid_page
+
+    # erase cache
+    if 'FileBasedCache' in settings.CACHES['default']['BACKEND']:
+        os.system('rm -Rf ' + repr(settings.CACHES['default']['LOCATION']) + '/*')
 
     return the_page

@@ -87,7 +87,7 @@ Cas d'un serveur avec SELinux
 
 Les serveurs basés sur une distribution RedHat (CentOS, Almalinux, ...) sont par défaut configurés avec le système de sécurité
 SELinux. Ce système apporte des sécurités supplémentaires, mais l'installation de BiomAid demande l'installation de quelques
-politiques de sécurité comlémentaires.
+politiques de sécurité complémentaires.
 
 TODO...
 
