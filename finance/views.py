@@ -29,6 +29,11 @@ from django.utils.timezone import now
 from django.views.generic import TemplateView
 from django_tables2 import Table, Column, TemplateColumn
 from django.utils.translation import gettext as _
+from django.shortcuts import render, redirect
+
+import tomlkit
+import pathlib
+from tomlkit.toml_file import TOMLFile
 
 import finance
 from analytics.data import get_last_data
@@ -44,6 +49,7 @@ from smart_view.smart_widget import (
     LightAndTextWidget,
 )
 from assetplusconnect.models import BFt1996, EnCours, Docliste, BEq1996
+from common.models import Programme, Etablissement, Discipline
 
 # from common.base_views import BiomAidView
 from common.base_views import BiomAidViewMixin
@@ -53,6 +59,7 @@ from finance.management.commands.gest_analyse import ORDER_ANOMALIES
 from finance.smart_views import DemAssessmentSmartView
 from smart_view.smart_page import SmartPage
 
+from drachar.models import Previsionnel
 
 class FinanceView(BiomAidViewMixin, TemplateView):
     # Droits de base pour toutes les vues de l'application. A modifier par héritage au besoin.
@@ -1303,3 +1310,88 @@ class DemAssessmentView(SmartPage):
     smart_modes = {
         None: {'view': 'list'},
     }
+
+class ProgrammStudie(BiomAidViewMixin, TemplateView):
+    """Vue admin du fichier de config toml"""
+
+    application = 'finance'
+    name = 'prog_studie'
+    permissions = {'ADM','MAN',}
+    raise_exception = True  # Refuse l'accès par défaut (pas de demande de login)
+    template_name = 'finance/config_studie.html'
+
+    def datageneration(self):
+        self.request_data = tomlkit.loads(pathlib.Path("finance/request.toml").read_text())
+        """GEt Liste des programmes favoris"""
+        self.etab = Etablissement.objects.all()
+        self.discipline = Discipline.objects.all()
+        self.programme_favori_bibl = self.request_data['PROGRAMME_LISTE']
+        self.trigger = "home"
+        return self
+
+    def dispatch(self, request, *args, **kwargs):
+        # context = self.get_context_data()  # unused
+        self.url = "../prog_studie/"
+        self.datageneration()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        context["trigger"] = self.trigger
+        if self.trigger == "get_it":
+            context["programmestcd"]= self.programmestcd #TODO : a supprimer juste pour essais
+            self.TCD(request)
+        else:
+            self.programme = Programme.objects.all()
+            context["programme"] = self.programme
+            context["url"] = self.url
+            context["programme_favori_bibl"] = self.programme_favori_bibl
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, *args, **kwargs):
+        if 'save_listes' in request.POST:
+            context = self.get_context_data()
+            self.trigger = 'NONE'
+            context["url"] = self.url
+            self.save_listes(request)
+            self.datageneration()
+        elif 'get_it' in request.POST:
+            context = self.get_context_data()
+            self.programmestcd = request.POST.get("get_it") or None
+            self.trigger = "get_it"
+        return self.get(request, *args, **kwargs)
+
+    def save_listes(self, request, *args, **kwargs): # sauvegarde des listes de programmes favoris)
+        for e in self.etab:
+            for d in self.discipline:
+                self.request_data['PROGRAMME_LISTE'][e.prefix][d.code]['liste'] = request.POST.get("programme_favori_bibl2-" + e.prefix +"-" + d.code)
+        #print(self.request_data['PROGRAMME_LISTE'])
+        with pathlib.Path('finance/request.toml').open('w') as f:
+            f.write(tomlkit.dumps(self.request_data))  # sauvegarde des modifs dans le .toml (=commit true)
+        return self
+
+    def TCD(self, request, *arg, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.programmestcd is not None :
+            programme_list = self.programmestcd.strip().split(',')
+            print(programme_list)
+            context["message"] = "filtre sur les programmes : " + str(programme_list)
+            my_filter_qs = Q()
+            for prog in programme_list:
+                print(prog)
+                my_filter_qs = my_filter_qs | Q(code=prog)
+            filtre_programmes = Programme.objects.filter(my_filter_qs)
+            print(filtre_programmes)
+            #TODO SLICE le filtre programme
+            qs = Previsionnel.objects.filter(programme=filtre_programmes)
+            print(qs)
+        else:
+            print("si pas filtre")
+            context["message"] = "Tous les programmes : aucun selectionné"
+            qs = Previsionnel.objects.all()
+
+        return self
