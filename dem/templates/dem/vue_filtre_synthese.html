@@ -5,7 +5,7 @@
 <h1>SELECTIONNER LES FILTRES A APPLIQUER</h1>
   <label name="programme">PROGRAMME :</label>
   <select id="programme" name="programme">
-    <option value="Tous">Tous</option>
+    <option value="">Selectionner une valeur</option>
     {% for prog in programmes %}
       <option value="{{prog.code}}"{% if programme_code == prog.code %}selected="1"{% endif %}>{{prog.code}} - {{prog.nom}}</option>
     {% endfor %}
@@ -14,8 +14,8 @@
   <br>
     <label name="validation_cp">VALIDATION CHEF DE POLE :</label>
   <select id="validation_cp" name="validation_cp">
-    <option value="">Tous</option>
-    <option value="1" selected="1">Oui</option>
+    <option value="tous" selected="tous">Tous</option>
+    <option value="1" >Oui</option>
     <option value="0">Non</option>
     <option value="None">Pas remplie</option>
   </select>

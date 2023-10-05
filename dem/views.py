@@ -31,6 +31,7 @@ from django.db.models import (
 from django.db.models.fields import DecimalField
 from django.db.models.functions import Coalesce
 from django.views.generic import TemplateView
+from django.shortcuts import render
 
 from common.base_views import BiomAidViewMixin
 from common.models import Programme, Domaine
@@ -81,25 +82,6 @@ class CommissionSynthese(BiomAidViewMixin, TemplateView):
                     ),
             #montant_final=ExpressionWrapper(
             #    Case(
-                    # When(
-                    #     arbitrage_commission__valeur=True,
-                    #     then=Case(
-                    #         When(
-                    #             prix_unitaire__isnull=False,
-                    #             then=F("quantite_validee") * F("prix_unitaire"),
-                    #         ),
-                    #         When(
-                    #             montant_unitaire_expert_metier__isnull=False,
-                    #             then=F("quantite_validee") * F("montant_unitaire_expert_metier"),
-                    #         ),
-                    #         When(
-                    #             enveloppe_allouee__isnull=False,
-                    #             then=F("enveloppe_allouee"),
-                    #         ),
-                    #         default=Value(math.nan),  # Pour indiquer que ce n'est pas un cas 'valide'
-                    #         output_field=DecimalField(),
-                    #     ),
-                    # ),
                 #     When(
                 #         prix_unitaire__isnull=False,
                 #         then=F("quantite") * F("prix_unitaire"),
@@ -297,8 +279,11 @@ class DemAide(BiomAidViewMixin, TemplateView):
 
 
 class VueFiltreSynthese(BiomAidViewMixin, TemplateView):
+    application ="demande"
     template_name = 'dem/vue_filtre_synthese.html'
     permissions = {'EXP', 'ARB'}
+    name = 'filtre_synthèse'
+    raise_exception = True  # Refuse l'accès par défaut (pas de demande de login)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -310,6 +295,12 @@ class VueFiltreSynthese(BiomAidViewMixin, TemplateView):
         context['programmes'] = programmes
 
         return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+
+        return render(request, self.template_name, context=context)
+
 
 class VueFiltreSynthese2(BiomAidViewMixin, TemplateView):
     template_name = 'dem/vue_filtre_synthese2.html'
