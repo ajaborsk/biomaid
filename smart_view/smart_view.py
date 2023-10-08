@@ -445,12 +445,12 @@ class SmartViewMetaclass(MediaDefiningClass):
                     # print(" (Model)   ", _meta.settings[f.name])
 
             # List of Overoly OFields
-            print(f"{model=}")
+            # print(f"{model=}")
             if issubclass(model, OverolyModel):
-                overoly_fields = list(model.OMeta._annotation_names)
+                overoly_fields = list(model._ometa.annotation_names)
             else:
                 overoly_fields = []
-            print(f"  {overoly_fields=}")
+            # print(f"  {overoly_fields=}")
             for fname in overoly_fields:
                 model_all_fields.append(fname)
 

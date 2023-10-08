@@ -515,6 +515,7 @@ class Programme(OModel):
             'ADM': 'is_superuser(USER)',
             'MAN': 'is_staff(USER)',
             'ARB': 'q(arbitre__isnull=False, arbitre=USER)',
+            'RED': "in_scope(USER, ['CAD','CHP','DIR'], uf='uf')",
         }
 
     code = models.CharField(max_length=16, null=False, blank=False)  # N° de programme

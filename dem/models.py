@@ -303,6 +303,9 @@ class Demande(OModel):
             models.Index(fields=['arbitrage_commission']),
         ]
 
+    class OMeta:
+        pass
+
     PRIO_CHOICES = (
         ('1', 'Haute'),
         ('2', 'Normale'),

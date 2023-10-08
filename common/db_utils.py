@@ -342,7 +342,7 @@ def class_roles_expression(
                 )
             )
 
-        # l'enregitrement possède-t-il la notion de 'campagne/calendrier' (pour dispatcher) ?
+        # l'enregistrement possède-t-il la notion de 'campagne/calendrier' (pour dispatcher) ?
         if campagne_field is not None:
             args.append(
                 Case(

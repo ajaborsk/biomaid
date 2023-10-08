@@ -22,7 +22,7 @@ from copy import deepcopy
 from functools import partial
 from logging import warning
 
-from django.db.models import Model, Manager, Expression, Value, When, Case, Field, Q
+from django.db.models import Model, Manager, Expression, Value, When, Case, Field, Q, Exists, OuterRef
 from django.db.models.functions import Concat
 from django.db.models.base import ModelBase
 
@@ -56,10 +56,30 @@ class ORolesMapper:
     def q(*args, **kwargs):
         return Q(*args, **kwargs)
 
+    @staticmethod
+    def in_scope(user, roles_list, **kwargs):
+        """Preliminary implementation, only for french healthcare structure"""
+        from common.models import UserUfRole
+
+        axis1_filters_list = []
+        if 'uf' in kwargs:
+            axis1_filters_list.append(Q(uf__isnull=True) | Q(uf=OuterRef(kwargs['uf'])))
+            axis1_filters_list.append(Q(service__isnull=True) | Q(service=OuterRef(kwargs['uf'] + '__service')))
+            axis1_filters_list.append(
+                Q(centre_responsabilite__isnull=True) | Q(centre_responsabilite=OuterRef(kwargs['uf'] + '__centre_responsabilite'))
+            )
+            axis1_filters_list.append(Q(pole__isnull=True) | Q(pole=OuterRef(kwargs['uf'] + '__pole')))
+            axis1_filters_list.append(Q(site__isnull=True) | Q(site=OuterRef(kwargs['uf'] + '__site')))
+            axis1_filters_list.append(Q(etablissement__isnull=True) | Q(etablissement=OuterRef(kwargs['uf'] + '__etablissement')))
+
+        # return True
+        return Exists(UserUfRole.records.filter(*axis1_filters_list, user=user, role_code__in=roles_list))
+
     builtins = {
         'is_superuser': {'django': is_superuser},
         'is_staff': {'django': is_staff},
         'q': {'django': Q},
+        'in_scope': {'django': in_scope},
     }
 
     def __init__(self, field_names: set, const_roles: set = None, **kwargs):
@@ -166,6 +186,10 @@ class OverolyRecordsManager(Manager):
         return qs
 
 
+class OverolyOptions:
+    pass
+
+
 class OverolyModelMetaclass(ModelBase):
     """
 
@@ -183,17 +207,18 @@ class OverolyModelMetaclass(ModelBase):
             return super().__new__(cls, name, bases, attrs, **kwargs)
 
         # print(f"Overoly: Creating class {name}")
+        attrs['_ometa'] = OverolyOptions()
 
         if 'OMeta' not in attrs:
             attrs['OMeta'] = type('OMeta', tuple(), {})
 
-        attrs['OMeta']._special_id = None
-        attrs['OMeta']._special_state = None
-        attrs['OMeta']._special_roles = None
-        attrs['OMeta']._config = None
-        attrs['OMeta']._attributes = None
-        attrs['OMeta']._django_field_names = set()
-        attrs['OMeta']._annotation_names = set()
+        attrs['_ometa'].special_id = None
+        attrs['_ometa'].special_state = None
+        attrs['_ometa'].special_roles = None
+        attrs['_ometa'].config = None
+        attrs['_ometa'].attributes = None
+        attrs['_ometa'].django_field_names = set()
+        attrs['_ometa'].annotation_names = set()
 
         roles_mapper = None
         # 1 - Configure the model using OMeta attributes
@@ -202,11 +227,11 @@ class OverolyModelMetaclass(ModelBase):
                 # print(f"  {overoly_attrs=}")
                 if overoly_attrs == 'config':
                     print("    " + repr(attrs['OMeta'].config))
-                    attrs['OMeta']._config = attrs['OMeta'].config
-                    del attrs['OMeta'].config
+                    attrs['_ometa'].config = attrs['OMeta'].config
+                    # del attrs['OMeta'].config
                 elif overoly_attrs == 'attributes':
-                    attrs['OMeta']._attributes = attrs['OMeta'].attributes
-                    del attrs['OMeta'].attributes
+                    attrs['_ometa'].attributes = attrs['OMeta'].attributes
+                    # del attrs['OMeta'].attributes
                 elif overoly_attrs == 'roles_mapper':
                     roles_mapper = attrs['OMeta'].roles_mapper
                 elif overoly_attrs in {
@@ -232,31 +257,31 @@ class OverolyModelMetaclass(ModelBase):
         # Scan all attributes to get explicit Overoly primary key (this is not a recommanded practice, default is often better)
         for attr_name, attr_value in attrs.items():
             if isinstance(attr_value, OField) and attr_value.special == 'id':
-                attrs['OMeta']._special_id = attr_name
+                attrs['_ometa'].special_id = attr_name
 
         # Scan all attributes to get primary key (mimics Django behaviour since the class is not yet created)
-        if attrs['OMeta']._special_id is None:
+        if attrs['_ometa'].special_id is None:
             for attr_name, attr_value in attrs.items():
                 if isinstance(attr_value, Field) and attr_value.primary_key:
-                    attrs['OMeta']._special_id = attr_name
+                    attrs['_ometa'].special_id = attr_name
 
         # Use default Django created 'id' if needed
-        if attrs['OMeta']._special_id is None:
+        if attrs['_ometa'].special_id is None:
             # No explicit 'special':'id' or explicit primary key found: assume Django will create one
-            attrs['OMeta']._special_id = 'id'
-            attrs['OMeta']._django_field_names.add('id')
+            attrs['_ometa'].special_id = 'id'
+            attrs['_ometa'].django_field_names.add('id')
 
         # Scan all attributes to get explicit Overoly roles field
         for attr_name, attr_value in attrs.items():
             if isinstance(attr_value, OField) and attr_value.special == 'roles':
-                attrs['OMeta']._special_roles = attr_name
+                attrs['_ometa'].special_roles = attr_name
 
         # Create roles field if needed
-        if attrs['OMeta']._special_roles is None and roles_mapper is not None:
+        if attrs['_ometa'].special_roles is None and roles_mapper is not None:
             if 'o_roles' not in attrs:
                 # No explicit 'special':'roles' or explicit primary key found: assume Django will create one
-                attrs['OMeta']._special_roles = 'o_roles'
-                attrs[attrs['OMeta']._special_roles] = OField(special='roles')
+                attrs['_ometa'].special_roles = 'o_roles'
+                attrs[attrs['_ometa'].special_roles] = OField(special='roles')
             else:
                 warning("Unable to create a roles field ('roles' field already exists and is not a special roles field) !")
 
@@ -268,13 +293,13 @@ class OverolyModelMetaclass(ModelBase):
                 return formulae
 
             if isinstance(attr_value, Field):
-                attrs['OMeta']._django_field_names.add(attr_name)
+                attrs['_ometa'].django_field_names.add(attr_name)
             if isinstance(attr_value, OField):
                 # All the field names of the model (both stored and computed ones)
-                field_names = attrs['OMeta']._django_field_names | attrs['OMeta']._annotation_names
+                field_names = attrs['_ometa'].django_field_names | attrs['_ometa'].annotation_names
                 # These are the field names that are available in value expression
 
-                attrs['OMeta']._annotation_names.add(attr_name)
+                attrs['_ometa'].annotation_names.add(attr_name)
                 formulae = attr_value.value
                 if attr_value.special == 'id':
                     pass
@@ -332,5 +357,5 @@ class OverolyModel(Model, metaclass=OverolyModelMetaclass):
         return 'Attribut :-) !'
 
     def save(self, *args, **kwargs):
-        print("Overoly: Checking rights (TODO)...")
+        print("Overoly: Checking *create/write* rights (TODO)...")
         super().save(*args, **kwargs)

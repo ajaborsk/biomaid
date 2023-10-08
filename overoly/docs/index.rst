@@ -79,8 +79,13 @@ Par convention, on pourra utiliser les constantes suivantes :
 
 Les fonctions prédéfinies (`builtins`) sont les suivantes :
 
-- `is_staff()`
-- `is_superuser()`
+- `is_staff(USER)` : Est vrai si l'utilisateur est un 'manager' de Django (accès à l'interface d'administration)
+- `is_superuser(USER)` : Est vrai si l'utilisateur est un superutilisateur Django 
+- `q()` : Analogue de la classe Q() de Django. Utilisé pour mettre des conditions sur un ou plusieurs champs du modèle, 
+  comme par exemple si un champs est nul ou si un champ désigne l'utilisateur courant
+- `in_scope(USER, scope_roles, axe_level_label1=axe_level_model_field_name1, ...)` : Est vrai si l'utilisateur dispose d'au moins l'un des rôles de la liste scope_roles dans le
+  désigné par les axes/niveaux champs. Exemple : in_scope(USER, ['CAD','CHP'], uf=uf_field)
+- `has_generic_role(USER, role)` : Est vrai si l'enregistrement est lié avec le rôle générique indiqué. 
 
 Pour chaque rôle, si l'expression ne comporte pas de champ du modèle, l'expression sera évaluée (en python) avant la requête SQL.
 Si, par contre, l'expression comporte des champs du modèle, l'expression sera transformée, via l'ORM de Django,
