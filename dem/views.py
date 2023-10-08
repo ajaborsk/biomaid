@@ -15,14 +15,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import logging
-import math
 
 import pandas as pd
-from decimal import Decimal
 
 from django.db.models import (
     F,
-    Q,
     ExpressionWrapper,
     When,
     Case,
@@ -72,39 +69,39 @@ class CommissionSynthese(BiomAidViewMixin, TemplateView):
             montant_final=ExpressionWrapper(
                 Case(
                     When(
-                         enveloppe_allouee__isnull=False,
-                         then=F("enveloppe_allouee"),
+                        enveloppe_allouee__isnull=False,
+                        then=F("enveloppe_allouee"),
                     ),
                     When(
-                         enveloppe_allouee__isnull=True,
-                         then=Coalesce(F('quantite_validee'), F('quantite'))
+                        enveloppe_allouee__isnull=True,
+                        then=Coalesce(F('quantite_validee'), F('quantite'))
                         * Coalesce(F('montant_unitaire_expert_metier'), F('prix_unitaire')),
                     ),
-            #montant_final=ExpressionWrapper(
-            #    Case(
-                #     When(
-                #         prix_unitaire__isnull=False,
-                #         then=F("quantite") * F("prix_unitaire"),
-                #     ),
-                #     When(
-                #         montant_unitaire_expert_metier__isnull=False,
-                #         then=F("quantite") * F("montant_unitaire_expert_metier"),
-                #     ),
-                #     When(
-                #         quantite_validee__isnull=False,
-                #         then=F("quantite_validee") * F("prix_unitaire"),
-                #     ),
-                #     When(
-                #         Q(quantite_validee__isnull =False, montant_unitaire_expert_metier__isnull=False),#TODO : ajouter condition and montant_unitaire_expert_metier__isnull=False,
-                #         then=F("quantite_validee") * F("montant_unitaire_expert_metier"),
-                #     ),
-                #     When(
-                #         enveloppe_allouee__isnull=False,
-                #         then=F("enveloppe_allouee"),
-                #     ),
-                # ),
-                #output_field=DecimalField(),
-            #),
+                    # montant_final=ExpressionWrapper(
+                    #    Case(
+                    #     When(
+                    #         prix_unitaire__isnull=False,
+                    #         then=F("quantite") * F("prix_unitaire"),
+                    #     ),
+                    #     When(
+                    #         montant_unitaire_expert_metier__isnull=False,
+                    #         then=F("quantite") * F("montant_unitaire_expert_metier"),
+                    #     ),
+                    #     When(
+                    #         quantite_validee__isnull=False,
+                    #         then=F("quantite_validee") * F("prix_unitaire"),
+                    #     ),
+                    #     When(
+                    #         Q(quantite_validee__isnull =False, montant_unitaire_expert_metier__isnull=False),#TODO : ajouter condition and montant_unitaire_expert_metier__isnull=False,
+                    #         then=F("quantite_validee") * F("montant_unitaire_expert_metier"),
+                    #     ),
+                    #     When(
+                    #         enveloppe_allouee__isnull=False,
+                    #         then=F("enveloppe_allouee"),
+                    #     ),
+                    # ),
+                    # output_field=DecimalField(),
+                    # ),
                 ),
                 output_field=DecimalField(),
             ),
@@ -279,7 +276,7 @@ class DemAide(BiomAidViewMixin, TemplateView):
 
 
 class VueFiltreSynthese(BiomAidViewMixin, TemplateView):
-    application ="demande"
+    application = "demande"
     template_name = 'dem/vue_filtre_synthese.html'
     permissions = {'EXP', 'ARB'}
     name = 'filtre_synthèse'

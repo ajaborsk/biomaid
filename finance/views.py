@@ -29,11 +29,10 @@ from django.utils.timezone import now
 from django.views.generic import TemplateView
 from django_tables2 import Table, Column, TemplateColumn
 from django.utils.translation import gettext as _
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 import tomlkit
 import pathlib
-from tomlkit.toml_file import TOMLFile
 
 import finance
 from analytics.data import get_last_data
@@ -60,6 +59,7 @@ from finance.smart_views import DemAssessmentSmartView
 from smart_view.smart_page import SmartPage
 
 from drachar.models import Previsionnel
+
 
 class FinanceView(BiomAidViewMixin, TemplateView):
     # Droits de base pour toutes les vues de l'application. A modifier par héritage au besoin.
@@ -1311,12 +1311,16 @@ class DemAssessmentView(SmartPage):
         None: {'view': 'list'},
     }
 
+
 class ProgrammStudie(BiomAidViewMixin, TemplateView):
     """Vue admin du fichier de config toml"""
 
     application = 'finance'
     name = 'prog_studie'
-    permissions = {'ADM','MAN',}
+    permissions = {
+        'ADM',
+        'MAN',
+    }
     raise_exception = True  # Refuse l'accès par défaut (pas de demande de login)
     template_name = 'finance/config_studie.html'
 
@@ -1343,7 +1347,7 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
         context = self.get_context_data()
         context["trigger"] = self.trigger
         if self.trigger == "get_it":
-            context["programmestcd"]= self.programmestcd #TODO : a supprimer juste pour essais
+            context["programmestcd"] = self.programmestcd  # TODO : a supprimer juste pour essais
             self.TCD(request)
         else:
             self.programme = Programme.objects.all()
@@ -1365,18 +1369,20 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             self.trigger = "get_it"
         return self.get(request, *args, **kwargs)
 
-    def save_listes(self, request, *args, **kwargs): # sauvegarde des listes de programmes favoris)
+    def save_listes(self, request, *args, **kwargs):  # sauvegarde des listes de programmes favoris)
         for e in self.etab:
             for d in self.discipline:
-                self.request_data['PROGRAMME_LISTE'][e.prefix][d.code]['liste'] = request.POST.get("programme_favori_bibl2-" + e.prefix +"-" + d.code)
-        #print(self.request_data['PROGRAMME_LISTE'])
+                self.request_data['PROGRAMME_LISTE'][e.prefix][d.code]['liste'] = request.POST.get(
+                    "programme_favori_bibl2-" + e.prefix + "-" + d.code
+                )
+        # print(self.request_data['PROGRAMME_LISTE'])
         with pathlib.Path('finance/request.toml').open('w') as f:
             f.write(tomlkit.dumps(self.request_data))  # sauvegarde des modifs dans le .toml (=commit true)
         return self
 
     def TCD(self, request, *arg, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.programmestcd is not None :
+        if self.programmestcd is not None:
             programme_list = self.programmestcd.strip().split(',')
             print(programme_list)
             context["message"] = "filtre sur les programmes : " + str(programme_list)
@@ -1386,7 +1392,7 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
                 my_filter_qs = my_filter_qs | Q(code=prog)
             filtre_programmes = Programme.objects.filter(my_filter_qs)
             print(filtre_programmes)
-            #TODO SLICE le filtre programme
+            # TODO SLICE le filtre programme
             qs = Previsionnel.objects.filter(programme=filtre_programmes)
             print(qs)
         else:
