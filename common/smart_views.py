@@ -375,7 +375,8 @@ class ProgrammeSmartView(SmartView):
                 ],
             },
         }
-        menu_left = ({'label': 'Ajouter un programme', 'url_name': 'common:programme-create'},)
+        menu_left = ({'label': 'Ajouter un programme', 'url_name': 'common:programme-create'},
+                     {'label': 'Analyser les programmes', 'url_name': 'finance:prog_studie'},)
         form_layout = """
         #
             # Informations de base

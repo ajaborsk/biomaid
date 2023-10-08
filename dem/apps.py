@@ -183,6 +183,10 @@ class DemConfig(AppConfig):
                             'label': _("Aides à l'arbitrage"),
                             'url_name': 'dem:arbitration-help-view',
                         },
+                        {
+                            'label': _("Synthèse arbitrage : programme"),
+                            'url_name': 'dem:vue-filtre-synthese',
+                        },
                     ],
                 },
             ),
