@@ -171,10 +171,7 @@ class AlertsManager:
 
             # Cloture toutes les alertes en cours qui ne sont pas/plus dans une catégorie
             # active (par exemple désactivée dans le fichier de configuration)
-            Alert.records.filter(
-                ~Q(categorie__in=alerts_manager.alert_categories.keys()),
-                cloture__isnull=True,
-            ).update(  # noqa
+            Alert.records.filter(~Q(categorie__in=alerts_manager.alert_categories.keys()), cloture__isnull=True,).update(  # noqa
                 date_modification=now(),
                 cloture=now(),
                 commentaire=_("Catégorie d'alerte désactivée."),

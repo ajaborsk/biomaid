@@ -3690,7 +3690,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             <calendrier> <date> <nature>
             # Le demandeur
                 <referent> <redacteur_view>
-                <uf> <service_view> 
+                <uf> <service_view>
                 <cr_view> <pole_view>
                 <site_view> <etablissement_view>
             # Description du projet

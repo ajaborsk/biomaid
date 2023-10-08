@@ -57,7 +57,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     # 'autoapi.sphinx',
     # 'autoapi.extension',
-    ## Use only one of these two
+    # Use only one of these two
     # 'sphinxcontrib.inkscapeconverter',
     'sphinxcontrib.rsvgconverter',
 ]

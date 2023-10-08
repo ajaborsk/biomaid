@@ -111,7 +111,8 @@ class ORolesMapper:
         Returns a Django expression (to be used as a annotation value) that compute for every row a list of the user roles,
         as a string with a comma separated list of roles and starting and ending with a comma ','.
         eg : ',ADM,MAN,OWN,EDT,'
-        To determine if the current user has a role (eg. Manager, code 'MAN'), one can test if the comma bracketed role code string (',MAN,') is
+        To determine if the current user has a role (eg. Manager, code 'MAN'),
+        one can test if the comma bracketed role code string (',MAN,') is
         a substring of this roles string
         """
         # Get all the needed parameters from query_parameters (setting at None if not found)
@@ -161,7 +162,8 @@ class OverolyRecordsManager(Manager):
                 self._annotations_dict = deepcopy(kwargs['annotations'])
                 self.annotations = lambda query_parameters: self._annotations_dict
             elif callable(kwargs['annotations']):
-                # Dynamic (ie parametric) annotations. Computed from constants, fields values and parameters provided at request time
+                # Dynamic (ie parametric) annotations.
+                # Computed from constants, fields values and parameters provided at request time
                 # The callable should get a unique argument (the parameters dictionnary) and return a annotations dict (see above)
                 self.annotations = kwargs['annotations']
 
@@ -172,8 +174,11 @@ class OverolyRecordsManager(Manager):
         super().__init__(*args, **kwargs)
 
     def setup(self, **query_parameters):
-        """The setup method is used to set the queryset/annotations parameters (*user*, to allow *permissions* system to work , for instance).
-        This is a chaining method (it returns *self*) so it can be used in the first part of the queryset building chain"""
+        """
+        The setup method is used to set the queryset/annotations parameters
+        (*user*, to allow *permissions* system to work , for instance).
+        This is a chaining method (it returns *self*) so it can be used in the first part of the queryset building chain
+        """
         self.query_parameters = query_parameters
         return self
 
@@ -195,15 +200,17 @@ class OverolyModelMetaclass(ModelBase):
 
     Roles:
       - Only OMeta.roles_mapper ==> Create roles ofield with default name then use it for roles management
-      - OMeta.roles_mapper *and* a special roles field set (but not defined) ==> Create roles ofield with provided name then use it for roles management
-      - No OMeta.roles_mapper *but* roles_fieldname set and defined (either Django Field or OField with value set) ==> Use this field for roles management
+      - OMeta.roles_mapper *and* a special roles field set (but not defined)
+            ==> Create roles ofield with provided name then use it for roles management
+      - No OMeta.roles_mapper *but* roles_fieldname set and defined (either Django Field or OField with value set)
+            ==> Use this field for roles management
       - No OMeta.roles_mapper neither roles field/ofield ==> No roles/rights management
       - Every other case ==> Raise a warning and do not use roles/rights management
     """
 
     def __new__(cls, name, bases, attrs, **kwargs):
         # If this model is a abstract one, let it as it is
-        if 'Meta' in attrs and getattr(attrs['Meta'], 'abstract', False) == True:
+        if 'Meta' in attrs and getattr(attrs['Meta'], 'abstract', False):
             return super().__new__(cls, name, bases, attrs, **kwargs)
 
         # print(f"Overoly: Creating class {name}")

@@ -375,13 +375,15 @@ class ProgrammeSmartView(SmartView):
                 ],
             },
         }
-        menu_left = ({'label': 'Ajouter un programme', 'url_name': 'common:programme-create'},
-                     {'label': 'Analyser les programmes', 'url_name': 'finance:prog_studie'},)
+        menu_left = (
+            {'label': 'Ajouter un programme', 'url_name': 'common:programme-create'},
+            {'label': 'Analyser les programmes', 'url_name': 'finance:prog_studie'},
+        )
         form_layout = """
         #
             # Informations de base
                 <code> <nom>
-                <calendrier> 
+                <calendrier>
                 <etablissement> <site>
                 <pole> <uf>
                 <discipline> <arbitre>

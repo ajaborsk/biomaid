@@ -39,7 +39,7 @@ class PolyExpr:
 
 # =================================================================================================================================
 
-from django.db.models import Q, F, Value
+from django.db.models import Q, F, Value  # noqa
 
 
 class PolyExprTransformer(ast.NodeTransformer):
