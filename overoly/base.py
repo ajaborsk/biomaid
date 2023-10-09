@@ -22,11 +22,16 @@ from copy import deepcopy
 from functools import partial
 from logging import warning
 
-from django.db.models import Model, Manager, Expression, Value, When, Case, Field, Q, Exists, OuterRef
+from django.db.models import Model, Expression, Value, When, Case, Field, Q, Exists, OuterRef
 from django.db.models.functions import Concat
 from django.db.models.base import ModelBase
 
 from polyexpr.polyexpr import PolyExpr, django_orm_expression
+
+try:
+    from django_pandas.managers import DataFrameManager as Manager
+except ImportError:
+    from django.db.models import Manager
 
 
 class ORolesMapper:
