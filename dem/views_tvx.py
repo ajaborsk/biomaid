@@ -146,6 +146,8 @@ class DemTvxSmartView(DemandeSmartView):
             'autre_argumentaire',
             'argumentaire_detaille_tvx',
             'documents_sf',
+            'avis_cadre_sup',
+            'commentaire_cadre_sup',
             'decision_validateur',
             'decision_soumission',
             'programme',
@@ -358,6 +360,14 @@ class DemTvxSmartView(DemandeSmartView):
                 'show-if': 'tvx_arg_vetustes',
                 'title': _("Détaillez"),
                 'table.hidden': True,
+            },
+            'avis_cadre_sup': {
+                'format': 'boolean',
+                'tristate': True,
+            },
+            'decision_validateur': {
+                'format': 'boolean',
+                'tristate': True,
             },
             'autre_argumentaire': {
                 'format': 'text',

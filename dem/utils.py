@@ -37,7 +37,7 @@ def user_campagnes(view_params: dict, tvx=False):
     """
     Fonction qui retourne un queryset avec la liste des campagnes actives pour un utilisateur donné à une date donnée.
     """
-    cache_key = view_params['user'].username + '-open-campaigns'
+    cache_key = view_params['user'].username + '-open-campaigns' + ('-tvx' if tvx else '-eqpts')
     # print(f"{cache_key=}")
 
     campaigns_pk_list = cache.get(cache_key)

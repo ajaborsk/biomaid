@@ -1517,6 +1517,19 @@ class DemandeSmartView(SmartView):
                         'tvx_arg_securite_comment': True,
                         "autre_argumentaire": True,
                     },
+                    "CSP": {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'CHP': {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
                     'DIS': {
                         'campagne_redirect': True,
                         'programme': True,
