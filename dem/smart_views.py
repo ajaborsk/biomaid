@@ -1756,6 +1756,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1842,6 +1843,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1868,6 +1870,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1914,6 +1917,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1951,6 +1955,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1993,6 +1998,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2034,6 +2040,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2073,6 +2080,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2114,6 +2122,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2155,6 +2164,7 @@ class DemandeSmartView(SmartView):
                         "decision_soumission": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2166,6 +2176,7 @@ class DemandeSmartView(SmartView):
                         'state_code': True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2219,6 +2230,7 @@ class DemandeSmartView(SmartView):
                         'state_code': True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
