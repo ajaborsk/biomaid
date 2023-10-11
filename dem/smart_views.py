@@ -1690,6 +1690,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1769,6 +1770,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1789,6 +1791,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1828,6 +1831,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1858,6 +1862,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1893,6 +1898,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1927,6 +1933,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1959,6 +1966,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -1993,6 +2001,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -2028,6 +2037,7 @@ class DemandeSmartView(SmartView):
                         "decision_soumission": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -2036,6 +2046,7 @@ class DemandeSmartView(SmartView):
                 'AREP_AEXP': {
                     'ADM': {},
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
@@ -2079,6 +2090,7 @@ class DemandeSmartView(SmartView):
                     # En attente (programme non actif)
                     'ADM': {},
                     'DIS': {
+                        'campagne_redirect': True,
                         'programme': True,
                         'domaine': True,
                         'expert_metier': True,
