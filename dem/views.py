@@ -286,9 +286,9 @@ class VueFiltreSynthese(BiomAidViewMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         programmes = [
             {"id": str(prog.id), "code": str(prog.code), "nom": str(prog.nom)}
-            for prog in set(Programme.objects.filter().order_by('code'))
+            for prog in set(Programme.records.all().order_by('code'))
         ]
-        programmes_recs = dict({rec.pk: str(rec) for rec in Programme.objects.all().order_by('code')})
+        programmes_recs = dict({rec.pk: str(rec) for rec in Programme.records.all().order_by('code')})
         programmes_recs[None] = "--------"
         context['programmes'] = programmes
 

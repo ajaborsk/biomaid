@@ -2405,8 +2405,9 @@ class DemandeSmartView(SmartView):
             },
             'programme': {
                 'autocomplete': True,
-                'lookup': lambda view_params: list(Programme.records.all().values_list('id', 'nom')) + [(None, '-- Indéfini --')],
-                'choices': lambda view_params: tuple(Programme.active_objects.all().values_list('id', 'nom').order_by('code')),
+                'lookup': lambda view_params: list(Programme.all_records.all().values_list('id', 'nom'))
+                + [(None, '-- Indéfini --')],
+                'choices': lambda view_params: tuple(Programme.records.all().values_list('id', 'nom').order_by('code')),
                 "width": 150,
             },
             'domaine': {
