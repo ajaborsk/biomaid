@@ -523,19 +523,16 @@ class BaseSmartModelForm(SmartFormMixin, ModelForm):
                     field.widget.choices = field_choices or []
 
                 if self.choices and fname in self.choices and field.choices is not None:
-                    match len(field.choices):
-                        case 0:
-                            raise PermissionDenied(
-                                _("Vous ne pouvez pas afficher ce formulaire (droits insuffisants). {}.").format(
-                                    self.choices[fname]
-                                )
-                            )
-                        case 1:
-                            # Do not disable the field as it prevent form to send a value, even if mandatory :-(
-                            # field.disabled = True
+                    if len(field.choices) == 0:
+                        raise PermissionDenied(
+                            _("Vous ne pouvez pas afficher ce formulaire (droits insuffisants). {}.").format(self.choices[fname])
+                        )
+                    elif len(field.choices) == 1:
+                        # Do not disable the field as it prevent form to send a value, even if mandatory :-(
+                        # field.disabled = True
 
-                            # Ensure the pre-filled value is the only possible one (useful if the input is hidden)
-                            field.initial = field.choices[0][0]
+                        # Ensure the pre-filled value is the only possible one (useful if the input is hidden)
+                        field.initial = field.choices[0][0]
 
                 # For autocomplete widget, a API url is also needed
                 if isinstance(field.widget, AutocompleteInputWidget):

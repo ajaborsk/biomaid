@@ -69,7 +69,7 @@ class TpsEngine(FileExtableEngine):
         return False
 
     @staticmethod
-    def columns_autodetect(filename: str, cfg: dict | None = None):
+    def columns_autodetect(filename: str, cfg=None):
         cfg = cfg or {}
         schema: dict = {}
         if os.path.exists(filename):
