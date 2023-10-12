@@ -2229,6 +2229,16 @@ class DemandeSmartView(SmartView):
                     'ADM': {
                         'state_code': True,
                     },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
                     'DIS': {
                         'campagne_redirect': True,
                         'state_code': True,
