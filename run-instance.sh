@@ -1,15 +1,63 @@
 #!/usr/bin/bash
 
-# VENV_BIN = `~/.local/bin/poetry env list --full-path | head -n1 | cut -d " " -f 1`/bin
-# MANAGE_PY_CMD = $VENV_BIN/python manage.py
+# ensure we are in the biomaid folder
+cd $HOME/biomaid
 
-# Generate documentation (if needed)
-# ~/.cache/pypoetry/virtualenvs/`~/.local/bin/poetry poetry env list --full-path | head -n1 | cut -d " " -f 1`bin/python runserver make_docs
+# Add ~/.local/bin to $PATH since poetry lives there
+export PATH=$HOME/.local/bin:$PATH
 
-# echo "using python virtualenv: "$VENV_BIN
+POSITIONAL_ARGS=()
 
-# Deploy statics
-poetry run python manage.py collectstatic --no-input
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -d|--make-docs)
+      MAKE_DOCS=TRUE
+      shift # past argument
+      ;;
+    -s|--install-statics)
+      INSTALL_STATICS=TRUE
+      shift # past argument
+      ;;
+    -r|--reset-to-demo)
+      RESET_DEMO=TRUE
+      shift # past argument
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
 
-# Run gunicorn workers
-exec poetry run gunicorn --workers 2 --log-file ../log/gunicorn_django.log -b unix:$HOME/biomaid.sock dra.wsgi
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+
+if [[ $# -eq 0 ]]; then
+    # No argument ==> Run gunicorn workers
+
+    if [[ $MAKE_DOCS = "TRUE" ]]; then
+        # Generate documentation (if needed)
+        poetry run python manage.py make_docs
+    fi
+
+    if [[ $INSTALL_STATICS = "TRUE" ]]; then
+        # Deploy statics
+        poetry run python manage.py collectstatic --no-input
+    fi
+
+    if [[ $RESET_DEMO = "TRUE" ]]; then
+        # Deploy statics
+        poetry run python manage.py reset_db --no-input
+        poetry run python manage.py migrate
+        poetry run python manage.py loaddata fixtures/demo_db.json
+    fi
+
+    exec poetry run gunicorn --workers 2 --log-file ../log/gunicorn_django.log -b unix:$HOME/biomaid.sock dra.wsgi
+else
+    # Run the provided commands 
+    exec poetry run python manage.py $*
+fi
