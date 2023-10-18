@@ -35,6 +35,13 @@ done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
+if [[ $RESET_DEMO = "TRUE" ]]; then
+    # Deploy statics
+    poetry run python manage.py reset_db --no-input
+    poetry run python manage.py migrate
+    poetry run python manage.py loaddata fixtures/demo_db.json
+fi
+
 
 if [[ $# -eq 0 ]]; then
     # No argument ==> Run gunicorn workers
@@ -47,13 +54,6 @@ if [[ $# -eq 0 ]]; then
     if [[ $INSTALL_STATICS = "TRUE" ]]; then
         # Deploy statics
         poetry run python manage.py collectstatic --no-input
-    fi
-
-    if [[ $RESET_DEMO = "TRUE" ]]; then
-        # Deploy statics
-        poetry run python manage.py reset_db --no-input
-        poetry run python manage.py migrate
-        poetry run python manage.py loaddata fixtures/demo_db.json
     fi
 
     exec poetry run gunicorn --workers 2 --log-file ../log/gunicorn_django.log -b unix:$HOME/biomaid.sock dra.wsgi
