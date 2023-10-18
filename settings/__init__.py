@@ -159,7 +159,7 @@ TEMPLATES = [
 
 HTML_SANITIZERS = {
     'page_content': {
-        'tags': {'div', 'span', 'p', 'h1', 'h2', 'hr', 'br', 'a', 'ul', 'li'},
+        'tags': {'div', 'span', 'p', 'h1', 'h2', 'hr', 'br', 'a', 'ul', 'li', 'b', 'em'},
         'attributes': {
             'div': {
                 'class',
