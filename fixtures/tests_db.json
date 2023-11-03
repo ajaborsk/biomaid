@@ -105,7 +105,7 @@
         "pk": 1,
         "fields": {
             "password": "pbkdf2_sha256$600000$7R5pJ4jd7jJNBaI9l4fPBX$Mc9zqCl3Gyp4NdqSr7mLrgi9ivPTu5GReTv3ShvBhsE=",
-            "last_login": "2020-08-15T01:01:32.464Z",
+            "last_login": "2020-08-15T01:00:26.287Z",
             "is_superuser": true,
             "username": "root",
             "first_name": "Super",
@@ -122,11 +122,11 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{\"marche\": {\"tabulator-marches_table\": {\"columns\": [{\"field\": \"id\", \"width\": null}, {\"field\": \"num_marche\", \"width\": 162}, {\"field\": \"intitule\", \"width\": 80}, {\"field\": \"type_procedure\", \"width\": 212}, {\"field\": \"date_notif\", \"width\": 112}, {\"field\": \"date_debut\", \"width\": 74}, {\"field\": \"duree\", \"width\": 131}, {\"field\": \"acheteur\", \"width\": 95}, {\"field\": \"expert_metier\", \"width\": 124}, {\"field\": \"commentaire\", \"width\": 124}, {\"field\": \"date_fin\", \"width\": 86}, {\"field\": \"documents_sf\", \"width\": 152}, {\"field\": \"comments_sf\", \"width\": 132}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}, {\"field\": \"roles\", \"width\": null}, {\"field\": \"state\", \"width\": null}], \"sort\": [], \"show-column\": {\"num_marche\": true, \"intitule\": true, \"type_procedure\": true, \"date_notif\": true, \"date_debut\": true, \"duree\": true, \"acheteur\": true, \"expert_metier\": true, \"commentaire\": true, \"date_fin\": true, \"documents_sf\": true, \"comments_sf\": true}}}, \"common\": {\"tabulator-programme_table\": {\"columns\": [{\"field\": \"id\", \"width\": 40}, {\"field\": \"roles\", \"width\": 40}, {\"field\": \"state_code\", \"width\": 40}, {\"field\": \"calendrier\", \"width\": 171}, {\"field\": \"etablissement\", \"width\": 169}, {\"field\": \"code\", \"width\": 81}, {\"field\": \"anteriorite\", \"width\": 128}, {\"field\": \"nom\", \"width\": 227}, {\"field\": \"enveloppe\", \"width\": 105}, {\"field\": \"arbitre\", \"width\": 215}, {\"field\": \"discipline\", \"width\": 105}, {\"field\": \"description\", \"width\": 112}, {\"field\": \"date_creation\", \"width\": 144}, {\"field\": \"date_modification\", \"width\": 173}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}], \"sort\": []}, \"tabulator-calendrier_simple_table\": {\"columns\": [{\"field\": \"id\", \"width\": 40}, {\"field\": \"code\", \"width\": 70}, {\"field\": \"nom\", \"width\": 124}, {\"field\": \"description\", \"width\": 112}, {\"field\": \"message\", \"width\": 94}, {\"field\": \"debut_recensement\", \"width\": 209}, {\"field\": \"fin_recensement\", \"width\": 208}, {\"field\": \"dispatcher\", \"width\": 107}, {\"field\": \"roles\", \"width\": 40}, {\"field\": \"state_code\", \"width\": 40}], \"sort\": []}, \"tabulator-calendrier_table\": {\"columns\": [{\"field\": \"id\", \"width\": null}, {\"field\": \"code\", \"width\": 70}, {\"field\": \"nom\", \"width\": 149}, {\"field\": \"description\", \"width\": 437}, {\"field\": \"message\", \"width\": 94}, {\"field\": \"debut_recensement\", \"width\": 209}, {\"field\": \"fin_recensement\", \"width\": 208}, {\"field\": \"discipline\", \"width\": 124}, {\"field\": \"dispatcher\", \"width\": 166}, {\"field\": \"instance_roles\", \"width\": null}, {\"field\": \"state_code\", \"width\": null}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}], \"filters\": {}}}}",
-            "last_seen": "2020-08-15T01:41:51.810Z",
+            "preferences": "{}",
+            "last_seen": "2020-08-15T01:01:59.065Z",
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
-            "date_modification": "2020-08-15T01:41:51.810Z",
+            "date_modification": "2020-08-15T01:01:59.066Z",
             "groups": [],
             "user_permissions": []
         }
@@ -153,7 +153,7 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{\"dem\": {\"tabulator-tvx_demande_table\": {\"columns\": [{\"field\": \"calendrier\", \"width\": null}, {\"field\": \"roles\", \"width\": 129}, {\"field\": \"tvx_state\", \"width\": 117}, {\"field\": \"discipline_dmd\", \"width\": 40}, {\"field\": \"couts_complementaires\", \"width\": 40}, {\"field\": \"num_dmd\", \"width\": 40}, {\"field\": \"code\", \"width\": 120}, {\"field\": \"date\", \"width\": 167}, {\"field\": \"uf\", \"width\": 100}, {\"field\": \"service_view\", \"width\": 109}, {\"field\": \"pole_view\", \"width\": 150}, {\"field\": \"redacteur\", \"width\": 40}, {\"field\": \"redacteur_view\", \"width\": 130}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"tvx_batiment\", \"width\": 95}, {\"field\": \"tvx_etage\", \"width\": 97}, {\"field\": \"localisation\", \"width\": 117}, {\"field\": \"description\", \"width\": 172}, {\"field\": \"tvx_contrainte_lib\", \"width\": 203}, {\"field\": \"tvx_contrainte_alib\", \"width\": 548}, {\"field\": \"tvx_contrainte_lar\", \"width\": 421}, {\"field\": \"tvx_contrainte_autre\", \"width\": 290}, {\"field\": \"tvx_contrainte\", \"width\": 235}, {\"field\": \"tvx_contraintes_view\", \"width\": 244}, {\"field\": \"tvx_priorite\", \"width\": 456}, {\"field\": \"tvx_arg_normes\", \"width\": 40}, {\"field\": \"tvx_arg_normes_comment\", \"width\": 40}, {\"field\": \"tvx_arg_reorg\", \"width\": 40}, {\"field\": \"tvx_arg_reorg_comment\", \"width\": 40}, {\"field\": \"tvx_arg_devact\", \"width\": 40}, {\"field\": \"tvx_arg_devact_comment\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_qvt\", \"width\": 40}, {\"field\": \"tvx_arg_qvt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_securite\", \"width\": 40}, {\"field\": \"tvx_arg_securite_comment\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes_comment\", \"width\": 40}, {\"field\": \"autre_argumentaire\", \"width\": 40}, {\"field\": \"argumentaire_detaille_tvx\", \"width\": 500}, {\"field\": \"documents_sf\", \"width\": 153}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"tvx_eval_devact\", \"width\": 40}, {\"field\": \"tvx_eval_contin\", \"width\": 40}, {\"field\": \"tvx_eval_confort\", \"width\": 40}, {\"field\": \"tvx_eval_securite\", \"width\": 40}, {\"field\": \"tvx_eval_qvt\", \"width\": 40}, {\"field\": \"tvx_eval_synthese\", \"width\": 158}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"montant_unitaire_expert_metier\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}]}], \"sort\": []}}}",
+            "preferences": "{}",
             "last_seen": "2022-05-14T09:04:50.168Z",
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
@@ -184,7 +184,7 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{\"dem\": {\"tabulator-tvx_demande_table\": {\"columns\": [{\"field\": \"roles\", \"width\": 128}, {\"field\": \"tvx_state\", \"width\": 116}, {\"field\": \"discipline_dmd\", \"width\": 40}, {\"field\": \"couts_complementaires\", \"width\": 40}, {\"field\": \"num_dmd\", \"width\": 40}, {\"field\": \"code\", \"width\": 120}, {\"field\": \"date\", \"width\": 166}, {\"field\": \"uf\", \"width\": 100}, {\"field\": \"service_view\", \"width\": 109}, {\"field\": \"pole_view\", \"width\": 149}, {\"field\": \"redacteur\", \"width\": 40}, {\"field\": \"redacteur_view\", \"width\": 129}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"tvx_batiment\", \"width\": 95}, {\"field\": \"tvx_etage\", \"width\": 97}, {\"field\": \"localisation\", \"width\": 116}, {\"field\": \"description\", \"width\": 172}, {\"field\": \"tvx_contrainte_lib\", \"width\": 203}, {\"field\": \"tvx_contrainte_alib\", \"width\": 546}, {\"field\": \"tvx_contrainte_lar\", \"width\": 419}, {\"field\": \"tvx_contrainte_autre\", \"width\": 289}, {\"field\": \"tvx_contrainte\", \"width\": 234}, {\"field\": \"tvx_priorite\", \"width\": 454}, {\"field\": \"tvx_arg_normes\", \"width\": 40}, {\"field\": \"tvx_arg_normes_comment\", \"width\": 40}, {\"field\": \"tvx_arg_reorg\", \"width\": 40}, {\"field\": \"tvx_arg_reorg_comment\", \"width\": 40}, {\"field\": \"tvx_arg_devact\", \"width\": 40}, {\"field\": \"tvx_arg_devact_comment\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_qvt\", \"width\": 40}, {\"field\": \"tvx_arg_qvt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_securite\", \"width\": 40}, {\"field\": \"tvx_arg_securite_comment\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes_comment\", \"width\": 40}, {\"field\": \"autre_argumentaire\", \"width\": 40}, {\"field\": \"argumentaire_detaille_tvx\", \"width\": 500}, {\"field\": \"documents_sf\", \"width\": 152}, {\"field\": \"expert_metier\", \"width\": 124}, {\"field\": \"tvx_eval_devact\", \"width\": 40}, {\"field\": \"tvx_eval_contin\", \"width\": 40}, {\"field\": \"tvx_eval_confort\", \"width\": 40}, {\"field\": \"tvx_eval_securite\", \"width\": 40}, {\"field\": \"tvx_eval_qvt\", \"width\": 40}, {\"field\": \"tvx_eval_synthese\", \"width\": 157}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"montant_unitaire_expert_metier\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}], \"sort\": []}, \"tabulator-demandes_en_cours_simple_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": 50}, {\"field\": \"roles\", \"width\": 40}, {\"field\": \"state_code\", \"width\": 40}, {\"field\": \"date_premiere_demande\", \"width\": 50}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"montant\", \"width\": 110}, {\"field\": \"impact_travaux\", \"width\": 40}, {\"field\": \"impact_informatique\", \"width\": 40}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"soumis_a_avis\", \"width\": 40}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"avis_biomed\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 120}, {\"field\": \"montant_qte_validee\", \"width\": 40}, {\"field\": \"montant_final\", \"width\": 40}, {\"field\": \"montant_consomme\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}], \"sort\": [], \"show-column\": {\"num_dmd\": true, \"date_premiere_demande\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"cause\": true, \"referent\": true, \"quantite\": true, \"prix_unitaire\": true, \"montant\": true, \"impact_travaux\": true, \"impact_informatique\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"soumis_a_avis\": true, \"commentaire_biomed\": true, \"avis_biomed\": true}}, \"tabulator-suivi_acquisitions_simple_table\": {\"columns\": [{\"field\": \"num\", \"width\": 66}, {\"field\": \"discipline_dmd\", \"width\": 40}, {\"field\": \"code_uf\", \"width\": 93}, {\"field\": \"nom_uf\", \"width\": 54}, {\"field\": \"nom_pole\", \"width\": 65}, {\"field\": \"dmd_quantite\", \"width\": 58}, {\"field\": \"dmd_libelle\", \"width\": 145}, {\"field\": \"budget\", \"width\": 95}, {\"field\": \"expert\", \"width\": 151}, {\"field\": \"suivi_besoin\", \"width\": 170}, {\"field\": \"suivi_achat\", \"width\": 84}, {\"field\": \"suivi_offre\", \"width\": 72}, {\"field\": \"suivi_appro\", \"width\": 111}, {\"field\": \"suivi_mes\", \"width\": 139}, {\"field\": \"commentaire_public\", \"width\": 125}, {\"field\": \"date_estimative_mes\", \"width\": 249}, {\"field\": \"roles\", \"width\": 40}], \"sort\": [], \"show-column\": {\"num\": true, \"code_uf\": true, \"nom_uf\": true, \"nom_pole\": true, \"dmd_quantite\": true, \"dmd_libelle\": true, \"budget\": true, \"expert\": true, \"suivi_besoin\": true, \"suivi_achat\": true, \"suivi_offre\": true, \"suivi_appro\": true, \"suivi_mes\": true, \"commentaire_public\": true, \"date_estimative_mes\": true}}, \"tabulator-demandes_tout_simple_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": 50}, {\"field\": \"roles\", \"width\": null}, {\"field\": \"state_code\", \"width\": null}, {\"field\": \"date_premiere_demande\", \"width\": 50}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"montant\", \"width\": 110}, {\"field\": \"impact_travaux\", \"width\": 40}, {\"field\": \"impact_informatique\", \"width\": 40}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"domaine\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"soumis_a_avis\", \"width\": 40}, {\"field\": \"prix_unitaire_conditional\", \"width\": 108}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"avis_biomed\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 120}, {\"field\": \"arbitrage_commission\", \"width\": 100}, {\"field\": \"commentaire_definitif_commission\", \"width\": 200}, {\"field\": \"quantite_validee_conditional\", \"width\": 143}, {\"field\": \"montant_qte_validee\", \"width\": null}, {\"field\": \"montant_valide_conditional\", \"width\": 120}, {\"field\": \"montant_final\", \"width\": null}, {\"field\": \"montant_consomme\", \"width\": null}, {\"field\": \"gel\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}], \"sort\": [], \"show-column\": {\"num_dmd\": true, \"date_premiere_demande\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"cause\": true, \"referent\": true, \"quantite\": true, \"prix_unitaire\": true, \"montant\": true, \"impact_travaux\": true, \"impact_informatique\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"programme\": true, \"domaine\": true, \"expert_metier\": true, \"soumis_a_avis\": true, \"prix_unitaire_conditional\": true, \"commentaire_biomed\": true, \"avis_biomed\": true, \"arbitrage_commission\": true, \"commentaire_definitif_commission\": true, \"quantite_validee_conditional\": true, \"montant_valide_conditional\": true}}}, \"common\": {\"tabulator-user_alerts_simple_table\": {\"columns\": [{\"field\": \"niveau\", \"width\": 81}, {\"field\": \"categorie\", \"width\": 99}, {\"field\": \"date_activation\", \"width\": 214}, {\"field\": \"intitule\", \"width\": 81}, {\"field\": \"date_lecture\", \"width\": 136}, {\"field\": \"date_fin\", \"width\": 107}, {\"field\": \"commentaire\", \"width\": 125}], \"sort\": []}}}",
+            "preferences": "{}",
             "last_seen": null,
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
@@ -215,7 +215,7 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{\"dem\": {\"tabulator-demandes_en_cours_simple_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": 50}, {\"field\": \"roles\", \"width\": null}, {\"field\": \"state_code\", \"width\": null}, {\"field\": \"date_premiere_demande\", \"width\": 50}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"montant\", \"width\": 110}, {\"field\": \"impact_travaux\", \"width\": 40}, {\"field\": \"impact_informatique\", \"width\": 40}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"soumis_a_avis\", \"width\": 40}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"avis_biomed\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 120}, {\"field\": \"montant_qte_validee\", \"width\": null}, {\"field\": \"montant_final\", \"width\": null}, {\"field\": \"montant_consomme\", \"width\": null}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}], \"sort\": [], \"show-column\": {\"num_dmd\": true, \"date_premiere_demande\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"cause\": true, \"referent\": true, \"quantite\": true, \"prix_unitaire\": true, \"montant\": true, \"impact_travaux\": true, \"impact_informatique\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"soumis_a_avis\": true, \"commentaire_biomed\": true, \"avis_biomed\": true}}, \"tabulator-suivi_acquisitions_simple_table\": {\"columns\": [{\"field\": \"num\", \"width\": 66}, {\"field\": \"discipline_dmd\", \"width\": 40}, {\"field\": \"code_uf\", \"width\": 93}, {\"field\": \"nom_uf\", \"width\": 54}, {\"field\": \"nom_pole\", \"width\": 65}, {\"field\": \"dmd_quantite\", \"width\": 58}, {\"field\": \"dmd_libelle\", \"width\": 145}, {\"field\": \"budget\", \"width\": 95}, {\"field\": \"expert\", \"width\": 151}, {\"field\": \"suivi_besoin\", \"width\": 170}, {\"field\": \"suivi_achat\", \"width\": 84}, {\"field\": \"suivi_offre\", \"width\": 72}, {\"field\": \"suivi_appro\", \"width\": 111}, {\"field\": \"suivi_mes\", \"width\": 139}, {\"field\": \"commentaire_public\", \"width\": 125}, {\"field\": \"date_estimative_mes\", \"width\": 249}, {\"field\": \"roles\", \"width\": 40}], \"sort\": [], \"show-column\": {\"num\": true, \"code_uf\": true, \"nom_uf\": true, \"nom_pole\": true, \"dmd_quantite\": true, \"dmd_libelle\": true, \"budget\": true, \"expert\": true, \"suivi_besoin\": true, \"suivi_achat\": true, \"suivi_offre\": true, \"suivi_appro\": true, \"suivi_mes\": true, \"commentaire_public\": true, \"date_estimative_mes\": true}}, \"tabulator-demandes_tout_simple_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": 50}, {\"field\": \"roles\", \"width\": 40}, {\"field\": \"state_code\", \"width\": 40}, {\"field\": \"date_premiere_demande\", \"width\": 50}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"montant\", \"width\": 110}, {\"field\": \"impact_travaux\", \"width\": 40}, {\"field\": \"impact_informatique\", \"width\": 40}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"domaine\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"soumis_a_avis\", \"width\": 40}, {\"field\": \"prix_unitaire_conditional\", \"width\": 108}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"avis_biomed\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 120}, {\"field\": \"arbitrage_commission\", \"width\": 100}, {\"field\": \"commentaire_definitif_commission\", \"width\": 200}, {\"field\": \"quantite_validee_conditional\", \"width\": 143}, {\"field\": \"montant_qte_validee\", \"width\": 40}, {\"field\": \"montant_valide_conditional\", \"width\": 120}, {\"field\": \"montant_final\", \"width\": 40}, {\"field\": \"montant_consomme\", \"width\": 40}, {\"field\": \"gel\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}], \"sort\": [], \"show-column\": {\"num_dmd\": true, \"date_premiere_demande\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"cause\": true, \"referent\": true, \"quantite\": true, \"prix_unitaire\": true, \"montant\": true, \"impact_travaux\": true, \"impact_informatique\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"programme\": true, \"domaine\": true, \"expert_metier\": true, \"soumis_a_avis\": true, \"prix_unitaire_conditional\": true, \"commentaire_biomed\": true, \"avis_biomed\": true, \"arbitrage_commission\": true, \"commentaire_definitif_commission\": true, \"quantite_validee_conditional\": true, \"montant_valide_conditional\": true}}}}",
+            "preferences": "{}",
             "last_seen": "2022-07-11T14:34:58.253Z",
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
@@ -277,7 +277,7 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{\"dem\": {\"tabulator-expertise_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": 40}, {\"field\": \"campagne_rect\", \"width\": 107}, {\"field\": \"roles\", \"width\": 129}, {\"field\": \"state_code\", \"width\": 117}, {\"field\": \"redacteur\", \"width\": 40}, {\"field\": \"contact\", \"width\": 40}, {\"field\": \"dect_contact\", \"width\": 40}, {\"field\": \"discipline_dmd\", \"width\": 40}, {\"field\": \"code\", \"width\": 51}, {\"field\": \"date_premiere_demande\", \"width\": 50}, {\"field\": \"uf\", \"width\": 100}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"description\", \"width\": 250}, {\"field\": \"localisation\", \"width\": 117}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"it_caracteristiques_minimales\", \"width\": 217}, {\"field\": \"it_a_installer\", \"width\": 221}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"materiel_existant\", \"width\": 154}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"montant_initial\", \"width\": 120}, {\"field\": \"it_cout_formation\", \"width\": 100}, {\"field\": \"impact_travaux\", \"width\": 40}, {\"field\": \"impact_informatique\", \"width\": 40}, {\"field\": \"consommables_eventuels\", \"width\": 40}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"domaine\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"prix_unitaire_conditional\", \"width\": 108}, {\"field\": \"arg_interet_medical\", \"width\": 40}, {\"field\": \"arg_commentaire_im\", \"width\": 40}, {\"field\": \"arg_oblig_reglementaire\", \"width\": 40}, {\"field\": \"arg_commentaire_or\", \"width\": 40}, {\"field\": \"arg_recommandations\", \"width\": 40}, {\"field\": \"arg_commentaire_r\", \"width\": 40}, {\"field\": \"arg_confort_patient\", \"width\": 40}, {\"field\": \"arg_commentaire_cp\", \"width\": 40}, {\"field\": \"arg_confort_perso_ergo\", \"width\": 40}, {\"field\": \"arg_commentaire_pe\", \"width\": 40}, {\"field\": \"arg_notoriete\", \"width\": 40}, {\"field\": \"arg_commentaire_n\", \"width\": 40}, {\"field\": \"arg_projet_chu_pole\", \"width\": 40}, {\"field\": \"arg_commentaire_pcp\", \"width\": 40}, {\"field\": \"arg_gain_financier\", \"width\": 40}, {\"field\": \"arg_commentaire_gf\", \"width\": 40}, {\"field\": \"arg_mutualisation\", \"width\": 40}, {\"field\": \"arg_commentaire_m\", \"width\": 40}, {\"field\": \"arg_innovation_recherche\", \"width\": 40}, {\"field\": \"arg_commentaire_ir\", \"width\": 40}, {\"field\": \"autre_argumentaire\", \"width\": 40}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"montant_unitaire_expert_metier\", \"width\": 110}, {\"field\": \"avis_biomed\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 120}, {\"field\": \"montant_qte_validee\", \"width\": 40}, {\"field\": \"montant_valide_conditional\", \"width\": 40}, {\"field\": \"montant_final\", \"width\": 40}, {\"field\": \"montant_consomme\", \"width\": 40}, {\"field\": \"arbitrage\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}]}, {\"field\": \"valide_flag\", \"width\": 40}], \"show-column\": {\"campagne_rect\": true, \"date_premiere_demande\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"description\": true, \"cause\": true, \"referent\": true, \"materiel_existant\": true, \"quantite\": true, \"prix_unitaire\": true, \"impact_travaux\": true, \"impact_informatique\": true, \"it_caracteristiques_minimales\": true, \"it_a_installer\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"programme\": true, \"domaine\": true, \"expert_metier\": true, \"montant_unitaire_expert_metier\": true, \"prix_unitaire_conditional\": true, \"it_cout_formation\": true, \"commentaire_biomed\": true, \"avis_biomed\": true}, \"filters\": {}}, \"tabulator-demandes_en_cours_exp_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": 40}, {\"field\": \"campagne_rect\", \"width\": 107}, {\"field\": \"roles\", \"width\": 129}, {\"field\": \"state_code\", \"width\": 117}, {\"field\": \"redacteur\", \"width\": 40}, {\"field\": \"contact\", \"width\": 40}, {\"field\": \"dect_contact\", \"width\": 40}, {\"field\": \"discipline_dmd\", \"width\": 40}, {\"field\": \"code\", \"width\": 120}, {\"field\": \"date_premiere_demande\", \"width\": 50}, {\"field\": \"uf\", \"width\": 100}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"description\", \"width\": 250}, {\"field\": \"localisation\", \"width\": 117}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"it_caracteristiques_minimales\", \"width\": 217}, {\"field\": \"it_a_installer\", \"width\": 221}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"materiel_existant\", \"width\": 154}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"montant_initial\", \"width\": 120}, {\"field\": \"it_cout_formation\", \"width\": 100}, {\"field\": \"impact_travaux\", \"width\": 40}, {\"field\": \"impact_informatique\", \"width\": 40}, {\"field\": \"consommables_eventuels\", \"width\": 40}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"domaine\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"prix_unitaire_conditional\", \"width\": 108}, {\"field\": \"arg_interet_medical\", \"width\": 40}, {\"field\": \"arg_commentaire_im\", \"width\": 40}, {\"field\": \"arg_oblig_reglementaire\", \"width\": 40}, {\"field\": \"arg_commentaire_or\", \"width\": 40}, {\"field\": \"arg_recommandations\", \"width\": 40}, {\"field\": \"arg_commentaire_r\", \"width\": 40}, {\"field\": \"arg_confort_patient\", \"width\": 40}, {\"field\": \"arg_commentaire_cp\", \"width\": 40}, {\"field\": \"arg_confort_perso_ergo\", \"width\": 40}, {\"field\": \"arg_commentaire_pe\", \"width\": 40}, {\"field\": \"arg_notoriete\", \"width\": 40}, {\"field\": \"arg_commentaire_n\", \"width\": 40}, {\"field\": \"arg_projet_chu_pole\", \"width\": 40}, {\"field\": \"arg_commentaire_pcp\", \"width\": 40}, {\"field\": \"arg_gain_financier\", \"width\": 40}, {\"field\": \"arg_commentaire_gf\", \"width\": 40}, {\"field\": \"arg_mutualisation\", \"width\": 40}, {\"field\": \"arg_commentaire_m\", \"width\": 40}, {\"field\": \"arg_innovation_recherche\", \"width\": 40}, {\"field\": \"arg_commentaire_ir\", \"width\": 40}, {\"field\": \"autre_argumentaire\", \"width\": 40}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"montant_unitaire_expert_metier\", \"width\": 110}, {\"field\": \"avis_biomed\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 120}, {\"field\": \"arbitrage_commission\", \"width\": 100}, {\"field\": \"commentaire_provisoire_commission\", \"width\": 200}, {\"field\": \"commentaire_definitif_commission\", \"width\": 200}, {\"field\": \"quantite_validee_conditional\", \"width\": 143}, {\"field\": \"montant_qte_validee\", \"width\": 40}, {\"field\": \"montant_valide_conditional\", \"width\": 120}, {\"field\": \"montant_final\", \"width\": 40}, {\"field\": \"montant_consomme\", \"width\": 40}, {\"field\": \"arbitrage\", \"width\": 40}, {\"field\": \"gel\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}], \"show-column\": {\"campagne_rect\": true, \"date_premiere_demande\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"description\": true, \"cause\": true, \"referent\": true, \"materiel_existant\": true, \"quantite\": true, \"prix_unitaire\": true, \"impact_travaux\": true, \"impact_informatique\": true, \"it_caracteristiques_minimales\": true, \"it_a_installer\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"programme\": true, \"domaine\": true, \"expert_metier\": true, \"montant_unitaire_expert_metier\": true, \"prix_unitaire_conditional\": true, \"it_cout_formation\": true, \"commentaire_biomed\": true, \"avis_biomed\": true, \"arbitrage_commission\": true, \"commentaire_provisoire_commission\": true, \"commentaire_definitif_commission\": true, \"quantite_validee_conditional\": true, \"montant_valide_conditional\": true}, \"filters\": {}}, \"tabulator-repartition_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": null}, {\"field\": \"state_code\", \"width\": 117}, {\"field\": \"roles\", \"width\": 129}, {\"field\": \"code\", \"width\": 120}, {\"field\": \"campagne_rect\", \"width\": 124}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"materiel_existant\", \"width\": 154}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"dispatcher_note\", \"width\": 226}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"domaine\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}], \"show-column\": {\"campagne_rect\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"cause\": true, \"referent\": true, \"materiel_existant\": true, \"quantite\": true, \"prix_unitaire\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"programme\": true, \"domaine\": true, \"expert_metier\": true}, \"filters\": {}}}}",
+            "preferences": "{}", 
             "last_seen": "2022-07-11T14:40:43.133Z",
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
@@ -308,7 +308,7 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{\"dem\": {\"tabulator-expertise_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": null}, {\"field\": \"campagne_rect\", \"width\": 124}, {\"field\": \"roles\", \"width\": 129}, {\"field\": \"state_code\", \"width\": 117}, {\"field\": \"redacteur\", \"width\": null}, {\"field\": \"contact\", \"width\": null}, {\"field\": \"dect_contact\", \"width\": null}, {\"field\": \"discipline_dmd\", \"width\": null}, {\"field\": \"code\", \"width\": 120}, {\"field\": \"date_premiere_demande\", \"width\": 50}, {\"field\": \"uf\", \"width\": 100}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"description\", \"width\": 250}, {\"field\": \"localisation\", \"width\": 117}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"it_caracteristiques_minimales\", \"width\": 217}, {\"field\": \"it_a_installer\", \"width\": 221}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"materiel_existant\", \"width\": 154}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"montant_initial\", \"width\": 120}, {\"field\": \"it_cout_formation\", \"width\": 100}, {\"field\": \"impact_travaux\", \"width\": 40}, {\"field\": \"impact_informatique\", \"width\": 40}, {\"field\": \"consommables_eventuels\", \"width\": 40}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"domaine\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"prix_unitaire_conditional\", \"width\": 108}, {\"field\": \"arg_interet_medical\", \"width\": null}, {\"field\": \"arg_commentaire_im\", \"width\": null}, {\"field\": \"arg_oblig_reglementaire\", \"width\": null}, {\"field\": \"arg_commentaire_or\", \"width\": null}, {\"field\": \"arg_recommandations\", \"width\": null}, {\"field\": \"arg_commentaire_r\", \"width\": null}, {\"field\": \"arg_confort_patient\", \"width\": null}, {\"field\": \"arg_commentaire_cp\", \"width\": null}, {\"field\": \"arg_confort_perso_ergo\", \"width\": null}, {\"field\": \"arg_commentaire_pe\", \"width\": null}, {\"field\": \"arg_notoriete\", \"width\": null}, {\"field\": \"arg_commentaire_n\", \"width\": null}, {\"field\": \"arg_projet_chu_pole\", \"width\": null}, {\"field\": \"arg_commentaire_pcp\", \"width\": null}, {\"field\": \"arg_gain_financier\", \"width\": null}, {\"field\": \"arg_commentaire_gf\", \"width\": null}, {\"field\": \"arg_mutualisation\", \"width\": null}, {\"field\": \"arg_commentaire_m\", \"width\": null}, {\"field\": \"arg_innovation_recherche\", \"width\": null}, {\"field\": \"arg_commentaire_ir\", \"width\": null}, {\"field\": \"autre_argumentaire\", \"width\": null}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"montant_unitaire_expert_metier\", \"width\": 110}, {\"field\": \"avis_biomed\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 120}, {\"field\": \"montant_qte_validee\", \"width\": null}, {\"field\": \"montant_valide_conditional\", \"width\": null}, {\"field\": \"montant_final\", \"width\": null}, {\"field\": \"montant_consomme\", \"width\": null}, {\"field\": \"arbitrage\", \"width\": null}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}]}, {\"field\": \"valide_flag\", \"width\": null}], \"show-column\": {\"campagne_rect\": true, \"date_premiere_demande\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"description\": true, \"cause\": true, \"referent\": true, \"materiel_existant\": true, \"quantite\": true, \"prix_unitaire\": true, \"impact_travaux\": true, \"impact_informatique\": true, \"it_caracteristiques_minimales\": true, \"it_a_installer\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"programme\": true, \"domaine\": true, \"expert_metier\": true, \"montant_unitaire_expert_metier\": true, \"prix_unitaire_conditional\": true, \"it_cout_formation\": true, \"commentaire_biomed\": true, \"avis_biomed\": true}, \"filters\": {}}}}",
+            "preferences": "{}",
             "last_seen": "2022-07-11T14:41:27.923Z",
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
@@ -339,7 +339,7 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{\"dem\": {\"tabulator-arbitrage_simple_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": 50}, {\"field\": \"roles\", \"width\": 40}, {\"field\": \"state_code\", \"width\": 40}, {\"field\": \"date_premiere_demande\", \"width\": 50}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"montant\", \"width\": 110}, {\"field\": \"impact_travaux\", \"width\": 40}, {\"field\": \"impact_informatique\", \"width\": 40}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"domaine\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"soumis_a_avis\", \"width\": 40}, {\"field\": \"prix_unitaire_conditional\", \"width\": 108}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"avis_biomed\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 120}, {\"field\": \"arbitrage_commission\", \"width\": 100}, {\"field\": \"commentaire_provisoire_commission\", \"width\": 200}, {\"field\": \"commentaire_definitif_commission\", \"width\": 200}, {\"field\": \"quantite_validee_conditional\", \"width\": 143}, {\"field\": \"montant_qte_validee\", \"width\": 40}, {\"field\": \"montant_valide_conditional\", \"width\": 120}, {\"field\": \"montant_final\", \"width\": 40}, {\"field\": \"montant_consomme\", \"width\": 40}, {\"field\": \"gel\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}, {\"field\": \"valide_flag\", \"width\": 40}], \"sort\": [], \"show-column\": {\"num_dmd\": true, \"date_premiere_demande\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"cause\": true, \"referent\": true, \"quantite\": true, \"prix_unitaire\": true, \"montant\": true, \"impact_travaux\": true, \"impact_informatique\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"programme\": true, \"domaine\": true, \"expert_metier\": true, \"soumis_a_avis\": true, \"prix_unitaire_conditional\": true, \"commentaire_biomed\": true, \"avis_biomed\": true, \"arbitrage_commission\": true, \"commentaire_provisoire_commission\": true, \"commentaire_definitif_commission\": true, \"quantite_validee_conditional\": true, \"montant_valide_conditional\": true, \"gel\": true}}, \"tabulator-arbitrage_table\": {\"columns\": [{\"field\": \"num_dmd\", \"width\": 50}, {\"field\": \"roles\", \"width\": 40}, {\"field\": \"state_code\", \"width\": 40}, {\"field\": \"date_premiere_demande\", \"width\": 50}, {\"field\": \"pole_nom\", \"width\": 125}, {\"field\": \"uf_code\", \"width\": 50}, {\"field\": \"uf_nom\", \"width\": 125}, {\"field\": \"redacteur_nom\", \"width\": 100}, {\"field\": \"priorite\", \"width\": 80}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"cause\", \"width\": 110}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"quantite\", \"width\": 33}, {\"field\": \"prix_unitaire\", \"width\": 100}, {\"field\": \"montant\", \"width\": 110}, {\"field\": \"impact_travaux\", \"width\": 40}, {\"field\": \"impact_informatique\", \"width\": 40}, {\"field\": \"argumentaire_detaille\", \"width\": 500}, {\"field\": \"documents_joints\", \"width\": 400}, {\"field\": \"avis_cadre_sup\", \"width\": 40}, {\"field\": \"commentaire_cadre_sup\", \"width\": 200}, {\"field\": \"decision_validateur\", \"width\": 40}, {\"field\": \"decision_soumission\", \"width\": 200}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"domaine\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"soumis_a_avis\", \"width\": 40}, {\"field\": \"prix_unitaire_conditional\", \"width\": 108}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"avis_biomed\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 120}, {\"field\": \"arbitrage_commission\", \"width\": 100}, {\"field\": \"commentaire_provisoire_commission\", \"width\": 200}, {\"field\": \"commentaire_definitif_commission\", \"width\": 200}, {\"field\": \"quantite_validee_conditional\", \"width\": 143}, {\"field\": \"montant_qte_validee\", \"width\": 40}, {\"field\": \"montant_valide_conditional\", \"width\": 120}, {\"field\": \"montant_final\", \"width\": 40}, {\"field\": \"montant_consomme\", \"width\": 40}, {\"field\": \"gel\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}, {\"width\": 24}, {\"width\": 24}]}, {\"field\": \"valide_flag\", \"width\": 40}], \"sort\": [], \"show-column\": {\"num_dmd\": true, \"date_premiere_demande\": true, \"pole_nom\": true, \"uf_code\": true, \"uf_nom\": true, \"redacteur_nom\": true, \"priorite\": true, \"nom_projet\": true, \"libelle\": true, \"cause\": true, \"referent\": true, \"quantite\": true, \"prix_unitaire\": true, \"montant\": true, \"impact_travaux\": true, \"impact_informatique\": true, \"argumentaire_detaille\": true, \"documents_joints\": true, \"avis_cadre_sup\": true, \"commentaire_cadre_sup\": true, \"decision_validateur\": true, \"decision_soumission\": true, \"programme\": true, \"domaine\": true, \"expert_metier\": true, \"soumis_a_avis\": true, \"prix_unitaire_conditional\": true, \"commentaire_biomed\": true, \"avis_biomed\": true, \"arbitrage_commission\": true, \"commentaire_provisoire_commission\": true, \"commentaire_definitif_commission\": true, \"quantite_validee_conditional\": true, \"montant_valide_conditional\": true, \"gel\": true}}, \"tabulator-tvx_demande_validation_table\": {\"columns\": [{\"field\": \"calendrier\", \"width\": 40}, {\"field\": \"roles\", \"width\": 129}, {\"field\": \"tvx_state\", \"width\": 117}, {\"field\": \"discipline_dmd\", \"width\": 40}, {\"field\": \"couts_complementaires\", \"width\": 40}, {\"field\": \"num_dmd\", \"width\": 40}, {\"field\": \"code\", \"width\": 88}, {\"field\": \"date\", \"width\": 167}, {\"field\": \"uf\", \"width\": 100}, {\"field\": \"service_view\", \"width\": 85}, {\"field\": \"pole_view\", \"width\": 65}, {\"field\": \"redacteur\", \"width\": 40}, {\"field\": \"redacteur_view\", \"width\": 104}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"tvx_batiment\", \"width\": 95}, {\"field\": \"tvx_etage\", \"width\": 73}, {\"field\": \"localisation\", \"width\": 117}, {\"field\": \"description\", \"width\": 172}, {\"field\": \"tvx_contrainte_lib\", \"width\": 203}, {\"field\": \"tvx_contrainte_alib\", \"width\": 548}, {\"field\": \"tvx_contrainte_lar\", \"width\": 421}, {\"field\": \"tvx_contrainte_autre\", \"width\": 290}, {\"field\": \"tvx_contrainte\", \"width\": 235}, {\"field\": \"tvx_priorite\", \"width\": 84}, {\"field\": \"tvx_arg_normes\", \"width\": 40}, {\"field\": \"tvx_arg_normes_comment\", \"width\": 40}, {\"field\": \"tvx_arg_reorg\", \"width\": 40}, {\"field\": \"tvx_arg_reorg_comment\", \"width\": 40}, {\"field\": \"tvx_arg_devact\", \"width\": 40}, {\"field\": \"tvx_arg_devact_comment\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_qvt\", \"width\": 40}, {\"field\": \"tvx_arg_qvt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_securite\", \"width\": 40}, {\"field\": \"tvx_arg_securite_comment\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes_comment\", \"width\": 40}, {\"field\": \"autre_argumentaire\", \"width\": 40}, {\"field\": \"argumentaire_detaille_tvx\", \"width\": 500}, {\"field\": \"documents_sf\", \"width\": 153}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"tvx_eval_devact\", \"width\": 275}, {\"field\": \"tvx_eval_contin\", \"width\": 258}, {\"field\": \"tvx_eval_confort\", \"width\": 286}, {\"field\": \"tvx_eval_securite\", \"width\": 163}, {\"field\": \"tvx_eval_qvt\", \"width\": 130}, {\"field\": \"tvx_eval_synthese\", \"width\": 158}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"montant_unitaire_expert_metier\", \"width\": 40}, {\"field\": \"prix_unitaire_conditional\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 106}, {\"field\": \"quantite_validee_conditional\", \"width\": 40}, {\"field\": \"montant_qte_validee\", \"width\": 40}, {\"field\": \"montant_valide_conditional\", \"width\": 105}, {\"field\": \"montant_final\", \"width\": 40}, {\"field\": \"montant_consomme\", \"width\": 40}, {\"field\": \"arbitrage_commission\", \"width\": 100}, {\"field\": \"commentaire_definitif_commission\", \"width\": 200}, {\"field\": \"gel\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}]}], \"sort\": []}}}",
+            "preferences": "{}",
             "last_seen": null,
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
@@ -401,7 +401,7 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{\"dem\": {\"tabulator-tvx_pre_analyse_table\": {\"columns\": [{\"field\": \"roles\", \"width\": 147}, {\"field\": \"tvx_state\", \"width\": 117}, {\"field\": \"discipline_dmd\", \"width\": 40}, {\"field\": \"couts_complementaires\", \"width\": 40}, {\"field\": \"num_dmd\", \"width\": 40}, {\"field\": \"code\", \"width\": 120}, {\"field\": \"date\", \"width\": 167}, {\"field\": \"uf\", \"width\": 100}, {\"field\": \"service_view\", \"width\": 109}, {\"field\": \"pole_view\", \"width\": 150}, {\"field\": \"redacteur\", \"width\": 40}, {\"field\": \"redacteur_view\", \"width\": 130}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"tvx_batiment\", \"width\": 95}, {\"field\": \"tvx_etage\", \"width\": 97}, {\"field\": \"localisation\", \"width\": 117}, {\"field\": \"description\", \"width\": 172}, {\"field\": \"tvx_contrainte_lib\", \"width\": 203}, {\"field\": \"tvx_contrainte_alib\", \"width\": 548}, {\"field\": \"tvx_contrainte_lar\", \"width\": 421}, {\"field\": \"tvx_contrainte_autre\", \"width\": 290}, {\"field\": \"tvx_contrainte\", \"width\": 235}, {\"field\": \"tvx_contraintes_view\", \"width\": 244}, {\"field\": \"tvx_priorite\", \"width\": 394}, {\"field\": \"tvx_arg_normes\", \"width\": 40}, {\"field\": \"tvx_arg_normes_comment\", \"width\": 40}, {\"field\": \"tvx_arg_reorg\", \"width\": 40}, {\"field\": \"tvx_arg_reorg_comment\", \"width\": 40}, {\"field\": \"tvx_arg_devact\", \"width\": 40}, {\"field\": \"tvx_arg_devact_comment\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_qvt\", \"width\": 40}, {\"field\": \"tvx_arg_qvt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_securite\", \"width\": 40}, {\"field\": \"tvx_arg_securite_comment\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes_comment\", \"width\": 40}, {\"field\": \"autre_argumentaire\", \"width\": 40}, {\"field\": \"argumentaire_detaille_tvx\", \"width\": 500}, {\"field\": \"documents_sf\", \"width\": 153}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"montant_arbitrage\", \"width\": 40}, {\"field\": \"quantite_validee_conditional\", \"width\": 40}, {\"field\": \"gel\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}]}], \"sort\": []}}}",
+            "preferences": "{}",
             "last_seen": null,
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
@@ -432,7 +432,7 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{\"dem\": {\"tabulator-tvx_demande_validation_table\": {\"columns\": [{\"field\": \"calendrier\", \"width\": 40}, {\"field\": \"roles\", \"width\": 129}, {\"field\": \"tvx_state\", \"width\": 117}, {\"field\": \"discipline_dmd\", \"width\": 40}, {\"field\": \"couts_complementaires\", \"width\": 40}, {\"field\": \"num_dmd\", \"width\": 40}, {\"field\": \"code\", \"width\": 88}, {\"field\": \"date\", \"width\": 167}, {\"field\": \"uf\", \"width\": 100}, {\"field\": \"service_view\", \"width\": 85}, {\"field\": \"pole_view\", \"width\": 65}, {\"field\": \"redacteur\", \"width\": 40}, {\"field\": \"redacteur_view\", \"width\": 104}, {\"field\": \"referent\", \"width\": 150}, {\"field\": \"libelle\", \"width\": 250}, {\"field\": \"nom_projet\", \"width\": 250}, {\"field\": \"tvx_batiment\", \"width\": 95}, {\"field\": \"tvx_etage\", \"width\": 73}, {\"field\": \"localisation\", \"width\": 117}, {\"field\": \"description\", \"width\": 172}, {\"field\": \"tvx_contrainte_lib\", \"width\": 203}, {\"field\": \"tvx_contrainte_alib\", \"width\": 548}, {\"field\": \"tvx_contrainte_lar\", \"width\": 421}, {\"field\": \"tvx_contrainte_autre\", \"width\": 290}, {\"field\": \"tvx_contrainte\", \"width\": 235}, {\"field\": \"tvx_priorite\", \"width\": 84}, {\"field\": \"tvx_arg_normes\", \"width\": 40}, {\"field\": \"tvx_arg_normes_comment\", \"width\": 40}, {\"field\": \"tvx_arg_reorg\", \"width\": 40}, {\"field\": \"tvx_arg_reorg_comment\", \"width\": 40}, {\"field\": \"tvx_arg_devact\", \"width\": 40}, {\"field\": \"tvx_arg_devact_comment\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt\", \"width\": 40}, {\"field\": \"tvx_arg_eqpt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_qvt\", \"width\": 40}, {\"field\": \"tvx_arg_qvt_comment\", \"width\": 40}, {\"field\": \"tvx_arg_securite\", \"width\": 40}, {\"field\": \"tvx_arg_securite_comment\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes\", \"width\": 40}, {\"field\": \"tvx_arg_vetustes_comment\", \"width\": 40}, {\"field\": \"autre_argumentaire\", \"width\": 40}, {\"field\": \"argumentaire_detaille_tvx\", \"width\": 500}, {\"field\": \"documents_sf\", \"width\": 153}, {\"field\": \"programme\", \"width\": 150}, {\"field\": \"expert_metier\", \"width\": 125}, {\"field\": \"tvx_eval_devact\", \"width\": 275}, {\"field\": \"tvx_eval_contin\", \"width\": 258}, {\"field\": \"tvx_eval_confort\", \"width\": 286}, {\"field\": \"tvx_eval_securite\", \"width\": 163}, {\"field\": \"tvx_eval_qvt\", \"width\": 130}, {\"field\": \"tvx_eval_synthese\", \"width\": 158}, {\"field\": \"commentaire_biomed\", \"width\": 200}, {\"field\": \"montant_unitaire_expert_metier\", \"width\": 40}, {\"field\": \"prix_unitaire_conditional\", \"width\": 40}, {\"field\": \"montant_arbitrage\", \"width\": 106}, {\"field\": \"quantite_validee_conditional\", \"width\": 40}, {\"field\": \"montant_qte_validee\", \"width\": 40}, {\"field\": \"montant_valide_conditional\", \"width\": 105}, {\"field\": \"montant_final\", \"width\": 40}, {\"field\": \"montant_consomme\", \"width\": 40}, {\"field\": \"arbitrage_commission\", \"width\": 100}, {\"field\": \"commentaire_definitif_commission\", \"width\": 200}, {\"field\": \"gel\", \"width\": 40}, {\"title\": \"Actions\", \"columns\": [{\"width\": 24}]}], \"sort\": []}}}",
+            "preferences": "{}",
             "last_seen": null,
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
@@ -586,9 +586,9 @@
             "nom": "Pôle Chirurgie",
             "intitule": "Pôle chirurgie",
             "cloture": null,
-            "etablissement": null,
+            "etablissement": 1,
             "date_creation": "2021-11-27T17:41:46.747Z",
-            "date_modification": "2021-11-29T06:03:18.107Z"
+            "date_modification": "2020-08-15T01:02:44.656Z"
         }
     },
     {
@@ -596,12 +596,12 @@
         "pk": 2,
         "fields": {
             "code": "BBBB",
-            "nom": "Pôle Médecine",
+            "nom": "Pôle Urgences et Médecine",
             "intitule": null,
             "cloture": null,
-            "etablissement": null,
+            "etablissement": 1,
             "date_creation": "2021-11-27T17:41:46.747Z",
-            "date_modification": "2021-11-29T06:03:18.107Z"
+            "date_modification": "2020-08-15T01:02:50.627Z"
         }
     },
     {
@@ -612,9 +612,48 @@
             "nom": "Pôle Long Séjour",
             "intitule": null,
             "cloture": null,
-            "etablissement": null,
+            "etablissement": 4,
             "date_creation": "2021-11-27T17:41:46.747Z",
-            "date_modification": "2021-11-29T06:03:18.107Z"
+            "date_modification": "2020-08-15T01:02:40.385Z"
+        }
+    },
+    {
+        "model": "common.pole",
+        "pk": 4,
+        "fields": {
+            "code": "DDDD",
+            "nom": "Pôle Femme et Enfant",
+            "intitule": "Pôle Femme et Enfant",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:46.374Z",
+            "date_modification": "2020-08-15T01:01:46.374Z"
+        }
+    },
+    {
+        "model": "common.pole",
+        "pk": 5,
+        "fields": {
+            "code": "EEEE",
+            "nom": "Pôle médicotechnique",
+            "intitule": "Pôle médicotechnique",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:20.050Z",
+            "date_modification": "2020-08-15T01:02:20.050Z"
+        }
+    },
+    {
+        "model": "common.pole",
+        "pk": 6,
+        "fields": {
+            "code": "ZZZZ",
+            "nom": "Pôle administratif",
+            "intitule": "Pôle administratif",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:03:14.310Z",
+            "date_modification": "2020-08-15T01:03:14.310Z"
         }
     },
     {
@@ -784,7 +823,7 @@
             "anteriorite": null,
             "date_creation": "2020-12-06T17:34:13.355Z",
             "cloture": null,
-            "date_modification": "2021-02-03T19:07:04.428Z"
+            "date_modification": "2020-08-15T01:07:19.379Z"
         }
     },
     {
@@ -811,6 +850,58 @@
             "date_creation": "2021-07-07T20:28:46.170Z",
             "cloture": null,
             "date_modification": "2021-07-13T19:57:37.112Z"
+        }
+    },
+    {
+        "model": "common.programme",
+        "pk": 3,
+        "fields": {
+            "code": "BIO-NX",
+            "nom": "Plan d'équipement biomédical prochain",
+            "description": "",
+            "etablissement": 1,
+            "site": null,
+            "pole": null,
+            "uf": null,
+            "enveloppe": "5000000",
+            "limit": null,
+            "consumed": null,
+            "arbitre": [
+                "arbitre_biomed"
+            ],
+            "debut_arbitrage": null,
+            "calendrier": 3,
+            "discipline": 1,
+            "anteriorite": null,
+            "date_creation": "2020-08-15T01:06:48.575Z",
+            "cloture": null,
+            "date_modification": "2020-08-15T01:07:29.453Z"
+        }
+    },
+    {
+        "model": "common.programme",
+        "pk": 4,
+        "fields": {
+            "code": "EQP-NX",
+            "nom": "Plan equipements généraux prochain",
+            "description": "",
+            "etablissement": 1,
+            "site": null,
+            "pole": null,
+            "uf": null,
+            "enveloppe": "1000000",
+            "limit": null,
+            "consumed": null,
+            "arbitre": [
+                "arbitre_biomed"
+            ],
+            "debut_arbitrage": null,
+            "calendrier": 3,
+            "discipline": 1,
+            "anteriorite": null,
+            "date_creation": "2020-08-15T01:01:58.981Z",
+            "cloture": null,
+            "date_modification": "2020-08-15T01:01:58.981Z"
         }
     },
     {
@@ -1070,7 +1161,7 @@
         "pk": 1,
         "fields": {
             "code": "TEST",
-            "nom": "Campagne de test",
+            "nom": "Recensement équipements 2021",
             "description": "",
             "message": "",
             "annee": 2020,
@@ -1078,7 +1169,7 @@
             "dispatcher": [
                 "tomiela"
             ],
-            "roles": null,
+            "roles": "",
             "natures": [],
             "debut_recensement": "2020-07-31T22:00:00Z",
             "fin_recensement": "2020-11-30T22:59:59Z"
@@ -1104,17 +1195,39 @@
         }
     },
     {
+        "model": "dem.campagne",
+        "pk": 3,
+        "fields": {
+            "code": "PEQ-PERM",
+            "nom": "Plan d'équipement",
+            "description": "Campagne permanente pour le plan d'équipement à venir",
+            "message": "",
+            "annee": 2020,
+            "discipline": 1,
+            "dispatcher": [
+                "zonloilo"
+            ],
+            "roles": "",
+            "natures": [
+                "EQ",
+                "SW"
+            ],
+            "debut_recensement": "2018-12-05T14:38:08Z",
+            "fin_recensement": "2999-01-01T22:59:59Z"
+        }
+    },
+    {
         "model": "dem.arbitrage",
         "pk": 1,
         "fields": {
             "code": "1",
-            "discipline": null,
-            "valeur": false,
+            "discipline": 1,
+            "valeur": true,
             "nom": "Validé prioritaire",
             "commentaire": "",
             "date_creation": "2020-12-06T19:59:59.241Z",
             "cloture": null,
-            "date_modification": "2020-12-06T19:59:59.241Z"
+            "date_modification": "2020-08-15T01:01:08.741Z"
         }
     },
     {
@@ -1122,13 +1235,13 @@
         "pk": 2,
         "fields": {
             "code": "2",
-            "discipline": null,
-            "valeur": false,
+            "discipline": 1,
+            "valeur": true,
             "nom": "Validé",
             "commentaire": "",
             "date_creation": "2020-12-06T20:00:09.847Z",
             "cloture": null,
-            "date_modification": "2020-12-06T20:00:09.847Z"
+            "date_modification": "2020-08-15T01:01:18.832Z"
         }
     },
     {
@@ -1136,13 +1249,13 @@
         "pk": 3,
         "fields": {
             "code": "3",
-            "discipline": null,
+            "discipline": 1,
             "valeur": false,
             "nom": "Non validé",
             "commentaire": "",
             "date_creation": "2020-12-06T20:00:29.015Z",
             "cloture": null,
-            "date_modification": "2020-12-06T20:00:29.015Z"
+            "date_modification": "2020-08-15T01:01:26.173Z"
         }
     },
     {
@@ -1150,13 +1263,13 @@
         "pk": 4,
         "fields": {
             "code": "4",
-            "discipline": null,
+            "discipline": 1,
             "valeur": false,
             "nom": "Refusé",
             "commentaire": "",
             "date_creation": "2020-12-06T20:00:38.568Z",
             "cloture": null,
-            "date_modification": "2020-12-06T20:00:38.569Z"
+            "date_modification": "2020-08-15T01:01:34.193Z"
         }
     },
     {
