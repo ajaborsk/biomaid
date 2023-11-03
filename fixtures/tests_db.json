@@ -582,7 +582,7 @@
         "model": "common.pole",
         "pk": 1,
         "fields": {
-            "code": "AAAA",
+            "code": "A",
             "nom": "Pôle Chirurgie",
             "intitule": "Pôle chirurgie",
             "cloture": null,
@@ -595,7 +595,7 @@
         "model": "common.pole",
         "pk": 2,
         "fields": {
-            "code": "BBBB",
+            "code": "B",
             "nom": "Pôle Urgences et Médecine",
             "intitule": null,
             "cloture": null,
@@ -608,7 +608,7 @@
         "model": "common.pole",
         "pk": 3,
         "fields": {
-            "code": "CCCC",
+            "code": "C",
             "nom": "Pôle Long Séjour",
             "intitule": null,
             "cloture": null,
@@ -621,7 +621,7 @@
         "model": "common.pole",
         "pk": 4,
         "fields": {
-            "code": "DDDD",
+            "code": "D",
             "nom": "Pôle Femme et Enfant",
             "intitule": "Pôle Femme et Enfant",
             "cloture": null,
@@ -634,7 +634,7 @@
         "model": "common.pole",
         "pk": 5,
         "fields": {
-            "code": "EEEE",
+            "code": "E",
             "nom": "Pôle médicotechnique",
             "intitule": "Pôle médicotechnique",
             "cloture": null,
@@ -647,7 +647,20 @@
         "model": "common.pole",
         "pk": 6,
         "fields": {
-            "code": "ZZZZ",
+            "code": "F",
+            "nom": "Pôle gériatrique",
+            "intitule": "Pôle gériatrique",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:20.050Z",
+            "date_modification": "2020-08-15T01:02:20.050Z"
+        }
+    },
+    {
+        "model": "common.pole",
+        "pk": 7,
+        "fields": {
+            "code": "Z",
             "nom": "Pôle administratif",
             "intitule": "Pôle administratif",
             "cloture": null,
