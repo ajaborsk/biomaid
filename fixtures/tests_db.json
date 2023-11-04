@@ -814,6 +814,123 @@
         }
     },
     {
+        "model": "common.domaine",
+        "pk": 2,
+        "fields": {
+            "code": "320",
+            "nom": "Anesthésie",
+            "parent": null,
+            "discipline": 1,
+            "description": "",
+            "date_creation": "2020-12-06T17:20:10.858Z",
+            "date_modification": "2020-12-06T17:20:10.859Z"
+        }
+    },
+    {
+        "model": "common.domaine",
+        "pk": 3,
+        "fields": {
+            "code": "322",
+            "nom": "Ventilation",
+            "parent": null,
+            "discipline": 1,
+            "description": "",
+            "date_creation": "2020-12-06T17:20:10.858Z",
+            "date_modification": "2020-12-06T17:20:10.859Z"
+        }
+    },
+    {
+        "model": "common.domaine",
+        "pk": 4,
+        "fields": {
+            "code": "323",
+            "nom": "Aspiration",
+            "parent": null,
+            "discipline": 1,
+            "description": "",
+            "date_creation": "2020-12-06T17:20:10.858Z",
+            "date_modification": "2020-12-06T17:20:10.859Z"
+        }
+    },
+    {
+        "model": "common.domaine",
+        "pk": 5,
+        "fields": {
+            "code": "325",
+            "nom": "Cardiostimulation",
+            "parent": null,
+            "discipline": 1,
+            "description": "",
+            "date_creation": "2020-12-06T17:20:10.858Z",
+            "date_modification": "2020-12-06T17:20:10.859Z"
+        }
+    },
+    {
+        "model": "common.domaine",
+        "pk": 6,
+        "fields": {
+            "code": "326",
+            "nom": "Réanimation pédiatrique",
+            "parent": null,
+            "discipline": 1,
+            "description": "",
+            "date_creation": "2020-12-06T17:20:10.858Z",
+            "date_modification": "2020-12-06T17:20:10.859Z"
+        }
+    },
+    {
+        "model": "common.domaine",
+        "pk": 7,
+        "fields": {
+            "code": "327",
+            "nom": "Fonction réfrigérante/chauffante",
+            "parent": null,
+            "discipline": 1,
+            "description": "",
+            "date_creation": "2020-12-06T17:20:10.858Z",
+            "date_modification": "2020-12-06T17:20:10.859Z"
+        }
+    },
+    {
+        "model": "common.domaine",
+        "pk": 8,
+        "fields": {
+            "code": "602",
+            "nom": "Eclairage Opératoire",
+            "parent": null,
+            "discipline": 1,
+            "description": "",
+            "date_creation": "2020-12-06T17:20:10.858Z",
+            "date_modification": "2020-12-06T17:20:10.859Z"
+        }
+    },
+    {
+        "model": "common.domaine",
+        "pk": 9,
+        "fields": {
+            "code": "603",
+            "nom": "Endoscopie",
+            "parent": null,
+            "discipline": 1,
+            "description": "",
+            "date_creation": "2020-12-06T17:20:10.858Z",
+            "date_modification": "2020-12-06T17:20:10.859Z"
+        }
+    },
+    {
+        "model": "common.domaine",
+        "pk": 10,
+        "fields": {
+            "code": "604",
+            "nom": "Bloc : Incision coagulation",
+            "parent": null,
+            "discipline": 1,
+            "description": "",
+            "date_creation": "2020-12-06T17:20:10.858Z",
+            "date_modification": "2020-12-06T17:20:10.859Z"
+        }
+    },
+    {
         "model": "common.programme",
         "pk": 1,
         "fields": {
