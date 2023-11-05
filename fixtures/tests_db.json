@@ -105,7 +105,7 @@
         "pk": 1,
         "fields": {
             "password": "pbkdf2_sha256$600000$7R5pJ4jd7jJNBaI9l4fPBX$Mc9zqCl3Gyp4NdqSr7mLrgi9ivPTu5GReTv3ShvBhsE=",
-            "last_login": "2020-08-15T01:00:26.287Z",
+            "last_login": "2023-11-05T06:21:42.716Z",
             "is_superuser": true,
             "username": "root",
             "first_name": "Super",
@@ -123,10 +123,10 @@
             "tel_dect": "",
             "tel_mobile": "",
             "preferences": "{}",
-            "last_seen": "2020-08-15T01:01:59.065Z",
+            "last_seen": "2023-11-05T18:30:24.755Z",
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
-            "date_modification": "2020-08-15T01:01:59.066Z",
+            "date_modification": "2023-11-05T18:30:24.755Z",
             "groups": [],
             "user_permissions": []
         }
@@ -277,7 +277,7 @@
             "tel_fixe": "",
             "tel_dect": "",
             "tel_mobile": "",
-            "preferences": "{}", 
+            "preferences": "{}",
             "last_seen": "2022-07-11T14:40:43.133Z",
             "last_email": null,
             "date_creation": "2021-11-27T10:26:44.730Z",
@@ -504,13 +504,445 @@
             "nom": "USLD 1",
             "intitule": null,
             "etablissement": 2,
-            "site": 3,
-            "pole": 3,
+            "site": 4,
+            "pole": 6,
             "centre_responsabilite": 1,
-            "service": 3,
+            "service": 1,
             "cloture": null,
             "date_creation": "2020-09-15T19:27:48.876Z",
-            "date_modification": "2020-09-15T19:27:48.876Z"
+            "date_modification": "2023-11-05T06:25:26.848Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 5,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "1010",
+            "nom": "Bloc opératoire",
+            "intitule": "Bloc opératoire",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 1,
+            "centre_responsabilite": 2,
+            "service": 2,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:26:16.222Z",
+            "date_modification": "2023-11-05T06:26:16.222Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 6,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "1020",
+            "nom": "Orthopédie",
+            "intitule": "Orthopédie",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 1,
+            "centre_responsabilite": 3,
+            "service": 4,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:26:57.709Z",
+            "date_modification": "2023-11-05T06:26:57.709Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 7,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "1030",
+            "nom": "Chirurgie digestive",
+            "intitule": "Chirurgie digestive",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 1,
+            "centre_responsabilite": 4,
+            "service": 3,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:28:18.051Z",
+            "date_modification": "2023-11-05T06:28:18.051Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 8,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "1040",
+            "nom": "Urologie",
+            "intitule": "Urologie",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 1,
+            "centre_responsabilite": 5,
+            "service": 5,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:29:23.836Z",
+            "date_modification": "2023-11-05T06:29:23.836Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 9,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "2010",
+            "nom": "Urgences",
+            "intitule": "Urgences",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 2,
+            "centre_responsabilite": 6,
+            "service": 6,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:30:13.392Z",
+            "date_modification": "2023-11-05T06:30:13.392Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 10,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "2020",
+            "nom": "Pneumologie",
+            "intitule": "Pneumologie",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 2,
+            "centre_responsabilite": 7,
+            "service": 7,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:30:44.789Z",
+            "date_modification": "2023-11-05T06:30:44.789Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 11,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "2030",
+            "nom": "Infectiologie",
+            "intitule": "Infectiologie",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 2,
+            "centre_responsabilite": 8,
+            "service": 8,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:31:35.494Z",
+            "date_modification": "2023-11-05T06:31:35.494Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 12,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "2040",
+            "nom": "Cardiologie",
+            "intitule": "Cardiologie",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 2,
+            "centre_responsabilite": 9,
+            "service": 9,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:32:08.274Z",
+            "date_modification": "2023-11-05T06:32:08.274Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 13,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "2050",
+            "nom": "USIC",
+            "intitule": "USIC",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 2,
+            "centre_responsabilite": 10,
+            "service": 10,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:33:09.786Z",
+            "date_modification": "2023-11-05T06:33:09.786Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 14,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "2060",
+            "nom": "Réanimation",
+            "intitule": "Réanimation",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 2,
+            "centre_responsabilite": 11,
+            "service": 11,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:34:01.264Z",
+            "date_modification": "2023-11-05T06:34:01.264Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 15,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "2070",
+            "nom": "Anesthésie",
+            "intitule": "Anesthésie",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 2,
+            "centre_responsabilite": 11,
+            "service": 11,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:34:47.256Z",
+            "date_modification": "2023-11-05T06:34:47.256Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 16,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "3010",
+            "nom": "Gériatrie Aiguë",
+            "intitule": "Gériatrie Aiguë",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 6,
+            "centre_responsabilite": 13,
+            "service": 13,
+            "cloture": null,
+            "date_creation": "2023-11-05T06:37:43.075Z",
+            "date_modification": "2023-11-05T06:37:43.075Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 17,
+        "fields": {
+            "lettre_budget": "J",
+            "code": "3020",
+            "nom": "MR Aile Nord",
+            "intitule": "MR Aile Nord",
+            "etablissement": 4,
+            "site": 8,
+            "pole": 6,
+            "centre_responsabilite": 14,
+            "service": 14,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:19:06.501Z",
+            "date_modification": "2023-11-05T18:19:06.501Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 18,
+        "fields": {
+            "lettre_budget": "J",
+            "code": "3030",
+            "nom": "MR Aile Sud",
+            "intitule": "MR Aile Sud",
+            "etablissement": 4,
+            "site": 8,
+            "pole": 6,
+            "centre_responsabilite": 14,
+            "service": 14,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:19:55.650Z",
+            "date_modification": "2023-11-05T18:19:55.650Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 19,
+        "fields": {
+            "lettre_budget": "B",
+            "code": "3040",
+            "nom": "USLD",
+            "intitule": "USLD",
+            "etablissement": 4,
+            "site": 8,
+            "pole": 6,
+            "centre_responsabilite": 15,
+            "service": 15,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:20:58.291Z",
+            "date_modification": "2023-11-05T18:20:58.291Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 20,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "4010",
+            "nom": "Bloc Obstétrical",
+            "intitule": "Bloc Obstétrical",
+            "etablissement": 1,
+            "site": 7,
+            "pole": 4,
+            "centre_responsabilite": 16,
+            "service": 16,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:23:14.566Z",
+            "date_modification": "2023-11-05T18:23:14.566Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 21,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "4020",
+            "nom": "Obstétrique",
+            "intitule": "Obstétrique",
+            "etablissement": 1,
+            "site": 7,
+            "pole": 4,
+            "centre_responsabilite": 17,
+            "service": 17,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:24:00.099Z",
+            "date_modification": "2023-11-05T18:24:00.099Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 22,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "4030",
+            "nom": "Pédiatrie",
+            "intitule": "Pédiatrie",
+            "etablissement": 1,
+            "site": 7,
+            "pole": 4,
+            "centre_responsabilite": 18,
+            "service": 18,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:25:14.665Z",
+            "date_modification": "2023-11-05T18:25:14.665Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 23,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "4040",
+            "nom": "Néonatalogie",
+            "intitule": "Néonatalogie",
+            "etablissement": 1,
+            "site": 7,
+            "pole": 4,
+            "centre_responsabilite": 19,
+            "service": 19,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:26:06.109Z",
+            "date_modification": "2023-11-05T18:26:06.109Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 24,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "4050",
+            "nom": "Urgences Pédiatriques",
+            "intitule": "Urgences Pédiatriques",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 4,
+            "centre_responsabilite": 20,
+            "service": 20,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:26:43.581Z",
+            "date_modification": "2023-11-05T18:26:43.581Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 25,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "5010",
+            "nom": "Laboratoire",
+            "intitule": "Laboratoire",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 5,
+            "centre_responsabilite": 21,
+            "service": 21,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:27:26.839Z",
+            "date_modification": "2023-11-05T18:27:26.839Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 26,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "5020",
+            "nom": "Imagerie médicale",
+            "intitule": "Imagerie médicale",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 5,
+            "centre_responsabilite": 22,
+            "service": 22,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:28:10.540Z",
+            "date_modification": "2023-11-05T18:28:10.540Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 27,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "9010",
+            "nom": "Biomédical",
+            "intitule": "Biomédical",
+            "etablissement": 1,
+            "site": 6,
+            "pole": 7,
+            "centre_responsabilite": 23,
+            "service": 23,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:28:59.817Z",
+            "date_modification": "2023-11-05T18:28:59.817Z"
+        }
+    },
+    {
+        "model": "common.uf",
+        "pk": 28,
+        "fields": {
+            "lettre_budget": "H",
+            "code": "9020",
+            "nom": "Restauration",
+            "intitule": "Restauration",
+            "etablissement": 1,
+            "site": 5,
+            "pole": 7,
+            "centre_responsabilite": 24,
+            "service": 24,
+            "cloture": null,
+            "date_creation": "2023-11-05T18:30:15.305Z",
+            "date_modification": "2023-11-05T18:30:15.305Z"
         }
     },
     {
@@ -530,39 +962,286 @@
         "model": "common.service",
         "pk": 2,
         "fields": {
-            "code": "S2",
-            "nom": "Médecine Sud",
+            "code": "1010",
+            "nom": "Bloc opératoire",
             "intitule": null,
             "cloture": null,
             "etablissement": null,
             "date_creation": "2021-11-29T06:03:18.142Z",
-            "date_modification": "2021-11-29T06:03:18.175Z"
+            "date_modification": "2023-11-05T06:24:12.490Z"
         }
     },
     {
         "model": "common.service",
         "pk": 3,
         "fields": {
-            "code": "S3",
-            "nom": "Gériatrie",
-            "intitule": null,
+            "code": "1030",
+            "nom": "Chirurgie digestive",
+            "intitule": "Chirurgie digestive",
             "cloture": null,
             "etablissement": null,
             "date_creation": "2021-11-29T06:03:18.142Z",
-            "date_modification": "2021-11-29T06:03:18.175Z"
+            "date_modification": "2023-11-05T06:23:55.385Z"
         }
     },
     {
         "model": "common.service",
         "pk": 4,
         "fields": {
-            "code": "S4",
+            "code": "1020",
             "nom": "Orthopédie",
-            "intitule": null,
+            "intitule": "Orthopédie",
             "cloture": null,
             "etablissement": null,
             "date_creation": "2021-11-29T06:03:18.142Z",
-            "date_modification": "2021-11-29T06:03:18.175Z"
+            "date_modification": "2023-11-05T06:23:30.637Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 5,
+        "fields": {
+            "code": "1040",
+            "nom": "Urologie",
+            "intitule": "Urologie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:06:05.833Z",
+            "date_modification": "2020-08-15T01:06:05.833Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 6,
+        "fields": {
+            "code": "2010",
+            "nom": "Urgences",
+            "intitule": "Urgences",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:00:58.112Z",
+            "date_modification": "2020-08-15T01:00:58.112Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 7,
+        "fields": {
+            "code": "2020",
+            "nom": "Pneumologie",
+            "intitule": "Pneumologie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:18.831Z",
+            "date_modification": "2020-08-15T01:01:18.831Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 8,
+        "fields": {
+            "code": "2030",
+            "nom": "Infectiologie",
+            "intitule": "Infectiologie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:38.241Z",
+            "date_modification": "2020-08-15T01:01:38.241Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 9,
+        "fields": {
+            "code": "2040",
+            "nom": "Cardiologie",
+            "intitule": "Cardiologie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:00.391Z",
+            "date_modification": "2020-08-15T01:02:00.391Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 10,
+        "fields": {
+            "code": "2050",
+            "nom": "USIC",
+            "intitule": "Unité de Soins Intensifs Cardiologique",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:25.358Z",
+            "date_modification": "2020-08-15T01:02:25.358Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 11,
+        "fields": {
+            "code": "2060",
+            "nom": "Anesthésie-Réanimation",
+            "intitule": "Anesthésie-Réanimation",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:53.971Z",
+            "date_modification": "2023-11-05T06:35:06.065Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 13,
+        "fields": {
+            "code": "3010",
+            "nom": "Gériatrie aiguë",
+            "intitule": "Gériatrie aiguë",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:51.317Z",
+            "date_modification": "2020-08-15T01:01:51.317Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 14,
+        "fields": {
+            "code": "3020",
+            "nom": "Maison de Retraite",
+            "intitule": "Maison de Retraite",
+            "cloture": null,
+            "etablissement": 4,
+            "date_creation": "2020-08-15T01:02:42.942Z",
+            "date_modification": "2020-08-15T01:02:42.942Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 15,
+        "fields": {
+            "code": "3040",
+            "nom": "USLD",
+            "intitule": "Unité de Soins de Longue Durée",
+            "cloture": null,
+            "etablissement": 4,
+            "date_creation": "2020-08-15T01:03:06.395Z",
+            "date_modification": "2020-08-15T01:03:06.395Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 16,
+        "fields": {
+            "code": "4010",
+            "nom": "Bloc Obstétrical",
+            "intitule": "Bloc Obstétrical",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:04:04.822Z",
+            "date_modification": "2020-08-15T01:04:04.822Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 17,
+        "fields": {
+            "code": "4020",
+            "nom": "Maternité",
+            "intitule": "Obstétrique",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:04:29.139Z",
+            "date_modification": "2020-08-15T01:04:29.139Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 18,
+        "fields": {
+            "code": "4030",
+            "nom": "Pédiatrie",
+            "intitule": "Pédiatrie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:05:01.018Z",
+            "date_modification": "2020-08-15T01:05:01.018Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 19,
+        "fields": {
+            "code": "4040",
+            "nom": "Néonatalogie",
+            "intitule": "Néonatalogie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:05:20.402Z",
+            "date_modification": "2020-08-15T01:05:20.402Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 20,
+        "fields": {
+            "code": "4050",
+            "nom": "Urgences Pédiatriques",
+            "intitule": "Urgences Pédiatriques",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:05:40.362Z",
+            "date_modification": "2020-08-15T01:05:40.362Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 21,
+        "fields": {
+            "code": "5010",
+            "nom": "Laboratoire",
+            "intitule": "Biologie médicale",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:41.166Z",
+            "date_modification": "2020-08-15T01:01:41.166Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 22,
+        "fields": {
+            "code": "5020",
+            "nom": "Radiologie",
+            "intitule": "Imagerie médicale",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:58.940Z",
+            "date_modification": "2020-08-15T01:01:58.940Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 23,
+        "fields": {
+            "code": "9010",
+            "nom": "Biomédical",
+            "intitule": "Biomédical",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:43.518Z",
+            "date_modification": "2020-08-15T01:02:43.518Z"
+        }
+    },
+    {
+        "model": "common.service",
+        "pk": 24,
+        "fields": {
+            "code": "9020",
+            "nom": "Restauration",
+            "intitule": "Restauration",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:03:03.449Z",
+            "date_modification": "2020-08-15T01:03:03.449Z"
         }
     },
     {
@@ -576,6 +1255,292 @@
             "etablissement": null,
             "date_creation": "2021-11-29T06:03:18.039Z",
             "date_modification": "2021-11-29T06:03:18.075Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 2,
+        "fields": {
+            "code": "1010",
+            "nom": "Bloc opératoire",
+            "intitule": "Bloc opératoire",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:04:54.520Z",
+            "date_modification": "2020-08-15T01:04:54.520Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 3,
+        "fields": {
+            "code": "1020",
+            "nom": "Orthopédie",
+            "intitule": "Orthopédie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:05:20.110Z",
+            "date_modification": "2020-08-15T01:05:20.110Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 4,
+        "fields": {
+            "code": "1030",
+            "nom": "Chirurgie Digestive",
+            "intitule": "Chirurgie Digestive",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:05:48.897Z",
+            "date_modification": "2020-08-15T01:05:48.897Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 5,
+        "fields": {
+            "code": "1040",
+            "nom": "Urologie",
+            "intitule": "Urologie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:06:05.833Z",
+            "date_modification": "2020-08-15T01:06:05.833Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 6,
+        "fields": {
+            "code": "2010",
+            "nom": "Urgences",
+            "intitule": "Urgences",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:00:58.112Z",
+            "date_modification": "2020-08-15T01:00:58.112Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 7,
+        "fields": {
+            "code": "2020",
+            "nom": "Pneumologie",
+            "intitule": "Pneumologie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:18.831Z",
+            "date_modification": "2020-08-15T01:01:18.831Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 8,
+        "fields": {
+            "code": "2030",
+            "nom": "Infectiologie",
+            "intitule": "Infectiologie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:38.241Z",
+            "date_modification": "2020-08-15T01:01:38.241Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 9,
+        "fields": {
+            "code": "2040",
+            "nom": "Cardiologie",
+            "intitule": "Cardiologie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:00.391Z",
+            "date_modification": "2020-08-15T01:02:00.391Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 10,
+        "fields": {
+            "code": "2050",
+            "nom": "USIC",
+            "intitule": "Unité de Soins Intensifs Cardiologique",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:25.358Z",
+            "date_modification": "2020-08-15T01:02:25.358Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 11,
+        "fields": {
+            "code": "2060",
+            "nom": "Ansthésie-Réanimation",
+            "intitule": "Ansthésie-Réanimation",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:53.971Z",
+            "date_modification": "2023-11-05T06:35:51.662Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 13,
+        "fields": {
+            "code": "3010",
+            "nom": "Gériatrie aiguë",
+            "intitule": "Gériatrie aiguë",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:51.317Z",
+            "date_modification": "2020-08-15T01:01:51.317Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 14,
+        "fields": {
+            "code": "3020",
+            "nom": "Maison de Retraite",
+            "intitule": "Maison de Retraite",
+            "cloture": null,
+            "etablissement": 4,
+            "date_creation": "2020-08-15T01:02:42.942Z",
+            "date_modification": "2020-08-15T01:02:42.942Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 15,
+        "fields": {
+            "code": "3040",
+            "nom": "USLD",
+            "intitule": "Unité de Soins de Longue Durée",
+            "cloture": null,
+            "etablissement": 4,
+            "date_creation": "2020-08-15T01:03:06.395Z",
+            "date_modification": "2020-08-15T01:03:06.395Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 16,
+        "fields": {
+            "code": "4010",
+            "nom": "Bloc Obstétrical",
+            "intitule": "Bloc Obstétrical",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:04:04.822Z",
+            "date_modification": "2020-08-15T01:04:04.822Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 17,
+        "fields": {
+            "code": "4020",
+            "nom": "Maternité",
+            "intitule": "Obstétrique",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:04:29.139Z",
+            "date_modification": "2020-08-15T01:04:29.139Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 18,
+        "fields": {
+            "code": "4030",
+            "nom": "Pédiatrie",
+            "intitule": "Pédiatrie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:05:01.018Z",
+            "date_modification": "2020-08-15T01:05:01.018Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 19,
+        "fields": {
+            "code": "4040",
+            "nom": "Néonatalogie",
+            "intitule": "Néonatalogie",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:05:20.402Z",
+            "date_modification": "2020-08-15T01:05:20.402Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 20,
+        "fields": {
+            "code": "4050",
+            "nom": "Urgences Pédiatriques",
+            "intitule": "Urgences Pédiatriques",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:05:40.362Z",
+            "date_modification": "2020-08-15T01:05:40.362Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 21,
+        "fields": {
+            "code": "5010",
+            "nom": "Laboratoire",
+            "intitule": "Biologie médicale",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:41.166Z",
+            "date_modification": "2020-08-15T01:01:41.166Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 22,
+        "fields": {
+            "code": "5020",
+            "nom": "Radiologie",
+            "intitule": "Imagerie médicale",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:01:58.940Z",
+            "date_modification": "2020-08-15T01:01:58.940Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 23,
+        "fields": {
+            "code": "9010",
+            "nom": "Biomédical",
+            "intitule": "Biomédical",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:02:43.518Z",
+            "date_modification": "2020-08-15T01:02:43.518Z"
+        }
+    },
+    {
+        "model": "common.centreresponsabilite",
+        "pk": 24,
+        "fields": {
+            "code": "9020",
+            "nom": "Restauration",
+            "intitule": "Restauration",
+            "cloture": null,
+            "etablissement": 1,
+            "date_creation": "2020-08-15T01:03:03.449Z",
+            "date_modification": "2020-08-15T01:03:03.449Z"
         }
     },
     {
@@ -661,12 +1626,12 @@
         "pk": 7,
         "fields": {
             "code": "Z",
-            "nom": "Pôle administratif",
-            "intitule": "Pôle administratif",
+            "nom": "Pôle support",
+            "intitule": "Pôle support",
             "cloture": null,
             "etablissement": 1,
             "date_creation": "2020-08-15T01:03:14.310Z",
-            "date_modification": "2020-08-15T01:03:14.310Z"
+            "date_modification": "2020-08-15T01:01:46.171Z"
         }
     },
     {
@@ -706,6 +1671,84 @@
             "etablissement": null,
             "date_creation": "2021-11-29T06:03:18.210Z",
             "date_modification": "2021-11-29T06:03:18.246Z"
+        }
+    },
+    {
+        "model": "common.site",
+        "pk": 4,
+        "fields": {
+            "code": "A1",
+            "nom": "Aurissons",
+            "intitule": "Aurissons",
+            "cloture": null,
+            "etablissement": null,
+            "date_creation": "2020-08-15T01:01:59.294Z",
+            "date_modification": "2020-08-15T01:01:59.294Z"
+        }
+    },
+    {
+        "model": "common.site",
+        "pk": 5,
+        "fields": {
+            "code": "B1",
+            "nom": "Bourvins",
+            "intitule": "Bourvins",
+            "cloture": null,
+            "etablissement": null,
+            "date_creation": "2020-08-15T01:02:24.206Z",
+            "date_modification": "2020-08-15T01:02:24.206Z"
+        }
+    },
+    {
+        "model": "common.site",
+        "pk": 6,
+        "fields": {
+            "code": "C1",
+            "nom": "Courmomble centre",
+            "intitule": "Courmomble centre ville",
+            "cloture": null,
+            "etablissement": null,
+            "date_creation": "2020-08-15T01:02:56.925Z",
+            "date_modification": "2020-08-15T01:02:56.925Z"
+        }
+    },
+    {
+        "model": "common.site",
+        "pk": 7,
+        "fields": {
+            "code": "C2",
+            "nom": "Courmomble maternité sud",
+            "intitule": "Courmomble maternité sud",
+            "cloture": null,
+            "etablissement": null,
+            "date_creation": "2020-08-15T01:03:16.426Z",
+            "date_modification": "2020-08-15T01:03:33.612Z"
+        }
+    },
+    {
+        "model": "common.site",
+        "pk": 8,
+        "fields": {
+            "code": "D1",
+            "nom": "Draves",
+            "intitule": "Draves",
+            "cloture": null,
+            "etablissement": null,
+            "date_creation": "2020-08-15T01:03:47.388Z",
+            "date_modification": "2020-08-15T01:03:47.388Z"
+        }
+    },
+    {
+        "model": "common.site",
+        "pk": 9,
+        "fields": {
+            "code": "E1",
+            "nom": "Epimur",
+            "intitule": "Epimur",
+            "cloture": null,
+            "etablissement": null,
+            "date_creation": "2020-08-15T01:04:13.482Z",
+            "date_modification": "2020-08-15T01:04:13.482Z"
         }
     },
     {
