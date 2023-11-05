@@ -62,24 +62,28 @@ if config.settings.BIOM_AID_USE_PREFIX:
             name='root',
         ),
         path(
+            'admin/',
+            admin.site.urls,
+            name='admin',
+        ),
+        path(
             'dem/home/',
             common.views.redirect_to_home,
             kwargs={'url_prefix': 'geqip-chuap'},
             name='home-old',
         ),
+        # path(
+        #     'kos/',
+        #     common.views.redirect_to_kos_home,
+        #     kwargs={'url_prefix': 'kos-chuap'},
+        #     name='kos-start',
+        # ),
         path(
-            'kos/',
-            common.views.redirect_to_kos_home,
-            kwargs={'url_prefix': 'kos-chuap'},
-            name='kos-start',
-        ),
-        path(
-            'geqip/',
+            '<str:url_prefix>/',
             common.views.redirect_to_home,
-            kwargs={'url_prefix': 'geqip-chuap'},
-            name='geqip-start',
+            # kwargs={'url_prefix': 'geqip-chuap'},
+            name='root',
         ),
-        path('admin/', admin.site.urls, name='admin'),
         path(
             '<str:url_prefix>/index/',
             common.views.BiomAidAccueil.as_view(),

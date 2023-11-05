@@ -165,7 +165,7 @@ class DataWorksheet:
         return self
 
 
-def url_prefix_parse(kwargs: dict, request: HttpRequest):
+def url_prefix_parse(kwargs: dict, request: HttpRequest, user_roles: set()):
     if 'url_prefix' in kwargs:
         url_prefix = kwargs['url_prefix']
     else:
@@ -180,9 +180,32 @@ def url_prefix_parse(kwargs: dict, request: HttpRequest):
 
     portal_name, config_name, prefix_theme_name = (url_prefix.split('-', 2) + [None, None])[:3]
 
+    available_portal_names = list(apps.app_configs['common'].portals.keys())
+
+    # provided portal name
     portal = apps.app_configs['common'].portals.get(portal_name)
+
+    # Is provided portal name ok ?
+    if portal is not None and set(portal['permissions']).isdisjoint(user_roles):
+        portal = None
+
+    # Let's try to find a better one
     if portal is None:
-        portal_name = list(apps.app_configs['common'].portals.keys())[0]
+        for tentative_portal_name in available_portal_names:
+            if not set(apps.app_configs['common'].portals[tentative_portal_name]['permissions']).isdisjoint(user_roles):
+                portal_name = tentative_portal_name
+                portal = apps.app_configs['common'].portals.get(portal_name)
+                break
+    # idx = 0
+    # while portal is None and idx < len(available_portal_names):
+    #     if not set(apps.app_configs['common'].portals[available_portal_names[idx]]['permissions']).isdisjoint(user_roles):
+    #         portal_name = available_portal_names[idx]
+    #         portal = apps.app_configs['common'].portals.get(portal_name)
+    #     idx += 1
+
+    # Fallback in case no suitable portal is found
+    if portal is None:
+        portal_name = available_portal_names[0]
         portal = apps.app_configs['common'].portals.get(portal_name)
 
     local_config = apps.app_configs['common'].configs.get(config_name)
