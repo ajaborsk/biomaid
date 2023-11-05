@@ -1,0 +1,3 @@
+[drachar]
+# Delay between request validation and switch to planification (in **minutes**)
+delay_to_plan = 1

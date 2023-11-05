@@ -67,11 +67,15 @@ def test_new_campaign(biomaid_page: Callable):
 def test_new_request_minimal(biomaid_page: Callable, user, uf_code, failure_point) -> None:
     "Saisie d'une demande minimale par un cadre, dans une campagne sur un établissement entier"
     # used fields values
-    campaign = "Campagne de test"
+    campaign = "Recensement équipements 2021"
     quantity = 6
     requested = "Matériel dont j'ai besoin"
 
     page: Page = biomaid_page('dem:home', username=user, password='yQ6FfiKypa7h8Hc')
+    # ensure we are on the dem portal
+    page.locator("li").filter(has_text="Portail BiomAid : Equipements").locator("i").click()
+    page.get_by_role("link", name="Portail BiomAid : Equipements").click()
+
     page.get_by_text("Nouvelle demande").click()
     if failure_point == 'no_campaign':
         expect(page.get_by_role("link", name=campaign)).not_to_be_visible()
@@ -127,7 +131,7 @@ def test_new_request_minimal(biomaid_page: Callable, user, uf_code, failure_poin
 def test_new_request_full(biomaid_page: Callable, user, uf_code, failure_point) -> None:
     "Saisie d'une demande complète par un utilisateur, dans une campagne sur un établissement entier"
     # used fields values
-    campaign = "Campagne de test"
+    campaign = "Recensement équipements 2021"
     quantity = 6
     requested = "Matériel dont j'ai besoin"
     project_name = "Mise à niveau du service"
@@ -135,6 +139,10 @@ def test_new_request_full(biomaid_page: Callable, user, uf_code, failure_point) 
     # description = "Voilà exactement le matériel dont j'ai besoin"
 
     page: Page = biomaid_page('dem:home', username=user, password='yQ6FfiKypa7h8Hc')
+    # ensure we are on the dem portal
+    page.locator("li").filter(has_text="Portail BiomAid : Equipements").locator("i").click()
+    page.get_by_role("link", name="Portail BiomAid : Equipements").click()
+
     page.get_by_text("Nouvelle demande").click()
     if failure_point == 'no_campaign':
         expect(page.get_by_role("link", name=campaign)).not_to_be_visible()
@@ -194,8 +202,12 @@ def test_new_request_full(biomaid_page: Callable, user, uf_code, failure_point) 
 )
 def test_new_request_minimal_before(biomaid_page: Callable, user, uf_code, failure_point) -> None:
     "Saisie d'une demande minimale par un cadre, dans une campagne sur un établissement entier (test avant l'ouverture de la campagne)"
-    campaign = "Campagne de test"
+    campaign = "Recensement équipements 2021"
     page: Page = biomaid_page('dem:home', username=user, password='yQ6FfiKypa7h8Hc')
+    # ensure we are on the dem portal
+    page.locator("li").filter(has_text="Portail BiomAid : Equipements").locator("i").click()
+    page.get_by_role("link", name="Portail BiomAid : Equipements").click()
+
     page.get_by_text("Nouvelle demande").click()
     if failure_point == 'no_campaign':
         expect(page.get_by_role("link", name=campaign)).not_to_be_visible()
@@ -229,8 +241,12 @@ def test_new_request_minimal_before(biomaid_page: Callable, user, uf_code, failu
 )
 def test_new_request_minimal_after(biomaid_page: Callable, user, uf_code, failure_point) -> None:
     "Saisie d'une demande minimale par un cadre, dans une campagne sur un établissement entier (test après la fermeture de la campagne)"
-    campaign = "Campagne de test"
+    campaign = "Recensement équipements 2021"
     page: Page = biomaid_page('dem:home', username=user, password='yQ6FfiKypa7h8Hc')
+    # ensure we are on the dem portal
+    page.locator("li").filter(has_text="Portail BiomAid : Equipements").locator("i").click()
+    page.get_by_role("link", name="Portail BiomAid : Equipements").click()
+
     page.get_by_text("Nouvelle demande").click()
     if failure_point == 'no_campaign':
         expect(page.get_by_role("link", name=campaign)).not_to_be_visible()

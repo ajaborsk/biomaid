@@ -289,10 +289,12 @@ class BiomAidViewMixin(UserPassesTestMixin, metaclass=BiomAidViewMixinMetaclass)
     def setup(self, request: HttpRequest, *args: list, **kwargs: dict):
         super().setup(request, *args, **kwargs)
 
-        self.url_prefix, self.portal, self.config, self.prefix_theme, self.theme = url_prefix_parse(kwargs, request)
-
         # Détermine les roles principaux de l'utilisateur et les stocke dans l'instance. Cela servira...
         self._user_roles = self.get_user_roles(request)
+
+        # Get portal, config and theme
+        self.url_prefix, self.portal, self.config, self.prefix_theme, self.theme = url_prefix_parse(kwargs, request, self._user_roles)
+
 
         self.my_app_name = self.__module__.split('.')[0]
 

@@ -246,6 +246,8 @@ class DemandeSmartView(SmartView):
         permissions = {
             "create": config.settings.DEM_DEMANDE_CREATION_ROLES,
             'read': {
+                'ADM': {},
+                'MAN': {},
                 'DIR': {},
                 'CHP': {},
                 'ACHP': {},
