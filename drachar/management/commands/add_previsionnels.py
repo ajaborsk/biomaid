@@ -18,6 +18,7 @@ from django.core.management import BaseCommand
 from django.utils.timezone import now
 
 from common.models import User
+from common import config
 from dem.smart_views import DemandesEnCoursExpSmartView
 from drachar.models import Previsionnel
 
@@ -30,14 +31,19 @@ class Command(BaseCommand):
             # No need for a request here
             'request': None,
             # Use the first superuser account
-            'user': User.records.filter(is_active=True, is_superuser=True)[0],
+            'user': User.objects.filter(is_active=True, is_staff=True)[0],
             # Give us a admin role
-            'user_roles': ['ADM'],
+            'user_roles': ['MAN'],
             'now': now(),
         }
         smart_view = DemandesEnCoursExpSmartView(view_params=vp, appname='drachar')
+        try:
+            delay = int(config.get('drachar.delay_to_plan', default=30))
+        except ValueError:
+            # fallback
+            delay = 30
         qs = smart_view.get_base_queryset(vp, skip_base_filter=True).filter(
-            dyn_state='A_BASCULER', date_modification__lt=now() - timedelta(minutes=30)
+            dyn_state='A_BASCULER', date_modification__lt=now() - timedelta(minutes=delay)
         )
         for demande in qs:
             previsionnel = Previsionnel(

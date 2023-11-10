@@ -25,12 +25,30 @@ from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.forms import CharField, forms
 from django.forms.utils import ErrorList
 from django.forms import Form
 from django.forms import ModelForm
-from django.forms.widgets import Input, NullBooleanSelect, Select, TextInput  # noqa
+from django.forms.widgets import Input, NullBooleanSelect, Select, TextInput
+
+
+class EvaluationWidget(Select):
+    """A evaluation widget that stores its value in a integer database field:
+    - Number of levels is configurable (TODO)
+    - None is stored as NULL,
+    - False is stored as 0,
+    - True is stored as 1
+    - The highest the better
+    - For 'priorisation' displays N+1-v where N is the maximum evaluation score and v the stored value (TODO)
+
+
+    Preliminary implementation
+    """
+
+    def __init__(self, attrs: dict = None, levels=(_("Non"), _("Oui"))):
+        self.levels = levels
+        super().__init__(attrs, choices=[('', _("Indéterminé"))] + list(enumerate(self.levels)))
 
 
 class EurosField(CharField):
@@ -519,23 +537,20 @@ class BaseSmartModelForm(SmartFormMixin, ModelForm):
                     field_choices.sort(key=lambda a: a[1])
 
                 field.choices = field_choices
-                if not isinstance(field.widget, NullBooleanSelect):
+                if not isinstance(field.widget, NullBooleanSelect) and not isinstance(field.widget, EvaluationWidget):
                     field.widget.choices = field_choices or []
 
                 if self.choices and fname in self.choices and field.choices is not None:
-                    match len(field.choices):
-                        case 0:
-                            raise PermissionDenied(
-                                _("Vous ne pouvez pas afficher ce formulaire (droits insuffisants). {}.").format(
-                                    self.choices[fname]
-                                )
-                            )
-                        case 1:
-                            # Do not disable the field as it prevent form to send a value, even if mandatory :-(
-                            # field.disabled = True
+                    if len(field.choices) == 0:
+                        raise PermissionDenied(
+                            _("Vous ne pouvez pas afficher ce formulaire (droits insuffisants). {}.").format(self.choices[fname])
+                        )
+                    elif len(field.choices) == 1:
+                        # Do not disable the field as it prevent form to send a value, even if mandatory :-(
+                        # field.disabled = True
 
-                            # Ensure the pre-filled value is the only possible one (useful if the input is hidden)
-                            field.initial = field.choices[0][0]
+                        # Ensure the pre-filled value is the only possible one (useful if the input is hidden)
+                        field.initial = field.choices[0][0]
 
                 # For autocomplete widget, a API url is also needed
                 if isinstance(field.widget, AutocompleteInputWidget):

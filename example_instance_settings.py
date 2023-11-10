@@ -10,20 +10,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-# =============================================================================
-#
-# DO NOT USE THIS FILE AS YOUR instance_settings.py !
-# make a copy of 'example_instance_settings.py' instead and modify it !
-#
-# =============================================================================
-
 import logging
 
 
 from settings import DEBUG_TOOLBAR, MIDDLEWARE, INSTALLED_APPS
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%dT%H:%M:%S')
-logging.getLogger(__name__).info("MKTEST.")
+logging.getLogger(__name__).info("Example demo instance.")
 
 DEFAULT_DOMAIN = 'http://localhost:8000'
 
@@ -32,7 +25,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 SMARTVIEW_DEBUG = DEBUG
 
@@ -68,23 +61,24 @@ INSTALLED_APPS += [
 ]
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': 'db.sqlite3',
-    # },
+    # For a demonstration instance, the easiest is to use a SQLite3 database
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mktest_db',
-        'USER': 'mktest_user',
-        'PASSWORD': 'mktest_pwd',  # Utilisé seulement pour les tests en local
-        'HOST': 'localhost',
-        'PORT': '',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db.sqlite3',
     },
+    # But you could also use a PostgreSQL server if you want !
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME': 'demo_db',
+    #     'USER': 'demo_user',
+    #     'PASSWORD': 'demo_pwd',
+    #     'HOST': 'localhost',
+    #     'PORT': '',
+    # },
 }
 
 # local email tests on port 8025 (using aiosmtpd python module)
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = 8025
-
 
 MEDIA_ROOT = '../dem-media'

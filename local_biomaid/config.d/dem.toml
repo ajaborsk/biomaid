@@ -1,0 +1,126 @@
+[dem.home]
+
+# Template used to generate the main page
+# Some variables are available (very few for now) :
+#  - url_prefix
+# The resulting HTML will be sanitized (using html-sanitizer https://pypi.org/project/html-sanitizer/) 
+# with a pretty strict configuration (named 'page_content', see in Django settings the variable HTML_SANITIZERS)
+template = """
+{% load url_kwargs %}
+<div class="doc-page">
+    <h1>Portail BiomAid {{ main_name }} de démonstration.</h1>
+    <div class="main-block">
+        <div class="main-tile-c13 ie-row-1">
+            <div class="main-tile-title">Bienvenue</div>
+            <p>Cet espace est mis à votre disposition pour vous permettre de tester le portail de recensement des besoins en matériel et projets
+                informatiques. Il vous
+                permet également de mieux suivre l'instruction et l'arbitrage de ces demandes.</p>
+                <br>
+
+            <p>Ce portail BiomAid permet de suivre, en toute transparence, toutes les étapes institutionnelles par lesquelles
+                passent les demandes, depuis le recensement jusqu'à la réalisation des acquisitions, en passant par
+                leur
+                arbitrage.</p>
+            <br>
+            <p>A tout moment vous pouvez revenir à cette page en cliquant sur le menu "Accueil".</p>
+            <br>
+            <div class="main-tile-title">Cette page d'accueil est configurable ! </div>
+            <p><b>Le contenu de cette page est complètement configurable en insérant le code HTML dans le fichier de configuration qui est dans le dossier <em>local/config.d/dem.toml</em>.</b></p>
+            <br>
+            <p><b>Le contenu de la base de données de ce portail de tests est réinitialisé chaque nuit.</b></p>
+        </div>
+        <div class="main-tile-c1 ie-row-3">
+            <div class="main-tile-title">Recensement des besoins</div>
+            <p>Le recensement des besoins est disponible toute l'année !</p>
+            <p>Vous pouvez maintenant créer vos demandes d'équipement ou de logiciel.</p>
+            <p></p>
+            <br>
+            <div class="main-tile-title">Demandes déjà traitées</div>
+            <p>les demandes effectuées dans le cadre des recenssements antérieurs ont été traitées. Pour
+                connaître le résultat, rendez-vous dans la rubrique «<a
+                        href="{% url_kwargs 'drachar:suivi-plans' %}">&nbsp;DEMANDES ACCEPTEES&nbsp;</a>».</p>
+            <p></p>
+
+        </div>
+        <div class="main-tile-c2 ie-row-3">
+            <div class="main-tile-title">Historique des demandes</div>
+            <p>Toutes les demandes, ainsi que les résultats des
+                arbitrages sont disponibles en permanence.</p>
+            <p>Dans la rubrique «<a href="{% url_kwargs 'drachar:suivi-plans' %}">&nbsp;DEMANDES ACCEPTEES&nbsp;</a>»,
+                vous
+                trouverez les demandes validées, celles en cours d'acquisition ou celles mises en service depuis
+                moins de 3 mois. Dans la rubrique «<a href="{% url_kwargs 'dem:demandes-tout' %}">&nbsp;DEMANDES
+                    ARCHIVEES&nbsp;</a>» sont visibles les demandes
+                refusées ou celles acceptées et mises en service depuis plus de 3 mois.</p>
+        </div>
+        <div class="main-tile-c3 ie-row-3">
+            <div class="main-tile-title">Suivi des acquisitions</div>
+            <p>Le portail permet de suivre en temps réel le déroulement des acquisitions liées aux demandes
+                validées.</p>
+            <p>Cette fonctionnalité est disponible dans la rubrique «<a
+                    href="{% url_kwargs 'drachar:suivi-plans' %}">&nbsp;DEMANDES ACCEPTEES&nbsp;</a>».</p>
+        </div>
+
+    </div>
+</div>
+"""
+
+[CampagneSmartView.natures]
+label = "Natures des demandes"
+
+[CampagneSmartView.dispatcher]
+label = "Répartisseur"
+help_text = """Utilisateur en charge de la répartition des demandes entre
+ les différents programmes de la campagne et de la nomination d'un
+ expert technique pour l'analyse de la demande. 
+ Une campagne sans répartisseur sera considérée comme virtuelle (cf. documentation)"""
+
+[CampagneSmartView.message]
+label = "Message à l'utilisateur"
+help_text = """Blabla"""
+
+[CampagneSmartView]
+form_layout = """
+#
+    # Campagne 
+        <code>  <nom--+-->
+        <description-+--+->
+        <message-+-+-->
+        <discipline> <natures>  <dispatcher>
+        <debut_recensement> <fin_recensement>
+"""
+
+[DemTvxSmartView.tvx_etage]
+hidden = true
+null = false
+
+[DemTvxSmartView.autre_argumentaire]
+label = "Argumentaire"
+
+[DemTvxSmartView]
+form_layout = """
+        # demande de travaux courants {{ instance.code }}
+            <calendrier>
+            <discipline_dmd> <nature> <quantite> <cause> <priorite>
+            <couts_complementaires>
+            <nom_projet>
+            <redacteur>
+            # Demandeur
+                <referent> <redacteur_view>
+            # Projet
+                <tvx_batiment> <tvx_etage>
+                <uf> <localisation>
+                <service_view> <pole_view>
+                <libelle-+---->
+                <description+--->
+                # Contraintes dans la zone
+                    <tvx_contrainte_lib----> <tvx_contrainte-+--->
+                    <tvx_contrainte_alib---> <tvx_contrainte-+--->
+                    <tvx_contrainte_lar----> <tvx_contrainte-+--->
+                    <tvx_contrainte_autre--> <tvx_contrainte-+--->
+            # Argumentaire
+                <tvx_priorite--+--+--+-->
+                <autre_argumentaire--+---+--+-->
+            # Documents joints
+                <--documents_sf-+--+--+->
+"""

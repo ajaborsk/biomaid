@@ -107,7 +107,10 @@ def no_ie_view(request, **kwargs):
 
 
 def redirect_to_home(request, url_prefix=None):
-    return redirect('dem:home', url_prefix=url_prefix)
+    if url_prefix == 'kos':
+        return redirect('dem:tvx-home', url_prefix=url_prefix)
+    else:
+        return redirect('dem:home', url_prefix=url_prefix)
 
 
 def redirect_to_kos_home(request, url_prefix=None):

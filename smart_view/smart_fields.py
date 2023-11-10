@@ -25,7 +25,7 @@ from itertools import accumulate
 from typing import Any, Optional
 
 from django.apps import apps
-from django.db.models import Value, F, CharField, ExpressionWrapper
+from django.db.models import Value, F, CharField, ExpressionWrapper, IntegerField, BooleanField
 from django.db.models.functions import Coalesce, Cast, Concat
 from django.forms import MediaDefiningClass, NullBooleanSelect
 from django.http import JsonResponse
@@ -42,7 +42,7 @@ from django.forms.widgets import (
 
 # from document.forms import DocumentsSmartFormat
 from smart_view.smart_expression import SmartExpression
-from smart_view.smart_form import AutocompleteInputWidget, MultiChoiceInputWidget
+from smart_view.smart_form import AutocompleteInputWidget, MultiChoiceInputWidget, EvaluationWidget
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +142,12 @@ class BooleanSmartFormat(SmartFormat):
         # et django.forms n'a pas encore été adapté et ne "voit" donc pas que le champ est tristate...
         # Donc, ici, on indique 'manuellement' à django.forms quel widget utiliser.
         if self.get('tristate'):
-            return NullBooleanSelect()
+            if isinstance(self.field.properties['model_field'], IntegerField):
+                return EvaluationWidget()
+            if isinstance(self.field.properties['model_field'], BooleanField):
+                return NullBooleanSelect()
+            else:
+                return NullBooleanSelect()
         else:
             return CheckboxInput()
 

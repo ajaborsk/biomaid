@@ -4,10 +4,10 @@ from django.apps import apps
 
 def set_datasource_in_migration(
     code: str,
-    label: None | str = None,
-    parameters: None | dict = None,
-    auto: None | list = None,
-    processor: None | str = None,
+    label=None,
+    parameters=None,
+    auto=None,
+    processor=None,
 ) -> bool:
     datasource_model = apps.get_model('analytics', 'DataSource')
 
