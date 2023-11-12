@@ -31,6 +31,9 @@ class PolyExpr:
         visitor.visit(self.tree)
         return visitor.names
 
+    def __repr__(self):
+        return "PolyExpr<'" + ast.unparse(self.tree) + "'>"
+
     # def as_django_orm_expr(self, **kwargs):
     #     compiled = compile(tree, '<string>', 'eval')
     #     return eval(compiled, all_vars)
@@ -78,10 +81,10 @@ def django_orm_expression(polyexpr: PolyExpr, values: dict, fieldnames: set):
     all_vars.update({name: value.get('django') for name, value in polyexpr.builtins.items()})
     # Add query/view parameters
     all_vars.update(values)
-    # print(f"  {ast.unparse(tree)=} {all_vars=}")
 
     compiled = compile(tree, '<string>', 'eval')
     orm_expr = eval(compiled, all_vars)
+    # print(f">>  {ast.unparse(tree)=} {all_vars=} {compiled=} {orm_expr=}")
     # print(f"  {orm_expr=}")
     if isinstance(orm_expr, bool):
         if orm_expr:

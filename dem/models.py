@@ -28,7 +28,7 @@ from django_pandas.managers import DataFrameManager
 
 from common.models import Discipline
 from common import config
-from overoly.base import OField, OverolyModel as OModel
+from overoly.base import OverolyModel as OModel
 
 # les tables ci-dessous sont mise à jour par des scripts
 # qui vont chercher dans ASSETPLUS les infos :
@@ -1154,7 +1154,7 @@ class Demande(OModel):
         null=True,
     )
 
-    o_roles = OField()
+    # o_roles = OField()
 
     def __str__(self):
         # return "{0}  {1}  {2}  {3}".format(self.num_dmd, self.nom_projet, self.contact, self.dectcontact)

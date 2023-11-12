@@ -45,6 +45,7 @@ class ORolesMapper:
 
     @staticmethod
     def is_superuser(u):
+        # print(f"is_superuser(u): u=")
         try:
             return u.is_superuser
         except AttributeError:
@@ -116,7 +117,7 @@ class ORolesMapper:
         Returns a Django expression (to be used as a annotation value) that compute for every row a list of the user roles,
         as a string with a comma separated list of roles and starting and ending with a comma ','.
         eg : ',ADM,MAN,OWN,EDT,'
-        To determine if the current user has a role (eg. Manager, code 'MAN'),
+        To check if the current user has a given role (eg. Manager, code 'MAN'),
         one can test if the comma bracketed role code string (',MAN,') is
         a substring of this roles string
         """
@@ -124,7 +125,7 @@ class ORolesMapper:
         parameters = {param: query_parameters.get(param) for param in self.parameters}
 
         # print(f"   {query_parameters=} {self.field_names=}")
-        return Concat(
+        django_expression = Concat(
             *(
                 [Value(',')]
                 + [
@@ -139,6 +140,11 @@ class ORolesMapper:
                 ]
             )
         )
+
+        # for code, expr in self.row_roles_map.items():
+        #     print(f"  {code=} : {expr=}")
+        # print(f"{self.parameters=} {query_parameters=} {parameters=}:  {django_expression=}")
+        return django_expression
         # return Value(',' + ','.join(self.table_roles_list(query_parameters)) + ',')
 
 
@@ -295,7 +301,11 @@ class OverolyModelMetaclass(ModelBase):
                 attrs['_ometa'].special_roles = 'o_roles'
                 attrs[attrs['_ometa'].special_roles] = OField(special='roles')
             else:
-                warning("Unable to create a roles field ('roles' field already exists and is not a special roles field) !")
+                warning(
+                    "Unable to create a roles field ('roles' field already exists and is not a special roles field) in class {name}!".format(
+                        name=name
+                    )
+                )
 
         # Scan all attributes and compute annotations expressions if needed
         annotations = {}

@@ -71,6 +71,7 @@ from django.apps import apps
 from django.urls import reverse
 from django.forms import modelform_factory
 from django.forms.utils import ErrorList
+from django.core.exceptions import FieldDoesNotExist
 from django.contrib.contenttypes.fields import GenericRelation
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -277,91 +278,97 @@ def tablefield_default(field, **kwargs):
     return settings
 
 
-def columns_for_model(
-    model,
-    fields=None,
-    exclude=None,
-    columns=None,
-    tablefield_callback=tablefield_default,
-    localized_fields=None,
-    labels=None,
-    help_texts=None,
-    error_messages=None,
-    field_classes=None,
-    *,
-    apply_limit_choices_to=True,
-):
-    """
-    Return a dictionary containing table columns for the given model.
+# def columns_for_model(
+#     model,
+#     fields=None,
+#     exclude=None,
+#     columns=None,
+#     tablefield_callback=tablefield_default,
+#     localized_fields=None,
+#     labels=None,
+#     help_texts=None,
+#     error_messages=None,
+#     field_classes=None,
+#     *,
+#     apply_limit_choices_to=True,
+# ):
+#     """
+#     Return a dictionary containing table columns for the given model.
 
-    ``fields`` is an optional list of field names. If provided, return only the
-    named fields.
+#     ``fields`` is an optional list of field names. If provided, return only the
+#     named fields.
 
-    ``exclude`` is an optional list of field names. If provided, exclude the
-    named fields from the returned fields, even if they are listed in the
-    ``fields`` argument.
+#     ``exclude`` is an optional list of field names. If provided, exclude the
+#     named fields from the returned fields, even if they are listed in the
+#     ``fields`` argument.
 
-    ``columns`` is a dictionary of model field names mapped to a column.
+#     ``columns`` is a dictionary of model field names mapped to a column.
 
-    ``tablefield_callback`` is a callable that takes a model field and returns
-    a form field.
+#     ``tablefield_callback`` is a callable that takes a model field and returns
+#     a form field.
 
-    ``localized_fields`` is a list of names of fields which should be localized.
+#     ``localized_fields`` is a list of names of fields which should be localized.
 
-    ``labels`` is a dictionary of model field names mapped to a label.
+#     ``labels`` is a dictionary of model field names mapped to a label.
 
-    ``help_texts`` is a dictionary of model field names mapped to a help text.
+#     ``help_texts`` is a dictionary of model field names mapped to a help text.
 
-    ``error_messages`` is a dictionary of model field names mapped to a
-    dictionary of error messages.
+#     ``error_messages`` is a dictionary of model field names mapped to a
+#     dictionary of error messages.
 
-    ``field_classes`` is a dictionary of model field names mapped to a column class.
+#     ``field_classes`` is a dictionary of model field names mapped to a column class.
 
-    ``apply_limit_choices_to`` is a boolean indicating if limit_choices_to
-    should be applied to a field's queryset.
-    """
-    column_dict = {}
-    ignored = []
-    opts = model._meta
-    # Avoid circular import
-    from django.db.models import Field as ModelField
+#     ``apply_limit_choices_to`` is a boolean indicating if limit_choices_to
+#     should be applied to a field's queryset.
+#     """
+#     column_dict = {}
+#     ignored = []
+#     opts = model._meta
+#     # Avoid circular import
+#     from django.db.models import Field as ModelField
 
-    sortable_private_fields = [f for f in opts.private_fields if isinstance(f, ModelField)]
-    for f in sorted(chain(opts.concrete_fields, sortable_private_fields, opts.many_to_many)):
-        if fields is not None and f.name not in fields:
-            continue
-        if exclude and f.name in exclude:
-            continue
+#     sortable_private_fields = [f for f in opts.private_fields if isinstance(f, ModelField)]
+#     overoly_fields = []
+#     if issubclass(model, OverolyModel):
+#         o_opts = model._ometa
+#         print(f"--------> {o_opts=}")
+#     else:
+#         print(f"{model=}")
+#     for f in sorted(chain(opts.concrete_fields, sortable_private_fields, opts.many_to_many, overoly_fields)):
+#         if fields is not None and f.name not in fields:
+#             continue
+#         if exclude and f.name in exclude:
+#             continue
 
-        kwargs = {}
-        if columns and f.name in columns:
-            if isinstance(columns[f.name], SmartField):
-                kwargs["column"] = columns[f.name]
-            elif isinstance(columns[f.name], type) and issubclass(columns[f.name], SmartField):
-                kwargs["column"] = columns[f.name]()
-            else:
-                kwargs = columns[f.name]
+#         kwargs = {}
+#         if columns and f.name in columns:
+#             if isinstance(columns[f.name], SmartField):
+#                 kwargs["column"] = columns[f.name]
+#             elif isinstance(columns[f.name], type) and issubclass(columns[f.name], SmartField):
+#                 kwargs["column"] = columns[f.name]()
+#             else:
+#                 kwargs = columns[f.name]
 
-        if tablefield_callback is None:
-            tablefield = f.tablefield(**kwargs)
-        elif not callable(tablefield_callback):
-            raise TypeError("tablefield_callback must be a function or callable")
-        else:
-            tablefield = tablefield_callback(f, **kwargs)
+#         if tablefield_callback is None:
+#             tablefield = f.tablefield(**kwargs)
+#         elif not callable(tablefield_callback):
+#             raise TypeError("tablefield_callback must be a function or callable")
+#         else:
+#             tablefield = tablefield_callback(f, **kwargs)
 
-        if tablefield:
-            if apply_limit_choices_to:
-                # TODO: Choices
-                # apply_limit_choices_to_to_formfield(tablefield)
-                pass
-            column_dict[f.name] = tablefield
-        else:
-            ignored.append(f.name)
+#         if tablefield:
+#             if apply_limit_choices_to:
+#                 # TODO: Choices
+#                 # apply_limit_choices_to_to_formfield(tablefield)
+#                 pass
+#             column_dict[f.name] = tablefield
+#         else:
+#             ignored.append(f.name)
 
-    if fields:
-        column_dict = {f: column_dict.get(f) for f in fields if (not exclude or f not in exclude) and f not in ignored}
+#     if fields:
+#         column_dict = {f: column_dict.get(f) for f in fields if (not exclude or f not in exclude) and f not in ignored}
 
-    return column_dict
+#     return column_dict
 
 
 class SmartViewMetaclass(MediaDefiningClass):
@@ -428,6 +435,15 @@ class SmartViewMetaclass(MediaDefiningClass):
             # Liste des champs "privés" du modèle
             sortable_private_fields = [f for f in opts.private_fields if isinstance(f, ModelField)]
 
+            # liste des champs 'annotation' d'Overoly
+            overoly_fields = []
+            if issubclass(model, OverolyModel):
+                for fname in model._ometa.annotation_names:
+                    _meta['settings'][fname] = (
+                        _meta['settings'].get(fname, (SmartField, {}))[0],
+                        dict(_meta['settings'].get(fname, (SmartField, {}))[1], **{'data': fname}),
+                    )
+
             # On balaye tous les champs du modèle (concrets, privés et many2many)
             for f in sorted(chain(opts.concrete_fields, sortable_private_fields, opts.many_to_many)):
                 # print("  >  (Model)field", f.name)
@@ -450,7 +466,6 @@ class SmartViewMetaclass(MediaDefiningClass):
                 overoly_fields = list(model._ometa.annotation_names)
             else:
                 overoly_fields = []
-            # print(f"  {overoly_fields=}")
             for fname in overoly_fields:
                 model_all_fields.append(fname)
 
@@ -731,6 +746,9 @@ class SmartViewMetaclass(MediaDefiningClass):
 
             # from django.db.models import Value
 
+            # for column in _meta['fields']:
+            #     print(f"%% {column=} {attrs[column].get('data')=}")
+
             annotations_fields = {
                 k: v.get_annotation for k, v in _meta["smartfields_dict"].items() if isinstance(v, ComputedSmartField)
             }
@@ -767,6 +785,7 @@ class SmartViewMetaclass(MediaDefiningClass):
             _meta['queryset'] = queryset
 
             # All fieldnames that should be passed to values() Queryset method to mimic a values() without arg
+            print(f"{name=}:  {overoly_fields=}")
             _meta['values_fields'] = _meta['data_fields'] + list(overoly_fields) + list(annotations_fields.keys())
 
         # Step 7 : Process filters
@@ -1431,7 +1450,7 @@ class SmartView(metaclass=SmartViewMetaclass):
             return
 
         exclude = list(exclude)
-        form_fields = cls._meta['data_fields']
+        form_fields = [f for f in cls._meta['data_fields'] if f in cls._meta['model']._meta.get_fields()]
         help_texts = {}
         widgets = {
             'id': HiddenInput(),
@@ -1439,25 +1458,28 @@ class SmartView(metaclass=SmartViewMetaclass):
         }
         labels = {}
         for field_name in form_fields:
-            smartfield = cls._meta['smartfields_dict'][field_name]
-            labels[field_name] = smartfield.get('title', context='form.html')
-            help_texts[field_name] = smartfield.get('help_text', context='form.html')
+            try:
+                smartfield = cls._meta['smartfields_dict'][field_name]
+                model_field = cls._meta['model']._meta.get_field(smartfield.get('fieldname'))
+                labels[field_name] = smartfield.get('title', context='form.html')
+                help_texts[field_name] = smartfield.get('help_text', context='form.html')
 
-            if smartfield.get('hidden', context='form.html'):
-                widgets[field_name] = HiddenInput()
-            else:
-                widget = smartfield.format.get_widget(context='form.html')
-                if widget:
-                    widgets[field_name] = widget
+                if smartfield.get('hidden', context='form.html'):
+                    widgets[field_name] = HiddenInput()
+                else:
+                    widget = smartfield.format.get_widget(context='form.html')
+                    if widget:
+                        widgets[field_name] = widget
                 # print(labels, help_texts)
-            model_field = cls._meta['model']._meta.get_field(smartfield.get('fieldname'))
-            # print(smartfield.get('fieldname'), model_field.editable)
-            if not model_field.editable:
-                exclude.append(smartfield.get('fieldname'))
-            if smartfield.get('format') == 'money':
-                field_classes[field_name] = EurosField
-            elif smartfield.get('format') == 'multichoice':
-                field_classes[field_name] = MultiChoiceField
+                # print(smartfield.get('fieldname'), model_field.editable)
+                if not model_field.editable:
+                    exclude.append(smartfield.get('fieldname'))
+                if smartfield.get('format') == 'money':
+                    field_classes[field_name] = EurosField
+                elif smartfield.get('format') == 'multichoice':
+                    field_classes[field_name] = MultiChoiceField
+            except FieldDoesNotExist:
+                pass
 
         form_class = new_class(
             'SmartViewForm',
@@ -2110,6 +2132,7 @@ class SmartView(metaclass=SmartViewMetaclass):
                     else:
                         raise RuntimeError(_("Unknown export engine: {}").format(export.get("engine")))
                 else:
+                    print(f"{self._meta['values_fields']=}")
                     return JsonResponse({"data": list(query_set.values(*self._meta['values_fields']))})
         # Renvoyer None indique à l'appelant (la vue) que la requête n'a pas été traitée
 

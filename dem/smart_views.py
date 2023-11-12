@@ -3536,6 +3536,7 @@ class DemandeEqptSmartView(DemandeSmartView):
             'montant_final',
             'montant_consomme',
             'tmp_available',
+            'o_roles',
             'dyn_state',
             'gel',
             'tools',

@@ -425,7 +425,7 @@ class Discipline(OModel):
     parametric = OField(value=lambda params: Value(str(params.get('now_ts').ctime() if 'now_ts' in params else 0)))
     full_name = OField(value=Concat(F('code'), Value(' - '), F('nom')))
 
-    # o_roles = OField(special='roles')
+    _o_roles = OField(special='roles')
 
     def __str__(self):
         return "{0} - {1}".format(self.code, self.nom)
