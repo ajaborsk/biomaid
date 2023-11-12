@@ -4,7 +4,9 @@ Overoly
 Overoly est une bibiothèque (pas une application) pour Django (4+) qui permet d'ajouter des fonctionnalités au niveau
 des modèles :
 
-- Ajout de champs calculés 'en ligne' (non stockés dans la base), avec gestion des dépendances
+- Ajout de champs calculés 'en ligne' (non stockés dans la base), avec gestion des dépendances. 
+  Il est possible de définir ces champs calculés sous la forme d'une chaîne de caractères, ce qui
+  rend cette fonction utilisable sans définition de code Python/Django.
 - Ajout d'un système de gestion souple d'attributs pour les champs
 - Gestion fine des droits (par enregistrement et par champ), basée sur un mécanisme flexible de rôles
 - Notion (facultative) d'objets 'actifs' vs. 'désactivés' systématique
@@ -37,7 +39,7 @@ de le faire hériter de la classe OModel :
 Les nouveaux 'Manager' :
 ------------------------
 
-.. note:: 
+.. todo:: 
 
     Expliquer comment fonctionnent les nouveaux manager () et pourquoi les manager par défault `objects` ne sont plus disponibles.
 
@@ -46,14 +48,15 @@ Les nouveaux 'Manager' :
 Gestion des attributs :
 -----------------------
 
-.. note::
+.. todo::
 
     Expliquer le fonctionnement (avec des exemples et comment on s'en sert)
 
 Configuration externe :
 -----------------------
 
-.. note:: 
+.. todo:: 
+
     Expliquer le fonctionnement de l'attribut `config` de la classe `OMeta` et donner un 
     exemple d'utilisation avec un fichier de configuration externe type `toml`
 
@@ -62,7 +65,8 @@ Roles, états et permissions :
 
 C'est la partie la plus complexe, mais aussi la plus puissante. Elle repose notamment sur les champs calculés.
 
-C'est ce qui permet de faire des worflows complexes (y compris avec des sous-workflows qui fonctionnent en parallèle) avec des rôles multiples par utilisateur et des permissions très fines.
+C'est ce qui permet de faire des worflows complexes (y compris avec des sous-workflows qui fonctionnent en parallèle) 
+avec des rôles multiples par utilisateur et des permissions très fines.
 
 Les rôles :
 +++++++++++
@@ -94,5 +98,8 @@ en SQL et sera calculée pour chaque ligne (chaque enregistrement) au cours de l
 La méthode `save()` :
 +++++++++++++++++++++
 
-.. note:: 
-    TODO...
+.. todo:: 
+    La surcharge de la méthode ``save()`` du modèle permet de garantir le respect
+    des droits d'accès aux enregistrements. Si on fournit l'utilisateur courant, 
+    les droits sont vérifiés par rapport à cet utilisateur. Sinon, les droits donnés sont ceux d'un
+    utilisateur anonyme. More to come...
