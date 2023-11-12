@@ -1,5 +1,7 @@
+***************************************
 Créer un environnement de développement
-=======================================
+***************************************
+
 
 - Poetry
 - flake9
@@ -50,6 +52,8 @@ sont un peu différentes, mais presque tout le reste est sans doute identique.
 
 - Créer un fichier 'simple-biomaid.conf' dans /etc/nginx/conf.d et y insérer :
 
+.. code::
+    
     server {
       server_name simple_biomaid;
 

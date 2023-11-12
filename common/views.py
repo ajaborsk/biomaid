@@ -107,7 +107,10 @@ def no_ie_view(request, **kwargs):
 
 
 def redirect_to_home(request, url_prefix=None):
-    return redirect('dem:home', url_prefix=url_prefix)
+    if url_prefix == 'kos':
+        return redirect('dem:tvx-home', url_prefix=url_prefix)
+    else:
+        return redirect('dem:home', url_prefix=url_prefix)
 
 
 def redirect_to_kos_home(request, url_prefix=None):
@@ -1150,6 +1153,7 @@ class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
 # GESTION DES DATAs MARQUES, TYPES, Structure...
 # ==================================================================================================================
 
+
 # TODO : Faire de même pour Type, pour Comptes, Familles d'achat, CNEH,
 class GestionData(BiomAidViewMixin, TemplateView, BddImportation):
     """Code pour gestion des items d'une table simple :Marques, Types,... en mode manuel
@@ -2031,6 +2035,7 @@ class GestionStructure(GestionData):
 
     # éléments de base à renseigner pour la class "GestionData" :
     ''' Paramètres de base '''
+
     # url = "/drachar-chuap/common/gestion_structure/1/"
     # TODO : régler le problème de l'URL
     def fonc_url(self, kwargs):

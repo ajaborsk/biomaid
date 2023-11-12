@@ -246,6 +246,8 @@ class DemandeSmartView(SmartView):
         permissions = {
             "create": config.settings.DEM_DEMANDE_CREATION_ROLES,
             'read': {
+                'ADM': {},
+                'MAN': {},
                 'DIR': {},
                 'CHP': {},
                 'ACHP': {},
@@ -2236,6 +2238,16 @@ class DemandeSmartView(SmartView):
                     # En attente (programme non actif)
                     'ADM': {
                         'state_code': True,
+                    },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
                     },
                     'DIS': {
                         'campagne_redirect': True,
