@@ -785,7 +785,7 @@ class SmartViewMetaclass(MediaDefiningClass):
             _meta['queryset'] = queryset
 
             # All fieldnames that should be passed to values() Queryset method to mimic a values() without arg
-            print(f"{name=}:  {overoly_fields=}")
+            # print(f"{name=}:  {overoly_fields=}")
             _meta['values_fields'] = _meta['data_fields'] + list(overoly_fields) + list(annotations_fields.keys())
 
         # Step 7 : Process filters

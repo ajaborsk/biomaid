@@ -161,9 +161,18 @@ class OverolyAllRecordsManager(Manager):
 class OverolyRecordsManager(Manager):
     """
     Overoly *default* manager. Only returns 'active' records (ie without atime or after it *and* without dtime or before it)
+    and which are accessible (readable) to the provided user via the settings.
+    **If no 'read' permissions is given then everyone can see all records !**
     """
 
     def __init__(self, *args, **kwargs):
+        self.read = tuple()
+        if 'read' in kwargs:
+            if isinstance(self.read, tuple):
+                self.read = kwargs['read']
+            else:
+                pass  # Should issue a warning here
+            del kwargs['read']
         if 'annotations' in kwargs:
             if isinstance(kwargs['annotations'], dict):
                 # Static (ie non parametric) annotations. Computed only from constants and fields values
@@ -182,6 +191,7 @@ class OverolyRecordsManager(Manager):
         else:
             self.annotations = lambda query_parameters: {}
         self.query_parameters = {}
+
         super().__init__(*args, **kwargs)
 
     def setup(self, **query_parameters):
@@ -189,15 +199,26 @@ class OverolyRecordsManager(Manager):
         The setup method is used to set the queryset/annotations parameters
         (*user*, to allow *permissions* system to work , for instance).
         This is a chaining method (it returns *self*) so it can be used in the first part of the queryset building chain
+        All parameter names are converted to upper char so this is a case insensible method
         """
-        self.query_parameters = query_parameters
+        self.query_parameters = {k.upper(): v for k, v in query_parameters.items()}
         return self
 
     def get_queryset(self):
         # if self.annotations:
         #     annotations = self.annotations(self.query_parameters)
         #     print(f"    {annotations=}")
-        qs = super().get_queryset().annotate(**(self.annotations(self.query_parameters)))
+        read_condition_args = []
+        if self.read:
+            read_condition = None
+            for role_str in self.read:
+                if read_condition is None:
+                    read_condition = Q(o_roles__contains=role_str)
+                else:
+                    read_condition |= Q(o_roles__contains=role_str)
+            read_condition_args = [read_condition]
+            print(f"{read_condition_args}")
+        qs = super().get_queryset().annotate(**(self.annotations(self.query_parameters))).filter(*read_condition_args)
         self.query_parameters = {}
         return qs
 
@@ -233,6 +254,7 @@ class OverolyModelMetaclass(ModelBase):
         attrs['_ometa'].special_id = None
         attrs['_ometa'].special_state = None
         attrs['_ometa'].special_roles = None
+        attrs['_ometa'].permissions = None
         attrs['_ometa'].config = None
         attrs['_ometa'].attributes = None
         attrs['_ometa'].django_field_names = set()
@@ -243,8 +265,11 @@ class OverolyModelMetaclass(ModelBase):
         for overoly_attrs in list(attrs['OMeta'].__dict__.keys()):
             if not overoly_attrs.startswith('_'):
                 # print(f"  {overoly_attrs=}")
-                if overoly_attrs == 'config':
-                    print("    " + repr(attrs['OMeta'].config))
+                if overoly_attrs == 'permissions':
+                    attrs['_ometa'].permissions = attrs['OMeta'].permissions
+                    # del attrs['OMeta'].attributes
+                elif overoly_attrs == 'config':
+                    # print("    " + repr(attrs['OMeta'].config))
                     attrs['_ometa'].config = attrs['OMeta'].config
                     # del attrs['OMeta'].config
                 elif overoly_attrs == 'attributes':
@@ -353,7 +378,13 @@ class OverolyModelMetaclass(ModelBase):
 
         if 'records' not in attrs:
             # Add the default Manager (see Django documentation)
-            attrs['records'] = OverolyRecordsManager(annotations=annotations_function_factory(annotations))
+            read_permissions = tuple()
+            if attrs['_ometa'].permissions:
+                if isinstance(attrs['_ometa'].permissions, dict):
+                    if attrs['_ometa'].permissions.get('read'):
+                        read_permissions = tuple(',' + role + ',' for role in attrs['_ometa'].permissions.get('read'))
+                        print(f"{attrs['_ometa'].permissions.get('read')=} ==> {read_permissions=}")
+            attrs['records'] = OverolyRecordsManager(annotations=annotations_function_factory(annotations), read=read_permissions)
         else:
             raise RuntimeError("Overoly Model cannot define a 'records' attribute (reserved for default manager)")
         if 'all_records' not in attrs:

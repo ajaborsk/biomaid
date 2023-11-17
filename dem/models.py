@@ -304,6 +304,12 @@ class Demande(OModel):
         ]
 
     class OMeta:
+        permissions = {
+            'read': [
+                'MAN',
+                'VAL',
+            ],
+        }
         roles_mapper = {
             'ADM': 'is_superuser(USER)',
             'MAN': 'is_staff(USER)',
