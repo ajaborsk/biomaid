@@ -8,6 +8,10 @@ Add to every model:
 - fine state-based & role-based permissions management :
     - at model level for record creation (without state management :-)
     - row level for record view and delete
+      - A weak field level view permission management is however possible : A field on a row is
+        visible only if the user has any role that allow row access OR any role that allow field access.
+        This limitation comes from ORM & SQL queries implementation (SQL only returns 'rectangular' results).
+        True 'per row and per field' read permission can be implemented on a higher level (but is less safe).
     - field level (+ computed values constraints) for record update
 
 Allows very customizable workflow management
@@ -16,6 +20,22 @@ Future (or optional ?):
 - integrated ctime/atime/mtime/dtime management
 
 Almost all features are implemented via metaclasses, thus computed at launch, without runnning overload
+
+Implementation roadmap :
+
+  v read permissions (row level)
+  o read permissions (field level)
+  o delete permissions
+  o modification permissions (fields write access)
+  o modification permissions (fields values constraints)
+  o creation permissions
+  o field attributes management
+  o configuration management
+  o generic role scope
+  o string and/or litteral based role rule
+  o atime/dtime management
+  (o ctime/mtime management)
+
 """
 
 from copy import deepcopy
@@ -78,7 +98,6 @@ class ORolesMapper:
             axis1_filters_list.append(Q(site__isnull=True) | Q(site=OuterRef(kwargs['uf'] + '__site')))
             axis1_filters_list.append(Q(etablissement__isnull=True) | Q(etablissement=OuterRef(kwargs['uf'] + '__etablissement')))
 
-        # return True
         return Exists(UserUfRole.records.filter(*axis1_filters_list, user=user, role_code__in=roles_list))
 
     builtins = {
@@ -114,7 +133,7 @@ class ORolesMapper:
 
     def row_roles_expression(self, query_parameters: dict):
         """
-        Returns a Django expression (to be used as a annotation value) that compute for every row a list of the user roles,
+        Returns a Django ORM expression (to be used as a annotation value) that compute for every row a list of the user roles,
         as a string with a comma separated list of roles and starting and ending with a comma ','.
         eg : ',ADM,MAN,OWN,EDT,'
         To check if the current user has a given role (eg. Manager, code 'MAN'),
@@ -145,7 +164,6 @@ class ORolesMapper:
         #     print(f"  {code=} : {expr=}")
         # print(f"{self.parameters=} {query_parameters=} {parameters=}:  {django_expression=}")
         return django_expression
-        # return Value(',' + ','.join(self.table_roles_list(query_parameters)) + ',')
 
 
 class OField:
@@ -382,8 +400,9 @@ class OverolyModelMetaclass(ModelBase):
             if attrs['_ometa'].permissions:
                 if isinstance(attrs['_ometa'].permissions, dict):
                     if attrs['_ometa'].permissions.get('read'):
+                        # Works with 'read' permission as a tuple, a list or a dict
                         read_permissions = tuple(',' + role + ',' for role in attrs['_ometa'].permissions.get('read'))
-                        print(f"{attrs['_ometa'].permissions.get('read')=} ==> {read_permissions=}")
+                        # print(f"{attrs['_ometa'].permissions.get('read')=} ==> {read_permissions=}")
             attrs['records'] = OverolyRecordsManager(annotations=annotations_function_factory(annotations), read=read_permissions)
         else:
             raise RuntimeError("Overoly Model cannot define a 'records' attribute (reserved for default manager)")
@@ -397,6 +416,8 @@ class OverolyModelMetaclass(ModelBase):
 
 
 class OverolyModel(Model, metaclass=OverolyModelMetaclass):
+    """ """
+
     # ctime = DateTimeField() # creation time
     # atime = DateTimeField() # activation time
     # mtime = DateTimeField() # modification time
@@ -410,5 +431,9 @@ class OverolyModel(Model, metaclass=OverolyModelMetaclass):
         return 'Attribut :-) !'
 
     def save(self, *args, **kwargs):
-        print("Overoly: Checking *create/write* rights (TODO)...")
+        print(f"Overoly: Checking *create/write* rights: {self=} {args=} {kwargs=} (TODO)...")
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        print(f"Overoly: Checking *delete* rights: {self=} {args=} {kwargs=} (TODO)...")
+        super().delete(*args, **kwargs)
