@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import re
+import pathlib
 from datetime import datetime
 from functools import reduce
 
@@ -31,17 +32,7 @@ from django_tables2 import Table, Column, TemplateColumn
 from django.utils.translation import gettext as _
 from django.shortcuts import render
 
-from django.shortcuts import render, redirect
-import pandas as pd
-from django.db.models import (
-    F,
-    ExpressionWrapper,
-    When,
-    Case,
-    Value,
-)
 import tomlkit
-import pathlib
 
 import finance
 from analytics.data import get_last_data
@@ -312,7 +303,6 @@ class MyTestWidget1(AltairWidget):
 
 
 class GestWidget(HtmlWidget):
-
     template_string = """
     {% load render_table from django_tables2 %}
     <div>
@@ -805,7 +795,6 @@ class OrderRowWidget(ContainerWidget):
 
 
 class OrderWidget(ContainerWidget):
-
     template_string = """<div id="{{ html_id }}">
             {% if order %}
                 <table class="simple" style="width:80%;margin:0 10%;background-color:#eee;">
@@ -829,7 +818,6 @@ class OrderWidget(ContainerWidget):
             libelle_html=Replace(F('libelle'), Value('\n'), Value('<br>'), output_field=CharField())
         )
         if qs.count():
-
             # Order header
             header = (
                 qs.values(
@@ -971,7 +959,6 @@ class OrderViewBak(FinanceView):
         dernier_commentaire = Column(orderable=False)
 
     class EqptTable(Table):
-
         FIELDS = (
             'n_imma',
             'n_order',
@@ -1394,7 +1381,6 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
         return self
 
     def TCD(self, request, *arg, **kwargs):
-        context = super().get_context_data(**kwargs)
         if self.programmestcd is not None:
             programme_list = self.programmestcd.strip().split(',')
             self.message = "filtre sur les programmes : " + str(programme_list)
@@ -1405,13 +1391,13 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             filtre_programmes = Programme.objects.filter(my_filter_qs)
             print(filtre_programmes)
             # TODO SLICE le filtre programme
-            #self.qs = Previsionnel.objects.filter(programme=filtre_programmes)
+            # self.qs = Previsionnel.objects.filter(programme=filtre_programmes)
 
-            #qs = Previsionnel.objects.filter(programme__in=filtre_programmes)
+            # qs = Previsionnel.objects.filter(programme__in=filtre_programmes)
             self.qs = Previsionnel.objects.filter(programme="67")
-            #TODO : ajouter les colonnes de calcul
-            #self.qs.annotate(
-            #Trimestre=ExpressionWrapper(
+            # TODO : ajouter les colonnes de calcul
+            # self.qs.annotate(
+            # Trimestre=ExpressionWrapper(
             #    Case(
             #        When(
             #             date_estimative_mes__isnull=False,
@@ -1422,20 +1408,20 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             #        #     then=Coalesce(F('quantite_validee'), F('quantite'))
             #        #    * Coalesce(F('montant_unitaire_expert_metier'), F('prix_unitaire')),
             #        #),
-            #montant_final=ExpressionWrapper(
+            # montant_final=ExpressionWrapper(
             #    Case(
-                #     When(
-                #         prix_unitaire__isnull=False,
-                #         then=F("quantite") * F("prix_unitaire"),
-                #     ),
+            #     When(
+            #         prix_unitaire__isnull=False,
+            #         then=F("quantite") * F("prix_unitaire"),
+            #     ),
 
             #    ),
             #    output_field=TextField(),
-            #),
-            #ENVELOPPE=Coalesce(F('arbitrage_commission__code'), Value('0')),
-            #)
-            #for q in self.qs:
-            #self.qs.annotate()
+            # ),
+            # ENVELOPPE=Coalesce(F('arbitrage_commission__code'), Value('0')),
+            # )
+            # for q in self.qs:
+            # self.qs.annotate()
 
             self.df = self.qs.to_dataframe(
                 fieldnames=[
@@ -1447,18 +1433,18 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
                     'montant_commande',
                     'date_estimative_mes',
                     'solder_ligne',
-                    ],
-                ).fillna(0)
+                ],
+            ).fillna(0)
             for d in self.df:
                 if d.date_estimative_mes == 0:
-                    d.date_estimative_mes = "01/01"+d.num_dmd[5:7]
+                    d.date_estimative_mes = "01/01" + d.num_dmd[5:7]
                 else:
                     pass
 
             self.df["Trimestres"] = self.df["date_estimative_mes"].dt.to_period("Q").fillna("NULL")
-            self.df.columns = ["NUM", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE","date mes","soldé","Trimestre"]
-            #TODO : puis ajouter au TCD les enveloppes
-            #TODO : puis inserer les calculs en fonction des enveloppes.
+            self.df.columns = ["NUM", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE", "date mes", "soldé", "Trimestre"]
+            # TODO : puis ajouter au TCD les enveloppes
+            # TODO : puis inserer les calculs en fonction des enveloppes.
 
         else:
             print("si pas filtre")
