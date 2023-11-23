@@ -148,9 +148,10 @@ Installation d'une instance de |project|
 Création de l'utilisateur et du dossier de l'instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Le principe général est de créer un utilisateur par instance et installer dans son dossier personnel `$HOME` tout ce qui est nécessaire au
-fonctionnement de cette instance. Dans cet example, nous allons appeler cette instance et cet utilisateur *`instance`* mais vous
-pouvez la nommer comme vous le souhaitez et même en créer plusieurs, comme *`production`*, *`demo`*, *`test`*, *`evaluation`*, etc.
+Le principe général est de créer un utilisateur par instance et installer dans son dossier personnel `$HOME` tout ce qui est 
+nécessaire au fonctionnement de cette instance. Dans cette documentation, nous allons appeler cette instance et cet utilisateur 
+*`instance`* mais vous pouvez la nommer comme vous le souhaitez et même en créer plusieurs, comme *`production`*, *`demo`*, 
+*`test`*, *`evaluation`*, etc.
 
 .. code:: console
 
@@ -172,12 +173,12 @@ Une fois l'utilisateur de l'instance créé, vous pouvez vous connecter sous cet
 
 Après avoir décidé du nom que vous donnerez à votre dossier de configuration locale 
 (ici, on utilisera `local_mon_ets` pour l'exemple), installez le code depuis le dépôt et 
-créez les quatre dossiers qui hébergeront l'instance et ses données :
+créez les trois dossiers qui hébergeront les données dynamiques de l'instance :
 
 .. code:: console
 
     instance@serveur~$ git clone https://bitbucket.org/ajaborsk/biomaid.git
-    instance@serveur~$ mkdir local_mon_ets static media log
+    instance@serveur~$ mkdir static media log
 
 .. note::
 
@@ -288,13 +289,68 @@ Activez ensuite le fichier (lors de vos prochaines connexions, cela se fera auto
 
     instance@biomaid:~/biomaid$ source ~/.bashrc
 
-install dependances
+N'hésitez pas à consulter la documentation de ce script d'installation de poetry : 
+https://github.com/python-poetry/install.python-poetry.org et à la documentation de l'outil poetry lui-même : 
+https://python-poetry.org/docs/
+
+La configuration poetry de |project| comporte trois groupes de dépendances et deux "extensions" (groupes de dépendances 
+optionnelles). Les groupes de dépendances sont :
+
+- **docs** : Outils nécessaires à la création de la documentation (*html* et *pdf*) à partir des sources 
+  (inclus dans l'arbre *git*). Il est recommandé d'installer les dépendances de ce groupe, même pour la production.
+- **tests** : Outils nécessaires à l'exécution des tests de régression. Il n'est pas recommandé d'installer ce groupe en production.
+- **dev** : Outils nécessaires pour le développement. Il n'est pas recommandé d'installer ces dépendances pour la production.
+
+Les dépendances optionnelles sont :
+
+- **oracle** : Bibliothèques pour accéder directement à une base de données Oracle (pour la GMAO Asset+). Cela demande aussi 
+  l'installation de fichiers dans le système d'exploitation.
+- **ldap** : Bibliothèques pour accéder au LDAP (Advance Directory par exemple) institutionnel 
+  (notamment pour la gestion des mots de passe). 
+
+Pour installer, par exemple, les dépendances d'une version de production sans aucune dépendance optionnelle :
 
 .. code:: console
 
     instance@biomaid:~/biomaid$ poetry install --no-root --without=dev --without=tests
 
-copie local
+.. note::
+
+    L'option ``--no-root`` sert à indiquer à poetry que |Project| n'est pas une bibiothèque python et qu'il n'y a donc pas
+    de fichiers python à installer dans le dossier des bibliothèques python de l'environnement virtuel. Il faut juste installer les
+    dépendances.
+
+Pour installer les dépendances d'une version de développement avec la connexion Oracle :
+
+.. code:: console
+
+    instance@biomaid:~/biomaid$ poetry install --no-root -E oracle
+
+Création du dossier de configuration locale
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+L'ensemble des données de configuration d'une installation de |project| est rangé dans un dossier unique, qui pourra être copié
+pour configurer différentes instances (production, test, développement, etc.) ou, mieux encore, installé dans un dépôt *git* dédié.
+Ce dépôt pourra être, par exemple, hébergé comme un dépôt privé dans un *hub* public (gituh.com, gitlab.com, bitbucket.org...) 
+ou dans un gestionnaire de dépôt privé de l'établissement. Cette option permet de bénéficier des avantages d'un dépôt *git*, et 
+notamment la possibilité de travailler à plusieurs, de tester des configurations dans des *branches* dédiées et surtout d'avoir
+un historique complet (et réversible) de toutes les modifications.
+
+Le plus simple, pour créer ce dossier local, est de copier le dossier de configuration locale de la version de démo (qui est inclus
+dans le dépôt *git* public des sources) :
+
+.. code-block:: console
+
+    instance@biomaid:~/biomaid$ cp -R local_biomaid ../local_mon_ets
+
+En remplaçant ``local_mon_ets`` par un nom de dossier spécifique à votre établissement.
+
+Il faut ensuite faire un lien symbolique de ce dossier vers le dossier `local` de l'arbre des sources :
+
+.. code-block:: console
+
+    instance@biomaid:~/biomaid$ ln -sf ../local_mon_ets local
+
 
 Ajout de l'instance dans la configuration système
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
