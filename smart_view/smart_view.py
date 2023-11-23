@@ -1450,7 +1450,16 @@ class SmartView(metaclass=SmartViewMetaclass):
             return
 
         exclude = list(exclude)
-        form_fields = [f for f in cls._meta['data_fields'] if f in cls._meta['model']._meta.get_fields()]
+
+        # Quite tricky way to add in the form only fields that are defined in the model class
+        form_fields = []
+        for f in cls._meta['data_fields']:
+            try:
+                cls._meta['model']._meta.get_field(f)
+                form_fields.append(f)
+            except FieldDoesNotExist:
+                pass
+
         help_texts = {}
         widgets = {
             'id': HiddenInput(),
@@ -1480,6 +1489,8 @@ class SmartView(metaclass=SmartViewMetaclass):
                     field_classes[field_name] = MultiChoiceField
             except FieldDoesNotExist:
                 pass
+
+        # print(f"{cls=} {form_fields=}")
 
         form_class = new_class(
             'SmartViewForm',
@@ -1778,7 +1789,7 @@ class SmartView(metaclass=SmartViewMetaclass):
                 **{
                     sf: getattr(self, sf).get_annotation(self._view_params)
                     for sf in [self._meta['state_field'], self._meta['roles_field']]
-                    if getattr(self, sf).get_annotation(self._view_params)
+                    if sf is not None and getattr(self, sf).get_annotation(self._view_params)
                 }
             )
         )
@@ -2132,7 +2143,7 @@ class SmartView(metaclass=SmartViewMetaclass):
                     else:
                         raise RuntimeError(_("Unknown export engine: {}").format(export.get("engine")))
                 else:
-                    print(f"{self._meta['values_fields']=}")
+                    # print(f"{self._meta['values_fields']=}")
                     return JsonResponse({"data": list(query_set.values(*self._meta['values_fields']))})
         # Renvoyer None indique à l'appelant (la vue) que la requête n'a pas été traitée
 
