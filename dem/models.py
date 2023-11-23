@@ -305,10 +305,13 @@ class Demande(OModel):
 
     class OMeta:
         permissions = {
-            'read': [
+            'read_list': [
                 'MAN',
                 'VAL',
             ],
+            'read_dict': {
+                'MAN': ('id', 'uf'),
+            },
         }
         roles_mapper = {
             'ADM': 'is_superuser(USER)',
