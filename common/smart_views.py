@@ -103,6 +103,7 @@ class RoleScopeSmartView(SmartView):
             'domaine_prefix',
             'id',
             'roles',
+            'state_code',
             'tools',
         )
         settings = {
@@ -180,6 +181,15 @@ class RoleScopeSmartView(SmartView):
             'data': class_roles_expression(UserUfRole),
         },
     )
+
+    state_code = (
+        ComputedSmartField,
+        {
+            'special': 'state',
+            'data': lambda view_params: ExpressionWrapper(Value('EDITABLE'), output_field=TextField()),
+        },
+    )
+
     tools = (
         ToolsSmartField,
         {
