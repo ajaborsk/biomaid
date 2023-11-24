@@ -71,16 +71,16 @@ en production, pour laquelle la **configuration recommandée** est :
 
 Lors de l'installation d'Ubuntu (la méthode de lancement dépend de la machine, virtuelle ou non) :
 
-- Choisissez un nom de machine (le nom du serveur). Dans la suite de cette documentation, 
-  nous utiliserons le nom **`serveur`**.  
 - Choisissez le français comme langue principale du système. De cette façon, la configuration par défaut des services,
   et en particulier du gestionnaire de bases de données PostgreSQL, sera le français avec un encodage UTF-8,
 - Choisissez un nom d'utilisateur pour vous (l'administrateur système). Dans la suite de cette documentation, 
   nous utiliserons le nom **`utilisateur`**. Cet utilisateur sera utilisé pour toutes les commandes d'administration par le biais
   de la commande `sudo` lorsque les droits de `root` seront nécessaires.
+- Choisissez un nom de machine (le nom du serveur). Dans la suite de cette documentation, 
+  nous utiliserons le nom **`serveur`**.  
 - Validez l'installation de `ssh`. Que la machine soit virtuelle ou non, il est toujours utile de pouvoir y accéder à distance de 
   façon sécurisée,
-- Ne demandez par l'installation de PostgreSQL proposée dans la liste initiale des serveurs. C'est une version ancienne
+- Ne demandez par l'installation de PostgreSQL proposée dans la liste des "Snaps". C'est une version ancienne
   (PostgreSQL 10) et nous utiliserons la version 14.
 - Pour tout le reste, validez les options par défaut proposées par la distribution.
 
@@ -115,16 +115,22 @@ L'installation des paquets se fait avec une seule commande :
 
 .. code:: console
 
-    utilisateur@serveur:~$ sudo apt-get install nginx postgresql gcc libpq-dev python3-dev gcc
+    utilisateur@serveur:~$ sudo apt-get install nginx postgresql gcc python3-dev libpq-dev
 
-`postgresql`
-   est le serveur de base de données de PostgreSQL et quelques bibliothèques pour l'utiliser,
-`libpq-dev`
-   est le paquet avec les bibliothèques de développement de PostgreSQL, nécessaire pour disposer de la dernière version
-   du pilote python.
 `nginx` 
    est le serveur HTTP(S) ; il sera utilisé en direct pour les fichiers simples (fichiers "statiques") et servira de 
    "reverse proxy" pour le serveur Django/gunicorn.
+`postgresql`
+   est le serveur de base de données de PostgreSQL et quelques bibliothèques pour l'utiliser,
+`gcc`
+   est le compilateur C, qui sera utilisé pour compiler les modules python depuis les sources 
+   (notamment `psycopg2`, driver pour PosgreSQL).
+`python3-dev`
+   est la bibliothèque de développement pour Python 3, qui sera utilisée pour compiler les modules python depuis les sources 
+   (notamment `psycopg2`, driver pour PosgreSQL).
+`libpq-dev`
+   est le paquet avec les bibliothèques de développement de PostgreSQL, nécessaire pour disposer de la dernière version
+   du pilote python.
 
 L'installation des paquets réalise également l'initialisation de la base de données primitive, l'activation et le lancement des
 services `systemd` associés.
@@ -145,8 +151,8 @@ Installation d'une instance de |project|
     configurer les services (base de données et serveur WEB) de façon à ce qu'elle soit techniquement fonctionnelle. Pour autant,
     il restera à configurer cette instance pour pouvoir l'utiliser.
 
-Création de l'utilisateur et du dossier de l'instance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Création de l'utilisateur
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Le principe général est de créer un utilisateur par instance et installer dans son dossier personnel `$HOME` tout ce qui est 
 nécessaire au fonctionnement de cette instance. Dans cette documentation, nous allons appeler cette instance et cet utilisateur 
@@ -161,10 +167,63 @@ Mis à part pour le mot de passe, qu'il faut définir, vous pouvez laisser vide 
 
 .. note:: 
 
-    Il n'est pas conseillé d'utiliser la commande `useradd`, beaucoup plus primitive et qui demande d'ajuster beaucoup plus de 
+    Il n'est pas conseillé d'utiliser la commande ``useradd``, beaucoup plus primitive et qui demande d'ajuster beaucoup plus de 
     paramètres ultérieurement.
 
-Une fois l'utilisateur de l'instance créé, vous pouvez vous connecter sous cette identité :
+Configuration de l'instance dans la base de données
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On va maintenant créer l'utilisateur et la base de données dans PostgreSQL qui seront utilisés pour l'instance.
+
+Pour commencer, il faut se connecter comme administrateur de la base de données (utilisateur ``postgres``) :
+
+.. code:: console
+
+    utilisateur@serveur~$ sudo su - postgres
+
+Il faut ensuite créer l'utilisateur et la base de données associés à l'instance et donner à l'utilisateur en question les droits 
+suffisants. Vous pouvez choisir les identifiants (et le mot de passe) à votre guise mais nous allons utiliser ici et dans la suite
+``instance_db``, ``instance_user`` et ``instance_pwd``.
+
+.. code:: console
+
+    postgres@serveur:~$ createuser --createdb --pwprompt instance_user 
+    Enter password for new role: 
+    Enter it again: 
+    postgres@serveur:~$ createdb --owner instance_user instance_db
+
+Vous devez saisir deux fois le mot de passe (ici ``instance_pwd``).
+
+Pour vérifier, on peut lancer l'interface en ligne de la base de données et lister les bases de données avec la commande ``\l``:
+
+.. code:: console
+
+    postgres@serveur~$ psql
+    psql (14.9 (Ubuntu 14.9-0ubuntu0.22.04.1))
+    Type "help" for help.
+
+    postgres=# \l
+                                         List of databases
+        Name     |     Owner     | Encoding |   Collate   |    Ctype    |   Access privileges   
+    -------------+---------------+----------+-------------+-------------+-----------------------
+     instance_db | instance_user | UTF8     | fr_FR.UTF-8 | fr_FR.UTF-8 | 
+     postgres    | postgres      | UTF8     | fr_FR.UTF-8 | fr_FR.UTF-8 | 
+     template0   | postgres      | UTF8     | fr_FR.UTF-8 | fr_FR.UTF-8 | =c/postgres          +
+                 |               |          |             |             | postgres=CTc/postgres
+     template1   | postgres      | UTF8     | fr_FR.UTF-8 | fr_FR.UTF-8 | =c/postgres          +
+                 |               |          |             |             | postgres=CTc/postgres
+    (4 rows)
+
+    postgres=# 
+    postgres=# ^d
+    postgres@serveur~$ ^d
+    utilisateur@serveur~$ 
+
+Création du dossier de l'instance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Une fois l'utilisateur de l'instance créé et la base de données créée et configurée, vous pouvez vous connecter sous l'identité 
+de l'utilisateur lié à l'instance :
 
 .. code:: console
 
@@ -172,7 +231,7 @@ Une fois l'utilisateur de l'instance créé, vous pouvez vous connecter sous cet
     instance@serveur~$
 
 Après avoir décidé du nom que vous donnerez à votre dossier de configuration locale 
-(ici, on utilisera `local_mon_ets` pour l'exemple), installez le code depuis le dépôt et 
+(ici, on utilisera ``local_mon_ets`` pour l'exemple), installez le code depuis le dépôt et 
 créez les trois dossiers qui hébergeront les données dynamiques de l'instance :
 
 .. code:: console
@@ -224,6 +283,16 @@ documentation, nous allons installer la dernière version stable (branche ``stab
     instance@serveur~/biomaid$
 
 
+.. note::
+
+    Il peut y avoir plusieurs branches et plusieurs versions disponibles dans l'arbre *git*. On peut se caler (faire un *checkout*)
+    sur une branche ou sur un *tag* précis créé par les développeurs. Il existe normalement un *tag* par version publiée de
+    |project|. On peut en faire la liste avec la commande ``git tag --list``. Par ailleurs, les deux branches principales du projet
+    sont ``stable``, qui doit normalement pointer sur la dernière version stable de |project| et ``main``, qui pointe vers la
+    dernière version de développement (**à ne pas utiliser en production !**).
+
+    Reportez-vous à la documentation de *git* : https://git-scm.com/doc pour plus de détails
+
 Il faut maintenant installer le gestionnaire 'Poetry', qui va gérer les environnements virtuels python et surtout les 
 dépendances de |project|. 
 
@@ -269,7 +338,7 @@ dépendances de |project|.
     instance@biomaid:~/biomaid$ 
 
 Comme le préconise le message d'installation, il faut maintenant ajouter ``/home/instance/.local/bin/`` dans le PATH 
-de l'utilisateur instance. C'est d'ailleurs une configuration qui pourra être utile par la suite pour d'autres sujets.
+de l'utilisateur ``instance``. C'est d'ailleurs une configuration qui pourra être utile par la suite pour d'autres outils.
 
 Pour ce faire, le plus simple est d'ajouter à la fin du fichier ``/home/instance/.bashrc`` (fichier exécuté à chaque connexion) 
 la commande ``export PATH="/home/instance/.local/bin:$PATH"``, comme indiqué. Vous pouvez utiliser l'éditeur ``nano``, qui est présent
@@ -351,27 +420,149 @@ Il faut ensuite faire un lien symbolique de ce dossier vers le dossier `local` d
 
     instance@biomaid:~/biomaid$ ln -sf ../local_mon_ets local
 
+Initialisation de l'application
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+L'avant dernière étape à mettre en oeuvre avant de pouvoir lancer une instance, c'est de créer le fichier de configuration de 
+l'instance. Ce fichier, qui est placé à la racine de l'application (dans le dossier ``biomaid``), est toujours nommé 
+``instance_settings.py``. Ce fichier n'est pas disponible dans le dépôt car c'est le fichier qui va contenir toutes les options 
+spécifiques à cette instance et en particulier tous les mots de passe et les clés secrètes.
+
+La distribution comporte néanmoins un fichier d'exemple, qu'on peut copier et modifier pour créer un fichier de configuration 
+d'instance :
+
+.. code:: console
+
+    instance@biomaid:~/biomaid$ cp example_instance_settings.py instance_settings.py
+    instance@biomaid:~/biomaid$ nano instance_settings.py
+
+Les modifications minimales à faire pour avoir une instance opérationnelle sont :
+
+- Indiquer le nom de l'hôte qui héberge le serveur (par défaut, seul un accès en local ``localhost`` est possible). C'est le nom qui
+  sera utilisé pour accéder au serveur depuis le navigateur des utilisateurs. 
+- Choisir une valeur de ``DEBUG`` : Choisir ``False`` pour une instance de production ou de test et ``True`` pour une instance de
+  développement.
+- Configurer l'accès à la base de données avec les identifiants définis plus haut (``instance_db``, ``instance_user`` et 
+  ``instance_pwd`` ici)
+- Changer la clé secrète ``SECRET_KEY`` pour une instance de production. Le site https://djecrety.ir/ permet de générer une clef 
+  secrète facilement, par exemple.
+
+Le résultat (le fichier ``~/biomaid/instance_settings.py``) pourra ressembler à cela :
+
+.. code-block:: python
+
+    #  Copyright (c) 2020-2023 Brice Nord, Romuald Kliglich, Alexandre Jaborska.
+    #  This file is part of the BiomAid distribution.
+    #  This program is free software: you can redistribute it and/or modify
+    #  it under the terms of the GNU General Public License as published by
+    #  the Free Software Foundation, version 3.
+    #  This program is distributed in the hope that it will be useful, but
+    #  WITHOUT ANY WARRANTY; without even the implied warranty of
+    #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    #  General Public License for more details.
+    #  You should have received a copy of the GNU General Public License
+    #  along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+    import logging
+
+    from settings import DEBUG_TOOLBAR, MIDDLEWARE, INSTALLED_APPS
+
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)s %(levelname)s %(message)s', datefmt='%Y-%m-%dT%H:%M:%S')
+    logging.getLogger(__name__).info("Example instance.")
+
+    DEFAULT_DOMAIN = 'http://localhost:8000'
+
+    ALLOWED_HOSTS = [
+        'localhost',
+        '127.0.0.1',
+    ]
+
+    DEBUG = False
+    TEMPLATE_DEBUG = DEBUG
+    SMARTVIEW_DEBUG = DEBUG
+
+    AUTHENTICATION_BACKENDS = ('common.auth_backends.MyAuthBackend',)
+
+    if DEBUG_TOOLBAR:
+        INSTALLED_APPS += [
+            'debug_toolbar',
+        ]
+        MIDDLEWARE = [
+            'debug_toolbar.middleware.DebugToolbarMiddleware',
+        ] + MIDDLEWARE
+        INTERNAL_IPS = [
+            # ...
+            '127.0.0.1',
+            # ...
+        ]
+
+    INSTALLED_APPS += []
+
+    # SECURITY WARNING: keep the secret key used in production secret!
+    SECRET_KEY = '1zjt*b2da6b4vc22@yirnix1w!&#$&hk08yh31%^hv2@)05h)6'
+
+    DATABASES = {
+        # For a demonstration instance, the easiest is to use a SQLite3 database
+        # 'default': {
+        #     'ENGINE': 'django.db.backends.sqlite3',
+        #     'NAME': 'db.sqlite3',
+        # },
+        # But you could also use a PostgreSQL server if you want !
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'instance_db',
+            'USER': 'instance_user',
+            'PASSWORD': 'instance_pwd',
+            'HOST': 'localhost',
+            'PORT': '',
+        },
+        # Asset+ SQL/Oracle access ; use with care...
+        # 'gmao': {
+        #     'ENGINE': 'oraclenvc',
+        #     'NAME': 'your_asset_plus_db_name',
+        #     'USER': 'your_asset_plus_db_user',
+        #     'PASSWORD': 'your_asset_plus_db_password',
+        #     'HOST': 'your_asset_plus_db_server_name',
+        #     'PORT': 'your_asset_plus_db_server_port',
+        # },
+    }
+
+    # local email tests on port 8025 (using aiosmtpd python module)
+    # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_PORT = 8025
+
+    MEDIA_ROOT = '../media'
+
+
+Une fois ce fichier créé, il doit être possible de rentrer dans l'environnement virtuel et de lancer l'application 
+et en particulier la première commande :
+
+.. code-block:: console
+
+    instance@biomaid:~/biomaid$ poetry shell
+    (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py migrate
+
+La commande peut mettre un certain temps à s'exécuter. Elle va créer toutes la structure de la base de données nécessaire à
+l'exécution de l'application django |project|.
+
+.. admonition:: Point d'étape
+
+    A partir de ce point, le code de l'instance doit être opérationnel. Il doit en particulier être possible de lancer un 
+    serveur de test avec la commande ``python manage.py runserver --insecure``, à condition d'être dans l'environnement virtuel
+    d'exécution (avec la commande ``poetry shell`` si nécessaire).
 
 Ajout de l'instance dans la configuration système
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-config database
+.. todo::
 
-nginx
+    nginx
 
-installation service 
+    installation service 
 
-instance_settings.py
+    collectstatics
 
-
-Initialisation et lancement de l'application
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-migration
-
-collectstatics
-
-systemd start/enable
+    systemd start/enable
 
 
 Configuration d'une instance de |project|
