@@ -2,15 +2,19 @@
 {% load static %}
 {% load url_kwargs %}
 {% block tab_contents %}
-<h1>Analyse des programmes</h1>
+<h1 xmlns="http://www.w3.org/1999/html">Analyse des programmes</h1>
 <div>
 <div>
 
     {% if trigger == "get_it" %}
         <p>TEST</p>
-        {{programmestcd.list}}
+        {{programmestcd}}
+        </br>
         {{message}}
+        </br>
         {{qs}}
+        </br>
+        {{df | safe}}
 
     {% else %}
         <form id="save" action={{url}} method="POST">

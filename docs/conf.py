@@ -35,7 +35,7 @@
 
 project = 'BiomAid'
 # project = 'Géqip'
-copyright = '2020-2021, Brice Nord, Romuald Kliglich, Alexandre Jaborska'
+copyright = '2020-2023, Brice Nord, Romuald Kliglich, Alexandre Jaborska'
 author = 'Brice Nord, Romuald Kliglich, Alexandre Jaborska'
 
 
@@ -113,6 +113,7 @@ html_logo = "BiomAid-glowing-logo.png"
 # html_style = 'css/biomaid_doc.css'
 globaltoc_depth = 1
 
+html_css_files = ['css/biomaid_doc.css']
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

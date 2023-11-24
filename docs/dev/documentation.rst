@@ -1,5 +1,6 @@
+*************************
 Documentation du projet
-=======================
+*************************
 
 |project| utilise `Sphinx <https://www.sphinx-doc.org/en/master/#>`_  comme générateur de documentation et le module
 `autoapi` pour générer automatiquement la documentation des API.

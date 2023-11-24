@@ -1600,18 +1600,18 @@ class GestionUf(GestionData):
         'ETABLISSEMENT',
         'SERVICE',
         'CENTRE RESPONSABILITE',
-        'SITE',
         'POLE',
+        'SITE',
         'DATE CLOTURE',
     ]  # colonne à afficher dans le table
     template_lig_var = [
         'code',
         'nom',
+        'etablissement',
         'service',
         'centre_responsabilite',
         'pole',
         'site',
-        'etablissement',
         'cloture',
     ]  # champs correspondants aux colonnes dans le table
     template_additional = None

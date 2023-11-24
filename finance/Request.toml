@@ -1,7 +1,7 @@
 [PROGRAMME_LISTE]
     [PROGRAMME_LISTE.CHUA]
         [PROGRAMME_LISTE.CHUA.BM]
-            liste = "BIO-23-PPI,BIO-23-PC,BIO-24-RT"
+            liste = "BIO-23-PPI"
         [PROGRAMME_LISTE.CHUA.EQ]
             liste = ""
         [PROGRAMME_LISTE.CHUA.ST]

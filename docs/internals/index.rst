@@ -1,6 +1,6 @@
-==================================================
+##################################################
 Description du fonctionnement interne de |project|
-==================================================
+##################################################
 
 Ce chapitre décrit les structures et les procédures internes de |project|.
 

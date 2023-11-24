@@ -1,6 +1,7 @@
-=======================
+##################################################
 Guide du développeur
-=======================
+##################################################
+
 
 Ce chapitre est destiné aux personnes qui souhaitent collaborer au projet |project| ou développer des applications
 pour leur usage propre.

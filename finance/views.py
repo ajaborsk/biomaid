@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import re
+import pathlib
 from datetime import datetime
 from functools import reduce
 
@@ -32,7 +33,6 @@ from django.utils.translation import gettext as _
 from django.shortcuts import render
 
 import tomlkit
-import pathlib
 
 import finance
 from analytics.data import get_last_data
@@ -1345,6 +1345,10 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
         if self.trigger == "get_it":
             context["programmestcd"] = self.programmestcd  # TODO : a supprimer juste pour essais
             self.TCD(request)
+            context["qs"] = self.qs
+            context["df"] = self.df.to_html
+            print(self.df)
+            context["message"] = self.message
         else:
             self.programme = Programme.objects.all()
             context["programme"] = self.programme
@@ -1377,11 +1381,9 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
         return self
 
     def TCD(self, request, *arg, **kwargs):
-        context = super().get_context_data(**kwargs)
         if self.programmestcd is not None:
             programme_list = self.programmestcd.strip().split(',')
-            print(programme_list)
-            context["message"] = "filtre sur les programmes : " + str(programme_list)
+            self.message = "filtre sur les programmes : " + str(programme_list)
             my_filter_qs = Q()
             for prog in programme_list:
                 print(prog)
@@ -1389,11 +1391,64 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             filtre_programmes = Programme.objects.filter(my_filter_qs)
             print(filtre_programmes)
             # TODO SLICE le filtre programme
-            qs = Previsionnel.objects.filter(programme=filtre_programmes)
-            print(qs)
+            # self.qs = Previsionnel.objects.filter(programme=filtre_programmes)
+
+            # qs = Previsionnel.objects.filter(programme__in=filtre_programmes)
+            self.qs = Previsionnel.objects.filter(programme="67")
+            # TODO : ajouter les colonnes de calcul
+            # self.qs.annotate(
+            # Trimestre=ExpressionWrapper(
+            #    Case(
+            #        When(
+            #             date_estimative_mes__isnull=False,
+            #             then=F("enveloppe_allouee"),
+            #        ),
+            #        #When(
+            #        #     enveloppe_allouee__isnull=True,
+            #        #     then=Coalesce(F('quantite_validee'), F('quantite'))
+            #        #    * Coalesce(F('montant_unitaire_expert_metier'), F('prix_unitaire')),
+            #        #),
+            # montant_final=ExpressionWrapper(
+            #    Case(
+            #     When(
+            #         prix_unitaire__isnull=False,
+            #         then=F("quantite") * F("prix_unitaire"),
+            #     ),
+
+            #    ),
+            #    output_field=TextField(),
+            # ),
+            # ENVELOPPE=Coalesce(F('arbitrage_commission__code'), Value('0')),
+            # )
+            # for q in self.qs:
+            # self.qs.annotate()
+
+            self.df = self.qs.to_dataframe(
+                fieldnames=[
+                    "num",
+                    "num_dmd",
+                    "programme",
+                    "budget",
+                    'montant_estime',
+                    'montant_commande',
+                    'date_estimative_mes',
+                    'solder_ligne',
+                ],
+            ).fillna(0)
+            for d in self.df:
+                if d.date_estimative_mes == 0:
+                    d.date_estimative_mes = "01/01" + d.num_dmd[5:7]
+                else:
+                    pass
+
+            self.df["Trimestres"] = self.df["date_estimative_mes"].dt.to_period("Q").fillna("NULL")
+            self.df.columns = ["NUM", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE", "date mes", "soldé", "Trimestre"]
+            # TODO : puis ajouter au TCD les enveloppes
+            # TODO : puis inserer les calculs en fonction des enveloppes.
+
         else:
             print("si pas filtre")
-            context["message"] = "Tous les programmes : aucun selectionné"
-            qs = Previsionnel.objects.all()
+            self.message = "Tous les programmes : aucun selectionné"
+            self.qs = Previsionnel.objects.all()
 
         return self
