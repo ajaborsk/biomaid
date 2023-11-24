@@ -439,10 +439,12 @@ d'instance :
 Les modifications minimales à faire pour avoir une instance opérationnelle sont :
 
 - Indiquer le nom de l'hôte qui héberge le serveur (par défaut, seul un accès en local ``localhost`` est possible). C'est le nom qui
-  sera utilisé pour accéder au serveur depuis le navigateur des utilisateurs. 
+  sera utilisé pour accéder au serveur depuis le navigateur des utilisateurs. Ainsi, si votre VM est accessible à l'adresse IP
+  192.168.122.128 ou sous le nom 'serveur.local' pour les utilisateurs, vous devez ajouter '192.168.122.128' et/ou 'serveur.local'
+  à la liste ``ALLOWED_HOSTS``.
 - Choisir une valeur de ``DEBUG`` : Choisir ``False`` pour une instance de production ou de test et ``True`` pour une instance de
   développement.
-- Configurer l'accès à la base de données avec les identifiants définis plus haut (``instance_db``, ``instance_user`` et 
+- Configurer l'accès à la base de données PostgreSQL avec les identifiants définis plus haut (``instance_db``, ``instance_user`` et 
   ``instance_pwd`` ici)
 - Changer la clé secrète ``SECRET_KEY`` pour une instance de production. Le site https://djecrety.ir/ permet de générer une clef 
   secrète facilement, par exemple.
@@ -548,8 +550,22 @@ l'exécution de l'application django |project|.
 .. admonition:: Point d'étape
 
     A partir de ce point, le code de l'instance doit être opérationnel. Il doit en particulier être possible de lancer un 
-    serveur de test avec la commande ``python manage.py runserver --insecure``, à condition d'être dans l'environnement virtuel
-    d'exécution (avec la commande ``poetry shell`` si nécessaire).
+    serveur de test avec la commande ``python manage.py runserver --insecure 0.0.0.0:8000``.
+
+    Vous pouvez même faire un essai avec la base de tests :
+
+    .. code:: console
+
+        (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py loaddata fixtures/tests_db.json
+        (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py runserver --insecure 0.0.0.0:8000
+    
+    Et revenir à une base vide après avoir arrêté le serveur :
+
+    .. code:: console
+
+        (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py reset_db
+        (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py migrate
+
 
 Ajout de l'instance dans la configuration système
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
