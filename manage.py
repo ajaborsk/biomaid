@@ -3,8 +3,6 @@
 import os
 import sys
 
-import time_machine
-
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
@@ -21,6 +19,8 @@ def main():
 
 if __name__ == '__main__':
     if os.environ.get('TIME_TRAVEL'):
+        import time_machine
+
         time_destination = os.environ.get('TIME_TRAVEL')  # get the destination (as a date string)
         print("travelling into time at", time_destination)
         with time_machine.travel(time_destination):
