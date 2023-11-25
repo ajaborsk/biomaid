@@ -113,11 +113,6 @@ INSTALLED_APPS = [
     # 'local',
     'assetplusconnect',
     'common',
-    'dem',
-    'drachar',
-    'marche',
-    'geprete',
-    'finance',
 ]
 
 MIDDLEWARE = [

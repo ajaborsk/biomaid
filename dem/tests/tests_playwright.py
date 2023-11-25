@@ -315,7 +315,7 @@ def test_full_dispatch_in_table_ok(biomaid_page: Callable) -> None:
 
     # Choose the menu entry
     page.get_by_text("Répartition").click()
-    page.get_by_role("link", name="Campagne de test").click()
+    page.get_by_role("link", name="Recensement équipements 2021").click()
 
     # Locate the SmartView table cell with 'expert_metier'
     loc = page.table_locator('repartition_table-smart-view-table', 'code', 'DEM-2021-00000', 'expert_metier')
@@ -375,7 +375,7 @@ def test_dispatch_in_table_expert_only(biomaid_page: Callable) -> None:
 
     # Choose the menu entry
     page.get_by_text("Répartition").click()
-    page.get_by_role("link", name="Campagne de test").click()
+    page.get_by_role("link", name="Recensement équipements 2021").click()
 
     # Locate the SmartView table cell with 'expert_metier'
     loc = page.table_locator('repartition_table-smart-view-table', 'code', 'DEM-2021-00000', 'expert_metier')
@@ -438,7 +438,7 @@ def test_dispatch_in_table_program_only(biomaid_page: Callable) -> None:
 
     # Choose the menu entry
     page.get_by_text("Répartition").click()
-    page.get_by_role("link", name="Campagne de test").click()
+    page.get_by_role("link", name="Recensement équipements 2021").click()
 
     # Locate the SmartView table cell with 'expert_metier'
     loc = page.table_locator('repartition_table-smart-view-table', 'code', 'DEM-2021-00000', 'expert_metier')
