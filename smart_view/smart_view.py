@@ -80,7 +80,7 @@ from xlsxwriter import Workbook
 
 from common.utils import DataWorksheet, HTMLFilter
 from common import config
-from common.workflow import toml_to_dict, Workflow
+from overoly.workflow import toml_to_dict, Workflow
 from document.smart_fields import DocumentsSmartField
 from overoly.base import OverolyModel
 from smart_view.smart_expression import SmartExpression
