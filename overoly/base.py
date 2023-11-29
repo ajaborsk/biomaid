@@ -43,7 +43,6 @@ from functools import partial
 from logging import warning
 
 from django.db.models import Model, Expression, Value, When, Case, Field, Q, Exists, OuterRef
-from django.db.models.functions import Concat
 from django.db.models.base import ModelBase
 
 # from overoly.queryset import OQuerySet
@@ -133,33 +132,30 @@ class ORolesMapper:
     def table_roles_list(self, query_parameters: dict):
         return self.const_roles + list(code for code, expr in self.table_roles_map.items() if expr(query_parameters))
 
-    def row_roles_expression(self, query_parameters: dict):
+    def row_roles_int_expression(self, query_parameters: dict):
         """
-        Returns a Django ORM expression (to be used as a annotation value) that compute for every row a list of the user roles,
-        as a string with a comma separated list of roles and starting and ending with a comma ','.
-        eg : ',ADM,MAN,OWN,EDT,'
-        To check if the current user has a given role (eg. Manager, code 'MAN'),
-        one can test if the comma bracketed role code string (',MAN,') is
-        a substring of this roles string
+        Returns a Django ORM expression (to be used as a annotation value) that compute for every row a map of the user roles,
+        as a integer which is a sum of powers of 2 (one for each effective role defined)
+        eg : if effective defined roles for this manager are ['ADM','MAN','OWN','VAL'], the expression evaluated for a record will
+        be 7 if the user has role ADM (2**0), MAN (2**1) and OWN (2**2) but not VAL (2**3).
+        To check if the current user has a given role (eg. Manager, code 'MAN', rank 1),
+        one can check if ((2**rank) & (this value)) is different from 0.
         """
         # Get all the needed parameters from query_parameters (setting at None if not found)
         parameters = {param: query_parameters.get(param) for param in self.parameters}
 
         # print(f"   {query_parameters=} {self.field_names=}")
-        django_expression = Concat(
-            *(
-                [Value(',')]
-                + [
-                    Case(
-                        When(
-                            django_orm_expression(expr, values=parameters, fieldnames=self.field_names),
-                            then=Value(code + ','),
-                        ),
-                        default=Value(''),
-                    )
-                    for code, expr in self.row_roles_map.items()
-                ]
-            )
+        django_expression = sum(
+            [
+                Case(
+                    When(
+                        django_orm_expression(expr, values=parameters, fieldnames=self.field_names),
+                        then=Value(2**code),
+                    ),
+                    default=Value(0),
+                )
+                for code, expr in enumerate(self.row_roles_map.values())
+            ]
         )
 
         # for code, expr in self.row_roles_map.items():
@@ -375,7 +371,7 @@ class OverolyModelMetaclass(ModelBase):
                     pass
                 elif attr_value.special == 'roles':
                     if attr_value.value is None and roles_mapper is not None:
-                        formulae = ORolesMapper(field_names, **roles_mapper).row_roles_expression
+                        formulae = ORolesMapper(field_names, **roles_mapper).row_roles_int_expression
                 # print(f"  overoly_field: {attr} => {val}")
 
                 if isinstance(formulae, Expression):
