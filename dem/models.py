@@ -304,6 +304,29 @@ class Demande(OModel):
         ]
 
     class OMeta:
+        """
+        Rôles effectifs pour ce modèle :
+
+        - ADM : Adminstrateur (rôle global), supr utilisateur
+        - MAN : Manager (rôle global), responsable applicatif
+        - RED : Rédacteur (rôle de modèle), peut créer une demande
+        - OWN : Propriétaire (rôle d'enregistrement), propriétaire de la demande
+        - CNS : Cadre supérieut/responsable médical (rôle d'enregistrement), peut donner un avis sur la demande
+        - APP : Approbateur (rôle d'enregistrement), peut approuver/prioriser la demande
+        - DIS : Dispatcheur (rôle d'enregistrement), peut dispatcher la demande
+        - EXP : Expert (rôle d'enregistrement), peut expertiser la demande
+        - ARB : Arbitre (rôle d'enregistrement), peut valider (ou non) la demande dans son programme
+
+        """
+
+        roles_mapper = {
+            'ADM': 'is_superuser(USER)',
+            'MAN': 'is_staff(USER)',
+            'OWN': 'q(redacteur=USER)',
+            'APP': "in_scope(USER, ['CHP','DIR'], uf='uf')",
+            'EXP': 'q(expert_metier__isnull=False, expert_metier=USER)',
+            'ARB': 'q(programme__arbitre__isnull=False, programme__arbitre=USER)',
+        }
         permissions = {
             'read_list': [
                 'MAN',
@@ -312,12 +335,6 @@ class Demande(OModel):
             'read_dict': {
                 'MAN': ('id', 'uf'),
             },
-        }
-        roles_mapper = {
-            'ADM': 'is_superuser(USER)',
-            'MAN': 'is_staff(USER)',
-            'ARB': 'q(programme__arbitre__isnull=False, programme__arbitre=USER)',
-            'VAL': "in_scope(USER, ['CHP','DIR'], uf='uf')",
         }
 
     PRIO_CHOICES = (

@@ -24,17 +24,17 @@ Almost all features are implemented via metaclasses, thus computed at launch, wi
 Implementation roadmap :
 
   v read permissions (row level)
-  o read permissions (field level)
+  o- read permissions (field level)
   o delete permissions
   o modification permissions (fields write access)
-  o modification permissions (fields values constraints)
+  o- modification permissions (fields values constraints)
   o creation permissions
   o field attributes management
   o configuration management
   o generic role scope
   o string and/or litteral based role rule
   o atime/dtime management
-  (o ctime/mtime management)
+  o- ctime/mtime management
 
 """
 
@@ -45,6 +45,8 @@ from logging import warning
 from django.db.models import Model, Expression, Value, When, Case, Field, Q, Exists, OuterRef
 from django.db.models.functions import Concat
 from django.db.models.base import ModelBase
+
+# from overoly.queryset import OQuerySet
 
 from polyexpr.polyexpr import PolyExpr, django_orm_expression
 
@@ -238,6 +240,7 @@ class OverolyRecordsManager(Manager):
             print(f"{read_condition_args}")
         qs = super().get_queryset().annotate(**(self.annotations(self.query_parameters))).filter(*read_condition_args)
         self.query_parameters = {}
+        # return OQuerySet(qs)
         return qs
 
 

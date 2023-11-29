@@ -124,3 +124,12 @@ form_layout = """
             # Documents joints
                 <--documents_sf-+--+--+->
 """
+
+
+# Quelques exemples de propriétés modifiables des champs de la table "Demande"
+[dem.Demande.properties.code]
+
+table.label = "Code"
+form.label = "Code de la demande"
+help_text = "Ceci est le code unique de la demande"
+
