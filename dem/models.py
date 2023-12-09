@@ -322,10 +322,50 @@ class Demande(OModel):
         roles_mapper = {
             'ADM': 'is_superuser(USER)',
             'MAN': 'is_staff(USER)',
+            'RED': None,
             'OWN': 'q(redacteur=USER)',
             'APP': "in_scope(USER, ['CHP','DIR'], uf='uf')",
             'EXP': 'q(expert_metier__isnull=False, expert_metier=USER)',
             'ARB': 'q(programme__arbitre__isnull=False, programme__arbitre=USER)',
+        }
+        workflow = {
+            'conditions': {},
+            'actions': {
+                'create': {
+                    'roles': ['RED'],
+                    'permissions': '__ALL__',
+                },
+                'comment': {
+                    'roles': ['SUP'],
+                    'conditions': {},
+                    'permissions': {},
+                },
+                'approbate': {
+                    'roles': ['APP'],
+                    'conditions': {},
+                    'permissions': {},
+                },
+                'dispatch': {
+                    'roles': ['DIS'],
+                    'conditions': {},
+                    'permissions': {},
+                },
+                'expertise': {
+                    'roles': ['EXP'],
+                    'conditions': {},
+                    'permissions': {},
+                },
+                'arbitrate': {
+                    'roles': ['ARB'],
+                    'conditions': {},
+                    'permissions': {},
+                },
+                'finalize': {
+                    'roles': ['ARB'],
+                    'conditions': {},
+                    'permissions': {'flag'},
+                },
+            },
         }
         permissions = {
             'read_list': [

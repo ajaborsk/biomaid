@@ -285,5 +285,6 @@ if __name__ == '__main__':
     with open('test.gv', 'w+') as f:
         f.write(wf.dot())
 
+    pprint(cfg['demo'])
     pprint(wf.permissions)
     print(wf.django_orm_state_expr)
