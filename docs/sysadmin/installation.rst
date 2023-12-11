@@ -305,7 +305,7 @@ dépendances de |project|.
 
 .. code:: console
 
-    instance@biomaid:~/biomaid$ curl -sSL https://install.python-poetry.org | python3 -
+    instance@serveur:~/biomaid$ curl -sSL https://install.python-poetry.org | python3 -
     Retrieving Poetry metadata
 
     # Welcome to Poetry!
@@ -335,7 +335,7 @@ dépendances de |project|.
 
     `poetry --version`
 
-    instance@biomaid:~/biomaid$ 
+    instance@serveur:~/biomaid$ 
 
 Comme le préconise le message d'installation, il faut maintenant ajouter ``/home/instance/.local/bin/`` dans le PATH 
 de l'utilisateur ``instance``. C'est d'ailleurs une configuration qui pourra être utile par la suite pour d'autres outils.
@@ -346,7 +346,7 @@ sur toutes les distributions modernes et facile d'utilisation :
 
 .. code-block:: console
 
-    instance@biomaid:~/biomaid$ nano ~/.bashrc
+    instance@serveur:~/biomaid$ nano ~/.bashrc
 
 Allez à la fin du fichier et ajoutez sur une nouvelle ligne la commande ``export PATH="/home/instance/.local/bin:$PATH"``.
 
@@ -356,7 +356,7 @@ Activez ensuite le fichier (lors de vos prochaines connexions, cela se fera auto
 
 .. code-block:: console
 
-    instance@biomaid:~/biomaid$ source ~/.bashrc
+    instance@serveur:~/biomaid$ source ~/.bashrc
 
 N'hésitez pas à consulter la documentation de ce script d'installation de poetry : 
 https://github.com/python-poetry/install.python-poetry.org et à la documentation de l'outil poetry lui-même : 
@@ -381,7 +381,7 @@ Pour installer, par exemple, les dépendances d'une version de production sans a
 
 .. code:: console
 
-    instance@biomaid:~/biomaid$ poetry install --no-root --without=dev --without=tests
+    instance@serveur:~/biomaid$ poetry install --no-root --without=dev --without=tests
 
 .. note::
 
@@ -393,7 +393,7 @@ Pour installer les dépendances d'une version de développement avec la connexio
 
 .. code:: console
 
-    instance@biomaid:~/biomaid$ poetry install --no-root -E oracle
+    instance@serveur:~/biomaid$ poetry install --no-root -E oracle
 
 Création du dossier de configuration locale
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -410,7 +410,7 @@ dans le dépôt *git* public des sources) :
 
 .. code-block:: console
 
-    instance@biomaid:~/biomaid$ cp -R local_biomaid ../local_mon_ets
+    instance@serveur:~/biomaid$ cp -R local_biomaid ../local_mon_ets
 
 En remplaçant ``local_mon_ets`` par un nom de dossier spécifique à votre établissement.
 
@@ -418,7 +418,7 @@ Il faut ensuite faire un lien symbolique de ce dossier vers le dossier `local` d
 
 .. code-block:: console
 
-    instance@biomaid:~/biomaid$ ln -sf ../local_mon_ets local
+    instance@serveur:~/biomaid$ ln -sf ../local_mon_ets local
 
 Initialisation de l'application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -433,8 +433,8 @@ d'instance :
 
 .. code:: console
 
-    instance@biomaid:~/biomaid$ cp example_instance_settings.py instance_settings.py
-    instance@biomaid:~/biomaid$ nano instance_settings.py
+    instance@serveur:~/biomaid$ cp example_instance_settings.py instance_settings.py
+    instance@serveur:~/biomaid$ nano instance_settings.py
 
 Les modifications minimales à faire pour avoir une instance opérationnelle sont :
 
@@ -541,7 +541,7 @@ et en particulier la première commande :
 
 .. code-block:: console
 
-    instance@biomaid:~/biomaid$ poetry shell
+    instance@serveur:~/biomaid$ poetry shell
     (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py migrate
 
 La commande peut mettre un certain temps à s'exécuter. Elle va créer toutes la structure de la base de données nécessaire à
@@ -567,35 +567,120 @@ l'exécution de l'application django |project|.
         (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py migrate
 
 
-Ajout de l'instance dans la configuration système
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Extraction des fichiers statiques :
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    .. code:: console
+
+        (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py collectstatics
+
+Configuration de *nginx*
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Le serveur WEB *nginx* est utilisé ici comme *reverse proxy*. C'est à dire qu'il va traiter les demandes 
+(requêtes HTTP) faites par les clients (navigateurs web des utilisateurs finaux) et les transférer si besoin
+à l'application Django (lancée comme une application WSGI).
+
+Il y a plusieurs avantages à ajouter cet "intermédiaire" :
+
+- *nginx* peut gérer tout le protocole de sécurité *https*, ce qui permet à Django de n'avoir que des requêtes 
+  *HTTP*, plus simples, à traiter (cette fonction n'est pas forcément utile en cas d'utilisation sur intranet),
+- *nginx* peut traiter seul, et de façon extrêmement efficace, les requêtes qui demandent des fichiers statiques,
+  c'est à dire qui ne sont pas calculés 'au vol'. Cela concerne notamment tous les fichiers CSS, JS, les images et tous les
+  fichiers enregistrés par les utilistateurs (pièces jointes).
+
+Un seul serveur *nginx* peut parfaitement être utilisé pour plusieurs instances de |project| sur la même machine (le
+même serveur physique ou virtuel), à condition d'utiliser des ports différents. Il est également possible de faire fonctionner
+plusieurs instances de |project| sur le port 80 (port normalement utilisé pour HTTP) ou sur le port 443 (port normalement utilisé
+pour HTTPS) mais cela demande l'utilisation d'un préfixe dans l'URL (http://serveur/production/biomaid-demo/... 
+ou http://serveur/test/biomaid-demo/... par exemple) et une configuration un peu plus complexe, qui est/sera 
+décrite dans :ref:`multiple_instances`.
+
+La configuration de *nginx* se trouve (sans surprise) dans le dossier ``/etc/nginx/`` de votre système Linux.
+Elle est constituée notamment d'un fichier de configuration principal ``nginx.conf``, qu'il n'est normalement pas nécessaire de modifier,
+et de deux dossiers : ``sites-available`` et ``sites-enabled``. Le principe est de créer, pour chaque *serveur*, un fichier
+de configuration spécifique dans ``sites-available``. Il suffit ensuite de créer un lien symbolique de ce fichier dans
+le dossier ``sites-enabled`` pour l'activer (au prochain démarrage de *nginx*). 
+
+A l'installation de *nginx*, il y a généralement un serveur nommé ``default`` qui est activé (avec un lien dans le
+dossier ``sites-enabled``).
+
+Le plus simple pour créer un fichier de configuration pour |project| est, après avoir quitté l'environnement virtuel et 
+se déconnecter de l'utilisateur ``instance``, de copier le fichier *masque* que vous trouverez 
+dans l'arbre des sources de |project| : ``tools/install_vm_site_nginx_dra.conf`` dans le dossier ``/etc/nginx/sites-available`` 
+puis de l'éditer pour que la configuration corresponde à votre installation :
+
+.. code:: console
+
+    (biomaid-py3.10) instance@serveur:~/biomaid$ exit
+    instance@serveur:~/biomaid$ exit
+    utilisateur@serveur$ sudo cp /home/instance/biomaid/tools/install_vm_site_nginx_dra.conf /etc/nginx/sites-available/instance.conf
+    utilisateur@serveur$ sudo nano /etc/nginx/sites-available/instance.conf
+
+Votre écran doit montrer le contenu du masque de configuration :
+
+.. code:: 
+
+    server {
+        listen 80;
+        server_name ####VM_HOSTNAME####;
+        root ####VM_DRADEM_BASE_PATH####;
+        client_max_body_size 100m;
+
+        location /static {
+            alias ####VM_DRA_BASE_PATH####/staticfiles;
+        }
+
+        location / {
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_redirect off;
+            if (!-f $request_filename) {
+                proxy_pass http://127.0.0.1:8000;
+                break;
+            }
+        }
+    }
 
 .. todo::
 
-    nginx
+    nginx fin...
+    /media
+    ln -sf
+
+Création et lancement du service
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. todo::
 
     installation service 
-
-    collectstatics
 
     systemd start/enable
 
 
-Configuration d'une instance de |project|
-+++++++++++++++++++++++++++++++++++++++++
+Configuration de votre |project|
+++++++++++++++++++++++++++++++++
 
 .. admonition:: Objectif
 
-    L'objectif de cette partie est de configurer une instance de |project|. Cela correspond à la modification des fichiers 
-    de configuration pour adapter l'instance au fonctionnement souhaité. Il va s'agit par exemple des noms de champs, des 
+    L'objectif de cette partie est de configurer votre propre |project|. Cela correspond à la modification des fichiers 
+    de configuration pour adapter l'application au fonctionnement souhaité. Il va s'agit par exemple des noms de champs, des 
     textes, des couleurs, du logo, des importations automatiques, etc. Il est possible de faire cette configuration autant de 
-    fois que nécessaire et de relancer le serveur `gunicorn` pour l'activer.
+    fois que nécessaire et de relancer le serveur `gunicorn` pour l'activer (sur l'instance de production ou de test).
+
+Lors de l'étape de création du dossier de configuration locale, nous n'avons fait que copier un exemple de dossier
+de configuration, qu'il est possible de modifier pour le faire correspondre aux besoins de votre établissement ou
+de votre GHT (ou de tout autre entité).
+
+Vous trouverez la documentation relative à cette partie ici : :ref:`config_local`
 
 Installation d'une maquette sous Linux
 --------------------------------------
 
 Installation d'une maquette sous Windows
 ----------------------------------------
+
+.. _multiple_instances:
 
 Installation multiple (plusieurs instances sur un seul serveur)
 ---------------------------------------------------------------
