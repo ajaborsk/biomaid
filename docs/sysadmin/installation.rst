@@ -222,6 +222,32 @@ Pour vérifier, on peut lancer l'interface en ligne de la base de données et li
 Création du dossier de l'instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. note::
+
+    L'architecture du dossier de l'utilisateur propriétaire de l'instance comportera cinq dossiers :
+
+    ``biomaid``
+      c'est le dossier qui contiendra le code du logiciel. Mis à part un lien (``local``) et le fichier de configuration principal 
+      (``instance_settings.py``), les fichiers de ce dossier ne devraient pas être modifiés pour une installation normale 
+      (*production*, *demo* ou *test* : C'est à dire sans développement de code).
+    ``local_mon_ets``
+      va contenir tous les fichiers de configuration qui sont spécifiques au site d'installation. Ce sont donc 
+      les fichiers de ce dossier qu'il faudra modifier pour adapter |project| à votre établissement. Ce dossier
+      peut éventuellement être partagé entre plusieurs instances (locales) et il est possible de le gérer comme un dépôt
+      `git` pour bénéficier des fonctionnalités de cet outil.
+    ``staticfiles``
+      sera utilisé pour stocker les fichiers statiques (qui ne sont pas calculés "au vol") de l'application. Son
+      contenu est généré par Django et il ne faut pas le modifier à la main
+    ``media``
+      va contenir tous les fichiers ajoutés par les utilisateurs de l'application ("pièces jointes"). Il sera nécessaire
+      de sauvegarder son contenu lors des sauvegardes régulières.
+    ``log`` 
+      sera utilisé pour ranger les différents fichiers de "log" lors du fonctionnement de l'application. C'est ici 
+      qu'il faudra venir des informations en cas de problème...
+
+    Ces différents dossiers seront créés lors des étapes suivantes de l'installation. Il n'est pas nécessaire de
+    les créer à la main à ce niveau.
+
 Une fois l'utilisateur de l'instance créé et la base de données créée et configurée, vous pouvez vous connecter sous l'identité 
 de l'utilisateur lié à l'instance :
 
@@ -237,29 +263,8 @@ créez les trois dossiers qui hébergeront les données dynamiques de l'instance
 .. code:: console
 
     instance@serveur~$ git clone https://bitbucket.org/ajaborsk/biomaid.git
-    instance@serveur~$ mkdir static media log
+    instance@serveur~$ mkdir media log
 
-.. note::
-
-    L'architecture du dossier de l'utilisateur propriétaire de l'instance comporte cinq dossiers :
-
-    ``biomaid``
-      c'est le dossier qui contient le code du logiciel. Mis à part un lien et le fichier de configuration principal,
-      les fichiers de ce dossier ne devraient pas être modifiés pour une installation normale (sans développement).
-    ``local_mon_ets``
-      va contenir tous les fichiers de configuration qui sont spécifiques au site d'installation. Ce sont donc 
-      les fichiers de ce dossier qu'il faudra modifier pour adapter |project| à votre établissement. Ce dossier
-      peut éventuellement être partagé entre plusieurs instances (locales) et il est possible de le gérer comme un dépôt
-      `git` pour bénéficier des fonctionnalités de cet outil.
-    ``static``
-      sera utilisé pour stocker les fichiers statiques (qui ne sont pas calculés "au vol") de l'application. Son
-      contenu est généré par Django et il ne faut pas le modifier à la main
-    ``media``
-      va contenir tous les fichiers ajoutés par les utilisateurs de l'application ("pièces jointes"). Il sera nécessaire
-      de sauvegarder son contenu lors des sauvegardes régulières.
-    ``log`` 
-      sera utilisé pour ranger les différents fichiers de "log" lors du fonctionnement de l'application. C'est ici 
-      qu'il faudra venir des informations en cas de problème...
 
 Initialisation de l'environnement d'exécution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -534,6 +539,7 @@ Le résultat (le fichier ``~/biomaid/instance_settings.py``) pourra ressembler �
     EMAIL_PORT = 8025
 
     MEDIA_ROOT = '../media'
+    STATIC_ROOT = '../staticfiles'
 
 
 Une fois ce fichier créé, il doit être possible de rentrer dans l'environnement virtuel et de lancer l'application 
@@ -570,9 +576,40 @@ l'exécution de l'application django |project|.
 Extraction des fichiers statiques :
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    .. code:: console
+Django est capable de séparer les fichiers *statiques* de l'ensemble du code et de les rassembler
+dans un dossier dédié, afin qu'ils soient ensuite gérés entièrement par le serveur *nginx*, ce qui est
+à la fois plus rapide et plus sûr.
 
-        (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py collectstatics
+Pour que Django fasse cette opération, il suffit de taper la commande (en tant qu'utilisateur de l'instance) :
+
+.. code:: console
+
+    (biomaid-py3.10) instance@serveur:~/biomaid$ python manage.py collectstatics
+
+Si vous avez déjà lancé cette commande auparavant, Django peut vous demander une confirmation pour écraser
+les fichiers précédents. Vous pouvez répondre *oui* (ou *yes*) sans hésiter.
+
+.. note:: 
+
+    Si vous utilisez la configuration de service directe (sans *supervisor*) décrite ci-dessous, l'étape
+    d'extraction et d'installation des fichiers statiques se fait automatiquement et cette étape est 
+    donc facultative (mais sans risque).
+
+.. note:: 
+
+    Attention, sur certaines versions de |project|, le chemin de stockage des fichiers statiques, défini
+    par la variable de configuration ``STATIC_ROOT`` est ``../static``. Pour vous assurer de bien 
+    avoir la valeur ``../staticfiles``, vérifiez que vous avez bien la ligne 
+
+    .. code:: python
+
+        STATIC_ROOT = '../staticfiles'
+
+    dans votre fichier de configuration de l'instance ``instance_settings.py``.
+
+    Alternativement, vous pouvez adapter les fichiers de configuration plus bas et remplacer partout 
+    ``/staticfiles`` par ``/static``.
+
 
 Configuration de *nginx*
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -642,20 +679,168 @@ Votre écran doit montrer le contenu du masque de configuration :
         }
     }
 
-.. todo::
 
-    nginx fin...
-    /media
-    ln -sf
+Vous devez modifier le fichier pour l'adapter à votre instance de |project| et ajouter quelques lignes
+pour la configuration de l'accès aux pièces jointes et obtenir quelque chose comme cela :
+
+.. code:: 
+
+    server {
+        listen 80;
+        server_name serveur;
+        root /home/instance;
+        client_max_body_size 100m;
+
+        location /static {
+            alias /staticfiles;
+        }
+
+        location /media {
+            alias /media;
+        }
+
+        location / {
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_redirect off;
+            if (!-f $request_filename) {
+                proxy_pass http://unix:/home/instance/biomaid.sock;
+                break;
+            }
+        }
+    }
+
+.. note:: 
+
+    Comme ce masque date un peu, il faut, en plus de la transformation des noms encadrés par des ``###``, apporter deux 
+    modifications significatives au fichier :
+
+    - Il faut ajouter un petit *alias* pour le chemin */media* (exactement comme pour les fichiers statiques)  
+    - Et changer l'adresse à laquelle le serveur *nginx* ira se connecter à gunicorn, en utilisant une
+      socket UNIX au lieu d'une socket IP
+
+    Cette dernière modification n'est pas applicable sous Windows et en cas de tentative d'installation
+    complètement sous Windows, il faudra utiliser un port IP et modifier la gestion du service (qui est complètement différente).
+
+Il faut ensuite effectivement activer ce serveur "Reverse Proxy" et il faut pour cela saisir quelques
+commandes sur la console : 
+
+.. code:: console
+
+    utilisateur@serveur$ sudo rm /etc/nginx/sites-enabled/default
+    utilisateur@serveur$ sudo ln -sf /etc/nginx/sites-available/instance.conf /etc/nginx/sites-enabled/
+    utilisateur@serveur$ sudo usermod -a -G instance www-data
+    utilisateur@serveur$ sudo systemctl restart nginx
+
+La première commande désactive le serveur par défaut de *nginx*, la seconde active notre serveur "ReverseProxy"
+et serveur de fichiers statiques, la troisième donne à l'utilisateur qui exécute *nginx* (*www-data* sur
+une distribution Ubuntu) le droit d'accéder aux fichiers de notre instance en l'ajoutant au groupe des utilisateurs
+d'*instance* et enfin la dernière relance le serveur *nginx* pour mettre en oeuvre toutes ces actions.
+
+.. admonition:: Point d'étape
+
+    A partir d'ici, le serveur HTTP fonctionne et vous devriez pouvoir le vérifier en saisissant l'adresse suivante dans votre
+    navigateur : ``http://serveur/static/local/Logo%20BiomAid.png``, qui doit afficher le logo de BiomAid. Si 
+    votre serveur n'est pas déclaré avec son nom dans le DNS de l'établissement, vous devez utiliser à la place son
+    adresse IP.
+
+    Toutefois, comme le serveur Django/gunicorn n'est pas lancé, l'accès à la ressource ``http://serveur//`` va 
+    vous retourner un message d'erreur (**502 Bad Gateway**).
 
 Création et lancement du service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. todo::
+Pour lancer automatiquement |project| au démarrage du serveur, il faut maintenant ajouter un *service* (au sens d'Unix) 
+au système. Ubuntu, comme toutes les distributions modernes, utilise le gestionnaire d'initialisation (et de services) *systemd*.
 
-    installation service 
+Pour créer (et activer) un service pour |project|, il existe plusieurs options possibles. Il est par exemple
+possible d'utiliser le gestionnaire *supervisor* (http://supervisord.org/) qui offre plusieurs avantages (compatibilité 
+avec d'autres systèmes d'initialisation, possibilité d'avoir des services en espace utilisateur, etc.)
 
-    systemd start/enable
+Dans cette documentation, nous allons décrire la création d'un service natif *systemd*, sans dépendance externe
+moins puissant mais un peu plus simple qu'en passant par *supervisor*.
+
+Comme pour le fichier de configuration de *nginx*, un modèle est proposé dans le code source de |project|. 
+Pour commencer, vous pouvez donc copier ce fichier dans ``/etc/systemd/system`` et de l'activer pour notre instance.
+
+Ce fichier ressemble à cela :
+
+.. code:: systemd
+
+    [Unit]
+    Description=gunicorn daemon for biomaid %i instance
+    After=network.target
+
+    [Service]
+    Type=exec
+    # gunicorn example uses 'Type=notify' but does not work for me.
+    # Type=notify
+
+    # the specific user that our service will run as
+    User=%i
+    Group=%i
+    # another option for an even more restricted service is
+    # DynamicUser=yes
+    # see http://0pointer.net/blog/dynamic-users-with-systemd.html
+    RuntimeDirectory=gunicorn
+    WorkingDirectory=/home/%i/biomaid
+    ExecStart=/usr/bin/bash run-instance.sh
+    ExecReload=/bin/kill -s HUP $MAINPID
+    KillMode=mixed
+    TimeoutStopSec=5
+    PrivateTmp=true
+
+    [Install]
+    WantedBy=multi-user.target
+
+
+.. warning:: 
+
+    Ce service lance l'instance de |project| via le script *bash* ``run-instance.sh`` qui est à la racine du projet 
+    (dans le dossier) ``/home/instance/biomaid/``. A la date d'écriture de cette documentation (décembre 2023),
+    Ce script ne lance que 2 processus parallèles *gunicorn* (2 *workers*) et ce nombre n'est pas configurable (il
+    faut modifier le script pour changer le nombre de *workers*, ce qui altère les sources et rend donc compliquées
+    les mises à jour futures :-( ). Deux processus sont largement suffisants pour faire des tests ou une version de démo,
+    mais sur un serveur de production, il est préférable d'en utiliser au moins 4.
+
+Ce service est un service qui est paramétrable avec le nom de l'instance (qui est aussi le nom de l'utilisateur).
+Cela signifie que si vous installez plusieurs instances sur le même serveur, il n'est pas nécessaire de
+créer plusieurs fois ce service. Il suffira de l'activer pour les différentes instances.
+
+.. code:: console
+
+    utilisateur@serveur:~$ sudo cp /home/instance/biomaid/tools/biomaid-instance@.service /etc/systemd/system
+    utilisateur@serveur:~$ sudo systemctl enable --now biomaid-instance@instance.service
+
+.. note:: 
+
+    Dans la commande ``systemctl enable --now biomaid-instance@instance.service``, le premier ``instance``, avant le ``@``,
+    correspond au nom du fichier de service et ne doit pas être changé. Si vous installez une instance dénommée *demo*,
+    la commande sera ``systemctl enable --now biomaid-instance@demo.service``
+
+La dernière commande installe **et** lance le service. Vous pouvez le lancer uniquement (sans l'installer, ce qui signifie qu'il ne
+sera pas relancé au prochain boot du serveur) avec :
+
+.. code:: console
+
+    utilisateur@serveur:~$ sudo systemctl start biomaid-instance@instance.service
+
+De la même façon, vous pouvez l'arrêter (sans le désinstaller) avec :
+
+.. code:: console
+
+    utilisateur@serveur:~$ sudo systemctl stop biomaid-instance@instance.service
+
+Et le désinstaller (sans l'arrêter) :
+
+.. code:: console
+
+    utilisateur@serveur:~$ sudo systemctl disable biomaid-instance@instance.service
+
+.. admonition:: Point d'étape
+
+    A ce niveau, vous devez avoir une instance de |project| complètement fonctionnelle, mais sans données.
+
 
 
 Configuration de votre |project|
