@@ -115,7 +115,9 @@ L'installation des paquets se fait avec une seule commande :
 
 .. code:: console
 
-    utilisateur@serveur:~$ sudo apt-get install nginx postgresql gcc python3-dev libpq-dev
+    utilisateur@serveur:~$ sudo apt-get install nginx postgresql gcc python3-dev libpq-dev make
+    utilisateur@serveur:~$ sudo apt-get install graphviz librsvg2-bin
+    utilisateur@serveur:~$ sudo apt-get install latexmk texlive texlive-latex-extra
 
 `nginx` 
    est le serveur HTTP(S) ; il sera utilisé en direct pour les fichiers simples (fichiers "statiques") et servira de 
@@ -134,6 +136,10 @@ L'installation des paquets se fait avec une seule commande :
 
 L'installation des paquets réalise également l'initialisation de la base de données primitive, l'activation et le lancement des
 services `systemd` associés.
+
+Les paquets de la seconde ligne (`graphviz` et `librsvg2-bin`) servent à la création de la documentation *html*. 
+Les paquets de la troisième ligne (`latexmk`, `texlive` et `texlive-latex-extra`) servent à la création de la documentation au format *pdf* (qui nécessite la documentation
+*html*)
 
 .. admonition:: Point d'étape
 
@@ -837,9 +843,95 @@ Et le désinstaller (sans l'arrêter) :
 
     utilisateur@serveur:~$ sudo systemctl disable biomaid-instance@instance.service
 
+Configuration des sauvegardes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. todo::
+
+    Il faut prévoir la sauvegarde de la base de données : Voir si on utilise
+    les utilitaires de PostgreSQL comme à Amiens, qui sont très performants mais 
+    avec une récupération un peu plus complexe ou la commande 'backup' de BiomAid,
+    qui est facile à réutiliser mais qui est nettement moins performante 
+
+    Il faut aussi faire la sauvegarde des fichiers dans ``/home/instance/media``, sans
+    doute pas avec la même fréquence. Voir si l'utilisation d'un utilitaire comme ``rsync`` 
+    peut apporter quelque chose
+
+    Discuter aussi de l'opportunité de faire les sauvegardes sur un autre serveur physique
+    et/ou l'intégrer dans les plans de sauvegarde institutionnels
+
+    Autre sujet à traiter : Une sauvegarde (en supplément) permettant de récupérer facilement
+    les données dans un format utilisable manuellement (CSV, Excel...)
+
+
+Programmation des tâches périodiques
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+La dernière étape consiste à programmer, via l'utilitaire `cron`, le lancement à 
+intervalle régulier de scripts chargés de réaliser des tâches de fond de |project|.
+
+Django (ou plus exactement *django-extension*, qui est installé) permet de classer ces différentes
+tâches par période (toutes les minutes, toutes les heures, etc.) et il suffit donc de mettre dans le 
+fichier ``.crontab`` de l'utilisateur quelques lignes qui appeleront ces commandes.
+
+Après s'être reconnecté comme l'utilisateur ``instance``, il suffit de lancer l'éditeur
+de *crontab* :
+
+.. code:: console
+
+    utilisateur@serveur~$ sudo su - instance
+    instance@serveur~$ crontab -e
+
+Si le système vous demande quel éditeur utiliser et que vous hésitez, choisissez *nano*.
+
+Vous devriez arriver sur l'éditeur ouvert avec un fichier *crontab* sans aucune
+tâche. Ajoutez à la fin les 4 lignes nécessaires à la programmation des tâches :
+
+.. code::
+
+    # Edit this file to introduce tasks to be run by cron.
+    # 
+    # Each task to run has to be defined through a single line
+    # indicating with different fields when the task will be run
+    # and what command to run for the task
+    # 
+    # To define the time you can provide concrete values for
+    # minute (m), hour (h), day of month (dom), month (mon),
+    # and day of week (dow) or use '*' in these fields (for 'any').
+    # 
+    # Notice that tasks will be started based on the cron's system
+    # daemon's notion of time and timezones.
+    # 
+    # Output of the crontab jobs (including errors) is sent through
+    # email to the user the crontab file belongs to (unless redirected).
+    # 
+    # For example, you can run a backup of all your user accounts
+    # at 5 a.m every week with:
+    # 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+    # 
+    # For more information see the manual pages of crontab(5) and cron(8)
+    # 
+    # m h  dom mon dow   command
+    */15 * * * * cd biomaid ; bash run-instance.sh runjobs quarter_hourly >> /home/instance/log/cron_quarter_hourly.log
+    7    * * * * cd biomaid ; bash run-instance.sh runjobs hourly >> /home/instance/log/cron_hourly.log
+    11 2 * * * cd biomaid ; bash run-instance.sh runjobs daily >> /home/instance/log/cron_daily.log
+    11 3 * * 1 cd biomaid ; bash run-instance.sh runjobs weekly >> /home/instance/log/cron_weekly.log
+
+A la date d'écriture de cette documentation (décembre 2023), les tâches périodiques traitées sont :
+
+- Bascule des demandes validées **définitivement** vers le plan d'acquisition (tous les 1/4 d'heure)
+- Auto-approbation des demandes lorsque le demandeur est aussi l'approbateur (toutes les heures)
+- Réorientation des demandes vers la bonne campagne si nécessaire (toutes les nuits)
+- Quelques calculs d'alertes mineures
+
+Cette liste est susceptible d'évoluer en fonction du déploiement de nouvelles fonctionnalités mais il ne sera normalement 
+pas nécessaire de revenir modifier la *crontab*.
+
 .. admonition:: Point d'étape
 
-    A ce niveau, vous devez avoir une instance de |project| complètement fonctionnelle, mais sans données.
+    A ce niveau, vous devez avoir une instance de |project| complètement fonctionnelle, mais sans données. Vous 
+    pouvez vous y connecter en saisissant ``http://serveur/`` dans un navigateur, si votre
+    serveur est bien enregistré dans le DNS de l'établissement.
 
 
 
