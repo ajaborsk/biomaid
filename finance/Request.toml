@@ -1,7 +1,10 @@
+#Sauvegarde des listes de programmes pour analyse financière
+# respecter dans l'explorateur le format : xxxxx,wwwww,yyyyy
+# le rendu ci-dessous doit être : liste = "xxxxx,wwwww,yyyyy"
 [PROGRAMME_LISTE]
     [PROGRAMME_LISTE.CHUA]
         [PROGRAMME_LISTE.CHUA.BM]
-            liste = "BIO-23-PPI, BIO-24-RT"
+            liste = "BIO-23-PPI,BIO-24-PR-RT,BIO-22-PPI"
         [PROGRAMME_LISTE.CHUA.EQ]
             liste = ""
         [PROGRAMME_LISTE.CHUA.ST]

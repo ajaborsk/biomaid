@@ -1384,46 +1384,15 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
         if self.programmestcd is not None:
             programme_list = self.programmestcd.strip().split(',')
             self.message = "filtre sur les programmes : " + str(programme_list)
-            my_filter_qs = Q()
-            for prog in programme_list:
-                print("prog")
-                print(prog)
-                my_filter_qs = my_filter_qs | Q(code=prog)
-                print("my_filter_qs")
-                print(my_filter_qs)
-            filtre_programmes = Programme.objects.filter(my_filter_qs)
-            print("filtre_programmes")
-            print(filtre_programmes)
-
-            """
-            query = Q(type__type=types[0])
-            for t in types[1:]:
-                query |= Q(type__type=t)
-            projects.filter(query)
------------------
-            from functools import reduce
-            from operator import or_
--------------------
-            query = reduce(or_, (Q(type__type=t) for t in types))
-            projects.filter(query)
----------------------
-            from django.db.models import Q
-            Query = Query.split()
-            query = Q()
-            for data in Query:
-                query |= Q(keyword_name__icontains=data)
-            Business= Business.objects.filter(query)
-            
-            """
-
-
+            filtre_programmes = Programme.objects.filter(code__in=programme_list)
             my_filter_prog = Q()
+            print("filtre_programmes")
+            print(len(filtre_programmes))
             for progfilter in filtre_programmes:
                 my_filter_prog = my_filter_prog | Q(programme=progfilter)
-            # TODO SLICE le filtre programme
-            # self.qs = Previsionnel.objects.filter(programme=filtre_programmes)
-            #qs = Previsionnel.objects.filter(programme__in=filtre_programmes)
             self.qs = Previsionnel.objects.filter(my_filter_prog)
+            #TODO : Créer le cas ou un programme est vide.
+            #TODO : ajouter dans le html le format à écrire dans les <input>
             #TODO : ajouter les colonnes de calcul
             #self.qs.annotate(
             #Trimestre=ExpressionWrapper(
@@ -1464,14 +1433,16 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
                     'solder_ligne',
                 ],
             ).fillna(0)
+            #for d in np.arange(len(df.index)):
             for d in self.df:
-                if d.date_estimative_mes == 0:
-                    d.date_estimative_mes = "01/01" + d.num_dmd[5:7]
-                else:
-                    pass
+                print(d)
+                #if d.date_estimative_mes == 0:
+                #    d.date_estimative_mes = "01/01" + d.num_dmd[5:7]
+                #else:
+                #    pass
 
             self.df["Trimestres"] = self.df["date_estimative_mes"].dt.to_period("Q").fillna("NULL")
-            self.df.columns = ["NUM", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE", "date mes", "soldé", "Trimestre"]
+            self.df.columns = ["NUM","NUM_DMD", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE", "date mes", "soldé", "Trimestre"]
             # TODO : puis ajouter au TCD les enveloppes
             # TODO : puis inserer les calculs en fonction des enveloppes.
         else:
