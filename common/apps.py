@@ -20,7 +20,6 @@ import json
 import logging
 import time
 from copy import deepcopy
-from typing import Any
 from warnings import warn
 
 from crispy_forms.helper import FormHelper
@@ -418,7 +417,7 @@ class CommonConfig(AppConfig):
     configs = {}
     user_settings_categories = {}
 
-    def __init__(self, app_name: str, app_module: Any | None) -> None:
+    def __init__(self, app_name: str, app_module) -> None:
         super().__init__(app_name, app_module)
         self.program_consumers = []
 

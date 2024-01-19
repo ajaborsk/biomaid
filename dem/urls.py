@@ -127,7 +127,7 @@ urlpatterns = (
         # path('commission_synthese/<str:programme_code>/<str:validation_cp>',
         #       views.commission_synthese, name='commission-synthese'),
         path(
-            'commission_synthese/<str:programme_code>/<str:validation_cp>',
+            'vue-filtre-synthese/<str:programme_code>/<str:validation_cp>',
             views.CommissionSynthese.as_view(),
             name='commission-synthese',
         ),

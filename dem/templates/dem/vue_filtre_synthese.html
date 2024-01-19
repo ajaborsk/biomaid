@@ -2,10 +2,11 @@
 {% load static %}
 {% block tab_contents %}
 <div class="">
-<h1>SELECTIONNER LES FILTRES A APPLIQUER</h1>
+<h1>ANALYSE D'UN PROGRAMME POUR SYNTHESE ARBITRAGE</h1>
+  <h2>Sélectionner un progamme à analyser et cliquer sur "GENERER"</h2>
   <label name="programme">PROGRAMME :</label>
   <select id="programme" name="programme">
-    <option value="Tous">Tous</option>
+    <option value="">Selectionner une valeur</option>
     {% for prog in programmes %}
       <option value="{{prog.code}}"{% if programme_code == prog.code %}selected="1"{% endif %}>{{prog.code}} - {{prog.nom}}</option>
     {% endfor %}
@@ -14,15 +15,15 @@
   <br>
     <label name="validation_cp">VALIDATION CHEF DE POLE :</label>
   <select id="validation_cp" name="validation_cp">
-    <option value="">Tous</option>
-    <option value="1" selected="1">Oui</option>
+    <option value="tous" selected="tous">Tous</option>
+    <option value="1" >Oui</option>
     <option value="0">Non</option>
     <option value="None">Pas remplie</option>
   </select>
 <br>
 <br>
 <span>GENERER LE TABLEAU CROISE DYNAMIQUE :</span>
-  <button id="btn">GO !</button>
+  <button id="btn">GENERER</button>
 <br>
   <p id="text1">selectedIndex: 0</p>
 

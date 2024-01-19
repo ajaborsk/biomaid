@@ -113,11 +113,6 @@ INSTALLED_APPS = [
     # 'local',
     'assetplusconnect',
     'common',
-    'dem',
-    'drachar',
-    'marche',
-    'geprete',
-    'finance',
 ]
 
 MIDDLEWARE = [
@@ -155,6 +150,20 @@ TEMPLATES = [
         },
     },
 ]
+
+
+HTML_SANITIZERS = {
+    'page_content': {
+        'tags': {'div', 'span', 'p', 'h1', 'h2', 'hr', 'br', 'a', 'ul', 'li', 'b', 'em'},
+        'attributes': {
+            'div': {
+                'class',
+            },
+            'a': ('href',),
+        },
+        'separate': ('div',),
+    },
+}
 
 AUTHENTICATION_BACKENDS = (
     'common.auth_backends.MyLDAPBackend',
@@ -297,6 +306,13 @@ LOGGING = {
     },
 }
 
+# Use a file based caching
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "/var/tmp/django_cache",
+    }
+}
 
 # Do not modify code below, please !
 

@@ -25,7 +25,7 @@ from itertools import accumulate
 from typing import Any, Optional
 
 from django.apps import apps
-from django.db.models import Value, F, CharField, ExpressionWrapper
+from django.db.models import Value, F, CharField, ExpressionWrapper, IntegerField, BooleanField
 from django.db.models.functions import Coalesce, Cast, Concat
 from django.forms import MediaDefiningClass, NullBooleanSelect
 from django.http import JsonResponse
@@ -42,7 +42,7 @@ from django.forms.widgets import (
 
 # from document.forms import DocumentsSmartFormat
 from smart_view.smart_expression import SmartExpression
-from smart_view.smart_form import AutocompleteWidget
+from smart_view.smart_form import AutocompleteInputWidget, MultiChoiceInputWidget, EvaluationWidget
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +142,12 @@ class BooleanSmartFormat(SmartFormat):
         # et django.forms n'a pas encore été adapté et ne "voit" donc pas que le champ est tristate...
         # Donc, ici, on indique 'manuellement' à django.forms quel widget utiliser.
         if self.get('tristate'):
-            return NullBooleanSelect()
+            if isinstance(self.field.properties['model_field'], IntegerField):
+                return EvaluationWidget()
+            if isinstance(self.field.properties['model_field'], BooleanField):
+                return NullBooleanSelect()
+            else:
+                return NullBooleanSelect()
         else:
             return CheckboxInput()
 
@@ -311,7 +316,7 @@ class ChoiceSmartFormat(SmartFormat):
 
     def get_widget(self, context=None, default=None, **kwargs):
         if self.get('autocomplete', context):
-            return AutocompleteWidget(smart_field=self.field)
+            return AutocompleteInputWidget(smart_field=self.field)
         else:
             return Select()
 
@@ -459,6 +464,23 @@ class AnalysisSmartFormat(SmartFormat):
         return settings
 
 
+class MultiChoiceSmartFormat(SmartFormat):
+    class Media:
+        js = ("smart_view/js/smart-view-multichoice.js",)
+
+    def get_definition(self, target: str = None, view_params: dict = None):
+        settings = super().get_definition(target, view_params)
+        settings["formatter"] = "'multichoice'"
+        choices = dict(self.get("choices"))
+        if callable(choices):
+            choices = dict(choices(view_params))
+        settings['formatter_params'] = {'lookup': choices}
+        return settings
+
+    def get_widget(self, context=None, default=None, **kwargs):
+        return MultiChoiceInputWidget(smart_field=self.field)
+
+
 class SubviewsSmartFormat(SmartFormat):
     def get_definition(self, target=None, view_params: dict = None):
         settings = super().get_definition(target, view_params)
@@ -504,6 +526,7 @@ apps.get_app_config('smart_view').register_formats(
         'money': MoneySmartFormat,
         'conditional_money': ConditionnalMoneySmartFormat,
         'boolean': BooleanSmartFormat,
+        'multichoice': MultiChoiceSmartFormat,
         'html': HtmlSmartFormat,
         'analysis': AnalysisSmartFormat,
         'subviews': SubviewsSmartFormat,

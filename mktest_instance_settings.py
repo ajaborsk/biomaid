@@ -10,6 +10,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+# =============================================================================
+#
+# DO NOT USE THIS FILE AS YOUR instance_settings.py !
+# make a copy of 'example_instance_settings.py' instead and modify it !
+#
+# =============================================================================
+
 import logging
 
 
@@ -79,12 +86,5 @@ DATABASES = {
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = 8025
 
-DRA94_CFG = {
-    'data_path': '../dem--dra94/',
-}
-
-MAGH2_CFG = {
-    'data_path': '../dem--magh2/',
-}
 
 MEDIA_ROOT = '../dem-media'

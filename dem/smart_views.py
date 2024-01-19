@@ -121,6 +121,14 @@ class CampagneSmartView(SmartView):
                 'lookup': user_lookup,
                 'choices': user_choices,
             },
+            'natures': {
+                'format': 'multichoice',
+                'choices': (
+                    ('EQ', 'Equipements'),
+                    ('SW', 'Logiciels'),
+                    ('TX', 'Travaux'),
+                ),
+            },
             'debut_recensement': {
                 'editor': 'dateEditor',
             },
@@ -238,6 +246,8 @@ class DemandeSmartView(SmartView):
         permissions = {
             "create": config.settings.DEM_DEMANDE_CREATION_ROLES,
             'read': {
+                'ADM': {},
+                'MAN': {},
                 'DIR': {},
                 'CHP': {},
                 'ACHP': {},
@@ -1578,6 +1588,19 @@ class DemandeSmartView(SmartView):
                         'tvx_arg_securite_comment': True,
                         "autre_argumentaire": True,
                     },
+                    "CSP": {
+                        'state_code': True,
+                        "avis_cadre_sup": True,
+                        "commentaire_cadre_sup": True,
+                    },
+                    'CHP': {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
                     'DIS': {
                         'campagne_redirect': True,
                         'programme': True,
@@ -1743,6 +1766,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1829,6 +1853,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1855,6 +1880,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1901,6 +1927,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1938,6 +1965,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -1980,6 +2008,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2021,6 +2050,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2060,6 +2090,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2101,6 +2132,7 @@ class DemandeSmartView(SmartView):
                         "commentaire_cadre_sup": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2108,6 +2140,12 @@ class DemandeSmartView(SmartView):
                     },
                     'EXP': {
                         'state_code': True,
+                        'programme': True,
+                        'domaine': True,
+                        'expert_metier': True,
+                        'montant_unitaire_expert_metier': True,
+                        'montant_total_expert_metier': False,
+                        'commentaire_biomed': True,
                         'avis_biomed': True,
                         'workflow_alert': True,
                     },
@@ -2136,6 +2174,7 @@ class DemandeSmartView(SmartView):
                         "decision_soumission": True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2147,6 +2186,7 @@ class DemandeSmartView(SmartView):
                         'state_code': True,
                     },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -2199,7 +2239,18 @@ class DemandeSmartView(SmartView):
                     'ADM': {
                         'state_code': True,
                     },
+                    'CHP': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
+                    'DIR': {
+                        'state_code': True,
+                        "decision_validateur": True,
+                        "decision_soumission": True,
+                    },
                     'DIS': {
+                        'campagne_redirect': True,
                         'state_code': True,
                         'programme': True,
                         'domaine': True,
@@ -3752,6 +3803,9 @@ class DemandeEqptSmartView(DemandeSmartView):
             'decision_validateur': {
                 'format': 'boolean',
                 'tristate': True,
+            },
+            'workflow_alert': {
+                'hidden': True,
             },
         }
         # Exclusion des demandes de travaux (kind of hack...)

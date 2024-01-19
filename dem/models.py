@@ -99,7 +99,7 @@ class Campagne(models.Model):
         config.settings.AUTH_USER_MODEL,
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         verbose_name=_("Dispatcher"),
     )
     roles = models.TextField(

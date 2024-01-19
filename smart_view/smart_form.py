@@ -20,20 +20,40 @@ from typing import Any, Dict, Optional
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.forms import ModelMultipleChoiceField
+from django.forms import CheckboxSelectMultiple, ModelMultipleChoiceField, MultipleChoiceField
 from django.http import HttpRequest, JsonResponse
 from django.utils import timezone
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.forms import CharField, forms
 from django.forms.utils import ErrorList
 from django.forms import Form
 from django.forms import ModelForm
-from django.forms.widgets import Input, NullBooleanSelect, Select, TextInput  # noqa
+from django.forms.widgets import Input, NullBooleanSelect, Select, TextInput
+
+
+class EvaluationWidget(Select):
+    """A evaluation widget that stores its value in a integer database field:
+    - Number of levels is configurable (TODO)
+    - None is stored as NULL,
+    - False is stored as 0,
+    - True is stored as 1
+    - The highest the better
+    - For 'priorisation' displays N+1-v where N is the maximum evaluation score and v the stored value (TODO)
+
+
+    Preliminary implementation
+    """
+
+    def __init__(self, attrs: dict = None, levels=(_("Non"), _("Oui"))):
+        self.levels = levels
+        super().__init__(attrs, choices=[('', _("Indéterminé"))] + list(enumerate(self.levels)))
 
 
 class EurosField(CharField):
+    """This is a (Django) **Form** field (not a Django Model field)"""
+
     def __init__(self, *args, **kwargs):
         if 'max_digits' in kwargs:
             del kwargs['max_digits']
@@ -79,20 +99,38 @@ class EurosField(CharField):
         return value
 
 
-class SmartWidgetMixin:
+class MultiChoiceField(MultipleChoiceField):
+    """This is a (Django) **Form** field (not a Django Model field)"""
+
+    def __init__(self, *args, **kwargs):
+        # AJA : I really don't know why, but 'encoder' and 'decoder' kwargs
+        # are not handled by MultipleChoiceField but are provided by form creation factory...
+        if 'encoder' in kwargs:
+            # print(f"{kwargs['encoder']} {kwargs['decoder']}")
+            del kwargs['encoder']
+            del kwargs['decoder']
+        super().__init__(*args, **kwargs)
+
+    def clean(self, value):
+        # The MultiChoiceField original clean method replace a empty list with None
+        # This is not the behaviour we need here, so keep the [] and return it
+        return value
+
+
+class SmartInputWidgetMixin:
     """For future use"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
 
-class MoneyWidget(SmartWidgetMixin, Input):
+class MoneyInputWidget(SmartInputWidgetMixin, Input):
     class Media(forms.Media):
         js = ('smart_view/js/money.js',)
         css = {'all': ('smart_view/css/jquery.flexdatalist.min.css',)}
 
 
-class AutocompleteWidget(SmartWidgetMixin, Input):
+class AutocompleteInputWidget(SmartInputWidgetMixin, Input):
     template_name = 'smart_view/autocomplete_widget.html'
 
     class Media(forms.Media):
@@ -167,6 +205,20 @@ class AutocompleteWidget(SmartWidgetMixin, Input):
             value_label=choices.get(str(value), ''),
         )
         return text_html + script
+
+
+class MultiChoiceInputWidget(SmartInputWidgetMixin, CheckboxSelectMultiple):
+    class Media(forms.Media):
+        pass
+
+    def __init__(self, smart_field=None):
+        # widgets = [CheckboxInput(), CheckboxInput()]
+        super().__init__(attrs={'class': 'smart-multichoices'})
+        self.smart_field = smart_field
+        # print(f"MultiChoice.__init__({smart_field})")
+
+    def format_value(self, value):
+        return [cx[0] for cx in self.choices if cx[0] in value]
 
 
 class SmartFormMixin:
@@ -485,25 +537,22 @@ class BaseSmartModelForm(SmartFormMixin, ModelForm):
                     field_choices.sort(key=lambda a: a[1])
 
                 field.choices = field_choices
-                if not isinstance(field.widget, NullBooleanSelect):
+                if not isinstance(field.widget, NullBooleanSelect) and not isinstance(field.widget, EvaluationWidget):
                     field.widget.choices = field_choices or []
 
                 if self.choices and fname in self.choices and field.choices is not None:
-                    match len(field.choices):
-                        case 0:
-                            raise PermissionDenied(
-                                _("Vous ne pouvez pas afficher ce formulaire (droits insuffisants). {}.").format(
-                                    self.choices[fname]
-                                )
-                            )
-                        case 1:
-                            # Do not disable the field as it prevent form to send a value, even if mandatory :-(
-                            # field.disabled = True
+                    if len(field.choices) == 0:
+                        raise PermissionDenied(
+                            _("Vous ne pouvez pas afficher ce formulaire (droits insuffisants). {}.").format(self.choices[fname])
+                        )
+                    elif len(field.choices) == 1:
+                        # Do not disable the field as it prevent form to send a value, even if mandatory :-(
+                        # field.disabled = True
 
-                            # Ensure the pre-filled value is the only possible one (useful if the input is hidden)
-                            field.initial = field.choices[0][0]
+                        # Ensure the pre-filled value is the only possible one (useful if the input is hidden)
+                        field.initial = field.choices[0][0]
 
                 # For autocomplete widget, a API url is also needed
-                if isinstance(field.widget, AutocompleteWidget):
+                if isinstance(field.widget, AutocompleteInputWidget):
                     field.widget.url = self.url + str(fname) + '/'
                     field.widget._request = request

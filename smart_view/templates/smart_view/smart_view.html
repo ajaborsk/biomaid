@@ -212,6 +212,7 @@
 
                     {% endif %}{% if column.columns %}
                     columns: [{% for sub_column in column.columns %}{
+                            minWidth: 24,
                             maxWidth: 24,
                             headerSort: false,
                             resizable: false,

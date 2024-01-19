@@ -18,6 +18,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext as _
+from django_pandas.managers import DataFrameManager
 
 from common import config
 
@@ -43,6 +44,8 @@ from common import config
 
 class Previsionnel(models.Model):
     # id = models.AutoField()
+    objects = DataFrameManager()
+
     num = models.AutoField(primary_key=True)  # numero de demande validée
     uf = models.ForeignKey(
         'common.Uf',
@@ -373,7 +376,7 @@ class Dra(models.Model):
         null=True,
         blank=True,
         verbose_name='Dossier de travail',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     # documents = models.ManyToManyField('dem.Document', blank=True, through="DocumentDracharLink")
     date_commande = models.DateField(  # date de commande Magh2
@@ -386,7 +389,7 @@ class Dra(models.Model):
         null=False,
         blank=False,
         verbose_name='contact pour la livraison',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     # montant_dra = models.DecimalField()  # A garder ou à supprimer = somme des lignes...
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name=_("date de création"))
@@ -619,7 +622,7 @@ class Dossier(models.Model):
     )
     proprietaire = models.ForeignKey(  # Chef de projet ?
         config.settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         verbose_name=_("Propriétaire"),
         related_name='possede_dossier',
     )

@@ -1,4 +1,4 @@
-@import '../../_static/css/sizzle.css';
+
 
 table
  {
@@ -22,4 +22,12 @@ td
 
 td.euros {
   text-align: right;
+}
+
+span.gp {
+  color:green;
+}
+
+span.go {
+  color:blue;
 }
