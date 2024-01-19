@@ -1386,18 +1386,47 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             self.message = "filtre sur les programmes : " + str(programme_list)
             my_filter_qs = Q()
             for prog in programme_list:
+                print("prog")
                 print(prog)
                 my_filter_qs = my_filter_qs | Q(code=prog)
+                print("my_filter_qs")
+                print(my_filter_qs)
             filtre_programmes = Programme.objects.filter(my_filter_qs)
+            print("filtre_programmes")
             print(filtre_programmes)
+
+            """
+            query = Q(type__type=types[0])
+            for t in types[1:]:
+                query |= Q(type__type=t)
+            projects.filter(query)
+-----------------
+            from functools import reduce
+            from operator import or_
+-------------------
+            query = reduce(or_, (Q(type__type=t) for t in types))
+            projects.filter(query)
+---------------------
+            from django.db.models import Q
+            Query = Query.split()
+            query = Q()
+            for data in Query:
+                query |= Q(keyword_name__icontains=data)
+            Business= Business.objects.filter(query)
+            
+            """
+
+
+            my_filter_prog = Q()
+            for progfilter in filtre_programmes:
+                my_filter_prog = my_filter_prog | Q(programme=progfilter)
             # TODO SLICE le filtre programme
             # self.qs = Previsionnel.objects.filter(programme=filtre_programmes)
-
-            # qs = Previsionnel.objects.filter(programme__in=filtre_programmes)
-            self.qs = Previsionnel.objects.filter(programme="67")
-            # TODO : ajouter les colonnes de calcul
-            # self.qs.annotate(
-            # Trimestre=ExpressionWrapper(
+            #qs = Previsionnel.objects.filter(programme__in=filtre_programmes)
+            self.qs = Previsionnel.objects.filter(my_filter_prog)
+            #TODO : ajouter les colonnes de calcul
+            #self.qs.annotate(
+            #Trimestre=ExpressionWrapper(
             #    Case(
             #        When(
             #             date_estimative_mes__isnull=False,
@@ -1445,7 +1474,6 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             self.df.columns = ["NUM", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE", "date mes", "soldé", "Trimestre"]
             # TODO : puis ajouter au TCD les enveloppes
             # TODO : puis inserer les calculs en fonction des enveloppes.
-
         else:
             print("si pas filtre")
             self.message = "Tous les programmes : aucun selectionné"

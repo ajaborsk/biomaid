@@ -25,9 +25,9 @@
     [LINK.CHUA]
         structure = "FILE" # ON, OFF ou FILE
     [LINK.IFF]
-        structure = "FILE" # ON, OFF ou FILE
-    [LINK.C]
-        structure = "FILE" # ON, OFF ou FILE
+        structure = "OFF" # ON, OFF ou FILE
+    [LINK.CHD]
+        structure = "OFF" # ON, OFF ou FILE
 
 [LINKED_FILES]
 

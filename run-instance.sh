@@ -21,6 +21,7 @@
 #
 # =============================================================================
 
+<<<<<<< Updated upstream
 # ------------------------------------------------------------------------------------------------------------
 # These functions need bash.
 # They have been published by johnraff aka John Crawley (https://asazuke.com/ https://github.com/johnraff)
@@ -83,6 +84,14 @@ cd $HOME/biomaid
 # Add ~/.local/bin to $PATH since poetry lives there
 export PATH=$HOME/.local/bin:$PATH
 
+=======
+# ensure we are in the biomaid folder
+cd $HOME/biomaid
+
+# Add ~/.local/bin to $PATH since poetry lives there
+export PATH=$HOME/.local/bin:$PATH
+
+>>>>>>> Stashed changes
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -133,12 +142,16 @@ if [[ $# -eq 0 ]]; then
         poetry run python manage.py collectstatic --no-input
     fi
 
+<<<<<<< Updated upstream
     if [ -f instance_config.toml ]; then
         parse_config instance_config.toml
     fi
     workers=${gunicorn_settings[workers]:-2}
 
     exec poetry run gunicorn --workers $workers --log-file ../log/gunicorn_django.log -b unix:$HOME/biomaid.sock dra.wsgi
+=======
+    exec poetry run gunicorn --workers 2 --log-file ../log/gunicorn_django.log -b unix:$HOME/biomaid.sock dra.wsgi
+>>>>>>> Stashed changes
 else
     # Run the provided commands 
     exec poetry run python manage.py $*

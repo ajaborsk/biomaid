@@ -24,11 +24,22 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 SMARTVIEW_DEBUG = DEBUG
 
 AUTHENTICATION_BACKENDS = ('common.auth_backends.MyAuthBackend',)
+
+# Get some print()...
+OVEROLY_DEBUG = DEBUG
+
+# If True, anything that is not explicitly authorized is denied
+# If False (default), any object with no explicit authorization information isn't checked
+OVEROLY_STRICT = True
+
+# For class based views, which attribute is used for permissions
+# default is 'overoly_permissions'
+OVEROLY_VIEW_PERMISSIONS_ATTRIBUTE_NAME = 'permissions'
 
 if DEBUG_TOOLBAR:
     INSTALLED_APPS += [
@@ -79,3 +90,4 @@ DATABASES = {
 EMAIL_PORT = 8025
 
 MEDIA_ROOT = '../media'
+
