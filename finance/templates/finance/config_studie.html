@@ -21,6 +21,8 @@
             {% csrf_token %}
             <br>
             <h3>Liste des analyses</h3>
+            <b style="color:#FF0000">Format à respecter : "codeprogramme1,codeprogramme2,codeprogramme3..." pas d'espace ni de " ' "</b>
+            <br>
                 {% for key1, value in programme_favori_bibl.items %}
                     <li>{{key1}}:<br>
                     {% for k2, v1 in value.items %}
