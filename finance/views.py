@@ -16,6 +16,9 @@
 #
 import re
 import pathlib
+import pandas as pd
+
+
 from datetime import datetime
 from functools import reduce
 
@@ -1391,7 +1394,6 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             for progfilter in filtre_programmes:
                 my_filter_prog = my_filter_prog | Q(programme=progfilter)
             self.qs = Previsionnel.objects.filter(my_filter_prog)
-            #TODO : Créer le cas ou un programme est vide.
             #TODO : ajouter dans le html le format à écrire dans les <input>
             #TODO : ajouter les colonnes de calcul
             #self.qs.annotate(
@@ -1420,34 +1422,36 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             # )
             # for q in self.qs:
             # self.qs.annotate()
-
-            self.df = self.qs.to_dataframe(
-                fieldnames=[
-                    "num",
-                    "num_dmd",
-                    "programme",
-                    "budget",
-                    'montant_estime',
-                    'montant_commande',
-                    'date_estimative_mes',
-                    'solder_ligne',
-                ],
-            ).fillna(0)
-            #for d in np.arange(len(df.index)):
-            for d in self.df:
-                print(d)
-                #if d.date_estimative_mes == 0:
-                #    d.date_estimative_mes = "01/01" + d.num_dmd[5:7]
-                #else:
-                #    pass
-
-            self.df["Trimestres"] = self.df["date_estimative_mes"].dt.to_period("Q").fillna("NULL")
-            self.df.columns = ["NUM","NUM_DMD", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE", "date mes", "soldé", "Trimestre"]
-            # TODO : puis ajouter au TCD les enveloppes
-            # TODO : puis inserer les calculs en fonction des enveloppes.
         else:
             print("si pas filtre")
             self.message = "Tous les programmes : aucun selectionné"
             self.qs = Previsionnel.objects.all()
+
+        self.df = self.qs.to_dataframe(
+            fieldnames=[
+                "num",
+                "num_dmd",
+                "programme",
+                "budget",
+                'montant_estime',
+                'montant_commande',
+                'date_estimative_mes',
+                'solder_ligne',
+            ],
+        ).fillna(0)
+        # for d in np.arange(len(df.index)):
+        for d in self.df:
+            print(d)
+            # if d.date_estimative_mes == 0:
+            #    d.date_estimative_mes = "01/01" + d.num_dmd[5:7]
+            # else:
+            #    pass
+
+        self.df['date_estimative_mes'] = pd.to_datetime(self.df['date_estimative_mes'], errors='coerce') #corrige le cas de champs vides.
+        self.df["Trimestres"] = self.df["date_estimative_mes"].dt.to_period("Q").fillna("NULL") # donne le trimestr de MES en fonction de la date
+        self.df.columns = ["NUM", "NUM_DMD", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE", "date mes",
+                           "soldé", "Trimestre"]
+        # TODO : puis ajouter au TCD les enveloppes
+        # TODO : puis inserer les calculs en fonction des enveloppes.
 
         return self

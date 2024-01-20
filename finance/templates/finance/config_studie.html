@@ -26,7 +26,7 @@
                     {% for k2, v1 in value.items %}
                         <ul>{{k2}}:
                         {% for vp, vf in v1.items %}
-                            <input type="textearea" name="programme_favori_bibl2-{{key1}}-{{k2}}" value="{{vf}}">
+                            <input type="textearea" name="programme_favori_bibl2-{{key1}}-{{k2}}" value="{{vf}}" size="90%">
                             <button name="get_it" type="submit" value="{{vf}}">GO !</button>
                         </ul>
                         {% endfor %}
