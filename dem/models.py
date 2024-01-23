@@ -579,7 +579,7 @@ class Demande(OModel):
     materiel_existant = models.CharField(
         verbose_name=_("Matériel concerné"),
         help_text=_("Matériel existant concerné par la demande de remplacement ou d'évolution."),
-        max_length=64,
+        max_length=1024,
         default=None,
         blank=True,
         null=True,

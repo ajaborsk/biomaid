@@ -178,7 +178,7 @@ class Uf(OModel):
 
     lettre_budget = models.CharField(max_length=1, verbose_name='Budget')
     code = models.CharField(max_length=8, verbose_name='Code UF')
-    nom = models.CharField(max_length=50, verbose_name='Nom UF')
+    nom = models.CharField(max_length=256, verbose_name='Nom UF')
     intitule = models.CharField(
         verbose_name=_("Intitulé"),
         help_text=_("Nom complet de l'unité fonctionnelle"),
@@ -225,7 +225,7 @@ class Service(OModel):
         verbose_name = _("service")
 
     code = models.CharField(max_length=8)
-    nom = models.CharField(max_length=50)
+    nom = models.CharField(max_length=256)
     intitule = models.CharField(
         verbose_name=_("Intitulé"),
         help_text=_("Nom complet du service"),
@@ -262,7 +262,7 @@ class CentreResponsabilite(OModel):
         verbose_name_plural = _("centres de responsabilité")
 
     code = models.CharField(max_length=8)
-    nom = models.CharField(max_length=50)
+    nom = models.CharField(max_length=256)
     intitule = models.CharField(
         verbose_name=_("Intitulé"),
         help_text=_("Nom complet du centre de responsabilité"),
@@ -298,7 +298,7 @@ class Pole(OModel):
         verbose_name = _("pôle")
 
     code = models.CharField(max_length=8)
-    nom = models.CharField(max_length=50)
+    nom = models.CharField(max_length=256)
 
     intitule = models.CharField(
         verbose_name=_("Intitulé"),
@@ -328,7 +328,7 @@ class Pole(OModel):
 
 class Site(OModel):
     code = models.CharField(max_length=8)
-    nom = models.CharField(max_length=50)
+    nom = models.CharField(max_length=256)
     intitule = models.CharField(
         verbose_name=_("Intitulé"),
         help_text=_("Nom complet du site"),
@@ -363,10 +363,10 @@ class Etablissement(OModel):
             models.UniqueConstraint(fields=['prefix'], name='etablissement_prefix_is_unique'),
         ]
 
-    code = models.CharField(max_length=5, default='')
+    code = models.CharField(max_length=8, default='')
     code_gmao = models.DecimalField(max_digits=5, decimal_places=0)  # clé donnée par asset+
-    prefix = models.CharField(max_length=4, blank=True)  # Lettre préfixe utilisée pour les codes (notamment dans Asset+)
-    nom = models.CharField(max_length=50)  # Nom du Centre
+    prefix = models.CharField(max_length=8, blank=True)  # Lettre préfixe utilisée pour les codes (notamment dans Asset+)
+    nom = models.CharField(max_length=256)  # Nom du Centre
     intitule = models.CharField(
         verbose_name=_("Intitulé"),
         help_text=_("Nom complet de l'établissement"),
@@ -411,8 +411,8 @@ class Discipline(OModel):
             'MAN': 'is_staff(USER)',
         }
 
-    code = models.CharField(max_length=3)  # code du service concerné par la demande
-    nom = models.CharField(max_length=30, null=True)  # nom du service concerné par la demande
+    code = models.CharField(max_length=8)  # code du service concerné par la demande
+    nom = models.CharField(max_length=256, null=True)  # nom du service concerné par la demande
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name='date de création', null=True)
     cloture = models.DateField(verbose_name='date de fin', null=True, blank=True)
     date_modification = models.DateTimeField(auto_now=True, verbose_name='date de modification', null=True)
@@ -466,7 +466,7 @@ class Domaine(OModel):
         ]
 
     code = models.CharField(max_length=16, default=None, blank=True, null=True)  # code du domaine
-    nom = models.CharField(max_length=64)  # Nom du domaine de l'équipement.
+    nom = models.CharField(max_length=256)  # Nom du domaine de l'équipement.
     # expert_metier = models.ForeignKey(  # code de l'acheteur/Expert métier concerné par le domaine
     #     'ExpertMetier',
     #     on_delete=models.PROTECT,)
@@ -519,7 +519,7 @@ class Programme(OModel):
         }
 
     code = models.CharField(max_length=16, null=False, blank=False)  # N° de programme
-    nom = models.CharField(max_length=64, null=False, blank=False)  # Nom du programme
+    nom = models.CharField(max_length=256, null=False, blank=False)  # Nom du programme
     description = models.TextField(null=True, blank=True, default=None)  # commentaires si nécessaire
     etablissement = models.ForeignKey(Etablissement, null=True, blank=True, on_delete=models.SET_NULL)
     site = models.ForeignKey(Site, null=True, blank=True, on_delete=models.SET_NULL)
@@ -541,7 +541,7 @@ class Programme(OModel):
     calendrier = models.ForeignKey('dem.Campagne', null=True, blank=True, default=None, on_delete=models.PROTECT)
     discipline = models.ForeignKey('Discipline', default=None, on_delete=models.PROTECT)  # discipline rattachée au programme
     anteriorite = models.CharField(  # N° de programme de DRA 94
-        max_length=10,
+        max_length=256,
         null=True,
         blank=True,
         default=None,

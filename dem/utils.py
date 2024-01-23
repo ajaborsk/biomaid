@@ -42,7 +42,7 @@ def user_campagnes(view_params: dict, tvx=False):
 
     campaigns_pk_list = cache.get(cache_key)
 
-    if not campaigns_pk_list:
+    if campaigns_pk_list is None:
         # Not in cache ==> compute the available campaigns list
         # print("  ==> Not in cache")
         f_role = UserUfRole.records.filter(user=view_params['user'], role_code__in=config.settings.DEM_DEMANDE_CREATION_ROLES)

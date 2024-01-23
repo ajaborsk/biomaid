@@ -214,23 +214,32 @@ class FileImportation:
                                     return ''
                                 return v
 
+                            def date_converter(v):
+                                return v
+
                             data_csv = pd.read_csv(
                                 fichier,
                                 encoding='utf-8',
                                 converters={
-                                    'code_etablissement': code_converter,
+                                    'code_etablisssement': code_converter,
                                     'code_service': code_converter,
                                     'code_site': code_converter,
                                     'code_pole': code_converter,
                                     'code_ccr': code_converter,
                                     'code_uf': code_converter,
+                                    'cloture': date_converter,
                                 },
                             )
                             d = timezone.now()
                             d.replace(year=d.year + 1)
-                            data_csv['cloture'] = data_csv['cloture'].apply(lambda x: datetime.strptime(x, '%d/%m/%Y'))
+                            data_csv['cloture'] = data_csv['cloture'].apply(
+                                lambda x: datetime.strptime(x, '%d/%m/%Y') if x else None
+                            )
                             # pd.to_datetime(data_csv['cloture'], format='%d/%m/%Y')
-                            df_data_csv = data_csv[(data_csv['cloture'] > d.replace(tzinfo=None))]
+
+                            # remove closed UF from dataframe read from input file
+                            df_data_csv = data_csv[pd.isnull(data_csv['cloture']) | (data_csv['cloture'] > d.replace(tzinfo=None))]
+
                             csv_pole = df_data_csv[['code_pole', 'nom_pole_long']].groupby('code_pole', as_index=False).first()
                             csv_cr = df_data_csv[['code_ccr', 'nom_ccr']].groupby('code_ccr', as_index=False).first()
                             csv_site = (
@@ -291,9 +300,7 @@ class FileImportation:
                                                         if csv_site["nom_etablissement"][element] != row.nom:
                                                             row.nom = csv_site["nom_etablissement"][element]
                                                             row.save()
-                                                        found_element = found_element + [
-                                                            '{:04d}'.format(csv_site["code_etablisssement"][element])
-                                                        ]
+                                                        found_element = found_element + [csv_site["code_etablisssement"][element]]
                                                 """________________________test intégrité csv_______________________"""
                                                 found_row = found_row + [row.code]
                                                 if not found_element:  # suppression de la BDD car absent du CSV
