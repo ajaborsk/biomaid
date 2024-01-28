@@ -17,7 +17,7 @@
 import re
 import pathlib
 import pandas as pd
-
+import numpy as np
 
 from datetime import datetime
 from functools import reduce
@@ -1350,6 +1350,7 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             self.TCD(request)
             context["qs"] = self.qs
             context["df"] = self.df.to_html
+            context["tcd"] = self.tcd.to_html
             print(self.df)
             context["message"] = self.message
         else:
@@ -1384,6 +1385,10 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
         return self
 
     def TCD(self, request, *arg, **kwargs):
+
+        def format(x):
+            return "{0:,.2f} €".format(x)
+
         if self.programmestcd is not None:
             programme_list = self.programmestcd.strip().split(',')
             self.message = "filtre sur les programmes : " + str(programme_list)
@@ -1394,7 +1399,6 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
             for progfilter in filtre_programmes:
                 my_filter_prog = my_filter_prog | Q(programme=progfilter)
             self.qs = Previsionnel.objects.filter(my_filter_prog)
-            #TODO : ajouter dans le html le format à écrire dans les <input>
             #TODO : ajouter les colonnes de calcul
             #self.qs.annotate(
             #Trimestre=ExpressionWrapper(
@@ -1435,23 +1439,179 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
                 "budget",
                 'montant_estime',
                 'montant_commande',
-                'date_estimative_mes',
                 'solder_ligne',
             ],
         ).fillna(0)
         # for d in np.arange(len(df.index)):
         for d in self.df:
             print(d)
-            # if d.date_estimative_mes == 0:
-            #    d.date_estimative_mes = "01/01" + d.num_dmd[5:7]
-            # else:
-            #    pass
 
-        self.df['date_estimative_mes'] = pd.to_datetime(self.df['date_estimative_mes'], errors='coerce') #corrige le cas de champs vides.
-        self.df["Trimestres"] = self.df["date_estimative_mes"].dt.to_period("Q").fillna("NULL") # donne le trimestr de MES en fonction de la date
-        self.df.columns = ["NUM", "NUM_DMD", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE", "date mes",
-                           "soldé", "Trimestre"]
-        # TODO : puis ajouter au TCD les enveloppes
+        #self.df['marge']= self.df['budget']-self.df['montant_commande']
+
+        def fonction1(x,y):
+            return x-y
+        #fonction2 = self.df['programme'] / self.df['programme'].count() * 100
+
+        self.df['marge'] = self.df.apply(lambda x: fonction1(x.budget, x.montant_commande) if x.solder_ligne == 1 else 0, axis=1)
+        #self.df['%realise'] = self.df['marge']
+
+        self.df.columns = ["NUM", "NUM_DMD", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE",
+                           "SOLDE", 'MARGE']#, "%REALISE"]
+        self.df.sort_values(by=['PROGRAMME'], inplace=True, ascending=True)
+
+        self.tcd = pd.pivot_table(data=self.df, index=['PROGRAMME','SOLDE'], aggfunc={'BUDGET':np.sum,'MONTANT COMMANDE':np.sum, 'MARGE':np.sum,})# "%REALISE":fonction2})
+        column_order = ['BUDGET', 'MONTANT COMMANDE', 'MARGE']#, "%REALISE"]
+        self.tcd = self.tcd.reindex(column_order, axis=1)
         # TODO : puis inserer les calculs en fonction des enveloppes.
-
+        # TODO : créer le TCD d'analyse global
+        # TODO : puis ajouter au TCD les enveloppes
+        # TODO : appliquer format monétaire sur les champs montants
         return self
+
+    class ProgrammStudieDecaisses(BiomAidViewMixin, TemplateView):
+        """Vue admin du fichier de config toml"""
+
+        application = 'finance'
+        name = 'prog_studie'
+        permissions = {
+            'ADM',
+            'MAN',
+        }
+        raise_exception = True  # Refuse l'accès par défaut (pas de demande de login)
+        template_name = 'finance/config_studie.html'
+
+        def datageneration(self):
+            self.request_data = tomlkit.loads(pathlib.Path("finance/request.toml").read_text())
+            """GEt Liste des programmes favoris"""
+            self.etab = Etablissement.objects.all()
+            self.discipline = Discipline.objects.all()
+            self.programme_favori_bibl = self.request_data['PROGRAMME_LISTE']
+            self.trigger = "home"
+            return self
+
+        def dispatch(self, request, *args, **kwargs):
+            # context = self.get_context_data()  # unused
+            self.url = "../prog_studie/"
+            self.datageneration()
+            return super().dispatch(request, *args, **kwargs)
+
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            return context
+
+        def get(self, request, *args, **kwargs):
+            context = self.get_context_data()
+            context["trigger"] = self.trigger
+            if self.trigger == "get_it":
+                context["programmestcd"] = self.programmestcd  # TODO : a supprimer juste pour essais
+                self.TCD(request)
+                context["qs"] = self.qs
+                context["df"] = self.df.to_html
+                print(self.df)
+                context["message"] = self.message
+            else:
+                self.programme = Programme.objects.all()
+                context["programme"] = self.programme
+                context["url"] = self.url
+                context["programme_favori_bibl"] = self.programme_favori_bibl
+            return render(request, self.template_name, context=context)
+
+        def post(self, request, *args, **kwargs):
+            if 'save_listes' in request.POST:
+                context = self.get_context_data()
+                self.trigger = 'NONE'
+                context["url"] = self.url
+                self.save_listes(request)
+                self.datageneration()
+            elif 'get_it' in request.POST:
+                context = self.get_context_data()
+                self.programmestcd = request.POST.get("get_it") or None
+                self.trigger = "get_it"
+            return self.get(request, *args, **kwargs)
+
+        def save_listes(self, request, *args, **kwargs):  # sauvegarde des listes de programmes favoris)
+            for e in self.etab:
+                for d in self.discipline:
+                    self.request_data['PROGRAMME_LISTE'][e.prefix][d.code]['liste'] = request.POST.get(
+                        "programme_favori_bibl2-" + e.prefix + "-" + d.code
+                    )
+            # print(self.request_data['PROGRAMME_LISTE'])
+            with pathlib.Path('finance/request.toml').open('w') as f:
+                f.write(tomlkit.dumps(self.request_data))  # sauvegarde des modifs dans le .toml (=commit true)
+            return self
+
+        def TCD(self, request, *arg, **kwargs):
+            if self.programmestcd is not None:
+                programme_list = self.programmestcd.strip().split(',')
+                self.message = "filtre sur les programmes : " + str(programme_list)
+                filtre_programmes = Programme.objects.filter(code__in=programme_list)
+                my_filter_prog = Q()
+                print("filtre_programmes")
+                print(len(filtre_programmes))
+                for progfilter in filtre_programmes:
+                    my_filter_prog = my_filter_prog | Q(programme=progfilter)
+                self.qs = Previsionnel.objects.filter(my_filter_prog)
+                # TODO : ajouter les colonnes de calcul
+                # self.qs.annotate(
+                # Trimestre=ExpressionWrapper(
+                #    Case(
+                #        When(
+                #             date_estimative_mes__isnull=False,
+                #             then=F("enveloppe_allouee"),
+                #        ),
+                #        #When(
+                #        #     enveloppe_allouee__isnull=True,
+                #        #     then=Coalesce(F('quantite_validee'), F('quantite'))
+                #        #    * Coalesce(F('montant_unitaire_expert_metier'), F('prix_unitaire')),
+                #        #),
+                # montant_final=ExpressionWrapper(
+                #    Case(
+                #     When(
+                #         prix_unitaire__isnull=False,
+                #         then=F("quantite") * F("prix_unitaire"),
+                #     ),
+
+                #    ),
+                #    output_field=TextField(),
+                # ),
+                # ENVELOPPE=Coalesce(F('arbitrage_commission__code'), Value('0')),
+                # )
+                # for q in self.qs:
+                # self.qs.annotate()
+            else:
+                print("si pas filtre")
+                self.message = "Tous les programmes : aucun selectionné"
+                self.qs = Previsionnel.objects.all()
+
+            self.df = self.qs.to_dataframe(
+                fieldnames=[
+                    "num",
+                    "num_dmd",
+                    "programme",
+                    "budget",
+                    'montant_estime',
+                    'montant_commande',
+                    'date_estimative_mes',
+                    'solder_ligne',
+                ],
+            ).fillna(0)
+            # for d in np.arange(len(df.index)):
+            for d in self.df:
+                print(d)
+                # if d.date_estimative_mes == 0:
+                #    d.date_estimative_mes = "01/01" + d.num_dmd[5:7]
+                # else:
+                #    pass
+
+            self.df['date_estimative_mes'] = pd.to_datetime(self.df['date_estimative_mes'],
+                                                            errors='coerce')  # corrige le cas de champs vides.
+            self.df["Trimestres"] = self.df["date_estimative_mes"].dt.to_period("Q").fillna(
+                "NULL")  # donne le trimestr de MES en fonction de la date
+            self.df.columns = ["NUM", "NUM_DMD", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE",
+                               "date mes",
+                               "soldé", "Trimestre"]
+            self.df.sort_values(by=['PROGRAMME'], inplace=True, ascending=True)
+            # TODO : puis inserer les calculs en fonction des enveloppes.
+            # TODO : créer le TCD d'analyse global
+            # TODO : puis ajouter au TCD les enveloppes
+            return self
