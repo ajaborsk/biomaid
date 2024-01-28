@@ -26,12 +26,11 @@ nom = true
 # For each condition, user MUST ensure that different values ARE distinct.
 #  Furthermore, any values of the used field(s) MUST fall into exactly ONE (condition) 'value'.
 #  The special value 'default' (if nothing other match) must be used if needed
-cond1 = { values = { unset = { d1__isnull = true }, set = { d1__isnull = false } } }
-cond2 = { values = { unset = { d2__isnull = true }, set = { d2__isnull = false } } }
+cond1 = { unset = { d1__isnull = true }, set = { d1__isnull = false } } 
+cond2 = { unset = { d2__isnull = true }, set = { d2__isnull = false } }
 
-# One can also use this, clearer, alternate form, but only at the end of the 'conditions' section
+# One can also use this, clearer, alternate form, but only at the end of the 'conditions' section 
 [workflows.conditions.active]
-[workflows.conditions.active.values]
 yes = { cloture__isnull = true }
 no = { cloture__isnull = false }
 
@@ -109,7 +108,6 @@ cloture = true
 #  Furthermore, any values of the used field(s) MUST fall into exactly ONE (condition) 'value'.
 #  The special value 'default' (if nothing other match) must be used if needed
 [workflows.conditions.active]
-[workflows.conditions.active.values]
 yes = { cloture__isnull = true }
 no = { cloture__isnull = false }
 

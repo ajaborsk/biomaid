@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import copy, deepcopy
 from collections.abc import Mapping
 from pprint import pprint
 
@@ -67,7 +67,7 @@ def evaluate_condition_expression(expression, values):
 
 
 def filter_match(filter_def, values):
-    # print("       filter_match", filter_def, values)
+    print("       filter_match", filter_def, values)
     for c, v in filter_def.items():
         fieldname, sep, lookup = c.partition('__')
         field_value = values.get(fieldname)
@@ -98,14 +98,17 @@ class Workflow:
         self.states: dict = dict()
         # self.permissions: dict = dict()
         self.next_state_index = 0
+        self.conditions = {}
 
         all_deps = set()
         fieldnames_set = set(fields.keys())
         # For each condition
         for cname, condition in self.cfg['conditions'].items():
+            self.conditions[cname] = {'values': {}, 'dependencies': set()}
             # Build dependencies list
             deps = set()
-            for key, value in condition['values'].items():
+            for key, value in condition.items():
+                self.conditions[cname]['values'][key] = copy(value)
                 vdeps = get_deps(value)
 
                 if not vdeps.issubset(fieldnames_set):
@@ -123,8 +126,9 @@ class Workflow:
                         ).format(self.name, cname, key, ', '.join(list(vdeps)))
                     )
                 deps |= vdeps
-            condition['dependencies'] = deps
+            self.conditions[cname]['dependencies'] = deps
             all_deps |= deps
+        pprint(self.conditions)
 
         # Build states (basic, no link, just conditions & names)
         self.states = {
@@ -135,8 +139,9 @@ class Workflow:
                 'can_be_initial': None,
                 'reachable': False,
             }
-            for state_l in make_states(list(self.cfg['conditions'].items()))
+            for state_l in make_states(list(self.conditions.items()))
         }
+        print(f"all states: {self.states}")
 
         # Parse actions conditions expressions
         for action_name, action_cfg in self.cfg['actions'].items():
@@ -150,19 +155,17 @@ class Workflow:
 
         # For each state
         for state_name, state_def in self.states.items():
-            # print(state_name)
+            print(state_name)
             # Build state --> action --> state links
             for action_name, action_cfg in self.cfg['actions'].items():
                 if evaluate_condition_expression(action_cfg['condition_expr'], state_def['def']):
                     state_def['actions'][action_name] = {'ends': set()}
-                    # print(' ', action_name)
+                    print(' ', action_name)
                     for dest_state_name, dest_state_def in self.states.items():
                         dest_ok = True
                         for dest_cond_name, dest_cond_value in dest_state_def['dict'].items():
                             if (
-                                set(action_cfg['permissions'].keys()).isdisjoint(
-                                    self.cfg['conditions'][dest_cond_name]['dependencies']
-                                )
+                                set(action_cfg['permissions'].keys()).isdisjoint(self.conditions[dest_cond_name]['dependencies'])
                                 and state_def['dict'][dest_cond_name] != dest_cond_value
                             ):
                                 dest_ok = False
@@ -173,13 +176,14 @@ class Workflow:
             # Determine if this state can be a initial state
             can_be_initial = True
             for cond in state_def['def']:
-                cond_fields = self.cfg['conditions'][cond[0]]['dependencies']
-                # print('   ', cond[0], cond_fields)
+                cond_fields = self.conditions[cond[0]]['dependencies']
+                print('   ', cond[0], cond_fields)
+                print(f"     {cond[2]}/{defaults_values}")
                 if cond_fields.isdisjoint(creation_fields) and not filter_match(cond[2], defaults_values):
                     can_be_initial = False
                     break
             state_def['can_be_initial'] = can_be_initial
-            # print('    ', can_be_initial)
+            print('    ', can_be_initial)
 
         # Propagate 'reachable' attribute
         for state_name, state_def in self.states.items():
