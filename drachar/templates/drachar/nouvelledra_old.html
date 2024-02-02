@@ -182,6 +182,131 @@
 {% if dra_id == None %}
     <form id="form" enctype="multipart/form-data" action="../nouvelledra/" method="POST">
         {% csrf_token %}
+        <div class="form-dra-section">
+            <div class="form-dra-section-c1-r1">
+                <label>Intitulé de la DRA :</label>
+            </div>
+            <div class="form-dra-section-c2-r1">
+               {{form_dra.intitule}}
+            </div>
+            <div class="form-dra-section-c3-r1">
+            </div>
+            <div class="form-dra-section-c4-r1">
+                <label>Expert Métier :</label>
+            </div>
+            <div class="form-dra-section-c5-r1">
+                {{ form_dra.expert_metier }}
+            </div>
+            <br>
+            <div class="form-dra-section-c1-r2">
+                <label>Fournisseur : ?!? faire champs auto JS nomfour fonction de la selection?!?</label>
+                <button><a href="/{{ url_prefix }}/common/gestion_fournisseurs" onclick="window.open(this.href); return false;">Add</a> </button>
+                <!--TODO : modifier le bouton pour un redirect et ne pas perdre le formulaire dra en cours-->
+            </div>
+            <div class="form-dra-section-c2-r2">
+               {{form_dra.fournisseur}}
+            </div>
+            <div class="form-dra-section-c3-r2">
+            </div>
+            <div class="form-dra-section-c4-r2">
+                <label>Contact fournisseur :?!? faire champs auto JS nomfour fonction de la selection?!?</label>
+                            <button><a href="/{{ url_prefix }}/common/gestion_fournisseurs" onclick="window.open(this.href); return false;">Add</a> </button>
+            </div>
+            <div class="form-dra-section-c5-r2">
+                {{form_dra.contact_fournisseur}}
+            </div>
+        </div>
+        <div class="form-dra-section">
+            <div class="form-dra-section-c1-r1">
+                <label>N° de dossier Affilié :</label>
+            </div>
+            <div class="form-dra-section-c2-r1">
+               {{form_dra.num_dossier}}
+            </div>
+        </div>
+         <!--Informations Devis-->
+        <br>
+        <div class="form-dra-section">
+            <div class="form-dra-section-c1-r1">
+                <label>Numéro du devis* :</label>
+            </div>
+            <div class="form-dra-section-c2-r1">
+               {{ form_dra.num_devis }}
+            </div>
+            <div class="form-dra-section-c3-r1">
+            </div>
+            <div class="form-dra-section-c4-r1">
+                <label>Date du Devis : </label>
+            </div>
+            <div class="form-dra-section-c5-r1">
+                {{ form_dra.date_devis }}
+            </div>
+            <button><a href="/{{ url_prefix }}/ajout_document/" onclick="window.open(this.href); return false;">Ajouter un devis</a> </button>
+
+        </div>
+            <br>
+            <!--Informations Commande-->
+        <div class="form-dra-section">
+            <div class="form-dra-section-c1-r1">
+                <label>Marché* :</label>
+                <button><a href="/{{ url_prefix }}/marche/marches/" onclick="window.open(this.href); return false;">Ajouter un marché</a> </button>
+            </div>
+            <div class="form-dra-section-c2-r1">
+                {{ form_dra.num_marche }}
+            </div>
+                        <div class="form-dra-section-c3-r1">
+                        </div>
+            <div class="form-dra-section-c4-r1">
+                <button><a href="/{{ url_prefix }}/ajout_document/" onclick="window.open(this.href); return false;">Ajouter fichier HM (ou lien HM)</a> </button>
+            </div>
+                        <div class="form-dra-section-c5-r1">
+                        </div>
+        </div>
+            <br>
+        <div class="form-dra-section">
+            <div class="form-dra-section-c1-r1">
+                <label>Numéro Bon de Commande :</label>
+            </div>
+            <div class="form-dra-section-c2-r1">
+               {{ form_dra.num_bon_commande }}
+            </div>
+            <div class="form-dra-section-c3-r1">
+            </div>
+            <div class="form-dra-section-c4-r1">
+                <label>Date de la commande : </label>
+            </div>
+            <div class="form-dra-section-c5-r1">
+                {{ form_dra.date_commande }}
+            </div>
+        </div>
+            <br>
+         <!--Document lié à DRA-->
+            <!--<div>
+                <h3 class="ie-row-1 form-subsection-title">Documents :</h3>
+                {{ formsetDoc.management_form }}
+                {% for form in formsetDoc %}
+                    {{ form.as_table }}
+                {{ form.id }}
+                {% endfor %}
+                    <br>
+                Actions :
+                    <input value="False" name="additemsdoc" id="additemsdoc">
+                    <button class="btn btn-primary" name="additemsbuttondoc" id="additemsbuttondoc">(+) Coût supplémentaire </button>
+                    <button class="btn btn-primary" name="delitemsbuttondoc" id="delitemsbuttondoc">(-) Supprimer les coûts sélectionnés </button>
+                <div class="ie-row-9 form-subsection-end"></div>
+            </div>-->
+         <!--Contact livraison-->
+        <br>
+        <label>Contact Livraison :</label>
+            <button><a href="../contactlivraison" onclick="window.open(this.href); return false;">Ajouter un contact</a> </button>
+
+            {{ form_dra.contact_livraison }}
+        <p>
+        </p>
+        <br>
+
+        <!--<div style="text-align:center;">-->
+
 
 
         <!--</div>-->
@@ -196,14 +321,14 @@
                     {{form_dra.intitule}}
                 </div>
                 <div class="container1c3r1">
-                    <label>Expert Métier* : </label>
+                    <label>Expert Métier : </label>
                 </div>
                 <div class="container1c4r1">
                     {{form_dra.expert_metier}}
                 </div>
                 <div class="container1c1r2">
                     <label>Fournisseur : ?!? faire champs auto JS nomfour fonction de la selection?!?</label>
-                    <button><a href="/{{ url_prefix }}/common/fournisseuretablissement" onclick="window.open(this.href); return false;">Add</a> </button>
+                    <button><a href="/{{ url_prefix }}/common/gestion_fournisseurs" onclick="window.open(this.href); return false;">Add</a> </button>
                     <!--TODO : modifier le bouton pour un redirect et ne pas perdre le formulaire dra en cours-->
                 </div>
                 <div class="container1c2r2">
@@ -211,7 +336,7 @@
                 </div>
                 <div class="container1c3r2">
                     <label>contact fournisseur : ?!? faire champs auto JS nomfour fonction de la selection?!?</label>
-                    <button><a href="/{{ url_prefix }}/common/fournisseuretablissement" onclick="window.open(this.href); return false;">Add</a> </button>
+                    <button><a href="/{{ url_prefix }}/common/gestion_fournisseurs" onclick="window.open(this.href); return false;">Add</a> </button>
                     </div>
                 <div class="container1c4r2">
                     {{form_dra.contact_fournisseur}}
@@ -235,14 +360,13 @@
                     {{form_dra.num_devis}}
                 </div>
                 <div class="container1c3r3">
-                    <label>Date du devis* : </label>
+                    <label>Date du devis : </label>
                 </div>
                 <div class="container1c4r3">
                     <input type="date" value='{{form_dra.date_devis}}' name="date_devis">
                 </div>
                 <div class="container1c1r4">
                     <label>N° de Marché* : </label>
-                    <button><a href="/{{ url_prefix }}/marche/marches" onclick="window.open(this.href); return false;">Add</a> </button>
                 </div>
                 <div class="container1c2r4">
                     {{form_dra.num_marche}}
@@ -264,34 +388,18 @@
                     <input type="date" value='{{form_dra.date_commande}}' name="date_commande">
                 </div>
                 <div class="container1c1r6">
-                    <label>Contact livraison* : </label>
+                    <label>Contact livraison : </label>
                     <button><a href="../contactlivraison" onclick="window.open(this.href); return false;">Ajouter un contact</a> </button>
                 </div>
                 <div class="container1c2r6">
-                    {{form_dra.contact_livraison}}
+                    <input type="text">
                 </div>
-          <!--Document lié à DRA-->
-            <!--<div>
-                <h3 class="ie-row-1 form-subsection-title">Documents :</h3>
-                {{ formsetDoc.management_form }}
-                {% for form in formsetDoc %}
-                    {{ form.as_table }}
-                {{ form.id }}
-                {% endfor %}
-                    <br>
-                Actions :
-                    <input value="False" name="additemsdoc" id="additemsdoc">
-                    <button class="btn btn-primary" name="additemsbuttondoc" id="additemsbuttondoc">(+) Coût supplémentaire </button>
-                    <button class="btn btn-primary" name="delitemsbuttondoc" id="delitemsbuttondoc">(-) Supprimer les coûts sélectionnés </button>
-                <div class="ie-row-9 form-subsection-end"></div>
-            </div>-->
-                  {{ form_dra.documents }}
+                {{ form_dra.documents }}
             </div>
             <p align="center">
                 <input type="submit" name="submit" value="ENREGISTRER">
                 <input type="button" OnClick="window.location.href = '../nouvelledra/';" value="REINITIALISER le formulaire">
             </p>
-
 
             <!--INFORMATIONS LIGNES DE LA DRA-->
 

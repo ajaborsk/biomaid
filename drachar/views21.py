@@ -180,67 +180,73 @@ class Nouvelle_draView(DracharView, DraData):
             context['form_dra'] = form
             return render(request, self.template_name, context=context)
 
-    #
+    
     def post(self, request, *args, **kwargs):
-        form_dra = self.formulaire_dra(request.POST or None)
+        self.form_dra = self.formulaire_dra(request.POST or None)
         context = self.get_context_data()
         submit = request.POST.get("submit")
         print("submit" + str(submit))
-        # TODO : la partie griser à mettre dans une fonction save() et intégrer dans chacun chacun des if ci dessous
-        #    if form_dra.is_valid():
-        #        dra = form_dra.save(commit=False)
-        #        dra.intitule = form_dra.cleaned_data["intitule"]
-        #        dra.fournisseur = form_dra.cleaned_data["fournisseur"]
-        #        dra.contact_fournisseur =
-        #        form_dra.cleaned_data["contact_fournisseur"]
-        #        dra.num_devis = form_dra.cleaned_data["num_devis"]
-        #        dra.date_devis = form_dra.cleaned_data["date_devis"]
-        #        dra.num_marche = form_dra.cleaned_data["num_marche"]
-        #        dra.expert_metier = form_dra.cleaned_data["expert_metier"]
-        #        dra.num_bon_commande = form_dra.cleaned_data["num_bon_commande"]
-        #        dra.num_dossier = form_dra.cleaned_data["num_dossier"]
-        #        # dra.documents = form_dra.cleaned_data["documents"] # TODO : fonction ajout documents
-        #        dra.date_commande = form_dra.cleaned_data["date_commande"]
-        #        dra.contact_livraison = form_dra.cleaned_data["contact_livraison"]
-        #        # TODO : récupérer id DRA et N° ligne pour ajout ligne
-        #        # self.dra_id = form_dra.id
-        #        # self.ligne = 0
-        #        print(dra.intitule)
-        #        print(dra.fournisseur)
-        #        print(dra.contact_fournisseur)
-        #        print(dra.num_devis)
-        #        print(dra.date_devis)
-        #        print(dra.num_marche)
-        #        print(dra.expert_metier)
-        #        print(dra.num_bon_commande)
-        #        print(dra.num_dossier)
-        #        # print(dra.documents)
-        #        print(dra.date_commande)
-        #        print(dra.contact_livraison)
-        #        # dra.save()
-        #        # self.dra_id = dra.id
-        #        # TODO : attention a supprimer : pour tests add ligne :
-        #        self.dra_id = '2'
-        #        print(self.dra_id)
-        #        dra_id = self.dra_id
         if submit == "AJOUTER_UNE_LIGNE":
-            context['form_dra'] = form_dra
+            if self.form_dra.is_valid():
+                self.save(request)
+            else:
+                print(self.form_dra.errors)
+            context['form_dra'] = self.form_dra
             return redirect("../nouvelleligne/%s" % self.dra_id, context=context)
         elif submit == "ENREGISTRER":
-            context['form_dra'] = form_dra
+            if self.form_dra.is_valid():
+                self.save(request)
+            else:
+                print(self.form_dra.errors)
+            context['dra_id'] = self.dra_id
+            context['form_dra'] = self.form_dra
             return render(request, self.template_name, context=context)
         else:
-            self.message = _("Problème" + str(form_dra.errors))
+            self.message = _("Problème" + str(self.form_dra.errors))
             return render(request, self.template_name, context=context)
 
     def save(self, request, *args, **kwargs):
         if not self.dra_id:
+            print("save new")
+            print("valide")
+            dra = self.form_dra.save(commit=False)
+            dra.intitule = self.form_dra.cleaned_data["intitule"]
+            dra.fournisseur = self.form_dra.cleaned_data["fournisseur"]
+            dra.contact_fournisseur = self.form_dra.cleaned_data["contact_fournisseur"]
+            dra.num_devis = self.form_dra.cleaned_data["num_devis"]
+            dra.date_devis = self.form_dra.cleaned_data["date_devis"]
+            dra.num_marche = self.form_dra.cleaned_data["num_marche"]
+            dra.expert_metier = self.form_dra.cleaned_data["expert_metier"]
+            dra.num_bon_commande = self.form_dra.cleaned_data["num_bon_commande"]
+            dra.num_dossier = self.form_dra.cleaned_data["num_dossier"]
+            # dra.documents = self.form_dra.cleaned_data["documents"] # TODO : fonction ajout documents
+            dra.date_commande = self.form_dra.cleaned_data["date_commande"]
+            dra.contact_livraison = self.form_dra.cleaned_data["contact_livraison"]
+            # TODO : récupérer id DRA et N° ligne pour ajout ligne
+            # self.dra_id = self.form_dra.id
+            # self.ligne = 0
+            print(dra.intitule)
+            print(dra.fournisseur)
+            print(dra.contact_fournisseur)
+            print(dra.num_devis)
+            print(dra.date_devis)
+            print(dra.num_marche)
+            print(dra.expert_metier)
+            print(dra.num_bon_commande)
+            print(dra.num_dossier)
+            # print(dra.documents)
+            print(dra.date_commande)
+            print(dra.contact_livraison)
+            # dra.save()
+            # super().save(*args, **kwargs) => a garder ?
+            # self.dra_id = dra.id
+            # TODO : attention a supprimer : pour tests add ligne :
+            self.dra_id = '2'
+            print(self.dra_id)
+            dra_id = self.dra_id
+        else:
             print("save modif")
             # code de modification
-        else:
-            print("save new")
-            # code d'ajout
-        super().save(*args, **kwargs)
 
 
 class LigneClass:
