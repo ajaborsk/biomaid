@@ -14,11 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
+from decimal import Decimal
 import pytz
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils import timezone
+from django.db.models import Value, Case, When, F, ExpressionWrapper, DecimalField
+from django.db.models.functions import Coalesce
 
 from django.db import models
 from django.urls import reverse
@@ -28,7 +31,7 @@ from django_pandas.managers import DataFrameManager
 
 from common.models import Discipline
 from common import config
-from overoly.base import OverolyModel as OModel
+from overoly.base import OField, OFieldState, OverolyModel as OModel
 
 # les tables ci-dessous sont mise à jour par des scripts
 # qui vont chercher dans ASSETPLUS les infos :
@@ -329,7 +332,22 @@ class Demande(OModel):
             'ARB': 'q(programme__arbitre__isnull=False, programme__arbitre=USER)',
         }
         workflow = {
+            # dict of **named** conditions
+            # - A condition can use one or several fields
+            # - A condition must define a (condition) value for every possible (fields) value.
+            #   - One can use 'default' value to ensure this condition
+            # - A condition cannot use any field from any other condition
+            # => All the conditions are defining a list on orthogonal partitions of records states
             'conditions': {},
+            # dict of **named** actions
+            #  - A named action without permissions (ie no fields than can be modified) is a VIEW ONLY action
+            #  - view permissions are automatic for roles allowed to modify some fields
+            #  - A named action without conditions is a start node (used to create objects)
+            #  - 'roles' is the list of roles than can modify the object
+            #  - 'conditions' is the list/set of (named) conditions needed to be allowed to perform this action
+            #  - 'permissions' is a list/set of fields that can be modified
+            #    - special string '__ALL__' means all fields can be modified
+            #    - TODO : if it's a dict, values represents allowed values (can be a expression or a list and/or a callable...)
             'actions': {
                 'create': {
                     'roles': ['RED'],
@@ -373,7 +391,12 @@ class Demande(OModel):
                 'VAL',
             ],
             'read_dict': {
-                'MAN': ('id', 'uf'),
+                'STATE0': {
+                    'MAN': ('id', 'uf'),
+                },
+                'STATE1': {
+                    'MAN': ('id', 'uf'),
+                },
             },
         }
 
@@ -1220,7 +1243,154 @@ class Demande(OModel):
         null=True,
     )
 
-    # o_roles = OField()
+    tmp_available_o = OField(value=F('programme__limit') - F('programme__consumed'))
+
+    montant_qte_validee_o = OField(
+        value=Coalesce(F('quantite_validee'), F('quantite')) * Coalesce(F('montant_unitaire_expert_metier'), F('prix_unitaire'))
+    )
+
+    enveloppe_finale_o = OField(
+        value=Case(
+            When(
+                arbitrage_commission__valeur=True,
+                then=Coalesce(F('enveloppe_allouee'), F('montant_qte_validee_o'), Value(Decimal(0.0))),
+            ),
+        )
+    )
+    montant_arbitrage_o = OField(
+        value=ExpressionWrapper(
+            Case(
+                # When(
+                #     montant_total_expert_metier__isnull=False,
+                #     then=F("montant_total_expert_metier"),
+                # ),
+                When(
+                    montant_unitaire_expert_metier__isnull=False,
+                    then=F("quantite") * F("montant_unitaire_expert_metier"),
+                ),
+                # When(montant__isnull=False, then=F("montant")),
+                When(
+                    prix_unitaire__isnull=False,
+                    then=F("quantite") * F("prix_unitaire"),
+                ),
+            ),
+            output_field=DecimalField(),
+        )
+    )
+    # 0 => TRAITE
+    # 1 => VALIDE
+    # 2 => A_BASCULER
+    # 3 => REFUSE
+    # 4 => ANNULE
+    # 5 => AAP_AREP
+    _o_state = OFieldState(
+        value=lambda view_params: Case(
+            When(
+                gel=True,
+                then=Case(
+                    When(
+                        arbitrage_commission__valeur=True,
+                        then=Case(
+                            When(
+                                previsionnel__isnull=False,
+                                then=Case(
+                                    When(
+                                        previsionnel__solder_ligne=True,
+                                        previsionnel__date_modification__lt=view_params['NOW'] - timedelta(days=90),
+                                        then=Value(0),
+                                    ),
+                                    default=Value(1),
+                                ),
+                            ),
+                            default=Value(2),
+                        ),
+                    ),
+                    When(
+                        arbitrage_commission__valeur=False,
+                        then=Value(3),
+                    ),
+                    default=Value(4),
+                ),
+            ),
+            default=Case(
+                When(
+                    montant_arbitrage_o__isnull=False,
+                    avis_biomed__isnull=False,
+                    programme__isnull=False,
+                    then=Case(
+                        When(
+                            decision_validateur__isnull=True,
+                            then=Case(
+                                When(
+                                    expert_metier__isnull=True,
+                                    then=Value(5),
+                                ),
+                                default=Case(
+                                    When(
+                                        programme__arbitre__isnull=True,
+                                        then=Value(6),  # "AAP"
+                                    ),
+                                    default=Case(
+                                        When(
+                                            arbitrage_commission__valeur=True,
+                                            enveloppe_finale_o__gt=F('tmp_available_o'),
+                                            then=Value(7),  # 'AAP_BLK'
+                                        ),
+                                        default=Value(8),  # "AAP_AARB"
+                                    ),
+                                ),
+                            ),
+                        ),
+                        default=Case(
+                            When(
+                                expert_metier__isnull=True,
+                                then=Value(9),  # "AREP"
+                            ),
+                            default=Case(
+                                When(
+                                    programme__arbitre__isnull=True,
+                                    then=Value(10),  # "WAIT"
+                                ),
+                                default=Case(
+                                    When(
+                                        arbitrage_commission__valeur=True,
+                                        enveloppe_finale_o__gt=F('tmp_available_o'),
+                                        then=Value(11),  # 'BLK'
+                                    ),
+                                    default=Value(12),  # "AARB"
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+                default=Case(
+                    When(
+                        expert_metier__isnull=True,
+                        then=Case(
+                            When(
+                                decision_validateur__isnull=True,
+                                then=Value(13),  # "AAP_AREP"
+                            ),
+                            default=Value(9),  # "AREP"
+                        ),
+                    ),
+                    default=Case(
+                        When(
+                            decision_validateur__isnull=True,
+                            then=Case(
+                                When(programme__isnull=True, then=Value(14)),  # "AAP_AREP_AEXP"
+                                default=Value(15),  # "AAP_AEXP"
+                            ),
+                        ),
+                        default=Case(
+                            When(programme__isnull=True, then=Value(16)),  # "AREP_AEXP"
+                            default=Value(17),  # "AEXP"
+                        ),
+                    ),
+                ),
+            ),
+        )
+    )
 
     def __str__(self):
         # return "{0}  {1}  {2}  {3}".format(self.num_dmd, self.nom_projet, self.contact, self.dectcontact)
