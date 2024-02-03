@@ -890,7 +890,7 @@ class PrevisionnelUtilisateursSmartView(PrevisionnelSmartView):
                 & (
                     # Hack pour ne pas voir les demandes de travaux
                     Q(discipline_dmd__isnull=True)
-                    | ~Q(discipline_dmd=Discipline.objects.values_list('pk', flat=True).filter(code='TX')[0])
+                    | ~Q(discipline_dmd__in=Discipline.objects.values_list('pk', flat=True).filter(code='TX').values('pk'))
                     # Uniquement les demandes qui ne sont pas terminées depuis 'longtemps'
                     & (
                         ~(Q(suivi_mes__startswith='1-') & Q(suivi_mes__startswith='0-'))
