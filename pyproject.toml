@@ -120,6 +120,7 @@ python-ldap = [
 ]
 cx-Oracle = { version = "8.3.0", optional = true }
 html-sanitizer = "^2.2.0"
+jsonschema = "^4.21.1"
 
 [tool.poetry.extras]
 ldap = ["python-ldap", "django-auth-ldap"]

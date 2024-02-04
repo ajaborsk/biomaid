@@ -233,6 +233,8 @@ class Workflow:
     @property
     def django_orm_state_expr(self) -> Expression:
         # First, lazy, implementation. Rely on database engine optimizer
+        # Just a list of 'if <conditions> then <state_code>' construction
+        # Should be optimized to a decision tree !
         cases = []
         for state_name, state_def in self.states.items():
             conds = {}
