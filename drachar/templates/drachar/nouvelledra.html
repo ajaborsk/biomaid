@@ -175,7 +175,7 @@
 
 {% block tab_contents %}
 
-<h1>titre :{{ title }}</h1>
+<h1>{{ title }}</h1>
 <!--________________________________________________________-->
 <!--_____formulaire pour le cas d'une nouvelle demande_____ -->
 <!--________________________________________________________-->
@@ -286,12 +286,12 @@
                 <div class="ie-row-9 form-subsection-end"></div>
             </div>-->
                   {{ form_dra.documents }}
+                  {{ documents }}
             </div>
             <p align="center">
                 <input type="submit" name="submit" value="ENREGISTRER">
                 <input type="button" OnClick="window.location.href = '../nouvelledra/';" value="REINITIALISER le formulaire">
             </p>
-
 
             <!--INFORMATIONS LIGNES DE LA DRA-->
 
@@ -307,23 +307,36 @@
                         <th>Référence | </th>
                         <th>Type | </th>
                         <th>Marque | </th>
+                        <th>Action | </th>
+
                    </tr>
                 </thead>
+                {% if ligne_exist == None %}
                 <tbody>
                     <tr>
-                        <td>{{ ligne.num_ligne }} | </td>
-                        <td>{{ ligne.num_previsionnel }} | </td>
-                        <td>{{ ligne.num_previsionnel }} | </td>
-                        <td>{{ ligne.num_compte }} | </td>
-                        <td>{{ ligne.uf }} | </td> <!-- Voir pour récupérer ou non celle de la demande ? ou modifiable ? -->
-                        <td>{{ ligne.reference }} | </td>
-                        <td>{{ ligne.modele }} | </td>
-                        <td>{{ ligne.marque }} | </td>
+                        <!-- FAIRE UNE BOUCLE  -->
+                        <!-- améliorer le visuel : https://developer.mozilla.org/fr/docs/Web/HTML/Element/tr-->
+                        {% for instance in instance_ligne %}
+                            <td>{{ instance.num_ligne }} | </td>
+                            <td>{{ instance.num_previsionnel }} | </td>
+                            <td>{{ instance.num_previsionnel }} | </td>
+                            <td>{{ instance.num_compte }} | </td>
+                            <td>{{ instance.uf }} | </td>
+                            <td>{{ instance.reference }} | </td>
+                            <td>{{ instance.modele }} | </td>
+                            <td>{{ instance.marque }} | </td>
+                            <td><button type="submit" name="submit" value="MODIFIER_UNE_LIGNE">Modifier {{ form_ligne.num_ligne }}</button> | </td>
+                        {% endfor %}
                     </tr>
                 </tbody>
                 <tfoot>
                 <tr><td colspan="8"><button type="submit" name="submit" value="AJOUTER_UNE_LIGNE">AJOUTER UNE LIGNE</button></td></tr>
                 </tfoot>
+                {% else %}
+                <tbody>
+                    <tr><td colspan="8"><button type="submit" name="submit" value="AJOUTER_UNE_LIGNE">AJOUTER UNE LIGNE</button></td></tr>
+                </tbody>
+                {% endif  %}
                 </table>
                 </div>
               </body>
@@ -332,7 +345,163 @@
 <!-- formulaire pour le cas d'une demande existante modifiée-->
 <!--________________________________________________________-->
 {% else %}
+    <form id="form" enctype="multipart/form-data" action="../nouvelledra/" method="POST">
+        {% csrf_token %}
+    <body>
+            <h2>Informations sur la DRA</h2>
+              <div class="grid-container1">
+                <div class="container1c1r1">
+                    <label>Intitulé de la DRA : </label>
+                </div>
+                <div class="container1c2r1">
+                    {{instance_dra.intitule}}
+                </div>
+                <div class="container1c3r1">
+                    <label>Expert Métier* : </label>
+                </div>
+                <div class="container1c4r1">
+                    {{instance_dra.expert_metier}}
+                </div>
+                <div class="container1c1r2">
+                    <label>Fournisseur : ?!? faire champs auto JS nomfour fonction de la selection?!?</label>
+                    <button><a href="/{{ url_prefix }}/common/fournisseuretablissement" onclick="window.open(this.href); return false;">Add</a> </button>
+                    <!--TODO : modifier le bouton pour un redirect et ne pas perdre le formulaire dra en cours-->
+                </div>
+                <div class="container1c2r2">
+                    {{instance_dra.fournisseur}}
+                </div>
+                <div class="container1c3r2">
+                    <label>contact fournisseur : ?!? faire champs auto JS nomfour fonction de la selection?!?</label>
+                    <button><a href="/{{ url_prefix }}/common/fournisseuretablissement" onclick="window.open(this.href); return false;">Add</a> </button>
+                    </div>
+                <div class="container1c4r2">
+                    {{instance_dra.contact_fournisseur}}
+                </div>
+                  <!-- TODO : ajouter :
+                           <div class="form-dra-section">
+                        <div class="form-dra-section-c1-r1">
+                             <label>N° de dossier Affilié :</label>
+                        </div>
+                            <div class="form-dra-section-c2-r1">
+                         {{instance_dra.num_dossier}}
+                         </div>
+                        </div>
+                   -->
+             <!--INFORMATIONS SUR LE DEVIS-->
+                <div class="container1c1r3">
+                    <label>N° du devis* : </label>
+                    <button><a href="/{{ url_prefix }}/ajout_document/" onclick="window.open(this.href); return false;">Ajouter un devis</a> </button>
+                </div>
+                <div class="container1c2r3">
+                    {{instance_dra.num_devis}}
+                </div>
+                <div class="container1c3r3">
+                    <label>Date du devis* : </label>
+                </div>
+                <div class="container1c4r3">
+                    <input type="date" value='{{instance_dra.date_devis}}' name="date_devis">
+                </div>
+                <div class="container1c1r4">
+                    <label>N° de Marché* : </label>
+                    <button><a href="/{{ url_prefix }}/marche/marches" onclick="window.open(this.href); return false;">Add</a> </button>
+                </div>
+                <div class="container1c2r4">
+                    {{instance_dra.num_marche}}
+                </div>
+                <div class="container1c3r4">
+                    <button><a href="/{{ url_prefix }}/ajout_document/" onclick="window.open(this.href); return false;">Ajouter fichier HM (ou lien HM)</a> </button>
+                </div>
+         <!--INFORMATIONS SUR LA COMMANDE-->
+                <div class="container1c1r5">
+                    <label>N°Commande : </label>
+                </div>
+                <div class="container1c2r5">
+                    {{instance_dra.num_bon_commande}}
+                </div>
+                <div class="container1c3r5">
+                    <label>Date Commande : </label>
+                </div>
+                <div class="container1c4r5">
+                    <input type="date" value='{{instance_dra.date_commande}}' name="date_commande">
+                </div>
+                <div class="container1c1r6">
+                    <label>Contact livraison* : </label>
+                    <button><a href="../contactlivraison" onclick="window.open(this.href); return false;">Ajouter un contact</a> </button>
+                </div>
+                <div class="container1c2r6">
+                    {{instance_dra.contact_livraison}}
+                </div>
+          <!--Document lié à DRA-->
+            <!--<div>
+                <h3 class="ie-row-1 form-subsection-title">Documents :</h3>
+                {{ formsetDoc.management_form }}
+                {% for form in formsetDoc %}
+                    {{ form.as_table }}
+                {{ form.id }}
+                {% endfor %}
+                    <br>
+                Actions :
+                    <input value="False" name="additemsdoc" id="additemsdoc">
+                    <button class="btn btn-primary" name="additemsbuttondoc" id="additemsbuttondoc">(+) Coût supplémentaire </button>
+                    <button class="btn btn-primary" name="delitemsbuttondoc" id="delitemsbuttondoc">(-) Supprimer les coûts sélectionnés </button>
+                <div class="ie-row-9 form-subsection-end"></div>
+            </div>-->
+                  {{ instance_dra.documents }}
+                  {{ documents }}
+            </div>
+            <p align="center">
+                <input type="submit" name="submit" value="MODIFIER">
+                <input type="button" OnClick="window.location.href = '../nouvelledra/';" value="REINITIALISER le formulaire">
+            </p>
 
+            <!--INFORMATIONS LIGNES DE LA DRA-->
+
+                <h2>Lignes de la DRA</h2>
+                <table>
+                <thead>
+                    <tr>
+                        <th>N°Ligne | </th>
+                        <th>N°previsionnel | </th>
+                        <th>N°programme | </th>
+                        <th>N°compte | </th>
+                        <th>UF | </th>
+                        <th>Référence | </th>
+                        <th>Type | </th>
+                        <th>Marque | </th>
+                        <th>Action | </th>
+
+                   </tr>
+                </thead>
+                {% if ligne_exist == None %}
+                <tbody>
+                    <tr>
+                        <!-- FAIRE UNE BOUCLE  -->
+                        <!-- améliorer le visuel : https://developer.mozilla.org/fr/docs/Web/HTML/Element/tr-->
+                        {% for instance in instance_ligne %}
+                            <td>{{ instance.num_ligne }} | </td>
+                            <td>{{ instance.num_previsionnel }} | </td>
+                            <td>{{ instance.num_previsionnel }} | </td>
+                            <td>{{ instance.num_compte }} | </td>
+                            <td>{{ instance.uf }} | </td>
+                            <td>{{ instance.reference }} | </td>
+                            <td>{{ instance.modele }} | </td>
+                            <td>{{ instance.marque }} | </td>
+                            <td><button type="submit" name="submit" value="MODIFIER_UNE_LIGNE">Modifier {{ form_ligne.num_ligne }}</button> | </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+                <tfoot>
+                <tr><td colspan="8"><button type="submit" name="submit" value="AJOUTER_UNE_LIGNE">AJOUTER UNE LIGNE</button></td></tr>
+                </tfoot>
+                {% else %}
+                <tbody>
+                    <tr><td colspan="8"><button type="submit" name="submit" value="AJOUTER_UNE_LIGNE">AJOUTER UNE LIGNE</button></td></tr>
+                </tbody>
+                {% endif  %}
+                </table>
+                </div>
+              </body>
+        </form>
     <!-- ICI : mettre le formulaire en mode modification -->
 
 {% endif %}

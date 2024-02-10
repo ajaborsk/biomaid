@@ -28,12 +28,13 @@ from common.models import Fournisseur, ContactFournisseur, UserUfRole, User
 from dem.smart_views import DemandeSmartView
 from drachar.smart_views import PrevisionnelSmartView, DraSmartView, PrevisionnelSmartView21, PrevisionnelUtilisateursSmartView
 
-from drachar.models import Previsionnel, ContactLivraison, Dra, Dossier
+from drachar.models import Previsionnel, ContactLivraison, Dra, Dossier, LigneCommande
 from drachar.forms import NouvelleDraForm, LigneForm
 from smart_view.smart_page import SmartPage
 from smart_view.smart_view import ComputedSmartField
 from smart_view.smart_widget import BarChartWidget
 from smart_view.views import DoubleSmartViewMixin
+from document.smart_fields import DocumentsSmartField
 from marche.models import Marche
 
 
@@ -140,12 +141,12 @@ class DraData:
         return form_dra
 
 
-class Nouvelle_draView(DracharView, DraData):
+class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIEW : 1 pour DRA et 1 pour les lignes.
     name = 'new-dra'
     template_name = 'drachar/nouvelledra.html'
     title = _("Nouvelle DRA")
     formulaire_dra = NouvelleDraForm
-    dra = DraData
+    dra = DraData  #TODO => a déplacer dans le get pour y appliquer le id ?
     dra_id = None
 
     # def __init__(self, *args, **kwargs):
@@ -155,7 +156,6 @@ class Nouvelle_draView(DracharView, DraData):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # context['message'] = self.message
-        # context['ligne'] = self.ligne
         # kwargs.update({'url_prefix': context.get('url_prefix', None)})
         return context
 
@@ -165,12 +165,25 @@ class Nouvelle_draView(DracharView, DraData):
         self.dra_id = kwargs.get('dra_id')
         context['dra_id'] = self.dra_id
         # print(context['url_prefix'])
+        context['documents']=DocumentsSmartField
+        print('ici 2')
         if self.dra_id is not None:  # FORMULAIRE DEJA RENSEIGNE : Modifification ou demande en cours pré enregistrée
+            print('ici 3')
             context['title'] = "DRA N° " + str(self.dra_id)
             kwargs['dra_id'] = self.dra_id
-            Instance_dra = Dra.objects.get(pk=self.dra_id)
-            context['form_dra'] = Instance_dra
+            item=Dra.objects.get(pk=self.dra_id)
+            instance_dra = self.formulaire_dra(request.user, request.POST, instance=item)
+            #form_dra = Dra.objects.get(pk=self.dra_id)
+            context['instance_dra'] = instance_dra
             # print("dra existante n° = " + str(Instance_dra))
+            if LigneCommande.objects.filter(num_dra=self.dra_id).exists():
+                print('ici 4')
+                self.instance_ligne = LigneCommande.objects.filter(num_dra=self.dra_id)
+                context['ligne_exist'] = '1'
+                context['instance_ligne'] = self.instance_ligne
+            else:
+                print('ici 5')
+                context['form_ligne'] = None
             return render(request, self.template_name, context=context)
         # TODO : Instance à faire en fonction de l'endroit à partir duquel on genère la DRA
         #  (depuis une ligne, depuis un dossier...) pour préremplir certains champs
@@ -180,7 +193,7 @@ class Nouvelle_draView(DracharView, DraData):
             context['form_dra'] = form
             return render(request, self.template_name, context=context)
 
-    
+
     def post(self, request, *args, **kwargs):
         self.form_dra = self.formulaire_dra(request.POST or None)
         context = self.get_context_data()
@@ -198,9 +211,11 @@ class Nouvelle_draView(DracharView, DraData):
                 self.save(request)
             else:
                 print(self.form_dra.errors)
+            kwargs['dra_id'] = self.dra_id
             context['dra_id'] = self.dra_id
             context['form_dra'] = self.form_dra
-            return render(request, self.template_name, context=context)
+            print('ici 1')
+            return self.get(request, **kwargs)
         else:
             self.message = _("Problème" + str(self.form_dra.errors))
             return render(request, self.template_name, context=context)
@@ -237,19 +252,19 @@ class Nouvelle_draView(DracharView, DraData):
             # print(dra.documents)
             print(dra.date_commande)
             print(dra.contact_livraison)
-            # dra.save()
+            dra.save()
             # super().save(*args, **kwargs) => a garder ?
-            # self.dra_id = dra.id
+            print('ici 0')
+            self.dra_id = dra.num_dra
             # TODO : attention a supprimer : pour tests add ligne :
-            self.dra_id = '2'
-            print(self.dra_id)
-            dra_id = self.dra_id
+            #self.dra_id = '2'
+            #dra_id = self.dra_id
         else:
             print("save modif")
             # code de modification
 
 
-class LigneClass:
+class LigneClass(DracharView, DraData):
     def get(self, request, *arg, **kwargs):
         template_name = 'drachar/nouvelleligne.html'
         data = {
@@ -266,7 +281,7 @@ class LigneClass:
         return form
 
 
-class NouvelleLigneView(DracharView, LigneClass):
+class NouvelleLigneView(DracharView):
 
     form_ligne = LigneForm
     template_name = 'drachar/nouvelleligne.html'
