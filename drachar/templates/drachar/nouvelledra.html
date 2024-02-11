@@ -347,6 +347,8 @@
 {% else %}
     <form id="form" enctype="multipart/form-data" action="../nouvelledra/" method="POST">
         {% csrf_token %}
+        <!-- Champs cachés (à conserver)-->
+        <input type='hidden' name="dra_id" value='{{dra_id}}'>
     <body>
             <h2>Informations sur la DRA</h2>
               <div class="grid-container1">

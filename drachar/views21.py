@@ -139,7 +139,6 @@ class DraData:
         print(self.dra_id)
         if self.dra_id:
             item=Dra.objects.get(pk=self.dra_id)
-            print(item.date_devis)
             instance_dra = self.formulaire_dra(request.user, request.POST, **data, instance=item)
             return instance_dra
         else:
@@ -176,18 +175,18 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
         context['documents']=DocumentsSmartField
         print('ici 2')
         if self.dra_id is not None:  # FORMULAIRE DEJA RENSEIGNE : Modifification ou demande en cours pré enregistrée
-            #TODO :ajouter la fonction modifier dans ce IF avant le return
             print('ici 3')
             context['title'] = "DRA N° " + str(self.dra_id)
             kwargs['dra_id'] = self.dra_id
             instance_dra = self.dra.get(self, request)
+            context['dra_id'] = self.dra_id
             context['instance_dra'] = instance_dra
-            if LigneCommande.objects.filter(num_dra=self.dra_id).exists():
+            if LigneCommande.objects.filter(num_dra=self.dra_id).exists(): # Affichage des lignes adossées à la DRA
                 print('ici 4')
                 self.instance_ligne = LigneCommande.objects.filter(num_dra=self.dra_id)
                 context['ligne_exist'] = '1'
                 context['instance_ligne'] = self.instance_ligne
-            else:
+            else: #Si pas de lignes adossées à la dra
                 print('ici 5')
                 context['form_ligne'] = None
             return render(request, self.template_name, context=context)
@@ -201,11 +200,12 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
 
 
     def post(self, request, *args, **kwargs):
-        self.form_dra = self.formulaire_dra(request.POST or None)
         context = self.get_context_data()
         submit = request.POST.get("submit")
         print("submit" + str(submit))
         if submit == "AJOUTER_UNE_LIGNE":
+            #TODO : à mon sens, enregistrer les modif + Get vers la class Ligne
+            self.form_dra = self.formulaire_dra(request.POST or None)
             if self.form_dra.is_valid():
                 self.save(request)
             else:
@@ -213,6 +213,7 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
             context['form_dra'] = self.form_dra
             return redirect("../nouvelleligne/%s" % self.dra_id, context=context)
         elif submit == "ENREGISTRER":
+            self.form_dra = self.formulaire_dra(request.POST or None)
             if self.form_dra.is_valid():
                 self.save(request)
             else:
@@ -221,6 +222,22 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
             context['dra_id'] = self.dra_id
             context['form_dra'] = self.form_dra
             print('ici 1')
+            return self.get(request, **kwargs)
+        elif submit == "MODIFIER":
+            self.dra_id = request.POST.get("dra_id")
+            print("modifier")
+            print(self.dra_id)
+            item = Dra.objects.get(pk=self.dra_id)
+            # TODO : bug sur ligne ci-dessous :'Nouvelle_draView' object has no attribute 'form'.
+            self.instance = self.form(request.POST or None, instance=item)
+            if self.instance_dra.is_valid():
+                self.save(request)
+            else:
+                print(self.form_dra.errors)
+            kwargs['dra_id'] = self.dra_id
+            context['dra_id'] = self.dra_id
+            context['form_dra'] = self.form_dra
+            print('ici 1bis')
             return self.get(request, **kwargs)
         else:
             self.message = _("Problème" + str(self.form_dra.errors))
@@ -243,9 +260,6 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
             # dra.documents = self.form_dra.cleaned_data["documents"] # TODO : fonction ajout documents
             dra.date_commande = self.form_dra.cleaned_data["date_commande"]
             dra.contact_livraison = self.form_dra.cleaned_data["contact_livraison"]
-            # TODO : récupérer id DRA et N° ligne pour ajout ligne
-            # self.dra_id = self.form_dra.id
-            # self.ligne = 0
             print(dra.intitule)
             print(dra.fournisseur)
             print(dra.contact_fournisseur)
@@ -259,14 +273,39 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
             print(dra.date_commande)
             print(dra.contact_livraison)
             dra.save()
-            # super().save(*args, **kwargs) => a garder ?
             print('ici 0')
             self.dra_id = dra.num_dra
-            # TODO : attention a supprimer : pour tests add ligne :
-            #self.dra_id = '2'
-            #dra_id = self.dra_id
         else:
             print("save modif")
+            print("valide")
+            dra = instance.save(commit=False)
+            dra.intitule = self.instance.cleaned_data["intitule"]
+            dra.fournisseur = self.instance.cleaned_data["fournisseur"]
+            dra.contact_fournisseur = self.instance.cleaned_data["contact_fournisseur"]
+            dra.num_devis = self.instance.cleaned_data["num_devis"]
+            dra.date_devis = self.instance.cleaned_data["date_devis"]
+            dra.num_marche = self.instance.cleaned_data["num_marche"]
+            dra.expert_metier = self.instance.cleaned_data["expert_metier"]
+            dra.num_bon_commande = self.instance.cleaned_data["num_bon_commande"]
+            dra.num_dossier = self.instance.cleaned_data["num_dossier"]
+            # dra.documents = self.instance.cleaned_data["documents"] # TODO : fonction ajout documents
+            dra.date_commande = self.instance.cleaned_data["date_commande"]
+            dra.contact_livraison = self.instance.cleaned_data["contact_livraison"]
+            print(dra.intitule)
+            print(dra.fournisseur)
+            print(dra.contact_fournisseur)
+            print(dra.num_devis)
+            print(dra.date_devis)
+            print(dra.num_marche)
+            print(dra.expert_metier)
+            print(dra.num_bon_commande)
+            print(dra.num_dossier)
+            # print(dra.documents)
+            print(dra.date_commande)
+            print(dra.contact_livraison)
+            dra.save()
+            print('ici 0')
+            self.dra_id = dra.num_dra
             # code de modification
 
 
