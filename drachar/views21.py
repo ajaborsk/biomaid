@@ -139,6 +139,7 @@ class DraData:
         print(self.dra_id)
         if self.dra_id:
             item=Dra.objects.get(pk=self.dra_id)
+            print(item.date_devis)
             instance_dra = self.formulaire_dra(request.user, request.POST, **data, instance=item)
             return instance_dra
         else:

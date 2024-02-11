@@ -141,6 +141,12 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
             #   'value':'test',
             # })
             # ici placer les surcharge des champs par défaut
+            'date_devis': forms.DateInput(
+                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)', 'class': 'form-control'}
+            ),
+            'date_commande': forms.DateInput(
+                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)', 'class': 'form-control'}
+            )
         }
 
     def __init__(self, user, *args, **kwargs):
@@ -152,12 +158,6 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
         _dossier_list = kwargs.pop('dossier_list', None)
         super(NouvelleDraForm, self).__init__(*args, user, **kwargs)
         self.initial['num_devis'] = "num_devis"
-        self.dra_id = kwargs.get('dra_id')
-        print(self.dra_id)
-        if self.dra_id is not None:
-            print('youpilou !')
-        else:
-            print('bouuuuuuuuuuuuuuu !')
         if _fournisseurs_list is not None:
             self.fields['fournisseur'].widget = ListTextWidget(data_list=_fournisseurs_list, name='fournisseurs-list')
         if _contact_fournisseur_list is not None:
