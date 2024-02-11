@@ -135,10 +135,17 @@ class DraData:
             "contact_liv_list": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
             "expert_metier_list": User.objects.filter(Q(userufrole__role_code='EXP')).exclude(username='arbitre_biomed')
         }
-        form_dra = self.formulaire_dra(request.user, request.GET, **data)
-        self.message = _("""ajout d'une DRA""")
-        self.template_name = template_name
-        return form_dra
+        print('HELLO')
+        print(self.dra_id)
+        if self.dra_id:
+            item=Dra.objects.get(pk=self.dra_id)
+            instance_dra = self.formulaire_dra(request.user, request.POST, **data, instance=item)
+            return instance_dra
+        else:
+            form_dra = self.formulaire_dra(request.user, request.GET, **data)
+            self.message = _("""ajout d'une DRA""")
+            self.template_name = template_name
+            return form_dra
 
 
 class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIEW : 1 pour DRA et 1 pour les lignes.
@@ -168,14 +175,12 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
         context['documents']=DocumentsSmartField
         print('ici 2')
         if self.dra_id is not None:  # FORMULAIRE DEJA RENSEIGNE : Modifification ou demande en cours pré enregistrée
+            #TODO :ajouter la fonction modifier dans ce IF avant le return
             print('ici 3')
             context['title'] = "DRA N° " + str(self.dra_id)
             kwargs['dra_id'] = self.dra_id
-            item=Dra.objects.get(pk=self.dra_id)
-            instance_dra = self.formulaire_dra(request.user, request.POST, instance=item)
-            #form_dra = Dra.objects.get(pk=self.dra_id)
+            instance_dra = self.dra.get(self, request)
             context['instance_dra'] = instance_dra
-            # print("dra existante n° = " + str(Instance_dra))
             if LigneCommande.objects.filter(num_dra=self.dra_id).exists():
                 print('ici 4')
                 self.instance_ligne = LigneCommande.objects.filter(num_dra=self.dra_id)

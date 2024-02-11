@@ -1446,6 +1446,7 @@ class DraSmartView(SmartView):
             'num_dossier',
             # 'documents',
             'contact_livraison',
+            #'tools',
         )
         selectable_columns = (
             'num_dra',
@@ -1483,6 +1484,26 @@ class DraSmartView(SmartView):
                 'filename': "Demandes en cours.xlsx",
             }
         }
+        tools = (
+            ToolsSmartField,
+            {
+                'title': _("Actions"),
+                'tools': [
+                    {
+                        'tool': 'open',
+                        'url_name': 'drachar:nouvelledra',
+                        'url_args': ('${id}',),
+                        'tooltip': _("Ouvrir la dra"),
+                    },
+                    {
+                        'tool': 'delete',
+                        'url_name': 'drachar:nouvelledra-ask-delete',
+                        'url_args': ('${id}',),
+                        'tooltip': _("Supprimer la dra"),
+                    },
+                ],
+            },
+        )
 
 class ContactLivraisonSmartView(SmartView):
     class Meta:
