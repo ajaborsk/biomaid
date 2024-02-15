@@ -229,14 +229,14 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
             print(self.dra_id)
             item = Dra.objects.get(pk=self.dra_id)
             # TODO : bug sur ligne ci-dessous :'Nouvelle_draView' object has no attribute 'form'.
-            self.instance = self.form(request.POST or None, instance=item)
+            self.instance_dra = self.formulaire_dra(request.POST or None, instance=item)
             if self.instance_dra.is_valid():
                 self.save(request)
             else:
                 print(self.form_dra.errors)
             kwargs['dra_id'] = self.dra_id
             context['dra_id'] = self.dra_id
-            context['form_dra'] = self.form_dra
+            context['form_dra'] = self.instance_dra
             print('ici 1bis')
             return self.get(request, **kwargs)
         else:
@@ -248,6 +248,7 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
             print("save new")
             print("valide")
             dra = self.form_dra.save(commit=False)
+            # TODO : CREER UN CHAMPS dra.NUMDRABIS pour récupérer le numéro DRA-ANNEE-NUM
             dra.intitule = self.form_dra.cleaned_data["intitule"]
             dra.fournisseur = self.form_dra.cleaned_data["fournisseur"]
             dra.contact_fournisseur = self.form_dra.cleaned_data["contact_fournisseur"]
@@ -278,19 +279,19 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
         else:
             print("save modif")
             print("valide")
-            dra = instance.save(commit=False)
-            dra.intitule = self.instance.cleaned_data["intitule"]
-            dra.fournisseur = self.instance.cleaned_data["fournisseur"]
-            dra.contact_fournisseur = self.instance.cleaned_data["contact_fournisseur"]
-            dra.num_devis = self.instance.cleaned_data["num_devis"]
-            dra.date_devis = self.instance.cleaned_data["date_devis"]
-            dra.num_marche = self.instance.cleaned_data["num_marche"]
-            dra.expert_metier = self.instance.cleaned_data["expert_metier"]
-            dra.num_bon_commande = self.instance.cleaned_data["num_bon_commande"]
-            dra.num_dossier = self.instance.cleaned_data["num_dossier"]
-            # dra.documents = self.instance.cleaned_data["documents"] # TODO : fonction ajout documents
-            dra.date_commande = self.instance.cleaned_data["date_commande"]
-            dra.contact_livraison = self.instance.cleaned_data["contact_livraison"]
+            dra = self.instance_dra.save(commit=False)
+            dra.intitule = self.instance_dra.cleaned_data["intitule"]
+            dra.fournisseur = self.instance_dra.cleaned_data["fournisseur"]
+            dra.contact_fournisseur = self.instance_dra.cleaned_data["contact_fournisseur"]
+            dra.num_devis = self.instance_dra.cleaned_data["num_devis"]
+            dra.date_devis = self.instance_dra.cleaned_data["date_devis"]
+            dra.num_marche = self.instance_dra.cleaned_data["num_marche"]
+            dra.expert_metier = self.instance_dra.cleaned_data["expert_metier"]
+            dra.num_bon_commande = self.instance_dra.cleaned_data["num_bon_commande"]
+            dra.num_dossier = self.instance_dra.cleaned_data["num_dossier"]
+            # dra.documents = self.instance_dra.cleaned_data["documents"] # TODO : fonction ajout documents
+            dra.date_commande = self.instance_dra.cleaned_data["date_commande"]
+            dra.contact_livraison = self.instance_dra.cleaned_data["contact_livraison"]
             print(dra.intitule)
             print(dra.fournisseur)
             print(dra.contact_fournisseur)
