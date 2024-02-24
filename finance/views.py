@@ -1481,7 +1481,7 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
         template_name = 'finance/config_studie.html'
 
         def datageneration(self):
-            self.request_data = tomlkit.loads(pathlib.Path("finance/request.toml").read_text())
+            self.request_data = tomlkit.loads(pathlib.Path("finance/request.toml").read_text()) # il s'agit de la config avec la liste des programmes à analyser, paramètrable directement dans Biomaid
             """GEt Liste des programmes favoris"""
             self.etab = Etablissement.objects.all()
             self.discipline = Discipline.objects.all()
@@ -1540,6 +1540,7 @@ class ProgrammStudie(BiomAidViewMixin, TemplateView):
                 f.write(tomlkit.dumps(self.request_data))  # sauvegarde des modifs dans le .toml (=commit true)
             return self
 
+        '''FONCTION DE GENERATION DU TCD D'ANALYSE DES PROGRAMMES'''
         def TCD(self, request, *arg, **kwargs):
             if self.programmestcd is not None:
                 programme_list = self.programmestcd.strip().split(',')

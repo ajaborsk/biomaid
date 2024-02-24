@@ -29,7 +29,7 @@ from dem.smart_views import DemandeSmartView
 from drachar.smart_views import PrevisionnelSmartView, DraSmartView, PrevisionnelSmartView21, PrevisionnelUtilisateursSmartView
 
 from drachar.models import Previsionnel, ContactLivraison, Dra, Dossier, LigneCommande
-from drachar.forms import NouvelleDraForm, LigneForm
+from drachar.forms import NouvelleDraForm, NouvelleLigneForm
 from smart_view.smart_page import SmartPage
 from smart_view.smart_view import ComputedSmartField
 from smart_view.smart_widget import BarChartWidget
@@ -148,12 +148,12 @@ class DraData:
             return form_dra
 
 
-class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIEW : 1 pour DRA et 1 pour les lignes.
+class Nouvelle_draView(DracharView, DraData):
     name = 'new-dra'
     template_name = 'drachar/nouvelledra.html'
     title = _("Nouvelle DRA")
     formulaire_dra = NouvelleDraForm
-    dra = DraData  #TODO => a déplacer dans le get pour y appliquer le id ?
+    dra = DraData
     dra_id = None
 
     # def __init__(self, *args, **kwargs):
@@ -173,7 +173,7 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
         context['dra_id'] = self.dra_id
         # print(context['url_prefix'])
         context['documents']=DocumentsSmartField
-        print('ici 2')
+        print('ici 2 dra')
         if self.dra_id is not None:  # FORMULAIRE DEJA RENSEIGNE : Modifification ou demande en cours pré enregistrée
             print('ici 3')
             context['title'] = "DRA N° " + str(self.dra_id)
@@ -202,15 +202,31 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
     def post(self, request, *args, **kwargs):
         context = self.get_context_data()
         submit = request.POST.get("submit")
+        print("dra post")
         print("submit" + str(submit))
         if submit == "AJOUTER_UNE_LIGNE":
-            #TODO : à mon sens, enregistrer les modif + Get vers la class Ligne
-            self.form_dra = self.formulaire_dra(request.POST or None)
-            if self.form_dra.is_valid():
-                self.save(request)
+            print("Ajouter une ligne dra")
+            self.dra_id = request.POST.get("dra_id")
+            if self.dra_id:
+                print("modifier")
+                print(self.dra_id)
+                item = Dra.objects.get(pk=self.dra_id)
+                self.instance_dra = self.formulaire_dra(request.POST or None, instance=item)
+                if self.instance_dra.is_valid():
+                    self.save(request)
+                else:
+                    print(self.instance_dra.errors)
+                context['form_dra'] = self.instance_dra
             else:
-                print(self.form_dra.errors)
-            context['form_dra'] = self.form_dra
+                print("new dra puis ligne")
+                self.form_dra = self.formulaire_dra(request.POST or None)
+                if self.form_dra.is_valid():
+                    self.save(request)
+                else:
+                    print(self.form_dra.errors)
+                context['form_dra'] = self.form_dra
+            kwargs['dra_id'] = self.dra_id
+            context['dra_id'] = self.dra_id
             return redirect("../nouvelleligne/%s" % self.dra_id, context=context)
         elif submit == "ENREGISTRER":
             self.form_dra = self.formulaire_dra(request.POST or None)
@@ -228,12 +244,11 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
             print("modifier")
             print(self.dra_id)
             item = Dra.objects.get(pk=self.dra_id)
-            # TODO : bug sur ligne ci-dessous :'Nouvelle_draView' object has no attribute 'form'.
             self.instance_dra = self.formulaire_dra(request.POST or None, instance=item)
             if self.instance_dra.is_valid():
                 self.save(request)
             else:
-                print(self.form_dra.errors)
+                print(self.instance_dra.errors)
             kwargs['dra_id'] = self.dra_id
             context['dra_id'] = self.dra_id
             context['form_dra'] = self.instance_dra
@@ -245,7 +260,7 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
 
     def save(self, request, *args, **kwargs):
         if not self.dra_id:
-            print("save new")
+            print("save new dra")
             print("valide")
             dra = self.form_dra.save(commit=False)
             # TODO : CREER UN CHAMPS dra.NUMDRABIS pour récupérer le numéro DRA-ANNEE-NUM
@@ -277,7 +292,7 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
             print('ici 0')
             self.dra_id = dra.num_dra
         else:
-            print("save modif")
+            print("save modif dra")
             print("valide")
             dra = self.instance_dra.save(commit=False)
             dra.intitule = self.instance_dra.cleaned_data["intitule"]
@@ -307,61 +322,204 @@ class Nouvelle_draView(DracharView, DraData): #TODO : passer cela en 2 SMART VIE
             dra.save()
             print('ici 0')
             self.dra_id = dra.num_dra
-            # code de modification
 
 
-class LigneClass(DracharView, DraData):
-    def get(self, request, *arg, **kwargs):
+class LigneData:
+    def get(self, request, *args, **kwargs):
         template_name = 'drachar/nouvelleligne.html'
         data = {
-            "num_previsionnel": Previsionnel.objects.filter(Q(solder_ligne=False)),
-            # "num_compte": Compte.objects.filter(Q())
+            # TODO : à compléter
+            #"num_previsionnel": Previsionnel.objects.filter(Q(solder_ligne=False)),
             # TODO : ligne a corriger à cause de ID dans le models : "num_previsionnel":
             #  Previsionnel.objects.filter(Q(solder_ligne=True,
             #                   expert=ExtensionUser.objects.get(user=self.request.user))),
             # TODO : faire le code pour l'importation depuis asset+ des comptes
+            #"four_list": Fournisseur.objects.filter(Q(cloture__isnull=True)),
+            #"contact_four_list": ContactFournisseur.objects.filter(Q(cloture__isnull=True)),
+            #"marche_list": Marche.objects.filter(Q(cloture__isnull=True)),
+            #"dossier_list": Dossier.objects.filter(Q(cloture__isnull=True)),
+            #"contact_liv_list": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
+            #"expert_metier_list": User.objects.filter(Q(userufrole__role_code='EXP')).exclude(username='arbitre_biomed')
         }
-        form = self.form_ligne(request.user, request.GET, **data)
-        self.message = _("""ajout d'une ligne""")
-        self.template_name = template_name
-        return form
+        print('HELLOligne')
+        print(self.ligne_id)
+        self.lignes_dra=LigneCommande.objects.filter(num_dra=self.dra_id)
+        # Chargement formulaire avec l'instance de la ligne selectionnée
+        if self.ligne_id:
+            print("la")
+            item=LigneCommande.objects.get(pk=self.ligne_id)
+            instance_ligne = self.formulaire_ligne(request.POST, **data, instance=item)
+            return instance_ligne
+        # Chargement d'un formulaire vierge car pas de ligne ou nouvelle ligne
+        else:
+            print("ici")
+            form_ligne = self.formulaire_ligne(request.GET) # TODO : technique **data trop longue à executer autre méthode à trouver
+            print("ici2")
+            self.message = _("""ajout d'une LIGNE""")
+            self.template_name = template_name
+            return form_ligne
 
 
 class NouvelleLigneView(DracharView):
-
-    form_ligne = LigneForm
+    name = 'new-line'
     template_name = 'drachar/nouvelleligne.html'
-    initial = {}
-    ligneclass = LigneClass
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.message = ""
+    title = _("Nouvelle LIGNE")
+    formulaire_ligne = NouvelleLigneForm # chargement formulaire ligne #TODO : Compléter le forms.py
+    ligne = LigneData   # chargement données des lignes
+    ligne_id = None     # initialisation ligne_id
+    #TODO : appeller l'ID de la DRA dans les KWARGS ou Context pour l'instance + l'affichage.
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = "Ajout d'une ligne de commande"
-        context['message'] = self.message
-        context['dra_id'] = self.dra_id
         return context
 
-    def get(self, request, dra_id, *args, **kwargs):
-        # Instance_dra = Dra.objects.get(pk=kwargs.dra_id)
-        form = self.ligneclass.get(self, request)
-        dra_id = dra_id  # TODO : renvoyer également le num de la DRA.
-        return render(request, self.template_name, {'form_ligne': form, 'dra_id': dra_id})
+    def get(self, request, dra_id, **kwargs):
+        # Appel du formulaire LIGNE
+        context = self.get_context_data()
+        self.dra_id = dra_id
+        print('HELLOdra')
+        print(self.dra_id)
+        self.ligne_id = kwargs.get('ligne_id')
+        context['ligne_id'] = self.ligne_id
+        context['dra_id'] = self.dra_id
+        context['documents'] = DocumentsSmartField
+        print('ici 2 ligne')
+        if self.ligne_id is not None:  # FORMULAIRE DEJA RENSEIGNE : Modifification ou demande en cours pré enregistrée
+            print('ici 3')
+            context['title'] = "DRA N° " + str(self.dra_id) + " Ligne N° " + str(self.ligne_id)
+            kwargs['dra_id'] = self.dra_id
+            kwargs['ligne_id'] = self.ligne_id
+            instance_dra = self.dra.get(self, request)
+            instance_ligne = self.ligne.get(self, request)
+            context['dra_id'] = self.dra_id
+            context['ligne_id'] = self.ligne_id
+            context['instance_dra'] = instance_dra
+            context['instance_ligne'] = instance_ligne
+            #TODO : Modifier pour DRA
+            if LigneCommande.objects.filter(num_dra=self.dra_id).exists():  # Affichage des lignes adossées à la DRA
+                print('ici 4')
+                self.instance_ligne = LigneCommande.objects.filter(num_dra=self.dra_id)
+                context['ligne_exist'] = '1'
+                context['instance_ligne'] = self.instance_ligne
+            else:  # Si pas de lignes adossées à la dra
+                print('ici 5')
+                context['form_ligne'] = None
+            return render(request, self.template_name, context=context)
+        # TODO : Instance à faire en fonction de l'endroit à partir duquel on genère la DRA
+        #  (depuis une ligne, depuis un dossier...) pour préremplir certains champs
+        else:  # NOUVEAU FORMULAIRE
+            context['title'] = "Ajout d'une ligne à la DRA N°" + str(self.dra_id)
+            print("why ?")
+            form = self.ligne.get(self, request)
+            print("Because ?")
+            context['form_ligne'] = form
+            return render(request, self.template_name, context=context)
 
     def post(self, request, *args, **kwargs):
-        form = self.form_ligne(request.POST)
-
-        if form.is_valid():
-            ligne = form.save(commit=False)
-            ligne.num_previsionnel = form.cleaned_data["num_previsionnel"]
-            return redirect('/drachar/nouvelle_dra/%s' % ligne.num_previsionnel)  # TODO: ajouter le numero de la dra concernée
+        context = self.get_context_data()
+        submit = request.POST.get("submit")
+        print("submit" + str(submit))
+        if submit == "AJOUTER_UNE_LIGNE":
+            self.form_ligne = self.formulaire_dra(request.POST or None)
+            if self.form_ligne.is_valid():
+                self.save(request)
+            else:
+                print(self.form_ligne.errors)
+            context['form_ligne'] = self.form_ligne
+            return redirect("../nouvelleligne/%s" % self.dra_id, context=context)
+        elif submit == "ENREGISTRER":
+            self.form_ligne = self.formulaire_dra(request.POST or None)
+            if self.form_ligne.is_valid():
+                self.save(request)
+            else:
+                print(self.form_ligne.errors)
+            kwargs['dra_id'] = self.dra_id
+            context['dra_id'] = self.dra_id
+            context['form_ligne'] = self.form_ligne
+            print('ici 1')
+            return self.get(request, **kwargs)
+        elif submit == "MODIFIER":
+            self.ligne_id = request.POST.get("ligne_id")
+            print("modifier")
+            print(self.ligne_id)
+            item = LigneCommande.objects.get(pk=self.ligne_id)
+            self.instance_ligne = self.formulaire_ligne(request.POST or None, instance=item)
+            if self.instance_ligne.is_valid():
+                self.save(request)
+            else:
+                print(self.form_ligne.errors)
+            kwargs['dra_id'] = self.dra_id
+            context['dra_id'] = self.dra_id
+            context['form_ligne'] = self.instance_ligne
+            print('ici 1bis')
+            return self.get(request, **kwargs)
         else:
-            self.message = _("Problème" + str(form.errors))
-            return super().post(request, *args, **kwargs)
+            self.message = _("Problème" + str(self.form_ligne.errors))
+            return render(request, self.template_name, context=context)
 
+    def save(self, request, *args, **kwargs):
+        if not self.dra_id:
+            print("save new ligne")
+            print("valide")
+            ligne = self.form_lignea.save(commit=False)
+            ligne.num_previsionnel = self.form_ligne.cleaned_data["num_previsionnel"]
+            ligne.num_dra = self.form_ligne.cleaned_data["num_dra"]
+            ligne.famille_achat = self.form_ligne.cleaned_data["famille_achat"]
+            ligne.num_compte = self.form_ligne.cleaned_data["num_compte"]
+            ligne.a_inventorier = self.form_ligne.cleaned_data["a_inventorier"]
+            ligne.classe = self.form_ligne.cleaned_data["classe"]
+            ligne.cneh = self.form_ligne.cleaned_data["cneh"]
+            ligne.modele = self.form_ligne.cleaned_data["modele"]
+            ligne.marque = self.form_ligne.cleaned_data["marque"]
+            ligne.reference = self.form_ligne.cleaned_data["reference"]
+            ligne.descriptif = self.form_ligne.cleaned_data["descriptif"]
+            ligne.prix_unitaire_ht = self.form_ligne.cleaned_data["prix_unitaire_ht"]
+            ligne.tva = self.form_ligne.cleaned_data["tva"]
+            ligne.ref_mut = self.form_ligne.cleaned_data["ref_mut"]
+            ligne.eqpt_recup = self.form_ligne.cleaned_data["eqpt_recup"]
+            ligne.pv_reforme = self.form_ligne.cleaned_data["pv_reforme"]
+            ligne.garantie = self.form_ligne.cleaned_data["garantie"]
+            ligne.date_reception = self.form_ligne.cleaned_data["date_reception"]
+            ligne.date_mes = self.form_ligne.cleaned_data["date_mes"]
+            ligne.date_commande = self.form_ligne.cleaned_data["date_commande"]
+            ligne.contact_livraison = self.form_ligne.cleaned_data["contact_livraison"]
+            ligne.save()
+            print('ici ligne0')
+            self.dra_id = dra.num_dra
+            self.ligne_id = ligne.id
+            # TODO : calcul des montants de commande par ligne prévisionnelles
+        else:
+            print("save modif ligne")
+            print("valide")
+            dra = self.instance_dra.save(commit=False)
+            dra.intitule = self.instance_dra.cleaned_data["intitule"]
+            dra.fournisseur = self.instance_dra.cleaned_data["fournisseur"]
+            dra.contact_fournisseur = self.instance_dra.cleaned_data["contact_fournisseur"]
+            dra.num_devis = self.instance_dra.cleaned_data["num_devis"]
+            dra.date_devis = self.instance_dra.cleaned_data["date_devis"]
+            dra.num_marche = self.instance_dra.cleaned_data["num_marche"]
+            dra.expert_metier = self.instance_dra.cleaned_data["expert_metier"]
+            dra.num_bon_commande = self.instance_dra.cleaned_data["num_bon_commande"]
+            dra.num_dossier = self.instance_dra.cleaned_data["num_dossier"]
+            # dra.documents = self.instance_dra.cleaned_data["documents"] # TODO : fonction ajout documents
+            dra.date_commande = self.instance_dra.cleaned_data["date_commande"]
+            dra.contact_livraison = self.instance_dra.cleaned_data["contact_livraison"]
+            print(dra.intitule)
+            print(dra.fournisseur)
+            print(dra.contact_fournisseur)
+            print(dra.num_devis)
+            print(dra.date_devis)
+            print(dra.num_marche)
+            print(dra.expert_metier)
+            print(dra.num_bon_commande)
+            print(dra.num_dossier)
+            # print(dra.documents)
+            print(dra.date_commande)
+            print(dra.contact_livraison)
+            dra.save()
+            print('ici 0')
+            self.dra_id = dra.num_dra
+            #TODO : Calcul des montants de commande par lignes prévisionnelles
 
 # TODO : envoie d'email exemple :
 '''

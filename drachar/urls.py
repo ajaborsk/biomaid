@@ -48,7 +48,7 @@ urlpatterns = [
     path(
         'nouvelleligne/<int:dra_id>/',
         views21.NouvelleLigneView.as_view(),
-        name='nouvelleligne',
+        name='nouvelleligne21',
     ),
     path('listedra/', views21.listedra.as_view(), name='listedra'),
     # path('nouvelledra/', views.NouvelleDra.as_view(), name='nouvelledra'),
@@ -58,6 +58,7 @@ urlpatterns = [
         views21.Nouvelle_draView.as_view(),
         name='nouvelledra21',
     ),
+    #path('nouvelleligne/', views21.NouvelleLigneView.as_view(), name='nouvelleligne21'),
     # path('cockpit/', views.cockpit, name='cockpit'),
     path('cockpit/', views21.CockpitView.as_view(), name='cockpit'),
     path('suiviplan/', views21.PrevisionnelView.as_view(), name='previsionnel'),

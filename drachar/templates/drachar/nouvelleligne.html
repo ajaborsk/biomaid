@@ -1,31 +1,252 @@
-{% extends "dem/base_avec_form.html" %}
-<link href="dem/select2-4.0.13/dist/css/select2.min.css" rel="stylesheet" />
-<script src="dem/select2-4.0.13/dist/js/select2.min.js"></script>
+{% extends "drachar/base_avec_form.html" %}
 {% load static %}
+{% load l10n %}
+{% load getattribute %}
 {% block more_header %}
+<!--<script src="{% static '/dem/jquery.flexdatalist.min.js' %}" xmlns="http://www.w3.org/1999/html"></script>
 <link rel="stylesheet" type="text/css" href="{% static '/drachar/formulaire.css' %}" />
-{% endblock more_header %}
+    <style>
+      .grid-container1 {
+        display:grid;
+        grid-template-columns: auto auto auto auto
+        grid-gap: 20px;
+        column-gap: 20px;
+        background-color: #999999;
+        padding: 10px;
+      }
+          .container1c1r1 {
+            grid-column: 1 / span 1;
+            text-align: right;
+          }
+          .container1c2r1 {
+            grid-column: 2 / span 1;
+            text-align: left;
+          }
+          .container1c3r1 {
+            grid-column: 3 / span 1;
+            text-align: right;
+          }
+          .container1c4r1 {
+            grid-column: 4 / span 1;
+            text-align: left;
+          }
+          .container1c1r2 {
+            grid-column: 1 / span 1;
+            grid-row: 2;
+            text-align: right;
+          }
+          .container1c2r2 {
+            grid-column: 2 / span 1;
+            grid-row: 2;
+            text-align: left;
+          }
+          .container1c3r2 {
+            grid-column: 3 / span 1;
+            grid-row: 2;
+            text-align: right;
+          }
+          .container1c4r2 {
+            grid-column: 4 / span 1;
+            grid-row: 2;
+            text-align: left;
+          }
+          .container1c1r3 {
+            grid-column: 1 / span 1;
+            grid-row: 3;
+            text-align: right;
+          }
+          .container1c2r3 {
+            grid-column: 2 / span 1;
+            grid-row: 3;
+            text-align: left;
+          }
+          .container1c3r3 {
+            grid-column: 3 / span 1;
+            grid-row: 3;
+            text-align: right;
+          }
+          .container1c4r3 {
+            grid-column: 4 / span 1;
+            grid-row: 3;
+            text-align: left;
+          }
+          .container1c1r4 {
+            grid-column: 1 / span 1;
+            grid-row: 4;
+            text-align: right;
+          }
+          .container1c2r4 {
+            grid-column: 2 / span 1;
+            grid-row: 4;
+            text-align: left;
+          }
+          .container1c3r4 {
+            grid-column: 3 / span 1;
+            grid-row: 4;
+            text-align: right;
+          }
+          .container1c4r4 {
+            grid-column: 4 / span 1;
+            grid-row: 4;
+            text-align: left;
+          }
+          .container1c1r5 {
+            grid-column: 1 / span 1;
+            grid-row: 5;
+            text-align: right;
+          }
+          .container1c2r5 {
+            grid-column: 2 / span 1;
+            grid-row: 5;
+            text-align: left;
+          }
+          .container1c3r5 {
+            grid-column: 3 / span 1;
+            grid-row: 5;
+            text-align: right;
+          }
+          .container1c4r5 {
+            grid-column: 4 / span 1;
+            grid-row: 5;
+            text-align: left;
+          }
+          .container1c1r6 {
+            grid-column: 1 / span 1;
+            grid-row: 6;
+            text-align: right;
+          }
+          .container1c2r6 {
+            grid-column: 2 / span 1;
+            grid-row: 6;
+            text-align: left;
+          }
+          .container1c3r6 {
+            grid-column: 3 / span 1;
+            grid-row: 6;
+            text-align: right;
+          }
+          .container1c4r6 {
+            grid-column: 4 / span 1;
+            grid-row: 6;
+            text-align: left;
+          }
 
-{% comment "docstring" %}
-<!--
-Template utilisé (uniquement) pour la saisie d'une nouvelle demande
-
-Variables python utilisées :
-
-- message : Message à diffuser à l'utilisateur, qui sera affiché
-            dans une boite de dialogue à l'ouverture de la page
-            et dans un bandeau en haut du formulaire
-- form_dmd : Formulaire de type NouvelleDemandeForm
-- ...
--->
-{% endcomment %}
+      .grid-container2 {
+        display:grid;
+        grid-template-columns: auto auto auto auto auto auto auto auto
+        grid-gap: 20px;
+        column-gap: 5px;
+        background-color: #00FF99;
+        padding: 10px;
+        justify-content: start;
+      }
+          .container2c1r1 {
+            grid-column: 1 / span 1;
+            text-align: center;
+          }
+          .container2c2r1 {
+            grid-column: 2 / span 1;
+            text-align: center;
+          }
+          .container2c3r1 {
+            grid-column: 3 / span 1;
+            text-align: center;
+          }
+          .container2c1r2 {
+            grid-column: 1 / span 1;
+            grid-row: 2;
+            text-align: center;
+          }
+          .container2c2r2 {
+            grid-column: 2 / span 1;
+            grid-row: 2;
+            text-align: center;
+          }
+          .container2c3r2 {
+            grid-column: 3 / span 1;
+            grid-row: 2;
+            text-align: center;
+          }
+    </style>
+{% endblock more_header %}-->
 
 {% block tab_contents %}
 
 <h1>{{ title }}</h1>
 
-
-<form id="form" enctype="multipart/form-data" action="/drachar/nouvelleligne/" method="POST">
+<!--
+<div>
+    <div class="form-dra-section">
+        <div class=".form-dra-section-c1-r1">
+            <label>numéro prévisionnel :</label>
+        </div>
+        <div class=".form-dra-section-c2-r1">
+            instance_dra.intitule
+        </div>
+        <div class=".form-dra-section-c1-r2">
+            <label>Fournisseur :</label>
+        </div>
+        <div class=".form-dra-section-c2-r2">
+            instance_dra.fournisseur
+        </div>
+        <div class=".form-dra-section-c3-r2">
+            <label>Contact fournisseur :</label>
+        </div>
+        <div class=".form-dra-section-c4-r2">
+            instance_dra.contact_fournisseur
+        </div>
+        <div class=".form-dra-section-c1-r3">
+            <label>Devis :</label>
+        </div>
+        <div class=".form-dra-section-c2-r3">
+            instance_dra.num_devis
+        </div>
+        <div class=".form-dra-section-c3-r3">
+            <label>Date Devis :</label>
+        </div>
+        <div class=".form-dra-section-c4-r3">
+            instance_dra.date_devis
+        </div>
+        <div class=".form-dra-section-c1-r4">
+            <label>Marché :</label>
+        </div>
+        <div class=".form-dra-section-c2-r4">
+            instance_dra.expert_metier
+        </div>
+        <div class=".form-dra-section-c1-r5">
+            <label>Marché :</label>
+        </div>
+        <div class=".form-dra-section-c2-r5">
+            instance_dra.expert_metier
+        </div>
+        <div class=".form-dra-section-c1-r6">
+            <label>Bon de commande :</label>
+        </div>
+        <div class=".form-dra-section-c2-r6">
+            instance_dra.num_bon_commande
+        </div>
+        <div class=".form-dra-section-c3-r6">
+            <label>Date Commande :</label>
+        </div>
+        <div class=".form-dra-section-c4-r6">
+            instance_dra.date_commande
+        </div>
+        <div class=".form-dra-section-c1-r7">
+            <label>Dossier :</label>
+        </div>
+        <div class=".form-dra-section-c2-r7">
+            instance_dra.num_dossier
+        </div>
+        <div class=".form-dra-section-c3-r7">
+            <label>Contact livraison :</label>
+        </div>
+        <div class=".form-dra-section-c4-r7">
+            instance_dra.contact_livraison
+        </div>
+    </div>
+</div>
+-->
+<!--<form id="form" enctype="multipart/form-data" action="/drachar/nouvelleligne/" method="POST">
     {% csrf_token %}
     <div>
     <div class="form-dra-section">
@@ -55,9 +276,9 @@ Variables python utilisées :
         <div class=".form-dra-section-c4-r2">
             {{ form_ligne.num_compte }}
         </div>
-    </div>
+    </div>-->
      <!--Produit-->
-    <br>
+    <!--<br>
     <div class="form-dra-section">
         <div class=".form-dra-section-c1-r1">
             <label>Marque :</label>
@@ -75,9 +296,9 @@ Variables python utilisées :
 
 
     </div>
-        <br>
+        <br>-->
         <!--Informations Commande-->
-    <div class="form-dra-section">
+    <!--<div class="form-dra-section">
         <div class=".form-dra-section-c1-r1">
             <label>A inventorier :</label>
         </div>
@@ -86,53 +307,15 @@ Variables python utilisées :
         </div>
     </p>
     </div>
-        <br>
-    <div class="form-dra-section">
-        <div class=".form-dra-section-c1-r1">
-            <label>Numéro Bon de Commande :</label>
-        </div>
-        <div class=".form-dra-section-c2-r1">
-           {{ form_dra.num_bon_commande }}
-        </div>
-        <div class="form-dra-section-c3-r1">
-            <label>Date de la commande : </label>
-        </div>
-        <div class=".form-dra-section-c4-r1">
-            {{ form_dra.date_commande }}
-        </div>
-    </div>
-        <br>
-     <!--Document lié à DRA-->
-        <!--<div>
-            <h3 class="ie-row-1 form-subsection-title">Documents :</h3>
-            {{ formsetDoc.management_form }}
-            {% for form in formsetDoc %}
-                {{ form.as_table }}
-            {{ form.id }}
-            {% endfor %}
-                <br>
-            Actions :
-                <input value="False" name="additemsdoc" id="additemsdoc">
-                <button class="btn btn-primary" name="additemsbuttondoc" id="additemsbuttondoc">(+) Coût supplémentaire </button>
-                <button class="btn btn-primary" name="delitemsbuttondoc" id="delitemsbuttondoc">(-) Supprimer les coûts sélectionnés </button>
-            <div class="ie-row-9 form-subsection-end"></div>
-        </div>-->
-     <!--Contact livraison-->
-    <br>
-    <label>Contact Livraison :</label>
-        {{ form_dra.contact_livraison }}
-    </p>
-        <button><a href="/drachar/gestion_contact_liv" onclick="window.open(this.href); return false;">Ajouter un contact</a> </button>
-    <br>
+        <br>-->
 
     <!--<div style="text-align:center;">-->
-        <input type="submit" name="submit" value="ENREGISTRER">
-        <input type="button" OnClick="window.location.href = '/drachar/nouvelledra/';" value="REINITIALISER le formulaire">
+       <!-- <input type="submit" name="submit" value="ENREGISTRER">
+        <input type="button" OnClick="window.location.href = '/drachar/nouvelleligne/';" value="REINITIALISER le formulaire">-->
     <!--</div>-->
     <!-- Champs cachés (à conserver)-->
-    {{ form_dra.documents }}
-</div>
-</form>
+<!--</div>
+</form>-->
 
 {% endblock tab_contents %}
 

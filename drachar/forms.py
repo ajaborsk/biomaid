@@ -183,7 +183,7 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
         pass
 
 
-class LigneForm(forms.ModelForm):
+class NouvelleLigneForm(forms.ModelForm):
     class Meta:
         model = LigneCommande
         # ici placer les champs du model à traiter dans le formulaire : les champs automatiques ne doivent pas être /
@@ -214,11 +214,11 @@ class LigneForm(forms.ModelForm):
             # 'num_dra': forms.HiddenInput(),
         }
 
-    def __init__(self, user, *args, **kwargs):
-        _numprevisionnel = kwargs.pop('num_previsionnel', None)
-        super(LigneForm, self).__init__(*args, user, **kwargs)
-        if _numprevisionnel is not None:
-            self.fields['num_previsionnel'].widget = ListTextWidget(data_list=_numprevisionnel, name='num_previsionnel')
+    #def __init__(self, user, *args, **kwargs):
+    #    _numprevisionnel = kwargs.pop('num_previsionnel', None)
+    #    super(NouvelleLigneForm, self).__init__(*args, user, **kwargs)
+        #if _numprevisionnel is not None:
+        #    self.fields['num_previsionnel'].widget = ListTextWidget(data_list=_numprevisionnel, name='num_previsionnel')
 
 
 class ContactLivForm(forms.ModelForm, LoginRequiredMixin):
