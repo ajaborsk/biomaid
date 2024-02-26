@@ -468,7 +468,10 @@ class LigneCommande(models.Model):
         ('2B', '2B'),
         ('3', '3'),
     )
-    TVA = (('20%', '0.2'),)
+    TVA = (
+        ('20%', '0.2'),
+        ('5,5%','0.055'),
+    )
     REFORME_MUTATION = (
         ('NON', 'NON'),
         ('REFORME', 'REFORME'),

@@ -1,0 +1,344 @@
+{% extends "drachar/base_avec_form.html" %}
+{% load static %}
+{% load l10n %}
+{% load getattribute %}
+{% block more_header %}
+<script src="{% static '/dem/jquery.flexdatalist.min.js' %}" xmlns="http://www.w3.org/1999/html"></script>
+<link rel="stylesheet" type="text/css" href="{% static '/drachar/formulaire.css' %}" />
+    <style>
+      .grid-container1 {
+        display:grid;
+        grid-template-columns: auto auto auto auto
+        grid-gap: 20px;
+        column-gap: 20px;
+        background-color: #999999;
+        padding: 10px;
+      }
+          .container1c1r1 {
+            grid-column: 1 / span 1;
+            text-align: right;
+          }
+          .container1c2r1 {
+            grid-column: 2 / span 1;
+            text-align: left;
+          }
+          .container1c3r1 {
+            grid-column: 3 / span 1;
+            text-align: right;
+          }
+          .container1c4r1 {
+            grid-column: 4 / span 1;
+            text-align: left;
+          }
+          .container1c1r2 {
+            grid-column: 1 / span 1;
+            grid-row: 2;
+            text-align: right;
+          }
+          .container1c2r2 {
+            grid-column: 2 / span 1;
+            grid-row: 2;
+            text-align: left;
+          }
+          .container1c3r2 {
+            grid-column: 3 / span 1;
+            grid-row: 2;
+            text-align: right;
+          }
+          .container1c4r2 {
+            grid-column: 4 / span 1;
+            grid-row: 2;
+            text-align: left;
+          }
+          .container1c1r3 {
+            grid-column: 1 / span 1;
+            grid-row: 3;
+            text-align: right;
+          }
+          .container1c2r3 {
+            grid-column: 2 / span 1;
+            grid-row: 3;
+            text-align: left;
+          }
+          .container1c3r3 {
+            grid-column: 3 / span 1;
+            grid-row: 3;
+            text-align: right;
+          }
+          .container1c4r3 {
+            grid-column: 4 / span 1;
+            grid-row: 3;
+            text-align: left;
+          }
+          .container1c1r4 {
+            grid-column: 1 / span 1;
+            grid-row: 4;
+            text-align: right;
+          }
+          .container1c2r4 {
+            grid-column: 2 / span 1;
+            grid-row: 4;
+            text-align: left;
+          }
+          .container1c3r4 {
+            grid-column: 3 / span 1;
+            grid-row: 4;
+            text-align: right;
+          }
+          .container1c4r4 {
+            grid-column: 4 / span 1;
+            grid-row: 4;
+            text-align: left;
+          }
+          .container1c1r5 {
+            grid-column: 1 / span 1;
+            grid-row: 5;
+            text-align: right;
+          }
+          .container1c2r5 {
+            grid-column: 2 / span 1;
+            grid-row: 5;
+            text-align: left;
+          }
+          .container1c3r5 {
+            grid-column: 3 / span 1;
+            grid-row: 5;
+            text-align: right;
+          }
+          .container1c4r5 {
+            grid-column: 4 / span 1;
+            grid-row: 5;
+            text-align: left;
+          }
+          .container1c1r6 {
+            grid-column: 1 / span 1;
+            grid-row: 6;
+            text-align: right;
+          }
+          .container1c2r6 {
+            grid-column: 2 / span 1;
+            grid-row: 6;
+            text-align: left;
+          }
+          .container1c3r6 {
+            grid-column: 3 / span 1;
+            grid-row: 6;
+            text-align: right;
+          }
+          .container1c4r6 {
+            grid-column: 4 / span 1;
+            grid-row: 6;
+            text-align: left;
+          }
+
+      .grid-container2 {
+        display:grid;
+        grid-template-columns: auto auto auto auto auto auto auto auto
+        grid-gap: 20px;
+        column-gap: 5px;
+        background-color: #00FF99;
+        padding: 10px;
+        justify-content: start;
+      }
+          .container2c1r1 {
+            grid-column: 1 / span 1;
+            text-align: center;
+          }
+          .container2c2r1 {
+            grid-column: 2 / span 1;
+            text-align: center;
+          }
+          .container2c3r1 {
+            grid-column: 3 / span 1;
+            text-align: center;
+          }
+          .container2c1r2 {
+            grid-column: 1 / span 1;
+            grid-row: 2;
+            text-align: center;
+          }
+          .container2c2r2 {
+            grid-column: 2 / span 1;
+            grid-row: 2;
+            text-align: center;
+          }
+          .container2c3r2 {
+            grid-column: 3 / span 1;
+            grid-row: 2;
+            text-align: center;
+          }
+    </style>
+{% endblock more_header %}
+
+{% block tab_contents %}
+
+<h1>{{ title }}</h1>
+
+<!--
+<div>
+    <div class="form-dra-section">
+        <div class=".form-dra-section-c1-r1">
+            <label>numéro prévisionnel :</label>
+        </div>
+        <div class=".form-dra-section-c2-r1">
+            instance_dra.intitule
+        </div>
+        <div class=".form-dra-section-c1-r2">
+            <label>Fournisseur :</label>
+        </div>
+        <div class=".form-dra-section-c2-r2">
+            instance_dra.fournisseur
+        </div>
+        <div class=".form-dra-section-c3-r2">
+            <label>Contact fournisseur :</label>
+        </div>
+        <div class=".form-dra-section-c4-r2">
+            instance_dra.contact_fournisseur
+        </div>
+        <div class=".form-dra-section-c1-r3">
+            <label>Devis :</label>
+        </div>
+        <div class=".form-dra-section-c2-r3">
+            instance_dra.num_devis
+        </div>
+        <div class=".form-dra-section-c3-r3">
+            <label>Date Devis :</label>
+        </div>
+        <div class=".form-dra-section-c4-r3">
+            instance_dra.date_devis
+        </div>
+        <div class=".form-dra-section-c1-r4">
+            <label>Marché :</label>
+        </div>
+        <div class=".form-dra-section-c2-r4">
+            instance_dra.expert_metier
+        </div>
+        <div class=".form-dra-section-c1-r5">
+            <label>Marché :</label>
+        </div>
+        <div class=".form-dra-section-c2-r5">
+            instance_dra.expert_metier
+        </div>
+        <div class=".form-dra-section-c1-r6">
+            <label>Bon de commande :</label>
+        </div>
+        <div class=".form-dra-section-c2-r6">
+            instance_dra.num_bon_commande
+        </div>
+        <div class=".form-dra-section-c3-r6">
+            <label>Date Commande :</label>
+        </div>
+        <div class=".form-dra-section-c4-r6">
+            instance_dra.date_commande
+        </div>
+        <div class=".form-dra-section-c1-r7">
+            <label>Dossier :</label>
+        </div>
+        <div class=".form-dra-section-c2-r7">
+            instance_dra.num_dossier
+        </div>
+        <div class=".form-dra-section-c3-r7">
+            <label>Contact livraison :</label>
+        </div>
+        <div class=".form-dra-section-c4-r7">
+            instance_dra.contact_livraison
+        </div>
+    </div>
+</div>
+-->
+<!--<form id="form" enctype="multipart/form-data" action="/drachar/nouvelleligne/" method="POST">
+    {% csrf_token %}
+    <div>
+    <div class="form-dra-section">
+        <div class=".form-dra-section-c1-r1">
+            <label>numéro prévisionnel :</label>
+        </div>
+        <div class=".form-dra-section-c2-r1">
+           {{form_ligne.num_previsionnel}}
+        </div>
+        <div class="form-dra-section-c3-r1">
+            <label>Numéro de DRA :</label>
+        </div>
+        <div class=".form-dra-section-c4-r1">
+            {{ dra_id }}
+        </div>
+        <br>
+        <div class=".form-dra-section-c1-r2">
+            <label>Fammile d'achat : </label>
+        </div>
+        <div class=".form-dra-section-c2-r2">
+            {{ form_ligne.famille_achat }}
+        </div>
+        <div class="form-dra-section-c3-r2">
+            <label>Numéro de compte : </label>
+            <button><a href="/drachar-chuap/common/gestion_comptes/" onclick="window.open(this.href); return false;">Add</a> </button>
+        </div>
+        <div class=".form-dra-section-c4-r2">
+            {{ form_ligne.num_compte }}
+        </div>
+    </div>-->
+     <!--Produit-->
+    <!--<br>
+    <div class="form-dra-section">
+        <div class=".form-dra-section-c1-r1">
+            <label>Marque :</label>
+        </div>
+        <div class=".form-dra-section-c2-r1">
+           {{ form.marque }}
+            <button><a href="/common/gestion_marques" onclick="window.open(this.href); return false;">Add</a> </button>
+        </div>
+        <div class="form-dra-section-c3-r1">
+            <label>Type/modèle : </label>
+        </div>
+        <div class=".form-dra-section-c4-r1">
+            {{ form.type }}
+        </div>
+
+
+    </div>
+        <br>-->
+        <!--Informations Commande-->
+    <!--<div class="form-dra-section">
+        <div class=".form-dra-section-c1-r1">
+            <label>A inventorier :</label>
+        </div>
+        <div class=".form-dra-section-c2-r1">
+            {{ form.a_inventorier }}
+        </div>
+    </p>
+    </div>
+        <br>-->
+
+    <!--<div style="text-align:center;">-->
+       <!-- <input type="submit" name="submit" value="ENREGISTRER">
+        <input type="button" OnClick="window.location.href = '/drachar/nouvelleligne/';" value="REINITIALISER le formulaire">-->
+    <!--</div>-->
+    <!-- Champs cachés (à conserver)-->
+<!--</div>
+</form>-->
+
+{% endblock tab_contents %}
+
+{% block javascript %}
+<script>
+$(document).ready(function() {
+        $('#additemsbuttondoc').on('click', function(event) {
+         $('#additemsdoc').val("True");
+       });
+});
+</script>
+{{ block.super }}
+<script>
+  $('.flexdatalist').flexdatalist({
+      minLength: 0,
+      searchContain:true,
+      valueProperty:'value',
+      noResultsText:"Pas de résultat trouvé pour '{keyword}'"
+    }).on('change:flexdatalist', function(event, set, options) {
+      // Simule le "onChange" sur le champ original
+      var event = new CustomEvent('change');
+      this.dispatchEvent(event);
+    });
+
+</script>
+{% endblock javascript %}

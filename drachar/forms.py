@@ -149,14 +149,15 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
             )
         }
 
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         _fournisseurs_list = kwargs.pop('four_list', None)
         _contact_fournisseur_list = kwargs.pop('contact_four_list', None)
         _marche_list = kwargs.pop('marche_list', None)
         _contact_liv_list = kwargs.pop('contact_liv_list', None)
         _expert_metier_list = kwargs.pop('expert_metier_list', None)
         _dossier_list = kwargs.pop('dossier_list', None)
-        super(NouvelleDraForm, self).__init__(*args, user, **kwargs)
+        _user = kwargs.pop('user', None)
+        super(NouvelleDraForm, self).__init__(*args, **kwargs)
         self.initial['num_devis'] = "num_devis"
         if _fournisseurs_list is not None:
             self.fields['fournisseur'].widget = ListTextWidget(data_list=_fournisseurs_list, name='fournisseurs-list')
@@ -172,7 +173,7 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
             self.fields['expert_metier'].widget = ListTextWidget(
                 data_list=_expert_metier_list,
                 name='expert_metier-list',
-                attrs={'value': user.id},
+                attrs={'value': _user.id},
             )
             # self.initial['expert_metier'] = user
         if _dossier_list is not None:
@@ -214,11 +215,14 @@ class NouvelleLigneForm(forms.ModelForm):
             # 'num_dra': forms.HiddenInput(),
         }
 
-    #def __init__(self, user, *args, **kwargs):
-    #    _numprevisionnel = kwargs.pop('num_previsionnel', None)
-    #    super(NouvelleLigneForm, self).__init__(*args, user, **kwargs)
+        #    def __init__(self, user, *args, **kwargs):
+        #_numdra = kwargs.pop('numdra', None)
+        #_numprevisionnel = kwargs.pop('num_previsionnel', None)
+        #super(NouvelleLigneForm, self).__init__(*args, user, **kwargs)
         #if _numprevisionnel is not None:
         #    self.fields['num_previsionnel'].widget = ListTextWidget(data_list=_numprevisionnel, name='num_previsionnel')
+        #if _numdra is not None:
+        #    self.fields['num_dra'] = _numdra
 
 
 class ContactLivForm(forms.ModelForm, LoginRequiredMixin):

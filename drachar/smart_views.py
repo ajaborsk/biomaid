@@ -41,84 +41,6 @@ class DossierSmartView(SmartView):
         )
 
 
-class NouvelleDraSmartView(SmartView):
-    class Meta:
-        model = LigneCommande
-        permissions = {}
-        columns = (
-            'num_ligne',
-            'num_previsionnel',
-            'famille_achat',
-            'num_compte',
-            'a_inventorier',
-            'num_dra',
-            'classe',
-            'cneh',
-            'modele',
-            'marque',
-            'reference',
-            'descriptif',
-            'prix_unitaire_ht',
-            'tva',
-            'ref_mut',
-            'eqpt_recup',
-            'pv_reforme',
-            'garantie',
-            'date_reception',
-            'date_mes',
-        )
-        selectable_columns = (
-            'num_ligne',
-            'num_previsionnel',
-            'famille_achat',
-            'num_compte',
-            'a_inventorier',
-            'num_ligne',
-            'classe',
-            'cneh',
-            'modele',
-            'marque',
-            'reference',
-            'descriptif',
-            'prix_unitaire_ht',
-            'tva',
-            'ref_mut',
-            'eqpt_recup',
-            'pv_reforme',
-            'garantie',
-            'date_reception',
-            'date_mes',
-        )
-        settings = {
-            'num_dra': {
-                'hidden': True,
-            },
-            'date_reception': {
-                'editor': 'dateEditor',
-                'datetime_format': '%d%m/%Y',
-            },
-            'date_mes': {
-                'editor': 'dateEditor',
-                'datetime_format': '%d%m/%Y',
-            },
-        }
-        '''a faire filtre sur num de la DRA'''
-        # user_filters = (
-        #     {
-        #         'name': 'num_dra',
-        #         'type': 'select',
-        #         'choices': filter_choices_from_column_values(Previsionnel, 'num_dmd__uf__code'),
-        #     },
-        # )
-        exports = {
-            'xlsx': {
-                'engine': 'xlsx',
-                'label': 'Microsoft Excel 2003+',
-                'filename': "Demandes en cours.xlsx",
-            }
-        }
-
-
 class PrevisionnelSmartView(SmartView):
     class Media(SmartView.Media):
         js = SmartView.Media.js + ('drachar/js/suivi-format.js',)
@@ -1621,3 +1543,143 @@ class ContactLivraisonSmartView(SmartView):
             ],
         },
     )
+
+
+class LigneSmartView(SmartView):
+    class Meta:
+        model = LigneCommande
+        permissions = {
+            'create': ('ADM', 'MAN', 'EXP'),
+            'delete': ('ADM', 'MAN', 'EXP'),
+            'write': {
+                None: {
+                    'ADM': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                    'MAN': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                    'EXP': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                },
+                'EDITABLE': {
+                    'ADM': {
+                        'code': True,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                    'MAN': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                    'EXP': {
+                        'code': False,
+                        'nom': True,
+                        'prenom': True,
+                        'coordonnees': True,
+                        'etablissement': True,
+                    },
+                },
+            },
+        }
+        columns = (
+            'num_ligne',
+            'num_previsionnel',
+            'famille_achat',
+            'num_compte',
+            'a_inventorier',
+            'num_dra',
+            'classe',
+            'cneh',
+            'modele',
+            'marque',
+            'reference',
+            'descriptif',
+            'prix_unitaire_ht',
+            'tva',
+            'ref_mut',
+            'eqpt_recup',
+            'pv_reforme',
+            'garantie',
+            'date_reception',
+            'date_mes',
+        )
+        selectable_columns = (
+            'num_ligne',
+            'num_previsionnel',
+            'famille_achat',
+            'num_compte',
+            'a_inventorier',
+            'num_ligne',
+            'classe',
+            'cneh',
+            'modele',
+            'marque',
+            'reference',
+            'descriptif',
+            'prix_unitaire_ht',
+            'tva',
+            'ref_mut',
+            'eqpt_recup',
+            'pv_reforme',
+            'garantie',
+            'date_reception',
+            'date_mes',
+        )
+        settings = {
+            'num_dra': {
+                'hidden': False, # TODO : a mettre en True quand code peaufiné
+            },
+            'date_reception': {
+                'editor': 'dateEditor',
+                'datetime_format': '%d%m/%Y',
+            },
+            'date_mes': {
+                'editor': 'dateEditor',
+                'datetime_format': '%d%m/%Y',
+            },
+            'prix_unitaire_ht': {
+                'title': _("PUHT"),
+                'format': 'money',
+                'decimal_symbol': ",",
+                'thousands_separator': " ",
+                'currency_symbol': " €",
+                'symbol_is_after': True,
+                'precision': 0,
+                'max_width': 95,
+                'footer_data': "sum",
+            },
+        }
+        '''a faire filtre sur num de la DRA'''
+        #user_filters = (
+        #     {
+        #         'name': 'num_dra',
+        #         'type': 'select',
+        #         'choices': filter_choices_from_column_values(Previsionnel, 'num_dmd__uf__code'),
+        #     },
+        #)
+        exports = {
+            'xlsx': {
+                'engine': 'xlsx',
+                'label': 'Microsoft Excel 2003+',
+                'filename': "Demandes en cours.xlsx",
+            }
+        }

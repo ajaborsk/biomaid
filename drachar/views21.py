@@ -26,7 +26,7 @@ from common.base_views import BiomAidViewMixin
 
 from common.models import Fournisseur, ContactFournisseur, UserUfRole, User
 from dem.smart_views import DemandeSmartView
-from drachar.smart_views import PrevisionnelSmartView, DraSmartView, PrevisionnelSmartView21, PrevisionnelUtilisateursSmartView
+from drachar.smart_views import PrevisionnelSmartView, DraSmartView, PrevisionnelSmartView21, PrevisionnelUtilisateursSmartView,LigneSmartView
 
 from drachar.models import Previsionnel, ContactLivraison, Dra, Dossier, LigneCommande
 from drachar.forms import NouvelleDraForm, NouvelleLigneForm
@@ -133,13 +133,14 @@ class DraData:
             "marche_list": Marche.objects.filter(Q(cloture__isnull=True)),
             "dossier_list": Dossier.objects.filter(Q(cloture__isnull=True)),
             "contact_liv_list": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
-            "expert_metier_list": User.objects.filter(Q(userufrole__role_code='EXP')).exclude(username='arbitre_biomed')
+            "expert_metier_list": User.objects.filter(Q(userufrole__role_code='EXP')).exclude(username='arbitre_biomed'),
+            "user":request.user,
         }
         print('HELLO')
         print(self.dra_id)
         if self.dra_id:
             item=Dra.objects.get(pk=self.dra_id)
-            instance_dra = self.formulaire_dra(request.user, request.POST, **data, instance=item)
+            instance_dra = self.formulaire_dra(request.POST or None, **data, instance=item)
             return instance_dra
         else:
             form_dra = self.formulaire_dra(request.user, request.GET, **data)
@@ -171,16 +172,15 @@ class Nouvelle_draView(DracharView, DraData):
         context = self.get_context_data()
         self.dra_id = kwargs.get('dra_id')
         context['dra_id'] = self.dra_id
-        # print(context['url_prefix'])
         context['documents']=DocumentsSmartField
         print('ici 2 dra')
         if self.dra_id is not None:  # FORMULAIRE DEJA RENSEIGNE : Modifification ou demande en cours pré enregistrée
             print('ici 3')
             context['title'] = "DRA N° " + str(self.dra_id)
             kwargs['dra_id'] = self.dra_id
-            instance_dra = self.dra.get(self, request)
+            self.instance_dra = self.dra.get(self, request)
             context['dra_id'] = self.dra_id
-            context['instance_dra'] = instance_dra
+            context['instance_dra'] = self.instance_dra
             if LigneCommande.objects.filter(num_dra=self.dra_id).exists(): # Affichage des lignes adossées à la DRA
                 print('ici 4')
                 self.instance_ligne = LigneCommande.objects.filter(num_dra=self.dra_id)
@@ -326,10 +326,10 @@ class Nouvelle_draView(DracharView, DraData):
 
 class LigneData:
     def get(self, request, *args, **kwargs):
-        template_name = 'drachar/nouvelleligne.html'
         data = {
             # TODO : à compléter
-            #"num_previsionnel": Previsionnel.objects.filter(Q(solder_ligne=False)),
+            "num_previsionnel": Previsionnel.objects.filter(Q(solder_ligne=False)),
+            "numdra":self.dra_id,
             # TODO : ligne a corriger à cause de ID dans le models : "num_previsionnel":
             #  Previsionnel.objects.filter(Q(solder_ligne=True,
             #                   expert=ExtensionUser.objects.get(user=self.request.user))),
@@ -352,11 +352,10 @@ class LigneData:
             return instance_ligne
         # Chargement d'un formulaire vierge car pas de ligne ou nouvelle ligne
         else:
-            print("ici")
+            print("ici ligne")
             form_ligne = self.formulaire_ligne(request.GET) # TODO : technique **data trop longue à executer autre méthode à trouver
-            print("ici2")
+            print("ici2 ligne")
             self.message = _("""ajout d'une LIGNE""")
-            self.template_name = template_name
             return form_ligne
 
 
@@ -365,9 +364,8 @@ class NouvelleLigneView(DracharView):
     template_name = 'drachar/nouvelleligne.html'
     title = _("Nouvelle LIGNE")
     formulaire_ligne = NouvelleLigneForm # chargement formulaire ligne #TODO : Compléter le forms.py
-    ligne = LigneData   # chargement données des lignes
+    #ligne = LigneData   # chargement données des lignes
     ligne_id = None     # initialisation ligne_id
-    #TODO : appeller l'ID de la DRA dans les KWARGS ou Context pour l'instance + l'affichage.
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -410,8 +408,9 @@ class NouvelleLigneView(DracharView):
         else:  # NOUVEAU FORMULAIRE
             context['title'] = "Ajout d'une ligne à la DRA N°" + str(self.dra_id)
             print("why ?")
-            form = self.ligne.get(self, request)
-            print("Because ?")
+            #form = self.ligne.get(self, request)
+            form = self.formulaire_ligne(request.GET)
+            print("Because ligne?")
             context['form_ligne'] = form
             return render(request, self.template_name, context=context)
 
@@ -861,3 +860,18 @@ class CockpitView(BiomAidViewMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['programme_tous'] = {'programme': 'Tous'}
         return context
+
+class ListeLigne(SmartPage):#, dra_id):
+    permissions = {
+        'EXP',
+        'ACH',
+        'DIS',
+        'ARB',
+        'ADM',
+    }
+    smart_view_class = LigneSmartView
+    name = 'liste-ligne'
+    title = _("Liste Ligne DRA")#+ str(dra_id))
+    smart_modes = {
+        None: {'view': 'list'},
+    }
