@@ -344,7 +344,7 @@ class Dra(models.Model):
     date_devis = models.DateField(blank=False, null=False, default=None, verbose_name='date du devis')
     num_marche = models.ForeignKey(
         'marche.Marche',
-        default=0,  # #0 qui sera le Hors marché
+        default=1,  # #1 qui sera le Hors marché
         blank=False,
         null=False,
         verbose_name='Marché utilisé',

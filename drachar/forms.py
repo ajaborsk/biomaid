@@ -35,6 +35,7 @@ from django.forms import ModelForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.translation import gettext as _
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib.admin.widgets import AdminDateWidget
 
 from drachar.fields import ListTextWidget
 
@@ -114,9 +115,16 @@ class NouveauDossierForm(ModelForm, LoginRequiredMixin):
     #    self.instance.filter_by = {key: list(val.values_list('id', flat=True).order_by('id'))
     #                               for key, val in filter_by_qsets.items()}
     #    return super(NouveauDossier, self).save(commit=commit)
-
+class XYZ_DateInput(forms.DateInput):
+    input_type = "date"
+    def __init__(self, **kwargs):
+        kwargs["format"] = "%d/%m/%Y"
+        super().__init__(**kwargs)
 
 class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
+
+    date_devis = forms.DateField(label='Date du devis', required=True, widget=AdminDateWidget)
+
     class Meta:
         model = Dra
         # ici placer les champs du model à traiter dans le formulaire : les champs automatiques ne doivent pas être /
@@ -141,9 +149,11 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
             #   'value':'test',
             # })
             # ici placer les surcharge des champs par défaut
-            'date_devis': forms.DateInput(
-                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)', 'class': 'form-control'}
-            ),
+            #'date_devis': forms.DateInput(
+            #    format=('%d/%m/%Y'),
+            #    attrs={'type': 'date', 'placeholder': 'Select Date', 'class': 'form-control'},
+            #),
+            #'date_devis': XYZ_DateInput(format=["%d/%m/%Y"],),
             'date_commande': forms.DateInput(
                 attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)', 'class': 'form-control'}
             )
@@ -158,7 +168,6 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
         _dossier_list = kwargs.pop('dossier_list', None)
         _user = kwargs.pop('user', None)
         super(NouvelleDraForm, self).__init__(*args, **kwargs)
-        self.initial['num_devis'] = "num_devis"
         if _fournisseurs_list is not None:
             self.fields['fournisseur'].widget = ListTextWidget(data_list=_fournisseurs_list, name='fournisseurs-list')
         if _contact_fournisseur_list is not None:

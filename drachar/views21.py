@@ -143,7 +143,7 @@ class DraData:
             instance_dra = self.formulaire_dra(request.POST or None, **data, instance=item)
             return instance_dra
         else:
-            form_dra = self.formulaire_dra(request.user, request.GET, **data)
+            form_dra = self.formulaire_dra(request.GET or None, **data)
             self.message = _("""ajout d'une DRA""")
             self.template_name = template_name
             return form_dra
