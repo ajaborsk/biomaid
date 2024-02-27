@@ -20,7 +20,10 @@ from collections.abc import Mapping
 from glob import glob
 from os.path import exists
 
+# from pprint import pprint
+
 from django.conf import settings
+from jsonschema import ValidationError, validate
 from tomlkit.exceptions import ParseError
 from tomlkit.toml_file import TOMLFile
 
@@ -39,15 +42,26 @@ class Configuration(dict):
     def __init__(self, **kwargs):
         super().__init__(self, **kwargs)
         self._initialized = False
+        self._schema = {
+            '$id': "http://www.biomaid.fr/",
+            'type': 'object',
+            'description': "A BiomAid Configuration",
+            'properties': {
+                'paths': {
+                    'type': 'object',
+                },
+            },
+            'required': [],
+        }
         self.settings = settings
-        self.pyproject = TOMLFile(os.path.join(settings.BASE_DIR, 'pyproject.toml')).read()
+        self.pyproject = TOMLFile(os.path.join(settings.BASE_DIR, 'pyproject.toml')).read().unwrap()
 
         self._config = {}
         # Get all configurations
         configs = []
         for fn in ['local/config.toml'] + glob('local/config.d/*.toml'):
             try:
-                configs.append(dict(TOMLFile(os.path.join(settings.BASE_DIR, fn)).read()))
+                configs.append(dict(TOMLFile(os.path.join(settings.BASE_DIR, fn)).read().unwrap()))
             except ParseError as exc:
                 logger.warning("Unable to parse TOML file '{}': {}".format(fn, exc))
 
@@ -59,11 +73,17 @@ class Configuration(dict):
         fn = os.path.join(settings.BASE_DIR, 'instance_config.toml')
         if exists(fn):
             try:
-                merge_dicts(self._config, dict(TOMLFile(fn).read()))
+                merge_dicts(self._config, dict(TOMLFile(fn).read().unwrap()))
             except ParseError as exc:
                 logger.warning("Unable to parse TOML file '{}': {}".format(fn, exc))
 
-    def _initialize(self):
+    def _initialize(self, **kwargs):
+        # Check configuration schema (WIP)
+        try:
+            # pprint(self._config)
+            validate(self._config, self._schema)
+        except ValidationError as exp:
+            logging.warning("Configuration is not valid !", exp)
         self.initialized = True
 
     def get(self, item, default=None):

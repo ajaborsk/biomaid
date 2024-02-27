@@ -493,6 +493,7 @@ class CommonConfig(AppConfig):
 
         # Build user settings forms from user settings registry
         self.user_settings = {}
+        config_schemas = {}
         for app in apps.get_app_configs():
             if hasattr(app, 'biom_aid'):
                 for key, setting in app.biom_aid.get('user-settings', {}).items():
@@ -505,6 +506,8 @@ class CommonConfig(AppConfig):
                         for s_key, setting in category['user_settings'].items():
                             key = 'notifications.' + app.name + '.' + key + '.' + s_key
                             self.user_settings[key] = deepcopy(setting)
+            if hasattr(app, 'biom_aid_config_schema'):
+                config_schemas[app.name] = app.biom_aid_config_schema
 
         self.user_settings_forms = {
             'main': user_settings_form_factory(
@@ -516,7 +519,7 @@ class CommonConfig(AppConfig):
         }
 
         # Initialize universal config object
-        config._initialize()
+        config._initialize(**config_schemas)
 
         # Register analytics processors
         def user_alerts(user):
