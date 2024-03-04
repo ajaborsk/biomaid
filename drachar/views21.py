@@ -862,16 +862,8 @@ class CockpitView(BiomAidViewMixin, TemplateView):
         return context
 
 class ListeLigne(SmartPage):#, dra_id):
-    permissions = {
-        'EXP',
-        'ACH',
-        'DIS',
-        'ARB',
-        'ADM',
-    }
+    application = 'drachar'
+    name = 'listeligne'
+    title = _("Liste Ligne DRA")  # + str(dra_id))
+    permissions = {'EXP', 'ACH', 'DIS', 'ARB', 'ADM'}
     smart_view_class = LigneSmartView
-    name = 'liste-ligne'
-    title = _("Liste Ligne DRA")#+ str(dra_id))
-    smart_modes = {
-        None: {'view': 'list'},
-    }

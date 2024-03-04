@@ -45,10 +45,15 @@ urlpatterns = [
     # path('nouveaudossier/', views.nouveau_dossier, name='nouveaudossier'),
     path('nouveaudossier/', views.NouveauDossier.as_view(), name='nouveaudossier'),
     # path('nouvelledra/', views.nouvelle_dra, name='nouvelledra'),
+    #path(
+    #    'ListeLigne/<int:dra_id>/',
+    #    views21.ListeLigne.as_view(),
+    #    name='ListeLigne',
+    #),
     path(
-        'nouvelleligne/',
+        'listeligne/',
         views21.ListeLigne.as_view(),
-        name='ListeLigne',
+        name='listeligne',
     ),
     #path(
     #    'nouvelleligne/<int:dra_id>/',
@@ -88,4 +93,5 @@ urlpatterns = [
     ),
 ]
 urlpatterns.extend(get_view_url_patterns(views.GestionContactLivraison22))
+urlpatterns.extend(get_view_url_patterns(views21.ListeLigne))
 

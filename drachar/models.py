@@ -552,6 +552,13 @@ class LigneCommande(models.Model):
         null=True,
         help_text="Descritif du produit",
     )
+    quantite = models.PositiveIntegerField(
+        verbose_name="Quantité",
+        help_text="Quantité de produit souhaité",
+        default=None,
+        blank=True,
+        null=True,
+    )
     prix_unitaire_ht = models.DecimalField(max_digits=15, decimal_places=2, default=None, blank=False, null=False)
     tva = models.CharField(
         choices=TVA,

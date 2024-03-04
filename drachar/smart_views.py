@@ -1554,55 +1554,66 @@ class LigneSmartView(SmartView):
             'write': {
                 None: {
                     'ADM': {
-                        'code': False,
-                        'nom': True,
-                        'prenom': True,
-                        'coordonnees': True,
-                        'etablissement': True,
+                        'num_ligne': False,
+                        'num_compte': True,
+                        'famille_achat': True,
+                        'num_previsionnel': True,
+                        'descriptif': True,
+                        'a_inventorier': True,
+                        'num_dra': False,
+                        'classe': True,
+                        'cneh': True,
+                        'modele': True,
+                        'marque': True,
+                        'reference': True,
+                        'descriptif': True,
+                        'prix_unitaire_ht': True,
+                        'tva': True,
+                        'ref_mut': True,
+                        'eqpt_recup': True,
+                        'pv_reforme': True,
+                        'garantie': True,
+                        'date_reception': True,
+                        'date_mes': True,
                     },
                     'MAN': {
-                        'code': False,
-                        'nom': True,
-                        'prenom': True,
-                        'coordonnees': True,
-                        'etablissement': True,
+                        'num_ligne': False,
+                        'num_compte': True,
+                        #'num_previsionnel': True,
+                        'descriptif': True,
                     },
                     'EXP': {
-                        'code': False,
-                        'nom': True,
-                        'prenom': True,
-                        'coordonnees': True,
-                        'etablissement': True,
+                        'num_ligne': False,
+                        'num_compte': True,
+                        #'num_previsionnel': True,
+                        'descriptif': True,
                     },
                 },
                 'EDITABLE': {
                     'ADM': {
-                        'code': True,
+                        'num_ligne': True,
                         'nom': True,
-                        'prenom': True,
-                        'coordonnees': True,
-                        'etablissement': True,
+                        #'num_previsionnel': True,
+                        'descriptif': True,
                     },
                     'MAN': {
-                        'code': False,
-                        'nom': True,
-                        'prenom': True,
-                        'coordonnees': True,
-                        'etablissement': True,
+                        'num_ligne': False,
+                        'num_compte': True,
+                        #'num_previsionnel': True,
+                        'descriptif': True,
                     },
                     'EXP': {
-                        'code': False,
-                        'nom': True,
-                        'prenom': True,
-                        'coordonnees': True,
-                        'etablissement': True,
+                        'num_ligne': False,
+                        'num_compte': True,
+                        #'num_previsionnel': True,
+                        'descriptif': True,
                     },
                 },
             },
         }
         columns = (
             'num_ligne',
-            'num_previsionnel',
+            #'num_previsionnel',
             'famille_achat',
             'num_compte',
             'a_inventorier',
@@ -1621,14 +1632,14 @@ class LigneSmartView(SmartView):
             'garantie',
             'date_reception',
             'date_mes',
+            #TODO : RAJOUTER LA QUANTITE
         )
         selectable_columns = (
             'num_ligne',
-            'num_previsionnel',
+            #'num_previsionnel',
             'famille_achat',
             'num_compte',
             'a_inventorier',
-            'num_ligne',
             'classe',
             'cneh',
             'modele',
@@ -1643,6 +1654,7 @@ class LigneSmartView(SmartView):
             'garantie',
             'date_reception',
             'date_mes',
+            # TODO : RAJOUTER LA QUANTITE
         )
         settings = {
             'num_dra': {
@@ -1676,6 +1688,9 @@ class LigneSmartView(SmartView):
         #         'choices': filter_choices_from_column_values(Previsionnel, 'num_dmd__uf__code'),
         #     },
         #)
+        menu_left = (
+            {'label': 'Ajouter une ligne', 'url_name': 'drachar:listeligne-create'},
+        )
         exports = {
             'xlsx': {
                 'engine': 'xlsx',
@@ -1683,3 +1698,52 @@ class LigneSmartView(SmartView):
                 'filename': "Demandes en cours.xlsx",
             }
         }
+        form_layout = """
+        #
+            # Produit
+                <num_previsionnel>
+                <famille_achat> <num_compte>
+                <a_inventorier> <classe>
+                <cneh>
+                <modele>
+                <marque>
+                <reference>
+                <descriptif>
+                <prix_unitaire_ht>
+                <tva>
+                <ref_mut>
+                <eqpt_recup>
+                <pv_reforme>
+                <garantie>
+            # Réception
+                <date_reception> <date_mes>
+        """
+    roles = (
+        ComputedSmartField,
+        {
+            'hidden': True,
+            'special': 'roles',
+            'data': class_roles_expression(LigneCommande),
+        },
+    )
+    tools = (
+        ToolsSmartField,
+        {
+            'title': _("Actions"),
+            'tools': [
+                {
+                    'tool': 'open',
+                    'url_name': 'drachar:listeligne-update',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Ouvrir la fiche de contact livraison"),
+                },
+                {
+                    'tool': 'delete',
+                    'url_name': 'drachar:listeligne-ask-delete',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Supprimer la fiche de contact livraison"),
+                },
+            ],
+        },
+    )
+
