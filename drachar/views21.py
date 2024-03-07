@@ -182,6 +182,8 @@ class Nouvelle_draView(DracharView, DraData):
             self.instance_dra = self.dra.get(self, request)
             context['dra_id'] = self.dra_id
             context['instance_dra'] = self.instance_dra
+            context['progid'] = Dra.objects.get(num_dra=self.dra_id).programme
+            kwargs['progid'] = Dra.objects.get(num_dra=self.dra_id).programme
             if LigneCommande.objects.filter(num_dra=self.dra_id).exists(): # Affichage des lignes adossées à la DRA
                 print('ici 4')
                 self.instance_ligne = LigneCommande.objects.filter(num_dra=self.dra_id)

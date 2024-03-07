@@ -1400,7 +1400,6 @@ class DraSmartView(SmartView):
             'intitule': {
                 'type': 'contains',
             },
-
         }
         exports = {
             'xlsx': {
@@ -1560,7 +1559,7 @@ class LigneSmartView(SmartView):
                         'num_ligne': False,
                         'num_compte': True,
                         'famille_achat': True,
-                        'num_previsionnel': True,
+                        #'num_previsionnel': True,
                         'descriptif': True,
                         'a_inventorier': True,
                         'num_dra': False,
@@ -1704,7 +1703,6 @@ class LigneSmartView(SmartView):
         form_layout = """
         #
             # Produit
-                <num_previsionnel>
                 <famille_achat> <num_compte>
                 <a_inventorier> <classe>
                 <cneh>

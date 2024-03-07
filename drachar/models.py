@@ -344,7 +344,7 @@ class Dra(models.Model):
     date_devis = models.DateField(blank=False, null=False, default=None, verbose_name='date du devis')
     num_marche = models.ForeignKey(
         'marche.Marche',
-        default=1,  # #1 qui sera le Hors marché
+        default=None,  # #1 qui sera le Hors marché
         blank=False,
         null=False,
         verbose_name='Marché utilisé',
@@ -581,6 +581,7 @@ class LigneCommande(models.Model):
         max_length=15,
         blank=False,
         null=False,
+        default='NON',
     )
     eqpt_recup = models.CharField(  # numéro de l'équipement récupéré
         verbose_name="N° inventaire",

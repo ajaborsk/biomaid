@@ -200,7 +200,7 @@ class NouvelleLigneForm(forms.ModelForm):
         # ici placer les champs du model à traiter dans le formulaire : les champs automatiques ne doivent pas être /
         # inscrits
         fields = [
-            'num_previsionnel',
+            #'num_previsionnel',
             'num_dra',
             'famille_achat',
             'num_compte',
@@ -229,7 +229,7 @@ class NouvelleLigneForm(forms.ModelForm):
             self.progid = kwargs.get('progid', None)
             self.numdra = kwargs.get('numdra', None)
             super(NouvelleLigneForm, self).__init__(kwargs)
-            self.fields['num_previsionnel'].queryset = Previsionnel.objects.filter(num=self.progid)
+            #self.fields['num_previsionnel'].queryset = Previsionnel.objects.filter(num=self.progid)
             self.fields['num_dra'] = self.numdra
 
         #    def __init__(self, user, *args, **kwargs):
