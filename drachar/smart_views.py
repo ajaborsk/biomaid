@@ -1362,6 +1362,7 @@ class DraSmartView(SmartView):
             'num_devis',
             'date_devis',
             'num_marche',
+            'programme',
             'expert_metier',
             'num_bon_commande',
             'date_commande',
@@ -1378,6 +1379,7 @@ class DraSmartView(SmartView):
             'num_devis',
             'date_devis',
             'num_marche',
+            'programme',
             'expert_metier',
             'num_bon_commande',
             'date_commande',
@@ -1398,6 +1400,7 @@ class DraSmartView(SmartView):
             'intitule': {
                 'type': 'contains',
             },
+
         }
         exports = {
             'xlsx': {

@@ -57,8 +57,8 @@ class Previsionnel(models.Model):
         'common.Programme',
         verbose_name="Numéro de programme",
         default=None,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         on_delete=models.PROTECT,
     )
     num_dmd = models.ForeignKey(  # numéro de la demande correspondante
@@ -348,6 +348,14 @@ class Dra(models.Model):
         blank=False,
         null=False,
         verbose_name='Marché utilisé',
+        on_delete=models.PROTECT,
+    )
+    programme = models.ForeignKey(  # numéro du programme d'affectation
+        'common.Programme',
+        verbose_name="Numéro de programme",
+        default=None,
+        blank=False,
+        null=False,
         on_delete=models.PROTECT,
     )
     expert_metier = models.ForeignKey(  # acheteur ou expert métier en charge de la dra

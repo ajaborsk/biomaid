@@ -24,7 +24,7 @@ from django.views.generic import TemplateView
 
 from common.base_views import BiomAidViewMixin
 
-from common.models import Fournisseur, ContactFournisseur, UserUfRole, User
+from common.models import Fournisseur, ContactFournisseur, UserUfRole, User, Programme
 from dem.smart_views import DemandeSmartView
 from drachar.smart_views import PrevisionnelSmartView, DraSmartView, PrevisionnelSmartView21, PrevisionnelUtilisateursSmartView,LigneSmartView
 
@@ -135,6 +135,7 @@ class DraData:
             "contact_liv_list": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
             "expert_metier_list": User.objects.filter(Q(userufrole__role_code='EXP')).exclude(username='arbitre_biomed'),
             "user":request.user,
+            "programme_list": Programme.objects.filter(Q(cloture__isnull=True)),
         }
         print('HELLO')
         print(self.dra_id)

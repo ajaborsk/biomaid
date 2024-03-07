@@ -123,8 +123,6 @@ class XYZ_DateInput(forms.DateInput):
 
 class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
 
-    date_devis = forms.DateField(label='Date du devis', required=True, widget=AdminDateWidget)
-
     class Meta:
         model = Dra
         # ici placer les champs du model à traiter dans le formulaire : les champs automatiques ne doivent pas être /
@@ -137,6 +135,7 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
             'num_devis',
             'date_devis',
             'num_marche',
+            'programme',
             'expert_metier',
             'num_bon_commande',
             'date_commande',
@@ -149,10 +148,9 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
             #   'value':'test',
             # })
             # ici placer les surcharge des champs par défaut
-            #'date_devis': forms.DateInput(
-            #    format=('%d/%m/%Y'),
-            #    attrs={'type': 'date', 'placeholder': 'Select Date', 'class': 'form-control'},
-            #),
+            'date_devis': forms.DateInput(
+                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)', 'class': 'form-control'},
+            ),
             #'date_devis': XYZ_DateInput(format=["%d/%m/%Y"],),
             'date_commande': forms.DateInput(
                 attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)', 'class': 'form-control'}
@@ -167,6 +165,7 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
         _expert_metier_list = kwargs.pop('expert_metier_list', None)
         _dossier_list = kwargs.pop('dossier_list', None)
         _user = kwargs.pop('user', None)
+        _programme_list = kwargs.pop('programme_list', None)
         super(NouvelleDraForm, self).__init__(*args, **kwargs)
         if _fournisseurs_list is not None:
             self.fields['fournisseur'].widget = ListTextWidget(data_list=_fournisseurs_list, name='fournisseurs-list')
@@ -187,6 +186,8 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
             # self.initial['expert_metier'] = user
         if _dossier_list is not None:
             self.fields['num_dossier'].widget = ListTextWidget(data_list=_dossier_list, name='num_dossier-list')
+        if _programme_list is not None:
+            self.fields['programme'].widget = ListTextWidget(data_list=_programme_list, name='programme-list')
 
     def send_email(self):
         # send email using the self.cleaned_data dictionary
@@ -223,6 +224,13 @@ class NouvelleLigneForm(forms.ModelForm):
             # ici placer les surcharge des champs par défaut
             # 'num_dra': forms.HiddenInput(),
         }
+
+        def __init__(self, kwargs):
+            self.progid = kwargs.get('progid', None)
+            self.numdra = kwargs.get('numdra', None)
+            super(NouvelleLigneForm, self).__init__(kwargs)
+            self.fields['num_previsionnel'].queryset = Previsionnel.objects.filter(num=self.progid)
+            self.fields['num_dra'] = self.numdra
 
         #    def __init__(self, user, *args, **kwargs):
         #_numdra = kwargs.pop('numdra', None)
