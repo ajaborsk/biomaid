@@ -34,7 +34,7 @@ from django.utils.translation import gettext as _
 from django.apps import apps
 
 from common.db_utils import class_roles_expression, user_choices, user_lookup
-from common.models import Fournisseur, FournisseurEtablissement, Programme, UserUfRole, Alert, Uf
+from common.models import Fournisseur, FournisseurEtablissement, Programme, UserUfRole, Alert, Uf, Compte
 from dem.models import Demande
 from document.views import all_documents_json_partial
 from drachar.models import Previsionnel
@@ -619,7 +619,6 @@ class FournisseurSmartView(SmartView):
                 'EDITABLE': {
                     'ADM': {
                         'code': True,
-                        'etablissement': True,
                         'fournisseur': True,
                     },
                 },
@@ -783,6 +782,122 @@ class FournisseurEtablissementSmartView(SmartView):
                     'url_name': 'common:fournisseuretablissement-ask-delete',
                     'url_args': ('${id}',),
                     'tooltip': _("Supprimer la fiche de fournisseur établissement"),
+                },
+            ],
+        },
+    )
+
+class CompteBudgetaireSmartView(SmartView):
+    class Meta:
+        model = Compte
+        permissions = {
+            'create': ('ADM', 'MAN'),
+            'delete': ('ADM'),
+            'write': {
+                None: {
+                    'ADM': {
+                        'code': True,
+                        'lettre_budgetaire': True,
+                        'etablissement': True,
+                        'nom': True,
+                        'discipline': True,
+                        'exercice': True,
+                        'budget_montant': True,
+                        'cloture': True,
+                    }
+                },
+                'EDITABLE': {
+                    'ADM': {
+                        'code': True,
+                        'lettre_budgetaire': True,
+                        'etablissement': True,
+                        'nom': True,
+                        'discipline': True,
+                        'exercice': True,
+                        'budget_montant': True,
+                        'cloture': True,
+                    },
+                },
+            },
+        }
+        columns = (
+            'id',
+            'lettre_budgetaire',
+            'code',
+            'etablissement',
+            'nom',
+            'discipline',
+            'exercice',
+            'budget_montant',
+            'cloture',
+            'tools',
+        )
+        user_filters = {
+            'contient': {
+                'type': 'contains',
+                'fields': ['lettre_budgetaire', 'code', 'nom'],
+            },
+            'etablissement': {'type': 'select'},
+            'discipline': {'type':'select'},
+            'exercice': {
+                'type': 'contains',
+                'fields': ['exercice'],
+            },
+            'actif': {
+                'label': _("Actif"),
+                'fieldname': 'cloture',
+                'type': 'select',
+                'choices': [
+                    {'label': _("Tous"), 'value': '{}'},
+                    {'label': _("Ouverts"), 'value': '{"cloture__isnull":true}'},
+                    {'label': _("Fermés"), 'value': '{"cloture__isnull":false}'},
+                ],
+            },
+        }
+        menu_left = ({'label': "Ajouter un compte budgetaire", 'url_name': 'common:compte-create'},)
+        form_layout = """
+        #
+            # Compte Budgetaire
+                <lettre_budgetaire> <code>
+                <nom>
+                <exercice>
+            # Compléments
+                <etablissement> <discipline>
+                <budget_montant>
+                <cloture>
+        """
+    roles = (
+        ComputedSmartField,
+        {
+            'hidden': True,
+            'special': 'roles',
+            'data': class_roles_expression(Compte),
+        },
+    )
+    state_code = (
+        ComputedSmartField,
+        {
+            'special': 'state',
+            'hidden': True,
+            'data': lambda vc: Value('EDITABLE'),
+        },
+    )
+    tools = (
+        ToolsSmartField,
+        {
+            'title': _("Actions"),
+            'tools': [
+                {
+                    'tool': 'open',
+                    'url_name': 'common:compte-update',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Ouvrir la fiche du Compte Budgétaire"),
+                },
+                {
+                    'tool': 'delete',
+                    'url_name': 'common:compte-ask-delete',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Supprimer la fiche du Compte Budgétaire"),
                 },
             ],
         },

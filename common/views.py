@@ -86,6 +86,7 @@ from common.smart_views import (
     RoleScopeSmartView,
     FournisseurSmartView,
     FournisseurEtablissementSmartView,
+    CompteBudgetaireSmartView,
 )
 from common.db_utils import MyAlertsWidget, StringAgg
 from smart_view.smart_page import SmartPage
@@ -2268,6 +2269,18 @@ class FournisseurEtablissementPage(SmartPage):
     permissions = {'ADM', 'MAN'}
     smart_view_class = FournisseurEtablissementSmartView
     title = "Fournisseurs par établissement"
+
+# ==================================================================================================================
+# GESTION DES COMPTES BUDGETAIRES
+# ==================================================================================================================
+
+class Compte(SmartPage):
+    application = 'common'
+    name = 'compte'
+    permissions = {'ADM', 'MAN'}
+    smart_view_class = CompteBudgetaireSmartView
+    title = "Comptes Budgetaires"
+
 
 
 #class GestionFournisseursEtab(GestionData):
