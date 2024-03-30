@@ -55,10 +55,22 @@ class RoleScopeSmartView(SmartView):
         model = UserUfRole
         # workflow = 'role_scope'
         permissions = {
-            'create': ('ADM',),
+            'create': ('ADM','MAN'),
             'write': {
                 None: {
                     'ADM': {
+                        'role_code': True,
+                        'user': True,
+                        'uf': True,
+                        'service': True,
+                        'centre_responsabilite': True,
+                        'pole': True,
+                        'site': True,
+                        'etablissement': True,
+                        'discipline': True,
+                        'domaine_prefix': True,
+                    },
+                    'MAN': {
                         'role_code': True,
                         'user': True,
                         'uf': True,
@@ -84,10 +96,22 @@ class RoleScopeSmartView(SmartView):
                         'discipline': True,
                         'domaine_prefix': True,
                     },
+                    'MAN': {
+                        'role_code': True,
+                        'user': True,
+                        'uf': True,
+                        'service': True,
+                        'centre_responsabilite': True,
+                        'pole': True,
+                        'site': True,
+                        'etablissement': True,
+                        'discipline': True,
+                        'domaine_prefix': True,
+                    },
                 },
             },
             'delete': {
-                'EDITABLE': ('ADM',),
+                'EDITABLE': ('ADM','MAN',),
             },
         }
         columns = (
