@@ -9,6 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
         ('common', '0084_programme_site'),
+        ('common', '0085_fournisseuretablissement'),
     ]
 
     operations = [
@@ -85,7 +86,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='userufrole',
             name='etablissement',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='common.etablissement'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='common.etablissement'
+            ),
         ),
         migrations.AlterField(
             model_name='userufrole',
