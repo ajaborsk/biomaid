@@ -94,4 +94,5 @@ urlpatterns = [
 ]
 urlpatterns.extend(get_view_url_patterns(views.GestionContactLivraison22))
 urlpatterns.extend(get_view_url_patterns(views21.ListeLigne))
+urlpatterns.extend(get_view_url_patterns(views21.dra24))
 

@@ -26,7 +26,7 @@ from common.base_views import BiomAidViewMixin
 
 from common.models import Fournisseur, ContactFournisseur, UserUfRole, User, Programme
 from dem.smart_views import DemandeSmartView
-from drachar.smart_views import PrevisionnelSmartView, DraSmartView, PrevisionnelSmartView21, PrevisionnelUtilisateursSmartView,LigneSmartView
+from drachar.smart_views import PrevisionnelSmartView, DraSmartView, PrevisionnelSmartView21, PrevisionnelUtilisateursSmartView,LigneSmartView,DRASmartView24
 
 from drachar.models import Previsionnel, ContactLivraison, Dra, Dossier, LigneCommande
 from drachar.forms import NouvelleDraForm, NouvelleLigneForm
@@ -846,6 +846,18 @@ class listedra(SmartPage):
         None: {'view': 'list'},
     }
 
+class dra24(SmartPage):
+    application = 'drachar'
+    name = 'dras'
+    title = _("Liste des DRA")
+    permissions = {
+        'EXP',
+        'ACH',
+        'DIS',
+        'ARB',
+        'ADM',
+    }  # Todo : Définir une valeur par défaut à partir des droits de l'application
+    smart_view_class = DRASmartView24
 
 class CockpitView(BiomAidViewMixin, TemplateView):
     permissions = {
@@ -870,3 +882,4 @@ class ListeLigne(SmartPage):#, dra_id):
     title = _("Liste Ligne DRA")  # + str(dra_id))
     permissions = {'EXP', 'ACH', 'DIS', 'ARB', 'ADM'}
     smart_view_class = LigneSmartView
+

@@ -20,13 +20,21 @@ from django.db.models.functions import Concat, Coalesce, Greatest
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
-from common.models import Discipline, UserUfRole, Fournisseur
+from common.models import Discipline, UserUfRole, Fournisseur, ContactFournisseur, Programme
 from common.db_utils import AgeDays, class_roles_expression, filter_choices_from_column_values
+from document.views import all_documents_json_partial
 from dem.apps import DRACHAR_DELAI_DEMANDE_TERMINEE
 from dem.utils import roles_demandes_possibles
-from smart_view.smart_fields import ConditionnalSmartField, ToolsSmartField
-from smart_view.smart_view import SmartView, ComputedSmartField
+from smart_view.smart_fields import ConditionnalSmartField
+from smart_view.smart_view import (
+    SmartView,
+    ToolsSmartField,
+    ComputedSmartField,
+    CommentsSmartField,
+    DocumentsSmartField,
+)
 from .models import Previsionnel, Dossier, LigneCommande, Dra, ContactLivraison
+from marche.models import Marche
 
 
 class DossierSmartView(SmartView):
@@ -1693,13 +1701,13 @@ class LigneSmartView(SmartView):
         menu_left = (
             {'label': 'Ajouter une ligne', 'url_name': 'drachar:listeligne-create'},
         )
-        exports = {
-            'xlsx': {
-                'engine': 'xlsx',
-                'label': 'Microsoft Excel 2003+',
-                'filename': "Demandes en cours.xlsx",
-            }
-        }
+        #exports = {
+        #    'xlsx': {
+        #        'engine': 'xlsx',
+        #        'label': 'Microsoft Excel 2003+',
+        #        'filename': "Demandes en cours.xlsx",
+        #    }
+        #}
         form_layout = """
         #
             # Produit
@@ -1736,13 +1744,312 @@ class LigneSmartView(SmartView):
                     'tool': 'open',
                     'url_name': 'drachar:listeligne-update',
                     'url_args': ('${id}',),
-                    'tooltip': _("Ouvrir la fiche de contact livraison"),
+                    'tooltip': _("Ouvrir la fiche de ligne dra"),
                 },
                 {
                     'tool': 'delete',
                     'url_name': 'drachar:listeligne-ask-delete',
                     'url_args': ('${id}',),
-                    'tooltip': _("Supprimer la fiche de contact livraison"),
+                    'tooltip': _("Supprimer la fiche de ligne dra"),
+                },
+            ],
+        },
+    )
+
+class DRASmartView24(SmartView):
+    class Meta:
+        model = Dra
+        permissions = {
+            'create': ('ADM', 'MAN', 'EXP'),
+            'delete': ('ADM', 'MAN', 'EXP'),
+            #    {
+            #    'OWN': True,
+            #},
+            'write': {
+                None: {
+                    'ADM': {
+                        'intitule': True,
+                        'fournisseur': True,
+                        'contact_fournisseur': True,
+                        'num_devis': True,
+                        'date_devis': True,
+                        'num_marche': True,
+                        'programme': True,
+                        'expert_metier': True,
+                        'num_bon_commande': True,
+                        'date_commande': True,
+                        #'num_dossier': True,
+                          # 'documents': True,
+                        'contact_livraison': True,
+                    },
+                    'EXP': {
+                        'intitule': True,
+                        'fournisseur': True,
+                        'contact_fournisseur': True,
+                        'num_devis': True,
+                        'date_devis': True,
+                        'num_marche': True,
+                        'programme': True,
+                        'expert_metier': True,
+                        'num_bon_commande': True,
+                        'date_commande': True,
+                        #'num_dossier': True,
+                        # 'documents': True,
+                        'contact_livraison': True,
+                    },
+                },
+                'EDITABLE': {
+                    'ADM': {
+                        'intitule': True,
+                        'fournisseur': True,
+                        'contact_fournisseur': True,
+                        'num_devis': True,
+                        'date_devis': True,
+                        'num_marche': True,
+                        'programme': True,
+                        'expert_metier': True,
+                        'num_bon_commande': True,
+                        'date_commande': True,
+                        #'num_dossier': True,
+                        # 'documents': True,
+                        'contact_livraison': True,
+                    },
+                    'EXP': {
+                        'intitule': True,
+                        'fournisseur': True,
+                        'contact_fournisseur': True,
+                        'num_devis': True,
+                        'date_devis': True,
+                        'num_marche': True,
+                        'programme': True,
+                        'expert_metier': True,
+                        'num_bon_commande': True,
+                        'date_commande': True,
+                        #'num_dossier': True,
+                        # 'documents': True,
+                        'contact_livraison': True,
+                    },
+                },
+            }
+        }
+        settings = {
+            'num_dra': {
+                'special': 'id',
+                'hidden': False,
+            },
+            'intitule': {
+                'title': _("Nom de la DRA"),
+                'help_text': _("Donner un nom a la DRA pour faciliter les futures recherches"),
+                'format': 'string',
+            },
+            'fournisseur': {
+                "title": _("Fournisseur"),
+                'help_text': _("Commencez à saisir un nom et choisissez le contacte dans la liste proposée."),
+                'width': 100,
+                'lookup': lambda view_params: Fournisseur.objects.values_list('code', 'nom'),
+                'autocomplete': True,
+                'table.hidden': True,
+            },
+            'contact_fournisseur': {
+                "title": _("Contact Fournisseur"),
+                'help_text': _("Commencez à saisir un nom et choisissez le contacte dans la liste proposée."),
+                'width': 100,
+                'lookup': lambda view_params: ContactFournisseur.objects.values_list('societe', 'nom', 'prenom'),
+                'autocomplete': True,
+                'table.hidden': True,
+            },
+            'num_devis': {
+                'title': _("Numéro du devis"),
+                'help_text': _("Numéro du devis"),
+                'format': 'string',
+            },
+            'date_devis': {
+                'format': 'date',
+            },
+            'num_marche': {
+                "title": _("Marché"),
+                'help_text': _("Commencez à saisir un code ou un nom et choisissez le marché dans la liste proposée."),
+                'width': 100,
+                'lookup': lambda view_params: Marche.objects.values_list('num_marche', 'intitule'),
+                'autocomplete': True,
+                'table.hidden': False,
+            },
+            'programme': {
+                "title": _("Programme"),
+                'help_text': _("Commencez à saisir un code ou un nom et choisissez le programme dans la liste proposée."),
+                'width': 100,
+                'lookup': lambda view_params: list(Programme.objects.all().values_list('id', 'code')) + [(None, '-- Indéfini --')],
+                'choices': lambda view_params: tuple(
+                    Programme.active_objects.all().values_list('id', 'code').order_by('code')),
+                'autocomplete': True,
+                'table.hidden': False,
+            },
+            'num_bon_commande': {
+                'title': _("Numéro du Bon de commande"),
+                'help_text': _("Numéro du bon de commande envoyé au fournisseur"),
+                'format': 'string',
+                },
+            'date_commande': {
+                'format': 'date',
+            },
+            'expert_metier': {
+                'format': 'choice',
+                'editor': 'autocomplete',
+                'choices': lambda view_params: tuple(
+                    UserUfRole.objects.order_by()
+                        .filter(role_code='EXP')
+                        .annotate(
+                        libelle=ExpressionWrapper(
+                            Concat(F('user__first_name'), Value(' '), F('user__last_name')),
+                            output_field=TextField(),
+                        )
+                    )
+                        .values_list('user', 'libelle')
+                        .distinct()
+                ),
+                'initial': lambda params: params['user'].pk,
+            },
+            #'num_dossier': {
+            #    'title': _("Numéro du devis"),
+            #    'help_text': _("Numéro du devis"),
+            #    'format': 'string',
+            #},
+            'contact_livraison': {
+                "title": _("Contact Fournisseur"),
+                'help_text': _("Commencez à saisir un nom et choisissez le contacte dans la liste proposée."),
+                'width': 100,
+                'lookup': lambda view_params: ContactFournisseur.objects.values_list('nom', 'prenom'),
+                'autocomplete': True,
+                'table.hidden': True,
+            },
+        }
+        menu_left = ({'label': 'Ajouter une DRA', 'url_name': 'drachar:dras-create'},)
+        columns = (
+            'num_dra',
+            'roles',
+            'intitule',
+            'fournisseur',
+            'contact_fournisseur',
+            'num_devis',
+            'date_devis',
+            'num_marche',
+            'programme',
+            'expert_metier',
+            'num_bon_commande',
+            'date_commande',
+            #'num_dossier',
+            'contact_livraison',
+            #'cloture',
+            'documents_sf',
+            #'comments_sf',
+            'tools',
+            #'state',
+        )
+        selectable_columns = (
+            'intitule',
+            'fournisseur',
+            'contact_fournisseur',
+            'num_devis',
+            'date_devis',
+            'num_marche',
+            'programme',
+            'expert_metier',
+            'num_bon_commande',
+            'date_commande',
+            #'num_dossier',
+            'contact_livraison',
+            #'cloture',
+            'documents_sf',
+            #'comments_sf',
+        )
+        user_filters = {
+            'expert_metier': {'type': 'select'},
+            'dra_contains': {
+                'type': 'contains',
+                'fieldnames': ['intitule', 'num_devis', 'num_bon_commande'],
+                'label': _('DRA contient'),
+            },
+            'fournisseur': {'type': 'select'},
+            'num_marche': {'type': 'select'},
+            'programme': {'type': 'select'},
+        }
+
+        fields_to_copy = (
+            'fournisseur',
+            'contact_fournisseur',
+            'num_marche',
+            'programme',
+            #'num_dossier',
+        )
+        exports = {
+            'xlsx': {
+                'engine': 'xlsx',
+                'label': 'Microsoft Excel 2003+',
+                'filename': "dra_extraction.xlsx",
+            }
+        }
+
+        form_layout = """
+            #
+                # Identification
+                    <--intitule--> <--expert_metier-->
+                    §Simple HTML rendu comme template : Numéro marché = {{ instance.num_marche }}
+                # Autres renseignements
+                    <--fournisseur-->  <-contact_fournisseur->
+                    <--num_devis-->  <---date_devis-->
+                    <--programme-->  <--num_marche-->
+                    <--num_bon_commande-->  <-date_commande->
+                    <--contact_livraison-->
+                # Documents joints
+                    <--documents_sf-+--+--+->
+        """
+
+    # Do not use 'comments' since this is a model fieldname
+    #comments_sf = (
+    #    CommentsSmartField,
+    #    {
+    #        'title': 'Commentaires',
+    #        'data': all_comments_json_partial(Meta.model),  # Hum... Sans doute possible de le configurer par défaut...
+    #    },
+    #)
+#
+    documents_sf = (
+        DocumentsSmartField,
+        {
+            'title': 'Documents joints',
+            'data': all_documents_json_partial(Dra),
+        },
+    )
+    roles = (
+        ComputedSmartField,
+        {
+            'special': 'roles',
+            'data': class_roles_expression(Dra),
+            'hidden': True,
+        },
+    )
+    tools = (
+        ToolsSmartField,
+        {
+            'title': _("Actions"),
+            'tools': [
+                {
+                    'tool': 'open',
+                    'url_name': 'drachar:dras-update',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Ouvrir la DRA"),
+                },
+                {
+                    'tool': 'copy',
+                    'url_name': 'drachar:dras-copy',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Copier la DRA"),
+                },
+                {
+                    'tool': 'delete',
+                    'url_name': 'drachar:dras-ask-delete',
+                    'url_args': ('${id}',),
+                    'tooltip': _("Supprimer la DRA"),
                 },
             ],
         },
