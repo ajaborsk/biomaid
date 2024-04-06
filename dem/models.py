@@ -88,7 +88,9 @@ class Campagne(OModel):
     code: models.CharField = models.CharField(max_length=16, null=True, blank=True)  # Code
     nom: models.CharField = models.CharField(max_length=64, null=True, blank=True)  # Nom du "calendrier"
     description = models.TextField(null=True, blank=True, default=None)  # commentaires si nécessaire
-    message = models.TextField(null=True, blank=True, default=None)  # message à présenter à l'utilisateur (alerte ou explications)
+    message = models.TextField(
+        null=True, blank=True, default=None
+    )  # message à présenter à l'utilisateur (alerte ou explications)
     annee = models.IntegerField(
         default='2020',
         null=False,
@@ -1242,6 +1244,8 @@ class Demande(OModel):
         blank=True,
         null=True,
     )
+
+    test_expr_o = OField(value="fcond(gel,1,5)")
 
     tmp_available_o = OField(value=F('programme__limit') - F('programme__consumed'))
 

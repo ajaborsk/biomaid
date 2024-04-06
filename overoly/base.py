@@ -97,7 +97,8 @@ class ORolesMapper:
             axis1_filters_list.append(Q(uf__isnull=True) | Q(uf=OuterRef(kwargs['uf'])))
             axis1_filters_list.append(Q(service__isnull=True) | Q(service=OuterRef(kwargs['uf'] + '__service')))
             axis1_filters_list.append(
-                Q(centre_responsabilite__isnull=True) | Q(centre_responsabilite=OuterRef(kwargs['uf'] + '__centre_responsabilite'))
+                Q(centre_responsabilite__isnull=True)
+                | Q(centre_responsabilite=OuterRef(kwargs['uf'] + '__centre_responsabilite'))
             )
             axis1_filters_list.append(Q(pole__isnull=True) | Q(pole=OuterRef(kwargs['uf'] + '__pole')))
             axis1_filters_list.append(Q(site__isnull=True) | Q(site=OuterRef(kwargs['uf'] + '__site')))
@@ -122,9 +123,9 @@ class ORolesMapper:
 
         for kwarg, kwval in kwargs.items():
             if isinstance(kwval, str):
-                role_expression = PolyExpr(kwval, builtins=self.builtins)
+                role_expression = PolyExpr(kwval, names=self.builtins)
                 # print(f" e:{ast.unparse(role_expression.tree)}")
-                expr_names = set(role_expression.names())
+                expr_names = set(role_expression.used_names())
                 # print(f"  1-{expr_names=}")
                 expr_names -= set(self.builtins.keys())
                 # print(f"  2-{expr_names=}")
@@ -408,7 +409,17 @@ class OverolyModelMetaclass(ModelBase):
                 elif callable(formulae):
                     annotations[attr_name] = formulae
                 elif isinstance(formulae, str):
-                    pass
+                    # The value of the field (annotation) is a string that need to be interpreted as a expression
+                    print("#### OField str expression:", repr(formulae))
+                    try:
+                        polyexpr = PolyExpr(formulae)
+                        print("#### Expression:", repr(polyexpr))
+                        print("#### Expression:", repr(polyexpr.used_names()), field_names)
+                        # expression names must be either field names or valid function names
+                        # Tomporary stub
+                        annotations[attr_name] = lambda params: Value('Unimplemented')
+                    except SyntaxError:
+                        warning("Syntax Error")
                 else:
                     pass
 

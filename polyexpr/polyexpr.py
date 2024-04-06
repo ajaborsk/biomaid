@@ -1,5 +1,6 @@
 """
 """
+
 from _ast import Name
 import ast
 from copy import deepcopy
@@ -17,8 +18,8 @@ class ExpressionNames(ast.NodeVisitor):
 
 
 class PolyExpr:
-    def __init__(self, expression: str, builtins=None):
-        self.builtins = builtins or {}
+    def __init__(self, expression: str, names=None):
+        self.names = names or {}
         try:
             self.tree = ast.parse(expression, mode='eval')
         except SyntaxError:
@@ -26,13 +27,24 @@ class PolyExpr:
         except ValueError:
             self.tree = None
 
-    def names(self):
+    def used_names(self):
         visitor = ExpressionNames()
         visitor.visit(self.tree)
         return visitor.names
 
+    def as_string(self):
+        if self.tree is None:
+            return None
+        return ast.unparse(self.tree)
+
+    def as_partial(self):
+        raise NotImplementedError()
+
     def __repr__(self):
-        return "PolyExpr<'" + ast.unparse(self.tree) + "'>"
+        if self.tree is None:
+            return "PolyExpr<None>"
+        else:
+            return "PolyExpr<'" + ast.unparse(self.tree) + "'>"
 
     # def as_django_orm_expr(self, **kwargs):
     #     compiled = compile(tree, '<string>', 'eval')
@@ -63,7 +75,7 @@ class PolyExprTransformer(ast.NodeTransformer):
             # self._dependencies.add(node.id)
             return ast.Call(
                 ast.Name('__f', ctx=node.ctx),
-                [ast.Str(node.id, ctx=node.ctx)],
+                [ast.Constant(node.id, ctx=node.ctx)],
                 [],
                 ctx=node.ctx,
             )
@@ -72,13 +84,13 @@ class PolyExprTransformer(ast.NodeTransformer):
 def django_orm_expression(polyexpr: PolyExpr, values: dict, fieldnames: set):
     tree = deepcopy(polyexpr.tree)
     tree = ast.fix_missing_locations(
-        PolyExprTransformer([], builtins=set(values.keys()) | set(polyexpr.builtins), mode='django').visit(tree)
+        PolyExprTransformer([], builtins=set(values.keys()) | set(polyexpr.names), mode='django').visit(tree)
     )
 
     # Specific builtins
     all_vars = {'__f': F, '__value': Value}
     # The builtins
-    all_vars.update({name: value.get('django') for name, value in polyexpr.builtins.items()})
+    all_vars.update({name: value.get('django') for name, value in polyexpr.names.items()})
     # Add query/view parameters
     all_vars.update(values)
 
