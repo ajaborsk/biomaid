@@ -90,6 +90,16 @@ form_layout = """
         <debut_recensement> <fin_recensement>
 """
 
+[DemandeEqptSmartView.nom_projet]
+null = true
+hidden = false
+
+[DemandeSmartView.permissions.write.AREP_AEXP.EXP]
+nom_projet=true
+
+[DemandeSmartView.permissions.write.AEXP.EXP]
+nom_projet=true
+
 [DemTvxSmartView.tvx_etage]
 hidden = true
 null = false
