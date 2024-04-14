@@ -2184,7 +2184,9 @@ class DemandeSmartView(SmartView):
             'date_premiere_demande': {
                 'form.title': _("Année de première demande"),
                 'format': 'choice',
-                'choices': lambda view_params: [(date(y, 1, 1).strftime('%Y-%m-%d'), str(y)) for y in range(2017, now().year + 1)],
+                'choices': lambda view_params: [
+                    (date(y, 1, 1).strftime('%Y-%m-%d'), str(y)) for y in range(2017, now().year + 1)
+                ],
                 'datetime_format': "%Y",
                 'width': 50,
                 'default': '2018',
@@ -2751,7 +2753,9 @@ class DemandeSmartView(SmartView):
             'data': Concat('uf__etablissement__code', Value(' - '), 'uf__etablissement__nom'),
             'form.data': {
                 'source': 'uf',
-                'choices': lambda view_params: {id: name for id, name in Uf.records.all().values_list('pk', 'etablissement__nom')},
+                'choices': lambda view_params: {
+                    id: name for id, name in Uf.records.all().values_list('pk', 'etablissement__nom')
+                },
             },
             'depends': ['uf'],
         },
@@ -3997,7 +4001,30 @@ class DemandesAApprouverSmartView(DemandesEnCoursSmartView):
 
 class DemandesEtudeSmartView(DemandeEqptSmartView):
     class Meta:
-        help_text = _("Ce tableau regroupe les demandes qui ont été approuvées (ou non) par le chef de pôle et qui sont à l'étude.")
+        help_text = _(
+            "Ce tableau regroupe les demandes qui ont été approuvées (ou non) par le chef de pôle et qui sont à l'étude."
+        )
+        user_filters__update = {
+            'state_code': {
+                'type': 'select',
+                'label': _('Validation chef de pôle / directeur'),
+                'choices': '__STYLES__',
+                'position': 'bar',
+            },
+        }
+        row_styler = {
+            'fieldname': 'state_code',
+            'styles': {
+                ('VALIDE_CP', 'INSTR_OK', 'ERR_VAL_EXP', 'AVFAV_EXP'): (
+                    "background-color:#efe",
+                    _("Demande approuvée par le chef de pôle<br>son instruction va pouvoir continuer"),
+                ),
+                'NONVAL_CP': (
+                    "background-color:#fdd",
+                    _("Demande non approuvée par le chef de pôle<br>elle ne sera pas arbitrée"),
+                ),
+            },
+        }
         columns__remove = (
             'arbitrage',
             'quantite_validee',
