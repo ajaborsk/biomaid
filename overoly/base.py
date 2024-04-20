@@ -410,11 +410,11 @@ class OverolyModelMetaclass(ModelBase):
                     annotations[attr_name] = formulae
                 elif isinstance(formulae, str):
                     # The value of the field (annotation) is a string that need to be interpreted as a expression
-                    print("#### OField str expression:", repr(formulae))
+                    # print("#### OField str expression:", repr(formulae))
                     try:
                         polyexpr = PolyExpr(formulae)
                         print("#### Expression:", repr(polyexpr))
-                        print("#### Expression:", repr(polyexpr.used_names()), field_names)
+                        # print("#### Expression:", repr(polyexpr.used_names()), field_names)
                         # expression names must be either field names or valid function names
                         # Tomporary stub
                         annotations[attr_name] = lambda params: Value('Unimplemented')

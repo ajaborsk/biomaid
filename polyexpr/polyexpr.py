@@ -4,7 +4,7 @@
 from _ast import Name
 import ast
 from copy import deepcopy
-from typing import Any
+from typing import Any, Self
 
 
 class ExpressionNames(ast.NodeVisitor):
@@ -18,38 +18,84 @@ class ExpressionNames(ast.NodeVisitor):
 
 
 class PolyExpr:
-    def __init__(self, expression: str, names=None):
-        self.names = names or {}
-        try:
-            self.tree = ast.parse(expression, mode='eval')
-        except SyntaxError:
-            self.tree = None
-        except ValueError:
-            self.tree = None
+    """A polyexpression is a expression that can be created with a string and converted to
+    some language expressions (including python).
+    It can be safe since available names (aka "builtins") have to be explicitly given
+    """
 
-    def used_names(self):
+    def __init__(self, expression: str | Self | ast.Expression, names=None):
+        self.names = names or {}
+
+        if isinstance(expression, PolyExpr):
+            self.tree = deepcopy(expression.tree)
+        elif isinstance(expression, ast.Expression):
+            self.tree = expression
+        else:
+            self.tree = ast.parse(expression, mode='eval')
+
+    def used_names(self) -> set:
         visitor = ExpressionNames()
         visitor.visit(self.tree)
         return visitor.names
 
+    def transform(self, transformer: ast.NodeTransformer):
+        tree = deepcopy(self.tree)
+        tree = ast.fix_missing_locations(transformer.visit(tree))
+        return PolyExpr(tree)
+
     def as_string(self):
-        if self.tree is None:
-            return None
         return ast.unparse(self.tree)
 
-    def as_partial(self):
+    def as_function(self, names: tuple[str] | None = None, builtins: dict | None = None):
+        """
+        Returns a function that takes some variables as named parameters and returns the computed value
+        (which can be any python object, not necesserally a litteral)
+        """
+        builtins = builtins or dict()
+        names = names or tuple()
+
+        if set(builtins.keys()) | set(names) != self.used_names():
+            raise RuntimeError(
+                (
+                    "Expression '{}' can't be converted to python function"
+                    " since not all used names are provided (needed {} and {} provided)"
+                ).format(repr(self), self.used_names(), set(builtins) | set(names))
+            )
+
+        node = ast.Lambda(
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg=name) for name in names],
+                kwonlyargs=[],
+                kw_defaults=[],
+            ),
+            body=self.tree.body,
+            lineno=0,
+            col_offset=1,
+        )
+        node = ast.fix_missing_locations(node)
+        return eval(compile(node, filename='<fn>', mode='eval'), {'__builtins__': builtins}, {})
+
+    def as_value(self):
         raise NotImplementedError()
 
-    def __repr__(self):
-        if self.tree is None:
-            return "PolyExpr<None>"
-        else:
-            return "PolyExpr<'" + ast.unparse(self.tree) + "'>"
+    def __add__(self, other):
+        return NotImplemented
 
-    # def as_django_orm_expr(self, **kwargs):
-    #     compiled = compile(tree, '<string>', 'eval')
-    #     return eval(compiled, all_vars)
-    #     # return ~Q(pk__in=[])
+    def __sub__(self, other):
+        return NotImplemented
+
+    def __mul__(self, other):
+        return NotImplemented
+
+    def __and__(self, other):
+        return NotImplemented
+
+    def __or__(self, other):
+        return NotImplemented
+
+    def __repr__(self):
+        return "PolyExpr<'" + ast.unparse(self.tree) + "'>"
 
 
 # =================================================================================================================================
@@ -96,7 +142,7 @@ def django_orm_expression(polyexpr: PolyExpr, values: dict, fieldnames: set):
 
     compiled = compile(tree, '<string>', 'eval')
     orm_expr = eval(compiled, all_vars)
-    # print(f">>  {ast.unparse(tree)=} {all_vars=} {compiled=} {orm_expr=}")
+    # print(f"\n>>  {ast.unparse(tree)=} \n>>  {list(all_vars.keys())=} \n>>  {compiled=} \n>>  {orm_expr=}")
     # print(f"  {orm_expr=}")
     if isinstance(orm_expr, bool):
         if orm_expr:
