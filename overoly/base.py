@@ -51,7 +51,7 @@ from django.utils.timezone import now
 
 # from overoly.queryset import OQuerySet
 
-from polyexpr.polyexpr import PolyExpr, django_orm_expression
+from polyexpr.polyexpr import PolyExpr
 
 try:
     from django_pandas.managers import DataFrameManager as Manager
@@ -72,16 +72,16 @@ class ORolesMapper:
     def is_superuser(u):
         # print(f"is_superuser(u): u=")
         try:
-            return u.is_superuser
+            return ~Q(pk__in=[]) if u.is_superuser else Q(pk__in=[])
         except AttributeError:
-            return False
+            return Q(pk__in=[])
 
     @staticmethod
     def is_staff(u):
         try:
-            return u.is_staff
+            return ~Q(pk__in=[]) if u.is_staff else Q(pk__in=[])
         except AttributeError:
-            return False
+            return Q(pk__in=[])
 
     @staticmethod
     def q(*args, **kwargs):
@@ -111,6 +111,7 @@ class ORolesMapper:
         'is_staff': {'django': is_staff},
         'q': {'django': Q},
         'in_scope': {'django': in_scope},
+        'when': {'django': lambda a, b, c: Case(When(a, then=b), default=c)},
     }
 
     def __init__(self, field_names: set, const_roles: set = None, **kwargs):
@@ -134,6 +135,19 @@ class ORolesMapper:
                 self.parameters |= expr_names
                 self.row_roles_map[kwarg] = role_expression
 
+        # Built the full expression
+        full_expr = ""
+        for code, expr in enumerate(self.row_roles_map.values()):
+            full_expr += "when((" + expr.as_string() + ")," + str(2**code) + ",0)+"
+            # print(">>> ", code, expr.as_string())
+        full_expr = full_expr[:-1]
+        # print(">>>>>> ", full_expr)
+        full_expression = PolyExpr(full_expr)
+        # print(">>>>>> ", full_expression.as_string())
+        self.roles_function = full_expression.as_function(
+            names={'USER'}, builtins={k: v['django'] for k, v in self.builtins.items()}
+        )
+
     def table_roles_list(self, query_parameters: dict):
         return self.const_roles + list(code for code, expr in self.table_roles_map.items() if expr(query_parameters))
 
@@ -152,23 +166,25 @@ class ORolesMapper:
         parameters = {param: query_parameters.get(param) for param in self.parameters}
 
         # print(f"   {query_parameters=} {self.field_names=}")
-        django_expression = sum(
-            [
-                Case(
-                    When(
-                        django_orm_expression(expr, values=parameters, fieldnames=self.field_names),
-                        then=Value(2**code),
-                    ),
-                    default=Value(0),
-                )
-                for code, expr in enumerate(self.row_roles_map.values())
-            ]
-        )
+        # django_expression = sum(
+        #     [
+        #         Case(
+        #             When(
+        #                 django_orm_expression(expr, builtins=self.builtins, values=parameters, fieldnames=self.field_names),
+        #                 then=Value(2**code),
+        #             ),
+        #             default=Value(0),
+        #         )
+        #         for code, expr in enumerate(self.row_roles_map.values())
+        #     ]
+        # )
 
         # for code, expr in self.row_roles_map.items():
         #     print(f"  {code=} : {expr=}")
         # print(f"{self.parameters=} {query_parameters=} {parameters=}:  {django_expression=}")
-        return django_expression
+        f = self.roles_function(**parameters)
+        # print(f"§§§§    {repr(f)=}")
+        return f
 
 
 class OField:

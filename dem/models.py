@@ -1245,7 +1245,7 @@ class Demande(OModel):
         null=True,
     )
 
-    test_expr_o = OField(value="fcond(gel,1,5)")
+    test_expr_o = OField(value="when(gel,1,5)")
 
     tmp_available_o = OField(value=F('programme__limit') - F('programme__consumed'))
 

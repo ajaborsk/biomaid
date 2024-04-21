@@ -54,12 +54,12 @@ class PolyExpr:
         builtins = builtins or dict()
         names = names or tuple()
 
-        if set(builtins.keys()) | set(names) != self.used_names():
+        if not (set(builtins.keys()) | set(names)).issuperset(self.used_names()):
             raise RuntimeError(
                 (
                     "Expression '{}' can't be converted to python function"
-                    " since not all used names are provided (needed {} and {} provided)"
-                ).format(repr(self), self.used_names(), set(builtins) | set(names))
+                    " since not all used names are provided ({} not provided)"
+                ).format(repr(self), self.used_names().difference(set(builtins) | set(names)))
             )
 
         node = ast.Lambda(
@@ -68,13 +68,14 @@ class PolyExpr:
                 args=[ast.arg(arg=name) for name in names],
                 kwonlyargs=[],
                 kw_defaults=[],
+                defaults=[],
             ),
             body=self.tree.body,
             lineno=0,
             col_offset=1,
         )
         node = ast.fix_missing_locations(node)
-        return eval(compile(node, filename='<fn>', mode='eval'), {'__builtins__': builtins}, {})
+        return eval(compile(ast.Expression(node), filename='<polyexpr>', mode='eval'), {'__builtins__': builtins}, {})
 
     def as_value(self):
         raise NotImplementedError()
@@ -127,26 +128,16 @@ class PolyExprTransformer(ast.NodeTransformer):
             )
 
 
-def django_orm_expression(polyexpr: PolyExpr, values: dict, fieldnames: set):
-    tree = deepcopy(polyexpr.tree)
-    tree = ast.fix_missing_locations(
-        PolyExprTransformer([], builtins=set(values.keys()) | set(polyexpr.names), mode='django').visit(tree)
+def django_orm_expression(polyexpr: PolyExpr, builtins: dict, values: dict, fieldnames: set):
+
+    orm_expr = polyexpr.transform(
+        PolyExprTransformer(fieldnames, builtins=set(values.keys()) | set(polyexpr.names), mode='django')
+    ).as_function(
+        names={
+            'USER',
+        },
+        builtins=builtins,
     )
-
-    # Specific builtins
-    all_vars = {'__f': F, '__value': Value}
-    # The builtins
-    all_vars.update({name: value.get('django') for name, value in polyexpr.names.items()})
-    # Add query/view parameters
-    all_vars.update(values)
-
-    compiled = compile(tree, '<string>', 'eval')
-    orm_expr = eval(compiled, all_vars)
-    # print(f"\n>>  {ast.unparse(tree)=} \n>>  {list(all_vars.keys())=} \n>>  {compiled=} \n>>  {orm_expr=}")
     # print(f"  {orm_expr=}")
-    if isinstance(orm_expr, bool):
-        if orm_expr:
-            return ~Q(pk__in=[])
-        else:
-            return Q(pk__in=[])
+
     return orm_expr
