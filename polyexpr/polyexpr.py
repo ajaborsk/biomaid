@@ -114,6 +114,7 @@ class PolyExprTransformer(ast.NodeTransformer):
     def visit_Name(self, node: Name) -> Any:
         if node.id in self.builtins:
             # The name is a builtins => do nothing
+            node.toto_builtins = True
             return node
         elif node.id == node.id.upper():
             # The name is uppercase => it's a constant => treat as a Value()
@@ -128,16 +129,16 @@ class PolyExprTransformer(ast.NodeTransformer):
             )
 
 
-def django_orm_expression(polyexpr: PolyExpr, builtins: dict, values: dict, fieldnames: set):
+# def django_orm_expression(polyexpr: PolyExpr, builtins: dict, values: dict, fieldnames: set):
 
-    orm_expr = polyexpr.transform(
-        PolyExprTransformer(fieldnames, builtins=set(values.keys()) | set(polyexpr.names), mode='django')
-    ).as_function(
-        names={
-            'USER',
-        },
-        builtins=builtins,
-    )
-    # print(f"  {orm_expr=}")
+#     orm_expr = polyexpr.transform(
+#         PolyExprTransformer(fieldnames, builtins=set(values.keys()) | set(polyexpr.names), mode='django')
+#     ).as_function(
+#         names={
+#             'USER',
+#         },
+#         builtins=builtins,
+#     )
+#     # print(f"  {orm_expr=}")
 
-    return orm_expr
+#     return orm_expr

@@ -617,7 +617,7 @@ class SmartField(metaclass=MediaDefiningClass):
     def as_column_def(self, context=None, fieldname=None, view_params: dict = None):
         column_settings = {
             "field": fieldname,  # This is the table field (not necessarily identical to model field)
-            "title": self.get('title', context),
+            "title": self.get('title', context, default=fieldname),
             "help_text": self.get("help_text", context),
             "hidden": self.get('hidden', context),
             "width": self.get('width', context),

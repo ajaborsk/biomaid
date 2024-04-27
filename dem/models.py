@@ -1245,7 +1245,7 @@ class Demande(OModel):
         null=True,
     )
 
-    test_expr_o = OField(value="when(gel,1,5)")
+    test_expr_o = OField(value="when(arbitrage_commission__valeur, 12, 24)")
 
     tmp_available_o = OField(value=F('programme__limit') - F('programme__consumed'))
 
@@ -1288,6 +1288,7 @@ class Demande(OModel):
     # 4 => ANNULE
     # 5 => AAP_AREP
     _o_state = OFieldState(
+        max_state=17,
         value=lambda view_params: Case(
             When(
                 gel=True,
@@ -1393,7 +1394,7 @@ class Demande(OModel):
                     ),
                 ),
             ),
-        )
+        ),
     )
 
     def __str__(self):

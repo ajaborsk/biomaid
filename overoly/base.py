@@ -45,13 +45,15 @@ from math import ceil, log10
 
 from django.db.models import Model, Expression, Value, When, Case, Field, Q, Exists, OuterRef, F
 from django.db.models.functions import Cast, Substr
+
+# from django.db.models.lookups import IsNull
 from django.db.models.base import ModelBase
-from django.db.models import IntegerField
+from django.db.models import IntegerField, BooleanField
 from django.utils.timezone import now
 
 # from overoly.queryset import OQuerySet
 
-from polyexpr.polyexpr import PolyExpr
+from polyexpr.polyexpr import PolyExpr, PolyExprTransformer
 
 try:
     from django_pandas.managers import DataFrameManager as Manager
@@ -140,7 +142,7 @@ class ORolesMapper:
         for code, expr in enumerate(self.row_roles_map.values()):
             full_expr += "when((" + expr.as_string() + ")," + str(2**code) + ",0)+"
             # print(">>> ", code, expr.as_string())
-        full_expr = full_expr[:-1]
+        full_expr = full_expr[:-1]  # remove trailing '+'
         # print(">>>>>> ", full_expr)
         full_expression = PolyExpr(full_expr)
         # print(">>>>>> ", full_expression.as_string())
@@ -194,7 +196,8 @@ class OField:
 
 
 class OFieldState(OField):
-    pass
+    def __init__(self, max_state=0, value=None, special=None):
+        super().__init__(value=value, special=special)
 
 
 class OFieldRoles(OField):
@@ -434,6 +437,19 @@ class OverolyModelMetaclass(ModelBase):
                         # expression names must be either field names or valid function names
                         # Tomporary stub
                         annotations[attr_name] = lambda params: Value('Unimplemented')
+
+                        def when(a, b, c):
+                            return Case(When(Cast(a, output_field=BooleanField()), then=b), default=c)
+
+                        builtins = {
+                            'when': when,
+                            '__f': F,
+                        }
+                        django_expr = polyexpr.transform(PolyExprTransformer(attrs['_ometa'].django_field_names, builtins))
+                        print(f"§§§§ {django_expr=}")
+                        annotations[attr_name] = django_expr.as_function(('USER',), builtins=builtins)
+                        print(f"§§§§ {annotations[attr_name]=}")
+                        print(f"§§§§ {annotations[attr_name](USER=3)=}")
                     except SyntaxError:
                         warning("Syntax Error")
                 else:

@@ -3453,6 +3453,7 @@ class DemandeEqptSmartView(DemandeSmartView):
         columns = (
             'code',
             'num_dmd',
+            'test_expr_o',
             'date',
             'nature',
             'calendrier',
