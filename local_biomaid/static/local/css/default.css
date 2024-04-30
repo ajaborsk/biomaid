@@ -97,3 +97,7 @@ footer {
 .has-badge[data-count]::after {
 	background: rgba(255, 166, 0, 0.85);
 }
+
+div.dialog {
+  overflow:scroll;
+}

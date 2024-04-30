@@ -902,7 +902,7 @@ class ProgrammePage(SmartPage):
 class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
     application = 'common'
     name = 'role'
-    permissions = {'ADM'}
+    permissions = {'ADM','MAN',}
     smart_view_class = RoleScopeSmartView
     title = _("Rôles")
 

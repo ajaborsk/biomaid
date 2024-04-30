@@ -485,6 +485,11 @@ class SmartViewMetaclass(MediaDefiningClass):
                                 _meta['settings'],
                                 **{s_name: mcls.meta_setting_update(mcls, _meta['settings'].get(s_name), setting)},
                             )
+                elif attr_name == 'permissions':
+                    if callable(getattr(attrs["Meta"], 'permissions')):
+                        _meta['permissions'] = getattr(attrs["Meta"], 'permissions')()
+                    else:
+                        _meta['permissions'] = deepcopy(getattr(attrs["Meta"], 'permissions'))
                 elif attr_name[:2] != "__":
                     # if attr_name not in _meta:
                     #     _meta[attr_name] = copy(getattr(attrs["Meta"], attr_name))
@@ -573,6 +578,63 @@ class SmartViewMetaclass(MediaDefiningClass):
                     }.items():
                         if v.get(src) is not None:
                             _meta['settings'][k][1].update(dest_f(v.get(src)))
+                elif k == 'permissions':
+                    # print(">>> {}".format(v))
+                    if isinstance(v, dict):
+                        for amode in v.keys():
+                            if amode in _meta['permissions']:
+                                if isinstance(v[amode], dict):
+                                    for state in v[amode].keys():
+                                        if state in _meta['permissions'][amode]:
+                                            if isinstance(v[amode][state], dict):
+                                                for role in v[amode][state].keys():
+                                                    if role in _meta['permissions'][amode][state]:
+                                                        if isinstance(v[amode][state][role], dict):
+                                                            for field in v[amode][state][role].keys():
+                                                                if field in _meta['fields']:
+                                                                    # print(
+                                                                    #     f"setting permission <{amode=}, {state=}, {role=}, {field=}> to {v[amode][state][role][field]}"
+                                                                    # )
+                                                                    _meta['permissions'][amode][state][role][field] = v[amode][
+                                                                        state
+                                                                    ][role][field]
+                                                                else:
+                                                                    logger.warning(
+                                                                        _("SmartView '{}' has no field '{}'").format(name, field)
+                                                                    )
+                                                        else:
+                                                            logger.warning(
+                                                                _(
+                                                                    "permissions configuration for access mode, state, role <{},{},{}> must be a dict, not {}"
+                                                                ).format(amode, state, role, repr(v[amode][state][role]))
+                                                            )
+                                                    else:
+                                                        logger.warning(
+                                                            _(
+                                                                "permissions fo access mode '{}', state '{}' has no role '{}'"
+                                                            ).format(amode, state, role)
+                                                        )
+                                            else:
+                                                logger.warning(
+                                                    _(
+                                                        "permissions configuration for access mode, state <{},{}> must be a dict, not {}"
+                                                    ).format(amode, state, repr(v[amode][state]))
+                                                )
+                                        else:
+                                            logger.warning(
+                                                _("permissions fo access mode '{}' has no state '{}'").format(amode, state)
+                                            )
+                                    pass
+                                else:
+                                    logger.warning(
+                                        _("permissions configuration for access mode <{}> must be a dict, not {}").format(
+                                            amode, repr(v[amode])
+                                        )
+                                    )
+                            else:
+                                logger.warning(_("permissions has no access mode '{}'").format(amode))
+                    else:
+                        logger.warning(_("permissions configuration must be a dict, not {}").format(repr(v)))
                     # print(f"  {k}: {v} {_meta['settings'][k]}")
 
         # Step 6 : Create real SmartField
@@ -669,7 +731,9 @@ class SmartViewMetaclass(MediaDefiningClass):
                     _meta["data_fields"] = []
             except KeyError as ke:
                 raise RuntimeError(
-                    _("Champ non trouvé dans la SmartView {} : '{}' n'est pas dans {}").format(name, ke.args[0], list(attrs.keys()))
+                    _("Champ non trouvé dans la SmartView {} : '{}' n'est pas dans {}").format(
+                        name, ke.args[0], list(attrs.keys())
+                    )
                 )
 
             # _meta['data_fields'] = attrs["_data_fields"]
@@ -1102,7 +1166,9 @@ class SmartViewMetaclass(MediaDefiningClass):
                                     )
                             column += colspan
                         else:
-                            raise AttributeError(_("In {} form_layout, incorrect fieldname in layout '{}'").format(name, field_def))
+                            raise AttributeError(
+                                _("In {} form_layout, incorrect fieldname in layout '{}'").format(name, field_def)
+                            )
                 return objects, subforms
             else:
                 raise AttributeError(_("Error TODO message"))
@@ -1589,7 +1655,8 @@ class SmartView(metaclass=SmartViewMetaclass):
                 for filter_name in self._meta['menu_user_filters']
             },
             'bar_user_filters': {
-                filter_name: filter_update(filter_name, user_filters[filter_name]) for filter_name in self._meta['bar_user_filters']
+                filter_name: filter_update(filter_name, user_filters[filter_name])
+                for filter_name in self._meta['bar_user_filters']
             },
             'exports': dict(self._meta['exports']),
             'query_base': self.url + "?smart_view_prefix=" + self._prefix,
@@ -1766,7 +1833,9 @@ class SmartView(metaclass=SmartViewMetaclass):
         for role in row_roles:
             if perms.get(role, False):
                 # At least this very role is allowed to modufy this record ; let's continue
-                allowed_fields = allowed_fields.union({fieldname for fieldname, allowed in perms.get(role, {}).items() if allowed})
+                allowed_fields = allowed_fields.union(
+                    {fieldname for fieldname, allowed in perms.get(role, {}).items() if allowed}
+                )
         if not allowed_fields:
             return {"error": {"message": _("Vos droits ne permettent pas de modifier cet enregistrement")}}
 
@@ -1836,7 +1905,10 @@ class SmartView(metaclass=SmartViewMetaclass):
                             }
                 # Cas des dates (une chaîne vide peut signifier 'null')
                 elif any(
-                    [isinstance(getattr(self._meta['model'], model_fieldname).field, klass) for klass in (DateField, DateTimeField)]
+                    [
+                        isinstance(getattr(self._meta['model'], model_fieldname).field, klass)
+                        for klass in (DateField, DateTimeField)
+                    ]
                 ):
                     if value is None or value == "":
                         setattr(record, model_fieldname, None)

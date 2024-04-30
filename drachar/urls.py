@@ -55,12 +55,7 @@ urlpatterns = [
         views21.ListeLigne.as_view(),
         name='listeligne',
     ),
-    #path(
-    #    'nouvelleligne/<int:dra_id>/',
-    #    views21.NouvelleLigneView.as_view(),
-    #    name='nouvelleligne21',
-    #),
-    path('listedra/', views21.listedra.as_view(), name='listedra'),
+    path('listedra/', views21.ListeDRA.as_view(), name='listedra'),
     # path('nouvelledra/', views.NouvelleDra.as_view(), name='nouvelledra'),
     path('nouvelledra/', views21.Nouvelle_draView.as_view(), name='nouvelledra21'),
     path(

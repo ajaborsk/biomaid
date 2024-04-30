@@ -106,13 +106,22 @@ Donnez votre mot de passe lorsqu'il est demandé, acceptez toutes les options pa
 Après cela, il est conseillé, surtout si la mise à jour a concerné des paquets de base (comme `linux`, `systemd`, etc.)
 de redémarrer une dernière fois la machine.
 
+.. admonition:: Pour une distribution basée sur Fedora (Oracle Linux, AlmaLinux...)
+
+    Les commandes sont légèrement différentes :
+
+    .. code:: console
+    
+        utilisateur@serveur:~$ sudo dnf update
+        utilisateur@serveur:~$ sudo dnf upgrade
+
 Les services du serveur
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 L'installation de PosgreSQL 14 et de nginx se fait en une seule étape (avec Ubuntu 22.04 ;
 ce n'est pas nécessairement le cas des autres distributions)
 
-L'installation des paquets se fait avec une seule commande :
+L'installation des paquets se fait avec quelques commandes :
 
 .. code:: console
 
@@ -141,6 +150,22 @@ services `systemd` associés.
 Les paquets de la seconde ligne (`graphviz` et `librsvg2-bin`) servent à la création de la documentation *html*. 
 Les paquets de la troisième ligne (`latexmk`, `texlive` et `texlive-latex-extra`) servent à la création de la documentation au format *pdf* (qui nécessite la documentation
 *html*)
+
+.. admonition:: Pour une distribution basée sur Fedora (Oracle Linux, AlmaLinux...)
+
+    Les commandes et les noms des paquets sont légèrement différents :
+
+    .. code:: console
+    
+        utilisateur@serveur:~$ sudo dnf install nginx postgresql gcc python3-devel libpq-devel make
+        utilisateur@serveur:~$ sudo dnf install
+
+    De plus, les services associés ne sont pas lancés et il faut donc le faire à la main :
+
+    .. code:: console
+    
+        utilisateur@serveur:~$ sudo systemctl enable --now nginx
+        utilisateur@serveur:~$ sudo systemctl enable --now postgresql
 
 .. admonition:: Point d'étape
 
