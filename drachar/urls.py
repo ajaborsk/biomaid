@@ -51,7 +51,7 @@ urlpatterns = [
     #    name='ListeLigne',
     #),
     path(
-        'listeligne/',
+        'listeligne/<str:dra>/',
         views21.ListeLigne.as_view(),
         name='listeligne',
     ),

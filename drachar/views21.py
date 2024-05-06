@@ -860,7 +860,7 @@ class dra24(SmartPage):
     smart_view_class = DRASmartView24
 
 class ListeDRA(SmartPage):
-    smart_view_class = DraSmartView
+    smart_view_class = DRASmartView24
     name = 'liste-dra'
     permissions = (
         'RMA',
@@ -886,6 +886,9 @@ class ListeDRA(SmartPage):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        #context['page_prefix'] = (
+        #    "<p>Partie qui est ajoutée en haut de la page, <b>quelque soit le type de page</b> (formulaire ou tableau)</p>"
+        #)
         context['page_prefix'] = (
             "<p>Partie qui est ajoutée en haut de la page, <b>quelque soit le type de page</b> (formulaire ou tableau)</p>"
         )
@@ -896,6 +899,8 @@ class ListeDRA(SmartPage):
         context['form_postfix'] = "Partie qui est ajoutée en bas de la page au dessous du formulaire"
 
         return context
+
+
 
 
 class CockpitView(BiomAidViewMixin, TemplateView):
@@ -922,3 +927,17 @@ class ListeLigne(SmartPage):#, dra_id):
     permissions = {'EXP', 'ACH', 'DIS', 'ARB', 'ADM'}
     smart_view_class = LigneSmartView
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #context['page_prefix'] = (
+        #    "<p>Partie qui est ajoutée en haut de la page, <b>quelque soit le type de page</b> (formulaire ou tableau)</p>"
+        #)
+        context['table_prefix'] = self.dra_select(**kwargs)
+        return context
+
+    def dra_select(self, **kwargs):
+        self.dra_id = "1"
+        self.instance_dra = Dra.objects.get(num_dra=self.dra_id)
+        print(self.instance_dra.intitule)
+        template = "{{self.instance_dra.intitule}}"
+        return template
