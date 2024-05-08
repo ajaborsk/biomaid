@@ -51,8 +51,8 @@ from dem.smart_views import CampagneSmartView
 from importationdata.views import BddImportation, FileImportation
 from common.forms import (
     UserProfileForm,
-    FournisseurForm,
-    FournisseurEtablissementForm,
+    # FournisseurForm,
+    # FournisseurEtablissementForm,
     MarqueForm,
     TypeForm,
     CompteForm,
@@ -72,7 +72,7 @@ from common.models import (
     CentreResponsabilite,
     Site,
     Etablissement,
-    Fournisseur,
+    # Fournisseur,
     # ContactFournisseur,
     # DataFournisseurGEF,
     Alert,
@@ -408,7 +408,9 @@ class VueGridWidget(VueWidget):
                     widget['w_params'] = json.dumps(widget['w_params'])
         except TypeError:
             logging.warning(
-                "Using fallback layout for portal home content (layout is not iterable: {}).".format(repr(self.contents['layout']))
+                "Using fallback layout for portal home content (layout is not iterable: {}).".format(
+                    repr(self.contents['layout'])
+                )
             )
             self.contents = {'layout': self.default_grid_layout}
 
@@ -902,7 +904,10 @@ class ProgrammePage(SmartPage):
 class RoleScopeView(SmartPage, BiomAidViewMixin, TemplateView):
     application = 'common'
     name = 'role'
-    permissions = {'ADM','MAN',}
+    permissions = {
+        'ADM',
+        'MAN',
+    }
     smart_view_class = RoleScopeSmartView
     title = _("Rôles")
 
@@ -2242,7 +2247,9 @@ class StructureView(BiomAidViewMixin, TemplateView):
             html_table += (
                 '<td>'
                 + '</td><td>'.join(
-                    "<br>".join("{user_first_name} {user_last_name}".format(**role) for role in json.loads(getattr(record, field)))
+                    "<br>".join(
+                        "{user_first_name} {user_last_name}".format(**role) for role in json.loads(getattr(record, field))
+                    )
                     for field in roles
                 )
                 + '</td></tr><tr>'
@@ -2256,12 +2263,14 @@ class StructureView(BiomAidViewMixin, TemplateView):
 # GESTION DES FOURNISSEURS GENERIQUES ET PAR ETABLISSEMENT
 # ==================================================================================================================
 
+
 class FournisseurPage(SmartPage):
     application = 'common'
     name = 'fournisseur'
     permissions = {'ADM', 'MAN'}
     smart_view_class = FournisseurSmartView
     title = "Fournisseurs"
+
 
 class FournisseurEtablissementPage(SmartPage):
     application = 'common'
@@ -2270,9 +2279,11 @@ class FournisseurEtablissementPage(SmartPage):
     smart_view_class = FournisseurEtablissementSmartView
     title = "Fournisseurs par établissement"
 
+
 # ==================================================================================================================
 # GESTION DES COMPTES BUDGETAIRES
 # ==================================================================================================================
+
 
 class Compte(SmartPage):
     application = 'common'
@@ -2282,8 +2293,7 @@ class Compte(SmartPage):
     title = "Comptes Budgetaires"
 
 
-
-#class GestionFournisseursEtab(GestionData):
+# class GestionFournisseursEtab(GestionData):
 #    """Class maitresse utilisant GestionData"""
 #
 #    # éléments de base à renseigner pour la class "GestionData" :

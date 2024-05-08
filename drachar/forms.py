@@ -35,7 +35,8 @@ from django.forms import ModelForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.translation import gettext as _
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.contrib.admin.widgets import AdminDateWidget
+
+# from django.contrib.admin.widgets import AdminDateWidget
 
 from drachar.fields import ListTextWidget
 
@@ -115,11 +116,15 @@ class NouveauDossierForm(ModelForm, LoginRequiredMixin):
     #    self.instance.filter_by = {key: list(val.values_list('id', flat=True).order_by('id'))
     #                               for key, val in filter_by_qsets.items()}
     #    return super(NouveauDossier, self).save(commit=commit)
+
+
 class XYZ_DateInput(forms.DateInput):
     input_type = "date"
+
     def __init__(self, **kwargs):
         kwargs["format"] = "%d/%m/%Y"
         super().__init__(**kwargs)
+
 
 class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
 
@@ -151,10 +156,8 @@ class NouvelleDraForm(forms.ModelForm, LoginRequiredMixin):
             'date_devis': forms.DateInput(
                 attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)', 'class': 'form-control'},
             ),
-            #'date_devis': XYZ_DateInput(format=["%d/%m/%Y"],),
-            'date_commande': forms.DateInput(
-                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)', 'class': 'form-control'}
-            )
+            # 'date_devis': XYZ_DateInput(format=["%d/%m/%Y"],),
+            'date_commande': forms.DateInput(attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd (DOB)', 'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -200,7 +203,7 @@ class NouvelleLigneForm(forms.ModelForm):
         # ici placer les champs du model à traiter dans le formulaire : les champs automatiques ne doivent pas être /
         # inscrits
         fields = [
-            #'num_previsionnel',
+            # 'num_previsionnel',
             'num_dra',
             'famille_achat',
             'num_compte',
@@ -229,16 +232,16 @@ class NouvelleLigneForm(forms.ModelForm):
             self.progid = kwargs.get('progid', None)
             self.numdra = kwargs.get('numdra', None)
             super(NouvelleLigneForm, self).__init__(kwargs)
-            #self.fields['num_previsionnel'].queryset = Previsionnel.objects.filter(num=self.progid)
+            # self.fields['num_previsionnel'].queryset = Previsionnel.objects.filter(num=self.progid)
             self.fields['num_dra'] = self.numdra
 
         #    def __init__(self, user, *args, **kwargs):
-        #_numdra = kwargs.pop('numdra', None)
-        #_numprevisionnel = kwargs.pop('num_previsionnel', None)
-        #super(NouvelleLigneForm, self).__init__(*args, user, **kwargs)
-        #if _numprevisionnel is not None:
+        # _numdra = kwargs.pop('numdra', None)
+        # _numprevisionnel = kwargs.pop('num_previsionnel', None)
+        # super(NouvelleLigneForm, self).__init__(*args, user, **kwargs)
+        # if _numprevisionnel is not None:
         #    self.fields['num_previsionnel'].widget = ListTextWidget(data_list=_numprevisionnel, name='num_previsionnel')
-        #if _numdra is not None:
+        # if _numdra is not None:
         #    self.fields['num_dra'] = _numdra
 
 
