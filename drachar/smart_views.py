@@ -2022,6 +2022,14 @@ class DRASmartView24(SmartView):
             'data': all_documents_json_partial(Dra),
         },
     )
+    state = (
+        ComputedSmartField,
+        {
+            'special': 'state',
+            'data': lambda a: Value('EDITABLE'),
+            'hidden': True,
+        },
+    )
     roles = (
         ComputedSmartField,
         {
