@@ -75,11 +75,13 @@ class PrevisionnelSmartView(SmartView):
                         'montant_estime': True,
                         'montant_commande': True,
                         'solder_ligne': True,
+                        'cloturer_ligne': True,
                         'date_estimative_mes': True,
                     },
                     'DIS': {
                         'programme': True,
                         'solder_ligne': True,
+                        'cloturer_ligne': True,
                         'expert': True,
                         # Temporaire ? ou définitif ??
                         'commentaire': True,
@@ -97,6 +99,7 @@ class PrevisionnelSmartView(SmartView):
                     'RESPD': {
                         'programme': True,
                         'solder_ligne': True,
+                        'cloturer_ligne': True,
                         'expert': True,
                         # Temporaire ? ou définitif ??
                         'commentaire': True,
@@ -134,17 +137,20 @@ class PrevisionnelSmartView(SmartView):
                 },
                 True: {
                     'DIS': {
-                        'solder_ligne': True,
+                        'solder_ligne': False,
+                        'cloturer_ligne': True,
                     },
                     'RESPD': {
-                        'solder_ligne': True,
+                        'solder_ligne': False,
+                        'cloturer_ligne': True,
                     },
                     'ARB': {
-                        'solder_ligne': True,
+                        'solder_ligne': False,
+                        'cloturer_ligne': True,
                     },
                     'OWN': {
                         'suivi_mes': True,
-                        'solder_ligne': True,  # Le propriétaire peut "désolder" un prévisionnel
+                        'solder_ligne': False,  # Le propriétaire peut "désolder" un prévisionnel
                         'date_estimative_mes': True,
                         'commentaire': True,
                         'commentaire_public': True,
@@ -181,6 +187,7 @@ class PrevisionnelSmartView(SmartView):
             'ordered_amount',
             'amount_conditional',
             'solder_ligne',
+            'cloturer_ligne',
             'commentaire_public',
             'date_estimative_mes',
             'commentaire',
@@ -210,6 +217,7 @@ class PrevisionnelSmartView(SmartView):
             'suivi_mes',
             'amount_conditional',
             'solder_ligne',
+            'cloturer_ligne',
             'commentaire_public',
             'date_estimative_mes',
             'commentaire',
@@ -301,6 +309,11 @@ class PrevisionnelSmartView(SmartView):
             },
             'solder_ligne': {
                 'title': _("Soldé"),
+                'special': 'state',
+                'hidden': False,
+            },
+            'cloturer_ligne': {
+                'title': _("Cloturé"),
                 'special': 'state',
                 'hidden': False,
             },
@@ -418,9 +431,13 @@ class PrevisionnelSmartView(SmartView):
                 'type': 'select',
                 'label': _("Ligne soldée"),
             },
+           'cloturer_ligne': {
+                'type': 'select',
+                'label': _("Ligne cloturée"),
+            },
         }
         row_styler = {
-            'fieldname': 'solder_ligne',
+            'fieldname': 'cloturer_ligne',
             'styles': {
                 False: ("background:#fff", "Demande à faire ou en cours"),
                 True: ("background:#ddd", "Demande Soldée"),
