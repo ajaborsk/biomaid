@@ -593,7 +593,8 @@ class SmartViewMetaclass(MediaDefiningClass):
                                                             for field in v[amode][state][role].keys():
                                                                 if field in _meta['fields']:
                                                                     # print(
-                                                                    #     f"setting permission <{amode=}, {state=}, {role=}, {field=}> to {v[amode][state][role][field]}"
+                                                                    #     f"setting permission <{amode=}, {state=}, {role=},"
+                                                                    #     f" {field=}> to {v[amode][state][role][field]}"
                                                                     # )
                                                                     _meta['permissions'][amode][state][role][field] = v[amode][
                                                                         state
@@ -605,7 +606,8 @@ class SmartViewMetaclass(MediaDefiningClass):
                                                         else:
                                                             logger.warning(
                                                                 _(
-                                                                    "permissions configuration for access mode, state, role <{},{},{}> must be a dict, not {}"
+                                                                    "permissions configuration for access mode, state, "
+                                                                    "role <{},{},{}> must be a dict, not {}"
                                                                 ).format(amode, state, role, repr(v[amode][state][role]))
                                                             )
                                                     else:
@@ -617,7 +619,8 @@ class SmartViewMetaclass(MediaDefiningClass):
                                             else:
                                                 logger.warning(
                                                     _(
-                                                        "permissions configuration for access mode, state <{},{}> must be a dict, not {}"
+                                                        "permissions configuration for access mode, "
+                                                        "state <{},{}> must be a dict, not {}"
                                                     ).format(amode, state, repr(v[amode][state]))
                                                 )
                                         else:
@@ -1769,7 +1772,7 @@ class SmartView(metaclass=SmartViewMetaclass):
                 **{
                     sf: getattr(self, sf).get_annotation(self._view_params)
                     for sf in [self._meta['state_field'], self._meta['roles_field']]
-                    if getattr(self, sf).get_annotation(self._view_params)
+                    if sf and getattr(self, sf).get_annotation(self._view_params)
                 }
             )
         )

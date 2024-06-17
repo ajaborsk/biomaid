@@ -30,7 +30,7 @@ from smart_view.smart_view import (
     SmartView,
     ToolsSmartField,
     ComputedSmartField,
-    CommentsSmartField,
+    # CommentsSmartField,
     DocumentsSmartField,
 )
 from .models import Previsionnel, Dossier, LigneCommande, Dra, ContactLivraison
@@ -1394,7 +1394,7 @@ class DraSmartView(SmartView):
             'num_dossier',
             # 'documents',
             'contact_livraison',
-            #'tools',
+            # 'tools',
         )
         selectable_columns = (
             'num_dra',
@@ -1453,6 +1453,7 @@ class DraSmartView(SmartView):
                 ],
             },
         )
+
 
 class ContactLivraisonSmartView(SmartView):
     class Meta:
@@ -1534,6 +1535,7 @@ class ContactLivraisonSmartView(SmartView):
                 <prenom> <nom>
                 <coordonnees>
         """
+
     roles = (
         ComputedSmartField,
         {
@@ -1584,7 +1586,7 @@ class LigneSmartView(SmartView):
                         'num_ligne': False,
                         'num_compte': True,
                         'famille_achat': True,
-                        #'num_previsionnel': True,
+                        # 'num_previsionnel': True,
                         'descriptif': True,
                         'a_inventorier': True,
                         'num_dra': False,
@@ -1606,13 +1608,13 @@ class LigneSmartView(SmartView):
                     'MAN': {
                         'num_ligne': False,
                         'num_compte': True,
-                        #'num_previsionnel': True,
+                        # 'num_previsionnel': True,
                         'descriptif': True,
                     },
                     'EXP': {
                         'num_ligne': False,
                         'num_compte': True,
-                        #'num_previsionnel': True,
+                        # 'num_previsionnel': True,
                         'descriptif': True,
                     },
                 },
@@ -1620,19 +1622,19 @@ class LigneSmartView(SmartView):
                     'ADM': {
                         'num_ligne': True,
                         'nom': True,
-                        #'num_previsionnel': True,
+                        # 'num_previsionnel': True,
                         'descriptif': True,
                     },
                     'MAN': {
                         'num_ligne': False,
                         'num_compte': True,
-                        #'num_previsionnel': True,
+                        # 'num_previsionnel': True,
                         'descriptif': True,
                     },
                     'EXP': {
                         'num_ligne': False,
                         'num_compte': True,
-                        #'num_previsionnel': True,
+                        # 'num_previsionnel': True,
                         'descriptif': True,
                     },
                 },
@@ -1640,7 +1642,7 @@ class LigneSmartView(SmartView):
         }
         columns = (
             'num_ligne',
-            #'num_previsionnel',
+            # 'num_previsionnel',
             'famille_achat',
             'num_compte',
             'a_inventorier',
@@ -1659,11 +1661,11 @@ class LigneSmartView(SmartView):
             'garantie',
             'date_reception',
             'date_mes',
-            #TODO : RAJOUTER LA QUANTITE
+            # TODO : RAJOUTER LA QUANTITE
         )
         selectable_columns = (
             'num_ligne',
-            #'num_previsionnel',
+            # 'num_previsionnel',
             'famille_achat',
             'num_compte',
             'a_inventorier',
@@ -1685,7 +1687,7 @@ class LigneSmartView(SmartView):
         )
         settings = {
             'num_dra': {
-                'hidden': False, # TODO : a mettre en True quand code peaufiné
+                'hidden': False,  # TODO : a mettre en True quand code peaufiné
             },
             'date_reception': {
                 'editor': 'dateEditor',
@@ -1708,23 +1710,21 @@ class LigneSmartView(SmartView):
             },
         }
         '''a faire filtre sur num de la DRA'''
-        #user_filters = (
+        # user_filters = (
         #     {
         #         'name': 'num_dra',
         #         'type': 'select',
         #         'choices': filter_choices_from_column_values(Previsionnel, 'num_dmd__uf__code'),
         #     },
-        #)
-        menu_left = (
-            {'label': 'Ajouter une ligne', 'url_name': 'drachar:listeligne-create'},
-        )
-        #exports = {
+        # )
+        menu_left = ({'label': 'Ajouter une ligne', 'url_name': 'drachar:listeligne-create'},)
+        # exports = {
         #    'xlsx': {
         #        'engine': 'xlsx',
         #        'label': 'Microsoft Excel 2003+',
         #        'filename': "Demandes en cours.xlsx",
         #    }
-        #}
+        # }
         form_layout = """
         #
             # Produit
@@ -1744,6 +1744,7 @@ class LigneSmartView(SmartView):
             # Réception
                 <date_reception> <date_mes>
         """
+
     roles = (
         ComputedSmartField,
         {
@@ -1773,6 +1774,7 @@ class LigneSmartView(SmartView):
         },
     )
 
+
 class DRASmartView24(SmartView):
     class Meta:
         model = Dra
@@ -1781,7 +1783,7 @@ class DRASmartView24(SmartView):
             'delete': ('ADM', 'MAN', 'EXP'),
             #    {
             #    'OWN': True,
-            #},
+            # },
             'write': {
                 None: {
                     'ADM': {
@@ -1795,8 +1797,8 @@ class DRASmartView24(SmartView):
                         'expert_metier': True,
                         'num_bon_commande': True,
                         'date_commande': True,
-                        #'num_dossier': True,
-                          # 'documents': True,
+                        # 'num_dossier': True,
+                        # 'documents': True,
                         'contact_livraison': True,
                     },
                     'EXP': {
@@ -1810,7 +1812,7 @@ class DRASmartView24(SmartView):
                         'expert_metier': True,
                         'num_bon_commande': True,
                         'date_commande': True,
-                        #'num_dossier': True,
+                        # 'num_dossier': True,
                         # 'documents': True,
                         'contact_livraison': True,
                     },
@@ -1827,7 +1829,7 @@ class DRASmartView24(SmartView):
                         'expert_metier': True,
                         'num_bon_commande': True,
                         'date_commande': True,
-                        #'num_dossier': True,
+                        # 'num_dossier': True,
                         # 'documents': True,
                         'contact_livraison': True,
                     },
@@ -1842,12 +1844,12 @@ class DRASmartView24(SmartView):
                         'expert_metier': True,
                         'num_bon_commande': True,
                         'date_commande': True,
-                        #'num_dossier': True,
+                        # 'num_dossier': True,
                         # 'documents': True,
                         'contact_livraison': True,
                     },
                 },
-            }
+            },
         }
         settings = {
             'num_dra': {
@@ -1895,9 +1897,9 @@ class DRASmartView24(SmartView):
                 "title": _("Programme"),
                 'help_text': _("Commencez à saisir un code ou un nom et choisissez le programme dans la liste proposée."),
                 'width': 100,
-                'lookup': lambda view_params: list(Programme.objects.all().values_list('id', 'code')) + [(None, '-- Indéfini --')],
-                'choices': lambda view_params: tuple(
-                    Programme.active_objects.all().values_list('id', 'code').order_by('code')),
+                'lookup': lambda view_params: list(Programme.objects.all().values_list('id', 'code'))
+                + [(None, '-- Indéfini --')],
+                'choices': lambda view_params: tuple(Programme.active_objects.all().values_list('id', 'code').order_by('code')),
                 'autocomplete': True,
                 'table.hidden': False,
             },
@@ -1905,7 +1907,7 @@ class DRASmartView24(SmartView):
                 'title': _("Numéro du Bon de commande"),
                 'help_text': _("Numéro du bon de commande envoyé au fournisseur"),
                 'format': 'string',
-                },
+            },
             'date_commande': {
                 'format': 'date',
             },
@@ -1914,23 +1916,23 @@ class DRASmartView24(SmartView):
                 'editor': 'autocomplete',
                 'choices': lambda view_params: tuple(
                     UserUfRole.objects.order_by()
-                        .filter(role_code='EXP')
-                        .annotate(
+                    .filter(role_code='EXP')
+                    .annotate(
                         libelle=ExpressionWrapper(
                             Concat(F('user__first_name'), Value(' '), F('user__last_name')),
                             output_field=TextField(),
                         )
                     )
-                        .values_list('user', 'libelle')
-                        .distinct()
+                    .values_list('user', 'libelle')
+                    .distinct()
                 ),
                 'initial': lambda params: params['user'].pk,
             },
-            #'num_dossier': {
+            # 'num_dossier': {
             #    'title': _("Numéro du devis"),
             #    'help_text': _("Numéro du devis"),
             #    'format': 'string',
-            #},
+            # },
             'contact_livraison': {
                 "title": _("Contact Fournisseur"),
                 'help_text': _("Commencez à saisir un nom et choisissez le contacte dans la liste proposée."),
@@ -1954,13 +1956,13 @@ class DRASmartView24(SmartView):
             'expert_metier',
             'num_bon_commande',
             'date_commande',
-            #'num_dossier',
+            # 'num_dossier',
             'contact_livraison',
-            #'cloture',
+            # 'cloture',
             'documents_sf',
-            #'comments_sf',
+            # 'comments_sf',
             'tools',
-            #'state',
+            # 'state',
         )
         selectable_columns = (
             'intitule',
@@ -1973,11 +1975,11 @@ class DRASmartView24(SmartView):
             'expert_metier',
             'num_bon_commande',
             'date_commande',
-            #'num_dossier',
+            # 'num_dossier',
             'contact_livraison',
-            #'cloture',
+            # 'cloture',
             'documents_sf',
-            #'comments_sf',
+            # 'comments_sf',
         )
         user_filters = {
             'expert_metier': {'type': 'select'},
@@ -1996,7 +1998,7 @@ class DRASmartView24(SmartView):
             'contact_fournisseur',
             'num_marche',
             'programme',
-            #'num_dossier',
+            # 'num_dossier',
         )
         exports = {
             'xlsx': {
@@ -2022,19 +2024,27 @@ class DRASmartView24(SmartView):
         """
 
     # Do not use 'comments' since this is a model fieldname
-    #comments_sf = (
+    # comments_sf = (
     #    CommentsSmartField,
     #    {
     #        'title': 'Commentaires',
     #        'data': all_comments_json_partial(Meta.model),  # Hum... Sans doute possible de le configurer par défaut...
     #    },
-    #)
-#
+    # )
+    #
     documents_sf = (
         DocumentsSmartField,
         {
             'title': 'Documents joints',
             'data': all_documents_json_partial(Dra),
+        },
+    )
+    state = (
+        ComputedSmartField,
+        {
+            'special': 'state',
+            'data': lambda a: Value('EDITABLE'),
+            'hidden': True,
         },
     )
     roles = (
@@ -2071,4 +2081,3 @@ class DRASmartView24(SmartView):
             ],
         },
     )
-

@@ -14,19 +14,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from django.db.models import Q, F, Case, Value, When, ExpressionWrapper, TextField
-from django.db.models.functions import Cast, Coalesce, Concat
+from django.db.models import Q, F, Case, Value, When
+
+# from django.db.models.functions import Cast, Coalesce, Concat
 
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 
 from common.base_views import BiomAidViewMixin
 
-from common.models import Fournisseur, ContactFournisseur, UserUfRole, User, Programme
+from common.models import Fournisseur, ContactFournisseur, User, Programme
 from dem.smart_views import DemandeSmartView
-from drachar.smart_views import PrevisionnelSmartView, DraSmartView, PrevisionnelSmartView21, PrevisionnelUtilisateursSmartView,LigneSmartView,DRASmartView24
+from drachar.smart_views import (
+    PrevisionnelSmartView,
+    DraSmartView,
+    PrevisionnelSmartView21,
+    PrevisionnelUtilisateursSmartView,
+    LigneSmartView,
+    DRASmartView24,
+)
 
 from drachar.models import Previsionnel, ContactLivraison, Dra, Dossier, LigneCommande
 from drachar.forms import NouvelleDraForm, NouvelleLigneForm
@@ -134,13 +142,13 @@ class DraData:
             "dossier_list": Dossier.objects.filter(Q(cloture__isnull=True)),
             "contact_liv_list": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
             "expert_metier_list": User.objects.filter(Q(userufrole__role_code='EXP')).exclude(username='arbitre_biomed'),
-            "user":request.user,
+            "user": request.user,
             "programme_list": Programme.objects.filter(Q(cloture__isnull=True)),
         }
         print('HELLO')
         print(self.dra_id)
         if self.dra_id:
-            item=Dra.objects.get(pk=self.dra_id)
+            item = Dra.objects.get(pk=self.dra_id)
             instance_dra = self.formulaire_dra(request.POST or None, **data, instance=item)
             return instance_dra
         else:
@@ -173,7 +181,7 @@ class Nouvelle_draView(DracharView, DraData):
         context = self.get_context_data()
         self.dra_id = kwargs.get('dra_id')
         context['dra_id'] = self.dra_id
-        context['documents']=DocumentsSmartField
+        context['documents'] = DocumentsSmartField
         print('ici 2 dra')
         if self.dra_id is not None:  # FORMULAIRE DEJA RENSEIGNE : Modifification ou demande en cours pré enregistrée
             print('ici 3')
@@ -184,12 +192,12 @@ class Nouvelle_draView(DracharView, DraData):
             context['instance_dra'] = self.instance_dra
             context['progid'] = Dra.objects.get(num_dra=self.dra_id).programme
             kwargs['progid'] = Dra.objects.get(num_dra=self.dra_id).programme
-            if LigneCommande.objects.filter(num_dra=self.dra_id).exists(): # Affichage des lignes adossées à la DRA
+            if LigneCommande.objects.filter(num_dra=self.dra_id).exists():  # Affichage des lignes adossées à la DRA
                 print('ici 4')
                 self.instance_ligne = LigneCommande.objects.filter(num_dra=self.dra_id)
                 context['ligne_exist'] = '1'
                 context['instance_ligne'] = self.instance_ligne
-            else: #Si pas de lignes adossées à la dra
+            else:  # Si pas de lignes adossées à la dra
                 print('ici 5')
                 context['form_ligne'] = None
             return render(request, self.template_name, context=context)
@@ -200,7 +208,6 @@ class Nouvelle_draView(DracharView, DraData):
             form = self.dra.get(self, request)
             context['form_dra'] = form
             return render(request, self.template_name, context=context)
-
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data()
@@ -332,31 +339,33 @@ class LigneData:
         data = {
             # TODO : à compléter
             "num_previsionnel": Previsionnel.objects.filter(Q(solder_ligne=False)),
-            "numdra":self.dra_id,
+            "numdra": self.dra_id,
             # TODO : ligne a corriger à cause de ID dans le models : "num_previsionnel":
             #  Previsionnel.objects.filter(Q(solder_ligne=True,
             #                   expert=ExtensionUser.objects.get(user=self.request.user))),
             # TODO : faire le code pour l'importation depuis asset+ des comptes
-            #"four_list": Fournisseur.objects.filter(Q(cloture__isnull=True)),
-            #"contact_four_list": ContactFournisseur.objects.filter(Q(cloture__isnull=True)),
-            #"marche_list": Marche.objects.filter(Q(cloture__isnull=True)),
-            #"dossier_list": Dossier.objects.filter(Q(cloture__isnull=True)),
-            #"contact_liv_list": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
-            #"expert_metier_list": User.objects.filter(Q(userufrole__role_code='EXP')).exclude(username='arbitre_biomed')
+            # "four_list": Fournisseur.objects.filter(Q(cloture__isnull=True)),
+            # "contact_four_list": ContactFournisseur.objects.filter(Q(cloture__isnull=True)),
+            # "marche_list": Marche.objects.filter(Q(cloture__isnull=True)),
+            # "dossier_list": Dossier.objects.filter(Q(cloture__isnull=True)),
+            # "contact_liv_list": ContactLivraison.objects.filter(Q(cloture__isnull=True)),
+            # "expert_metier_list": User.objects.filter(Q(userufrole__role_code='EXP')).exclude(username='arbitre_biomed')
         }
         print('HELLOligne')
         print(self.ligne_id)
-        self.lignes_dra=LigneCommande.objects.filter(num_dra=self.dra_id)
+        self.lignes_dra = LigneCommande.objects.filter(num_dra=self.dra_id)
         # Chargement formulaire avec l'instance de la ligne selectionnée
         if self.ligne_id:
             print("la")
-            item=LigneCommande.objects.get(pk=self.ligne_id)
+            item = LigneCommande.objects.get(pk=self.ligne_id)
             instance_ligne = self.formulaire_ligne(request.POST, **data, instance=item)
             return instance_ligne
         # Chargement d'un formulaire vierge car pas de ligne ou nouvelle ligne
         else:
             print("ici ligne")
-            form_ligne = self.formulaire_ligne(request.GET) # TODO : technique **data trop longue à executer autre méthode à trouver
+            form_ligne = self.formulaire_ligne(
+                request.GET
+            )  # TODO : technique **data trop longue à executer autre méthode à trouver
             print("ici2 ligne")
             self.message = _("""ajout d'une LIGNE""")
             return form_ligne
@@ -366,9 +375,9 @@ class NouvelleLigneView(DracharView):
     name = 'new-line'
     template_name = 'drachar/nouvelleligne.html'
     title = _("Nouvelle LIGNE")
-    formulaire_ligne = NouvelleLigneForm # chargement formulaire ligne #TODO : Compléter le forms.py
-    #ligne = LigneData   # chargement données des lignes
-    ligne_id = None     # initialisation ligne_id
+    formulaire_ligne = NouvelleLigneForm  # chargement formulaire ligne #TODO : Compléter le forms.py
+    # ligne = LigneData   # chargement données des lignes
+    ligne_id = None  # initialisation ligne_id
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -396,7 +405,7 @@ class NouvelleLigneView(DracharView):
             context['ligne_id'] = self.ligne_id
             context['instance_dra'] = instance_dra
             context['instance_ligne'] = instance_ligne
-            #TODO : Modifier pour DRA
+            # TODO : Modifier pour DRA
             if LigneCommande.objects.filter(num_dra=self.dra_id).exists():  # Affichage des lignes adossées à la DRA
                 print('ici 4')
                 self.instance_ligne = LigneCommande.objects.filter(num_dra=self.dra_id)
@@ -411,7 +420,7 @@ class NouvelleLigneView(DracharView):
         else:  # NOUVEAU FORMULAIRE
             context['title'] = "Ajout d'une ligne à la DRA N°" + str(self.dra_id)
             print("why ?")
-            #form = self.ligne.get(self, request)
+            # form = self.ligne.get(self, request)
             form = self.formulaire_ligne(request.GET)
             print("Because ligne?")
             context['form_ligne'] = form
@@ -487,7 +496,8 @@ class NouvelleLigneView(DracharView):
             ligne.contact_livraison = self.form_ligne.cleaned_data["contact_livraison"]
             ligne.save()
             print('ici ligne0')
-            self.dra_id = dra.num_dra
+            # AJA: J'ai commenté cette ligne car 'dra' n'est pas défini et cette erreur bloque le commit chez moi
+            # self.dra_id = dra.num_dra
             self.ligne_id = ligne.id
             # TODO : calcul des montants de commande par ligne prévisionnelles
         else:
@@ -521,7 +531,8 @@ class NouvelleLigneView(DracharView):
             dra.save()
             print('ici 0')
             self.dra_id = dra.num_dra
-            #TODO : Calcul des montants de commande par lignes prévisionnelles
+            # TODO : Calcul des montants de commande par lignes prévisionnelles
+
 
 # TODO : envoie d'email exemple :
 '''
@@ -846,6 +857,7 @@ class listedra(SmartPage):
         None: {'view': 'list'},
     }
 
+
 class dra24(SmartPage):
     application = 'drachar'
     name = 'dras'
@@ -858,6 +870,7 @@ class dra24(SmartPage):
         'ADM',
     }  # Todo : Définir une valeur par défaut à partir des droits de l'application
     smart_view_class = DRASmartView24
+
 
 class ListeDRA(SmartPage):
     smart_view_class = DRASmartView24
@@ -886,9 +899,9 @@ class ListeDRA(SmartPage):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        #context['page_prefix'] = (
+        # context['page_prefix'] = (
         #    "<p>Partie qui est ajoutée en haut de la page, <b>quelque soit le type de page</b> (formulaire ou tableau)</p>"
-        #)
+        # )
         context['page_prefix'] = (
             "<p>Partie qui est ajoutée en haut de la page, <b>quelque soit le type de page</b> (formulaire ou tableau)</p>"
         )
@@ -899,8 +912,6 @@ class ListeDRA(SmartPage):
         context['form_postfix'] = "Partie qui est ajoutée en bas de la page au dessous du formulaire"
 
         return context
-
-
 
 
 class CockpitView(BiomAidViewMixin, TemplateView):
@@ -920,7 +931,8 @@ class CockpitView(BiomAidViewMixin, TemplateView):
         context['programme_tous'] = {'programme': 'Tous'}
         return context
 
-class ListeLigne(SmartPage):#, dra_id):
+
+class ListeLigne(SmartPage):  # , dra_id):
     application = 'drachar'
     name = 'listeligne'
     title = _("Liste Ligne DRA")  # + str(dra_id))
@@ -929,9 +941,9 @@ class ListeLigne(SmartPage):#, dra_id):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        #context['page_prefix'] = (
+        # context['page_prefix'] = (
         #    "<p>Partie qui est ajoutée en haut de la page, <b>quelque soit le type de page</b> (formulaire ou tableau)</p>"
-        #)
+        # )
         context['table_prefix'] = self.dra_select(**kwargs)
         return context
 
