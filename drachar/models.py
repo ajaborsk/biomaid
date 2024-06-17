@@ -99,6 +99,12 @@ class Previsionnel(models.Model):
         blank=True,
         null=True,
     )
+    cloturer_ligne = models.BooleanField(  # solder la ligne prévisionnelle si demande honorée
+        verbose_name="Cloturer la ligne du prévisionnel",
+        help_text="cocher la case quand le dossier est terminé",
+        default=False,
+        null=False,
+    )
     # workflow =
     # ------------------------------------------------------------------------------------------------------------------
     # Cette partie (ci-dessous) est provisoire en attendant la fin de l'implémentation complète de DRACHAR
