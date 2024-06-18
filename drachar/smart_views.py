@@ -220,7 +220,8 @@ class PrevisionnelSmartView(SmartView):
                     },
                     'OWN': {
                         'suivi_mes': True,
-                        'solder_ligne': False,  # Le propriétaire peut "désolder" un prévisionnel
+                        'solder_ligne': False,
+                        'cloturer_ligne': True,  # Le propriétaire peut "déclôturer" un prévisionnel
                         'date_estimative_mes': True,
                         'commentaire': True,
                         'commentaire_public': True,
@@ -379,7 +380,7 @@ class PrevisionnelSmartView(SmartView):
             },
             'solder_ligne': {
                 'title': _("Soldé"),
-                'special': 'state',
+                # 'special': 'state',
                 'hidden': False,
             },
             'cloturer_ligne': {
@@ -501,7 +502,7 @@ class PrevisionnelSmartView(SmartView):
                 'type': 'select',
                 'label': _("Ligne soldée"),
             },
-           'cloturer_ligne': {
+            'cloturer_ligne': {
                 'type': 'select',
                 'label': _("Ligne cloturée"),
             },
