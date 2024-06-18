@@ -1,12 +1,12 @@
 # Nouveautés
 
-## Version 0.15 (juin 2024)
+## Version 0.15 (18 juin 2024)
 
 - [X] Un manager a maintenant accès à la gestion des rôles
 - [X] Ajout de la notion de "clôture" globale aux opérations (en plus du "solde" purement lié aux commandes)
 - [X] Documentation d'installation plus complète
 
-## Version 0.14 (?)
+## Version 0.14 (26 septembre 2023)
 
 - [X] ?
 
