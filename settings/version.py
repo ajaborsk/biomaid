@@ -15,5 +15,5 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 DEM_VERSION = '0.15'
-DEM_VERSION_DATE = '18 juin 2024'
+DEM_VERSION_DATE = '21 juin 2024'
 DEM_VERSION_NAME = 'stable'
