@@ -1,0 +1,53 @@
+[PROGRAMME_LISTE]
+    [PROGRAMME_LISTE.CHUA]
+        [PROGRAMME_LISTE.CHUA.BM]
+            liste = "BIO-23-PPI"
+        [PROGRAMME_LISTE.CHUA.EQ]
+            liste = ""
+        [PROGRAMME_LISTE.CHUA.ST]
+            liste = ""
+        [PROGRAMME_LISTE.CHUA.TX]
+            liste = ""
+        [PROGRAMME_LISTE.CHUA.IT]
+            liste = ""
+        [PROGRAMME_LISTE.CHUA.XX]
+            liste = ""
+    [PROGRAMME_LISTE.CHD]
+        [PROGRAMME_LISTE.CHD.BM]
+            liste = ""
+        [PROGRAMME_LISTE.CHD.EQ]
+            liste = ""
+        [PROGRAMME_LISTE.CHD.ST]
+            liste = ""
+        [PROGRAMME_LISTE.CHD.TX]
+            liste = ""
+        [PROGRAMME_LISTE.CHD.IT]
+            liste = ""
+        [PROGRAMME_LISTE.CHD.XX]
+            liste = ""
+    [PROGRAMME_LISTE.IFF]
+        [PROGRAMME_LISTE.IFF.BM]
+            liste = ""
+        [PROGRAMME_LISTE.IFF.EQ]
+            liste = ""
+        [PROGRAMME_LISTE.IFF.ST]
+            liste = ""
+        [PROGRAMME_LISTE.IFF.TX]
+            liste = ""
+        [PROGRAMME_LISTE.IFF.IT]
+            liste = ""
+        [PROGRAMME_LISTE.IFF.XX]
+            liste = ""
+#exemple :
+[LINK]
+    [LINK.DEFAUT]
+        structure = "ON" # ON, OFF ou FILE
+        marque = "ON" # ON, OFF ou FILE
+        type = "ON" # ON, OFF ou FILE
+    [LINK.CHUA]
+        structure = "FILE" # ON, OFF ou FILE
+    [LINK.IFF]
+        structure = "FILE" # ON, OFF ou FILE
+    [LINK.CHD]
+        structure = "OFF" # ON, OFF ou FILE
+

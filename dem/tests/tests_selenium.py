@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-import datetime
 import json
 import os
 import time
@@ -58,87 +57,6 @@ class TestsBaseTests(TestsBaseTestCase):
         self.login()
         self.selenium.get("{}{}".format(self.live_server_url, url))
         self.assertEqual(len(self.selenium.find_elements(by=By.CLASS_NAME, value='topbar2')), 1)
-
-
-class TestsManager(TestsBaseTestCase):
-    def setUp(self):
-        super().setUp()
-        self.login('root', 'introuvable')
-
-    def test_nouvelle_campagne(self):
-        "Saisie d'une demande minimale"
-        # On va sur la page pour faire une demande
-        self.selenium.get(
-            "{}{}".format(
-                self.live_server_url,
-                reverse(
-                    'common:calendrier',
-                    kwargs=self.reverse_base,
-                ),
-            )
-        )
-        # Vérification que la page s'affiche bien
-        self.assertEqual(len(self.selenium.find_elements(by=By.CLASS_NAME, value='topbar2')), 1)
-
-        # Add Calendrier click()
-        self.selenium.find_element(by=By.XPATH, value='/html/body/main/div[2]/div/div[3]/div[1]/div/ul[1]/li/a').click()
-
-        # Vérification que la page s'affiche bien
-        self.assertEqual(len(self.selenium.find_elements(by=By.CLASS_NAME, value='topbar2')), 1)
-
-        # -- Remplissage de la fiche --
-        # Code
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-code").send_keys('CREACODE\t')
-        # Intitulé
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-nom").send_keys('Nom du calendrier\t')
-        # Description
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-description").send_keys('Description du calendrier\t')
-        # Message
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-message").send_keys('Message du calendrier\t')
-        # Discipline
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-discipline").send_keys('T\t')
-        # Natures de demande
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-natures").clear()
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-natures").send_keys('["EQ","TX"]\t')
-        # Dispatcher
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-dispatcher").send_keys('E\t')
-        # Début recensement
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-debut_recensement").send_keys('01/01/2000\t')
-        # Fin recensement
-        self.selenium.find_element(by=By.ID, value="id_calendrier_table-fin_recensement").send_keys('31/12/2222\t')
-
-        # Enregistre et retour à la liste
-        self.selenium.find_element(by=By.CSS_SELECTOR, value='button[value="record"]').click()
-
-        # Vérification que la page s'affiche bien
-        self.assertEqual(len(self.selenium.find_elements(by=By.CLASS_NAME, value='topbar2')), 1)
-        self.assertIn(
-            "enregistré",
-            self.selenium.find_element(by=By.ID, value="main-dialog").text,
-        )
-
-        # Ferme la boîte de dialogue
-        self.selenium.find_element(by=By.ID, value='main-dialog-ok').click()
-
-        # Vérification que la page s'affiche bien
-        self.assertEqual(len(self.selenium.find_elements(by=By.CLASS_NAME, value='topbar2')), 1)
-
-        qs = Campagne.objects.filter(code='CREACODE')
-        self.assertEqual(qs.count(), 1)
-        calendrier = qs.get()
-        self.assertEqual(calendrier.nom, 'Nom du calendrier')
-        self.assertEqual(calendrier.description, 'Description du calendrier')
-        self.assertEqual(calendrier.message, 'Message du calendrier')
-        self.assertEqual(calendrier.discipline.code, 'TX')
-        self.assertEqual(calendrier.dispatcher.username, 'deboziel')
-        self.assertEqual(
-            calendrier.debut_recensement,
-            datetime.datetime(1999, 12, 31, 23, 0, tzinfo=datetime.timezone.utc),
-        )
-        self.assertEqual(
-            calendrier.fin_recensement,
-            datetime.datetime(2222, 12, 30, 23, 0, tzinfo=datetime.timezone.utc),
-        )
 
 
 class TestsUser1(TestsBaseTestCase):

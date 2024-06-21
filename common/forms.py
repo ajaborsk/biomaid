@@ -178,8 +178,8 @@ class UfForm(forms.ModelForm, LoginRequiredMixin):
         self.fields['etablissement'].queryset = Etablissement.objects.filter(code=self.etabid)
         self.fields['pole'].queryset = Pole.objects.filter(etablissement=self.etabid)
         self.fields['site'].queryset = Site.objects.filter(etablissement=self.etabid)
-        self.fields['centre_responsabilite'].queryset = Site.objects.filter(etablissement=self.etabid)
-        self.fields['service'].queryset = Site.objects.filter(etablissement=self.etabid)
+        self.fields['centre_responsabilite'].queryset = CentreResponsabilite.objects.filter(etablissement=self.etabid)
+        self.fields['service'].queryset = Service.objects.filter(etablissement=self.etabid)
 
 
 class PoleForm(forms.ModelForm, LoginRequiredMixin):

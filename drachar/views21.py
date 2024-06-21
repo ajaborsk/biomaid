@@ -613,6 +613,45 @@ class listedra(SmartPage):
     }
 
 
+class ListeDRA(SmartPage):
+    smart_view_class = DraSmartView
+    name = 'liste-dra'
+    permissions = (
+        'RMA',
+        'CAD',
+        'RUN',
+        'CHS',
+        'CADS',
+        'AMAR',
+        'DRP',
+        'CAP',
+        'CSP',
+        'ACHP',
+        'CHP',
+        'COP',
+        'DIR',
+        'EXP',
+        'TECH',
+    )
+    title = _("Liste DRA")
+    smart_modes = {
+        None: {'view': 'list'},
+    }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_prefix'] = (
+            "<p>Partie qui est ajoutée en haut de la page, <b>quelque soit le type de page</b> (formulaire ou tableau)</p>"
+        )
+        context['table_prefix'] = "Partie qui est ajoutée en haut de page au dessus du tableau"
+        context['form_prefix'] = "Partie qui est ajoutée en haut de la page au dessus du formulaire"
+        context['page_postfix'] = "Partie qui est ajoutée en bas de la page, quelque soit le type de page (formulaire ou tableau)"
+        context['table_postfix'] = "Partie qui est ajoutée en bas de page au dessous du tableau"
+        context['form_postfix'] = "Partie qui est ajoutée en bas de la page au dessous du formulaire"
+
+        return context
+
+
 class CockpitView(BiomAidViewMixin, TemplateView):
     permissions = {
         'EXP',

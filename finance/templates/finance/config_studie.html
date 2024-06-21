@@ -1,0 +1,51 @@
+{% extends "common/base.html" %}
+{% load static %}
+{% load url_kwargs %}
+{% block tab_contents %}
+<h1 xmlns="http://www.w3.org/1999/html">Analyse des programmes</h1>
+<div>
+<div>
+
+    {% if trigger == "get_it" %}
+        <p>TEST</p>
+        {{programmestcd}}
+        </br>
+        {{message}}
+        </br>
+        {{qs}}
+        </br>
+        {{df | safe}}
+
+    {% else %}
+        <form id="save" action={{url}} method="POST">
+            {% csrf_token %}
+            <br>
+            <h3>Liste des analyses</h3>
+                {% for key1, value in programme_favori_bibl.items %}
+                    <li>{{key1}}:<br>
+                    {% for k2, v1 in value.items %}
+                        <ul>{{k2}}:
+                        {% for vp, vf in v1.items %}
+                            <input type="textearea" name="programme_favori_bibl2-{{key1}}-{{k2}}" value="{{vf}}">
+                            <button name="get_it" type="submit" value="{{vf}}">GO !</button>
+                        </ul>
+                        {% endfor %}
+                    {% endfor %}
+                    </li>
+                {% endfor %}
+                <br>
+                <button name="save_listes" type="submit">Sauvegarder les listes</button>
+        </form>
+        <br>
+        <h3>Liste des programmes actuels</h3>
+        <br>
+        <table>
+            <tr><th>code</th><th>nom</th><th>discipline</th></tr>
+            {% for p in programme %}
+                <tr><td>{{p.code}}</td><td>{{p.nom}}</td><td>{{p.discipline}}</td></tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</div>
+</div>
+{% endblock tab_contents %}

@@ -293,7 +293,7 @@ class SmartPage(BiomAidViewMixin, TemplateView, metaclass=SmartPageMetaclass):
     }
     template_name = 'smart_view/smart_page.html'
     prefix = 'table'
-    # Le mode par défaut de la page
+    # Le mode par défaut de la page : tableau
     mode = None
 
     # Nom du champ 'identifiant' présenté à l'utilisateur

@@ -181,7 +181,7 @@ class RecordMatcher:
         self.weights, self.criteria_obj = zip(*self.criteria)
         self.data: dict = {}
 
-    def left_limits(self, left: dict) -> tuple[int, int | None]:
+    def left_limits(self, left: dict):
         """Returns, for a left record, the limits of matches to expect.
 
         Args:
@@ -194,7 +194,7 @@ class RecordMatcher:
         """
         return (0, None)
 
-    def right_limits(self, right: dict = None) -> tuple[int, int | None]:
+    def right_limits(self, right: dict = None):
         return (0, None)
 
     def prepare(self):

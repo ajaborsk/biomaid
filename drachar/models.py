@@ -18,6 +18,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext as _
+from django_pandas.managers import DataFrameManager
 
 from common import config
 
@@ -43,6 +44,8 @@ from common import config
 
 class Previsionnel(models.Model):
     # id = models.AutoField()
+    objects = DataFrameManager()
+
     num = models.AutoField(primary_key=True)  # numero de demande validée
     uf = models.ForeignKey(
         'common.Uf',
@@ -95,6 +98,12 @@ class Previsionnel(models.Model):
         help_text="Commentaire qui ne sera affiché qu'aux experts/acheteurs",
         blank=True,
         null=True,
+    )
+    cloturer_ligne = models.BooleanField(  # solder la ligne prévisionnelle si demande honorée
+        verbose_name="Cloturer la ligne du prévisionnel",
+        help_text="cocher la case quand le dossier est terminé",
+        default=False,
+        null=False,
     )
     # workflow =
     # ------------------------------------------------------------------------------------------------------------------

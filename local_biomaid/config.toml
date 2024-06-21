@@ -26,17 +26,17 @@
         structure = "FILE" # ON, OFF ou FILE
     [LINK.IFF]
         structure = "FILE" # ON, OFF ou FILE
-    [LINK.CHD]
-        structure = "OFF" # ON, OFF ou FILE
+    [LINK.C]
+        structure = "FILE" # ON, OFF ou FILE
 
 [LINKED_FILES]
 
     [LINKED_FILES.DEFAUT]
         compte = "" # nom du fichier avec extension
         structure = "" # nom du fichier avec extension
-    [LINKED_FILES.CHUA]
+    [LINKED_FILES.C]
         compte = "CHUA_GEF_COMPTE_05-08-2021.csv" # nom du fichier avec extension
-        structure = "structure.csv" # nom du fichier avec extension
+        structure = "local/structure_hus.csv" # nom du fichier avec extension
     [LINKED_FILES.CHD]
         structure = "" # nom du fichier avec extension
 

@@ -1,5 +1,6 @@
+*************************
 Première configuration
-======================
+*************************
 
 Lors de la création d'une instance de |project|, certaines opérations
 doivent être menées avant de pouvoir commencer à utiliser le portail :

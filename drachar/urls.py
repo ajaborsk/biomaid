@@ -49,7 +49,7 @@ urlpatterns = [
         views21.NouvelleLigneView.as_view(),
         name='nouvelleligne',
     ),
-    path('listedra/', views21.listedra.as_view(), name='listedra'),
+    path('listedra/', views21.ListeDRA.as_view(), name='listedra'),
     # path('nouvelledra/', views.NouvelleDra.as_view(), name='nouvelledra'),
     path('nouvelledra/', views21.Nouvelle_draView.as_view(), name='nouvelledra21'),
     path(

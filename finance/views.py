@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 import re
+import pathlib
 from datetime import datetime
 from functools import reduce
 
@@ -29,6 +30,9 @@ from django.utils.timezone import now
 from django.views.generic import TemplateView
 from django_tables2 import Table, Column, TemplateColumn
 from django.utils.translation import gettext as _
+from django.shortcuts import render
+
+import tomlkit
 
 import finance
 from analytics.data import get_last_data
@@ -44,6 +48,7 @@ from smart_view.smart_widget import (
     LightAndTextWidget,
 )
 from assetplusconnect.models import BFt1996, EnCours, Docliste, BEq1996
+from common.models import Programme, Etablissement, Discipline
 
 # from common.base_views import BiomAidView
 from common.base_views import BiomAidViewMixin
@@ -52,6 +57,8 @@ from finance.apps import no_interv_re, inv_re_list
 from finance.management.commands.gest_analyse import ORDER_ANOMALIES
 from finance.smart_views import DemAssessmentSmartView
 from smart_view.smart_page import SmartPage
+
+from drachar.models import Previsionnel
 
 
 class FinanceView(BiomAidViewMixin, TemplateView):
@@ -296,7 +303,6 @@ class MyTestWidget1(AltairWidget):
 
 
 class GestWidget(HtmlWidget):
-
     template_string = """
     {% load render_table from django_tables2 %}
     <div>
@@ -789,7 +795,6 @@ class OrderRowWidget(ContainerWidget):
 
 
 class OrderWidget(ContainerWidget):
-
     template_string = """<div id="{{ html_id }}">
             {% if order %}
                 <table class="simple" style="width:80%;margin:0 10%;background-color:#eee;">
@@ -813,7 +818,6 @@ class OrderWidget(ContainerWidget):
             libelle_html=Replace(F('libelle'), Value('\n'), Value('<br>'), output_field=CharField())
         )
         if qs.count():
-
             # Order header
             header = (
                 qs.values(
@@ -955,7 +959,6 @@ class OrderViewBak(FinanceView):
         dernier_commentaire = Column(orderable=False)
 
     class EqptTable(Table):
-
         FIELDS = (
             'n_imma',
             'n_order',
@@ -1303,3 +1306,149 @@ class DemAssessmentView(SmartPage):
     smart_modes = {
         None: {'view': 'list'},
     }
+
+
+class ProgrammStudie(BiomAidViewMixin, TemplateView):
+    """Vue admin du fichier de config toml"""
+
+    application = 'finance'
+    name = 'prog_studie'
+    permissions = {
+        'ADM',
+        'MAN',
+    }
+    raise_exception = True  # Refuse l'accès par défaut (pas de demande de login)
+    template_name = 'finance/config_studie.html'
+
+    def datageneration(self):
+        self.request_data = tomlkit.loads(pathlib.Path("finance/request.toml").read_text())
+        """GEt Liste des programmes favoris"""
+        self.etab = Etablissement.objects.all()
+        self.discipline = Discipline.objects.all()
+        self.programme_favori_bibl = self.request_data['PROGRAMME_LISTE']
+        self.trigger = "home"
+        return self
+
+    def dispatch(self, request, *args, **kwargs):
+        # context = self.get_context_data()  # unused
+        self.url = "../prog_studie/"
+        self.datageneration()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        context["trigger"] = self.trigger
+        if self.trigger == "get_it":
+            context["programmestcd"] = self.programmestcd  # TODO : a supprimer juste pour essais
+            self.TCD(request)
+            context["qs"] = self.qs
+            context["df"] = self.df.to_html
+            print(self.df)
+            context["message"] = self.message
+        else:
+            self.programme = Programme.objects.all()
+            context["programme"] = self.programme
+            context["url"] = self.url
+            context["programme_favori_bibl"] = self.programme_favori_bibl
+        return render(request, self.template_name, context=context)
+
+    def post(self, request, *args, **kwargs):
+        if 'save_listes' in request.POST:
+            context = self.get_context_data()
+            self.trigger = 'NONE'
+            context["url"] = self.url
+            self.save_listes(request)
+            self.datageneration()
+        elif 'get_it' in request.POST:
+            context = self.get_context_data()
+            self.programmestcd = request.POST.get("get_it") or None
+            self.trigger = "get_it"
+        return self.get(request, *args, **kwargs)
+
+    def save_listes(self, request, *args, **kwargs):  # sauvegarde des listes de programmes favoris)
+        for e in self.etab:
+            for d in self.discipline:
+                self.request_data['PROGRAMME_LISTE'][e.prefix][d.code]['liste'] = request.POST.get(
+                    "programme_favori_bibl2-" + e.prefix + "-" + d.code
+                )
+        # print(self.request_data['PROGRAMME_LISTE'])
+        with pathlib.Path('finance/request.toml').open('w') as f:
+            f.write(tomlkit.dumps(self.request_data))  # sauvegarde des modifs dans le .toml (=commit true)
+        return self
+
+    def TCD(self, request, *arg, **kwargs):
+        if self.programmestcd is not None:
+            programme_list = self.programmestcd.strip().split(',')
+            self.message = "filtre sur les programmes : " + str(programme_list)
+            my_filter_qs = Q()
+            for prog in programme_list:
+                print(prog)
+                my_filter_qs = my_filter_qs | Q(code=prog)
+            filtre_programmes = Programme.objects.filter(my_filter_qs)
+            print(filtre_programmes)
+            # TODO SLICE le filtre programme
+            # self.qs = Previsionnel.objects.filter(programme=filtre_programmes)
+
+            # qs = Previsionnel.objects.filter(programme__in=filtre_programmes)
+            self.qs = Previsionnel.objects.filter(programme="67")
+            # TODO : ajouter les colonnes de calcul
+            # self.qs.annotate(
+            # Trimestre=ExpressionWrapper(
+            #    Case(
+            #        When(
+            #             date_estimative_mes__isnull=False,
+            #             then=F("enveloppe_allouee"),
+            #        ),
+            #        #When(
+            #        #     enveloppe_allouee__isnull=True,
+            #        #     then=Coalesce(F('quantite_validee'), F('quantite'))
+            #        #    * Coalesce(F('montant_unitaire_expert_metier'), F('prix_unitaire')),
+            #        #),
+            # montant_final=ExpressionWrapper(
+            #    Case(
+            #     When(
+            #         prix_unitaire__isnull=False,
+            #         then=F("quantite") * F("prix_unitaire"),
+            #     ),
+
+            #    ),
+            #    output_field=TextField(),
+            # ),
+            # ENVELOPPE=Coalesce(F('arbitrage_commission__code'), Value('0')),
+            # )
+            # for q in self.qs:
+            # self.qs.annotate()
+
+            self.df = self.qs.to_dataframe(
+                fieldnames=[
+                    "num",
+                    "num_dmd",
+                    "programme",
+                    "budget",
+                    'montant_estime',
+                    'montant_commande',
+                    'date_estimative_mes',
+                    'solder_ligne',
+                ],
+            ).fillna(0)
+            for d in self.df:
+                if d.date_estimative_mes == 0:
+                    d.date_estimative_mes = "01/01" + d.num_dmd[5:7]
+                else:
+                    pass
+
+            self.df["Trimestres"] = self.df["date_estimative_mes"].dt.to_period("Q").fillna("NULL")
+            self.df.columns = ["NUM", "PROGRAMME", "BUDGET", "MONTANT ESTIME", "MONTANT COMMANDE", "date mes", "soldé", "Trimestre"]
+            # TODO : puis ajouter au TCD les enveloppes
+            # TODO : puis inserer les calculs en fonction des enveloppes.
+
+        else:
+            print("si pas filtre")
+            self.message = "Tous les programmes : aucun selectionné"
+            self.qs = Previsionnel.objects.all()
+
+        return self
